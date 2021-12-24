@@ -1,3 +1,5 @@
+pragma solidity ^0.8.0;
+
 interface Vm {
     // Set block.timestamp (newTimestamp)
     function warp(uint256) external;
