@@ -13,4 +13,446 @@ library stdError {
 	bytes public constant indexOOBError = abi.encodeWithSignature("Panic(uint256)", 0x32);
 	bytes public constant memOverflowError = abi.encodeWithSignature("Panic(uint256)", 0x41);
 	bytes public constant zeroVarError = abi.encodeWithSignature("Panic(uint256)", 0x51);
+
+}
+
+
+contract stdStorage {
+	error NotFound(string);
+	error NotStorage(string);
+	error PackedSlot(bytes32);
+
+	mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) public slots;
+    mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) public finds;
+	Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+	
+	event SlotFound(address who, string sig, uint slot);
+
+	function sigs(
+        string memory sig
+    )
+        internal
+        pure
+        returns (bytes4)
+    {
+        return bytes4(keccak256(bytes(sig)));
+    }
+
+    /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
+    // slot complexity:
+    //  if flat, will be bytes32(uint256(uint));
+    //  if map, will be keccak256(abi.encode(key, uint(slot)));
+    //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
+    //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
+    function find(
+    	address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory ins, // see slot complexity
+        bytes32 set
+    ) 
+    	public 
+    	returns (uint256)
+    {
+        // calldata to test against
+        bytes4 fsig = bytes4(keccak256(bytes(sig)));
+        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
+        vm.record();
+        bytes32 fdat;
+        {
+        	(bool pass, bytes memory rdat) = who.staticcall(cald);
+        	fdat = bytesToBytes32(rdat, 0);
+        }
+        
+        (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(address(who));
+        if (reads.length == 1) {
+        	slots[who][fsig][keccak256(abi.encodePacked(ins))] = uint256(reads[0]);
+        	finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+        } else if (reads.length > 1) {
+        	for (uint256 i = 0; i < reads.length; i++) {
+        		 bytes32 prev = vm.load(who, reads[i]);
+	            // store
+	            vm.store(who, reads[i], bytes32(hex"1337"));
+	            bytes32 fdat;
+		        {
+		        	(bool pass, bytes memory rdat) = who.staticcall(cald);
+		        	fdat = bytesToBytes32(rdat, 0);
+		        }
+	            
+	            if (fdat == bytes32(hex"1337")) {
+	            	// we found which of the slots is the actual one
+	            	slots[who][fsig][keccak256(abi.encodePacked(ins))] = uint256(reads[i]);
+		        	finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+		        	break;
+	            }
+	            vm.store(who, reads[i], prev);
+        	}
+        } else {
+        	revert NotStorage(sig);
+        }
+
+        if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) revert NotFound(sig);
+        return slots[who][fsig][keccak256(abi.encodePacked(ins))];
+    }
+
+    function find(
+    	address who, // contract
+    	string memory sig, // signature to check agains
+        bytes32[] memory ins // see slot complexity
+	) public returns (uint256) {
+    	return find(who, sig, ins, bytes32(uint256(13371337)));
+	}
+
+	function find(
+    	address who, // contract
+    	string memory sig, // signature to check agains
+        address target
+	) public returns (uint256) {
+		bytes32[] memory ins = new bytes32[](1);
+		ins[0] = bytes32(uint256(uint160(target)));
+    	return find(who, sig, ins, bytes32(uint256(13371337)));
+	}
+
+	function find(
+    	address who, // contract
+    	string memory sig, // signature to check agains
+        uint256 target
+	) public returns (uint256) {
+		bytes32[] memory ins = new bytes32[](1);
+		ins[0] = bytes32(target);
+    	return find(who, sig, ins, bytes32(uint256(13371337)));
+	}
+
+	function find(
+		address who, // contract
+    	string memory sig // signature to check agains
+	) public returns (uint256) {
+    	return find(who, sig, new bytes32[](0), bytes32(uint256(13371337)));
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		bytes32[] memory ins,
+		bytes32 set
+	) public {
+		bytes4 fsig = bytes4(keccak256(bytes(sig)));
+		bytes memory cald = abi.encodePacked(fsig, flatten(ins));
+		if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) {
+			find(who, sig, ins, hex"1337");
+		}
+		bytes32 slot = bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins))]);
+
+		bytes32 fdat;
+        {
+        	(bool pass, bytes memory rdat) = who.staticcall(cald);
+        	fdat = bytesToBytes32(rdat, 0);
+        }
+		bytes32 curr = vm.load(who, slot);
+
+		if (fdat != curr) {
+			revert PackedSlot(slot);
+		}
+		vm.store(who, slot, set);
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		bytes32 set
+	) public {
+		checked_write(who, sig, new bytes32[](0), set);
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		bytes32 target,
+		bytes32 set
+	) public {
+		bytes32[] memory ins = new bytes32[](1);
+		ins[0] = target;
+		checked_write(who, sig, ins, set);
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		uint256 target,
+		bytes32 set
+	) public {
+		checked_write(who, sig, bytes32(target), set);
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		uint256 target,
+		uint256 set
+	) public {
+		checked_write(who, sig, bytes32(target), bytes32(set));
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		address target,
+		bytes32 set
+	) public {
+		checked_write(who, sig, bytes32(uint256(uint160(target))), set);
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		address target,
+		address set
+	) public {
+		checked_write(who, sig, bytes32(uint256(uint160(target))), bytes32(uint256(uint160(set))));
+	}
+
+	function checked_write(
+		address who,
+		string memory sig,
+		address target,
+		uint256 set
+	) public {
+		checked_write(who, sig, bytes32(uint256(uint160(target))), bytes32(set));
+	}
+
+
+
+
+    // /// @notice write to an arbitrary slot given a function signature
+    // function writ(
+    //     string memory sig, // signature to check agains
+    //     bytes32[] memory ins, // see slot complexity
+    //     uint256 depth, // see slot complexity
+    //     address who, // contract
+    //     bytes32 set // value to set storage as
+    // ) public {
+    //     bytes4 fsig = sigs(sig);
+
+    //     require(finds[who][fsig][keccak256(abi.encodePacked(ins))], "!found");
+    //     // set storage
+    //     vm.store(who, bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins))]), set);
+    // }
+
+    // function write_flat(address who, string memory sig, uint256 value) public {
+    //     bytes32[] memory ins = new bytes32[](0);
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(ins))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             ins,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         ins,
+    //         0,
+    //         who,
+    //         bytes32(value)
+    //     );
+    // }
+
+    // function write_flat(address who, string memory sig, address value) public {
+    //     bytes32[] memory ins = new bytes32[](0);
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(ins))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             ins,
+    //             bytes32(uint256(uint160(0xaaaCfBec6a24756c20D41914f2CABA817C0d8521)))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         ins,
+    //         0,
+    //         who,
+    //         bytes32(uint256(uint160(value)))
+    //     );
+    // }
+
+    // function write_map(address who, string memory sig, uint256 key, uint256 value) public {
+    //     bytes32[] memory keys = new bytes32[](1);
+    //     keys[0] = bytes32(uint256(key));
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(value)
+    //     );
+    // }
+
+    // function write_map(address who, string memory sig, uint256 key, address value) public {
+    //     bytes32[] memory keys = new bytes32[](1);
+    //     keys[0] = bytes32(uint256(uint160(key)));
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(uint256(uint160(value)))
+    //     );
+    // }
+
+
+    // function write_map(address who, string memory sig, address key, uint256 value) public {
+    //     bytes32[] memory keys = new bytes32[](1);
+    //     keys[0] = bytes32(uint256(uint160(key)));
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(value)
+    //     );
+    // }
+
+    // function write_map(address who, string memory sig, address key, address value) public {
+    //     bytes32[] memory keys = new bytes32[](1);
+    //     keys[0] = bytes32(uint256(uint160(key)));
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(uint256(uint160(value)))
+    //     );
+    // }
+
+    // function write_deep_map(address who, string memory sig, bytes32[] memory keys, uint256 value) public {
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(value)
+    //     );
+    // }
+
+    // function write_deep_map(address who, string memory sig, bytes32[] memory keys, address value) public {
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         0,
+    //         who,
+    //         bytes32(uint256(uint160(value)))
+    //     );
+    // }
+
+    // function write_deep_map_struct(address who, string memory sig, bytes32[] memory keys, uint256 value, uint256 depth) public {
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         depth,
+    //         who,
+    //         bytes32(value)
+    //     );
+    // }
+
+    // function write_deep_map_struct(address who, string memory sig, bytes32[] memory keys, address value, uint256 depth) public {
+    //     if (!finds[who][sigs(sig)][keccak256(abi.encodePacked(keys))]) {
+    //         find(
+    //         	who,
+    //             sig,
+    //             keys,
+    //             bytes32(uint256(13371337))
+    //         );
+    //     }
+    //     writ(
+    //         sig,
+    //         keys,
+    //         depth,
+    //         who,
+    //         bytes32(uint256(uint160(value)))
+    //     );
+    // }
+
+    function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
+        bytes32 out;
+
+        for (uint i = 0; i < 32; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+        return out;
+    }
+
+    function flatten(bytes32[] memory b) private pure returns (bytes memory)
+    {
+        bytes memory result = new bytes(b.length * 32);
+        for (uint256 i = 0; i < b.length; i++) {
+            bytes32 k = b[i];
+            assembly {
+                mstore(add(result, add(32, mul(32, i))), k)
+            }
+        }
+
+        return result;
+    }
+
+    // call this to speed up on known storage slots. See SlotFound and add to setup()
+    function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint slot) public {
+        slots[who][fsig][keccak256(abi.encodePacked(ins))] = slot;
+        finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+    }
 }

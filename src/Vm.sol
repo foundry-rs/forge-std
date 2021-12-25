@@ -29,4 +29,8 @@ interface Vm {
     function etch(address, bytes calldata) external;
     // Expects an error on next call
     function expectRevert(bytes calldata) external;
+// Record all storage reads and writes
+    function record() external;
+    // Gets all accessed reads and write slot from a recording session, for a given address
+    function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
 }
