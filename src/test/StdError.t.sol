@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import "ds-test/test.sol";
-import "../stdlib.sol";
+import {stdError} from "../stdlib.sol";
 import "../Vm.sol";
 
 contract StdErrorsTest is DSTest {
@@ -11,6 +11,11 @@ contract StdErrorsTest is DSTest {
     ErrorsTest test;
     function setUp() public {
         test = new ErrorsTest();
+    }
+
+    function testExpectAssertion() public {
+        vm.expectRevert(stdError.assertionError);
+        test.assertionError();
     }
 
     function testExpectArithmetic() public {
@@ -23,13 +28,50 @@ contract StdErrorsTest is DSTest {
         test.divError(0);
     }
 
+    function testExpectMod() public {
+        vm.expectRevert(stdError.divisionError);
+        test.modError(0);
+    }
+
+    function testExpectEnum() public {
+        vm.expectRevert(stdError.enumConversionError);
+        test.enumConversion(1);
+    }
+
+    function testExpectPop() public {
+        vm.expectRevert(stdError.popError);
+        test.pop();
+    }
+
     function testExpectOOB() public {
         vm.expectRevert(stdError.indexOOBError);
         test.indexOOBError(1);
     }
+
+    function testExpectMem() public {
+        vm.expectRevert(stdError.memOverflowError);
+        test.mem();
+    }
+
+    function testExpectIntern() public {
+        vm.expectRevert(stdError.zeroVarError);
+        test.intern();
+    }
+
+    // TODO: figure out how to trigger encodeStorageError?
 }
 
 contract ErrorsTest {
+    enum T {
+        T1
+    }
+
+    uint256[] someArr;
+
+    function assertionError() public {
+        assert(false);
+    }
+
     function arithmeticError(uint256 a) public {
         uint256 a = a - 100;
     }
@@ -38,8 +80,31 @@ contract ErrorsTest {
         uint256 a = 100 / a;
     }
 
+    function modError(uint256 a) public {
+        uint256 a = 100 % a;
+    }
+
+    function enumConversion(uint256 a) public {
+        T someEnum = T(a);
+    }
+
+    function pop() public {
+        someArr.pop();
+    }
+
     function indexOOBError(uint256 a) public {
         uint256[] memory t = new uint256[](0);
         uint256 b = t[a];
+    }
+
+    function mem() public returns (uint256) {
+        uint256 l = 2**256 / 32;
+        uint256[] memory x = new uint256[](l);
+    }
+
+    function intern() public returns (uint256) {
+        function (uint256) internal returns (uint256) x;
+        x(2);
+        return 7;
     }
 }
