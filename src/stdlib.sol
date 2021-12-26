@@ -420,6 +420,58 @@ contract stdStorage {
         checked_write(who, sig, target, bytes32(uint256(uint160(set))), 0);
     }
 
+    function checked_write_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target,
+        uint256 depth,
+        address set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), depth);
+    }
+
+    function checked_write_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target,
+        uint256 depth,
+        uint256 set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        checked_write(who, sig, ins, bytes32(set), depth);
+    }
+
+    function checked_write_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        uint256[] memory target,
+        uint256 depth,
+        uint256 set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        checked_write(who, sig, ins, bytes32(set), depth);
+    }
+
+    function checked_write_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory target,
+        uint256 depth,
+        bytes32 set
+    ) public {
+        checked_write(who, sig, target, set, depth);
+    }
+
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
         bytes32 out;
 

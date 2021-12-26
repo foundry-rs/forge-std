@@ -41,6 +41,60 @@ contract StdStorageTest is DSTest {
         stdstore.find_struct(address(test), "map_struct(address)", address(this), 1);
     }
 
+    function testStorageDeepMap() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        assertEq(keccak256(abi.encode(keys[1], keccak256(abi.encode(keys[0], uint(5))))), bytes32(stdstore.find_multi_key(address(test), "deep_map(address,address)", keys)));
+    }
+
+    function testStorageCheckedWriteDeepMap() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        stdstore.checked_write_multi_key(address(test), "deep_map(address,address)", keys, 100);
+        assertEq(100, test.deep_map(address(this), address(this)));
+    }
+
+    function testStorageDeepMapStructA() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        uint256 depth = 0;
+        assertEq(bytes32(uint256(keccak256(abi.encode(keys[1], keccak256(abi.encode(keys[0], uint(6)))))) + depth), bytes32(stdstore.find_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth)));
+    }
+
+    function testStorageDeepMapStructB() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        uint256 depth = 1;
+        assertEq(bytes32(uint256(keccak256(abi.encode(keys[1], keccak256(abi.encode(keys[0], uint(6)))))) + depth), bytes32(stdstore.find_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth)));
+    }
+
+    function testStorageCheckedWriteDeepMapStructA() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        uint256 depth = 0;
+        stdstore.checked_write_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth, 100);
+        (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
+        assertEq(100, a);
+        assertEq(0, b);
+        stdstore.checked_write_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth, 100);
+    }
+
+    function testStorageCheckedWriteDeepMapStructB() public {
+        address[] memory keys = new address[](2);
+        keys[0] = address(this);
+        keys[1] = address(this);
+        uint256 depth = 1;
+        stdstore.checked_write_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth, 100);
+        (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
+        assertEq(0, a);
+        assertEq(100, b);
+    }
+
     function testStorageCheckedWriteMapStructA() public {
         stdstore.checked_write_struct(address(test), "map_struct(address)", address(this), 0, 100);
         (uint256 a, uint256 b) = test.map_struct(address(this));
@@ -121,6 +175,7 @@ contract StorageTest {
     mapping(address => Packed) public map_packed;
     mapping(address => UnpackedStruct) public map_struct;
     mapping(address => mapping(address => uint256)) public deep_map;
+    mapping(address => mapping(address => UnpackedStruct)) public deep_map_struct;
     UnpackedStruct public basic;
 
     struct UnpackedStruct {
