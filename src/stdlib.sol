@@ -47,7 +47,7 @@ contract stdStorage {
     function find(
         address who, // contract
         string memory sig, // signature to check agains
-        bytes32[] memory ins, // see slot complexity
+        bytes32[] memory ins // see slot complexity
     ) 
         public 
         returns (uint256)
@@ -56,10 +56,8 @@ contract stdStorage {
         bytes4 fsig = bytes4(keccak256(bytes(sig)));
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
         vm.record();
-        bytes32 fdat;
         {
-            (bool pass, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 0);
+            (bool pass, bytes memory dat) = who.staticcall(cald);
         }
         
         (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(address(who));
@@ -91,14 +89,6 @@ contract stdStorage {
 
         if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) revert NotFound(sig);
         return slots[who][fsig][keccak256(abi.encodePacked(ins))];
-    }
-
-    function find(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory ins // see slot complexity
-    ) public returns (uint256) {
-        return find(who, sig, ins);
     }
 
     function find(
