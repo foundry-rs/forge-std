@@ -27,6 +27,7 @@ contract stdStorage {
     Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
     
     event SlotFound(address who, string sig, bytes32 keysHash, uint slot);
+    event WARNING_UninitedSlot(address who, uint slot);
 
     function sigs(
         string memory sig
@@ -55,20 +56,35 @@ contract stdStorage {
     {
         // calldata to test against
         bytes4 fsig = bytes4(keccak256(bytes(sig)));
+        if (finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
+            return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
+        }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
         vm.record();
+        bytes32 fdat;
         {
-            (bool pass, bytes memory dat) = who.staticcall(cald);
+            (bool pass, bytes memory rdat) = who.staticcall(cald);
+            fdat = bytesToBytes32(rdat, 32*depth);
         }
         
         (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(address(who));
         if (reads.length == 1) {
+            bytes32 curr = vm.load(who, reads[0]);
+            if (curr == bytes32(0)) {
+                emit WARNING_UninitedSlot(who, uint256(reads[0]));
+            }
+            if (fdat != curr) {
+                revert PackedSlot(reads[0]);
+            }
             emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
             slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
             finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
-                 bytes32 prev = vm.load(who, reads[i]);
+                bytes32 prev = vm.load(who, reads[i]);
+                if (prev == bytes32(0)) {
+                    emit WARNING_UninitedSlot(who, uint256(reads[i]));
+                }
                 // store
                 vm.store(who, reads[i], bytes32(hex"1337"));
                 bytes32 fdat;

@@ -168,6 +168,15 @@ contract StdStorageTest is DSTest {
         vm.expectRevert(abi.encodeWithSignature("NotStorage(string)", string("const()")));
         stdstore.find(address(test), "const()");
     }
+
+    function testStorageNativePack() public {
+        stdstore.find(address(test), "tA()");
+        stdstore.find(address(test), "tB()");
+        vm.expectRevert(abi.encodeWithSignature("PackedSlot(bytes32)", bytes32(uint256(0xa))));
+        stdstore.find(address(test), "tC()");
+        vm.expectRevert(abi.encodeWithSignature("PackedSlot(bytes32)", bytes32(uint256(0xa))));
+        stdstore.find(address(test), "tD()");
+    }
 }
 
 type Packed is uint256;
@@ -181,6 +190,14 @@ contract StorageTest {
     mapping(address => mapping(address => uint256)) public deep_map;
     mapping(address => mapping(address => UnpackedStruct)) public deep_map_struct;
     UnpackedStruct public basic;
+
+    uint248 public tA;
+    bool public tB;
+
+
+    bool public tC = false;
+    uint248 public tD = 1;    
+
 
     struct UnpackedStruct {
         uint256 a;
