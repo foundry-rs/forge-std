@@ -47,7 +47,8 @@ contract stdStorage {
     function find(
         address who, // contract
         string memory sig, // signature to check agains
-        bytes32[] memory ins // see slot complexity
+        bytes32[] memory ins, // see slot complexity
+        uint256 depth
     ) 
         public 
         returns (uint256)
@@ -72,13 +73,14 @@ contract stdStorage {
                 bytes32 fdat;
                 {
                     (bool pass, bytes memory rdat) = who.staticcall(cald);
-                    fdat = bytesToBytes32(rdat, 0);
+                    fdat = bytesToBytes32(rdat, 32*depth);
                 }
                 
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
                     slots[who][fsig][keccak256(abi.encodePacked(ins))] = uint256(reads[i]);
                     finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+                    vm.store(who, reads[i], prev);
                     break;
                 }
                 vm.store(who, reads[i], prev);
@@ -98,7 +100,78 @@ contract stdStorage {
     ) public returns (uint256) {
         bytes32[] memory ins = new bytes32[](1);
         ins[0] = bytes32(uint256(uint160(target)));
-        return find(who, sig, ins);
+        return find(who, sig, ins, 0);
+    }
+
+    function find_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        return find(who, sig, ins, 0);
+    }
+
+    function find_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        uint256[] memory target
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        return find(who, sig, ins, 0);
+    }
+
+    function find_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory target
+    ) public returns (uint256) {
+        return find(who, sig, target, 0);
+    }
+
+    function find_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target,
+        uint256 depth
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        return find(who, sig, ins, depth);
+    }
+
+    function find_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        uint256[] memory target,
+        uint256 depth
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        return find(who, sig, ins, depth);
+    }
+
+    function find_multi_key_struct(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory target,
+        uint256 depth
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        return find(who, sig, ins, depth);
     }
 
     function find(
@@ -108,33 +181,65 @@ contract stdStorage {
     ) public returns (uint256) {
         bytes32[] memory ins = new bytes32[](1);
         ins[0] = bytes32(target);
-        return find(who, sig, ins);
+        return find(who, sig, ins, 0);
     }
 
     function find(
         address who, // contract
         string memory sig // signature to check agains
     ) public returns (uint256) {
-        return find(who, sig, new bytes32[](0));
+        return find(who, sig, new bytes32[](0), 0);
+    }
+
+    
+    function find_struct(
+        address who,
+        string memory sig,
+        uint256 depth
+    ) public returns (uint256) {
+        return find(who, sig, new bytes32[](0), depth);
+    }
+
+    function find_struct(
+        address who,
+        string memory sig,
+        uint256 target,
+        uint256 depth
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](1);
+        ins[0] = bytes32(target);
+        return find(who, sig, ins, depth);
+    }
+
+    function find_struct(
+        address who,
+        string memory sig,
+        address target,
+        uint256 depth
+    ) public returns (uint256) {
+        bytes32[] memory ins = new bytes32[](1);
+        ins[0] = bytes32(uint256(uint160(target)));
+        return find(who, sig, ins, depth);
     }
 
     function checked_write(
         address who,
         string memory sig,
         bytes32[] memory ins,
-        bytes32 set
+        bytes32 set,
+        uint256 depth 
     ) public {
         bytes4 fsig = bytes4(keccak256(bytes(sig)));
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
         if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) {
-            find(who, sig, ins);
+            find(who, sig, ins, depth);
         }
         bytes32 slot = bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins))]);
 
         bytes32 fdat;
         {
             (bool pass, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 0);
+            fdat = bytesToBytes32(rdat, 32*depth);
         }
         bytes32 curr = vm.load(who, slot);
 
@@ -149,7 +254,23 @@ contract stdStorage {
         string memory sig,
         bytes32 set
     ) public {
-        checked_write(who, sig, new bytes32[](0), set);
+        checked_write(who, sig, new bytes32[](0), set, 0);
+    }
+
+    function checked_write(
+        address who,
+        string memory sig,
+        address set
+    ) public {
+        checked_write(who, sig, new bytes32[](0), bytes32(bytes20(set)), 0);
+    }
+
+    function checked_write(
+        address who,
+        string memory sig,
+        uint256 set
+    ) public {
+        checked_write(who, sig, new bytes32[](0), bytes32(set), 0);
     }
 
     function checked_write(
@@ -160,7 +281,7 @@ contract stdStorage {
     ) public {
         bytes32[] memory ins = new bytes32[](1);
         ins[0] = target;
-        checked_write(who, sig, ins, set);
+        checked_write(who, sig, ins, set, 0);
     }
 
     function checked_write(
@@ -206,6 +327,97 @@ contract stdStorage {
         uint256 set
     ) public {
         checked_write(who, sig, bytes32(uint256(uint160(target))), bytes32(set));
+    }
+
+    function checked_write_struct(
+        address who,
+        string memory sig,
+        address target,
+        uint256 depth,
+        uint256 set
+    ) public {
+        bytes32[] memory ins = new bytes32[](1);
+        ins[0] = bytes32(uint256(uint160(target)));
+        checked_write(who, sig, ins, bytes32(set), depth);
+    }
+
+    function checked_write_struct(
+        address who,
+        string memory sig,
+        uint256 depth,
+        uint256 set
+    ) public {
+        checked_write(who, sig, new bytes32[](0), bytes32(set), depth);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target,
+        uint256 set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        checked_write(who, sig, ins, bytes32(set), 0);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        uint256[] memory target,
+        uint256 set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        checked_write(who, sig, ins, bytes32(set), 0);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory target,
+        uint256 set
+    ) public {
+        checked_write(who, sig, target, bytes32(set), 0);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        address[] memory target,
+        address set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(uint256(uint160(target[i])));
+        }
+        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), 0);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        uint256[] memory target,
+        address set
+    ) public {
+        bytes32[] memory ins = new bytes32[](target.length);
+        for (uint256 i = 0; i < target.length; i++) {
+            ins[i] = bytes32(target[i]);
+        }
+        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), 0);
+    }
+
+    function checked_write_multi_key(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory target,
+        address set
+    ) public {
+        checked_write(who, sig, target, bytes32(uint256(uint160(set))), 0);
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {

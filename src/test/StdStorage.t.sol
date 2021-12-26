@@ -15,12 +15,66 @@ contract StdStorageTest is DSTest {
         test = new StorageTest();
     }
 
-    function testStorageExpect() public {
+    function testStorageHidden() public {
         assertEq(stdstore.find(address(test), "hidden()"), uint256(keccak256("my.random.var")));
     }
 
-    function testStorageFound() public {
+    function testStorageObvious() public {
         assertEq(uint256(0), stdstore.find(address(test), "exists()"));
+    }
+
+    function testStorageWriteHidden() public {
+        stdstore.checked_write(address(test), "hidden()", 100);
+        assertEq(uint256(test.hidden()), 100);
+    }
+
+    function testStorageWriteObvious() public {
+        stdstore.checked_write(address(test), "exists()", 100);
+        assertEq(test.exists(), 100);
+    }
+
+    function testStorageMapStructA() public {
+        stdstore.find_struct(address(test), "map_struct(address)", address(this), 0);
+    }
+
+    function testStorageMapStructB() public {
+        stdstore.find_struct(address(test), "map_struct(address)", address(this), 1);
+    }
+
+    function testStorageCheckedWriteMapStructA() public {
+        stdstore.checked_write_struct(address(test), "map_struct(address)", address(this), 0, 100);
+        (uint256 a, uint256 b) = test.map_struct(address(this));
+        assertEq(a, 100);
+        assertEq(b, 0);
+    }
+
+    function testStorageCheckedWriteMapStructB() public {
+        stdstore.checked_write_struct(address(test), "map_struct(address)", address(this), 1, 100);
+        (uint256 a, uint256 b) = test.map_struct(address(this));
+        assertEq(a, 0);
+        assertEq(b, 100);
+    }
+
+    function testStorageStructA() public {
+        stdstore.find_struct(address(test), "basic()", 0);
+    }
+
+    function testStorageStructB() public {
+        stdstore.find_struct(address(test), "basic()", 1);
+    }
+
+    function testStorageCheckedWriteStructA() public {
+        stdstore.checked_write_struct(address(test), "basic()", 0, 100);
+        (uint256 a, uint256 b) = test.basic();
+        assertEq(a, 100);
+        assertEq(b, 1337);
+    }
+
+    function testStorageCheckedWriteStructB() public {
+        stdstore.checked_write_struct(address(test), "basic()", 1, 100);
+        (uint256 a, uint256 b) = test.basic();
+        assertEq(a, 1337);
+        assertEq(b, 100);
     }
 
     function testStorageMapAddrFound() public {
@@ -43,17 +97,17 @@ contract StdStorageTest is DSTest {
         assertEq(100, test.map_addr(address(this)));
     }
 
-    function testStorageCheckedWriteMapStructPacked() public {
+    function testStorageCheckedWriteMapPacked() public {
         vm.expectRevert(abi.encodeWithSignature("PackedSlot(bytes32)", uint256(keccak256(abi.encode(address(uint160(1337)), uint(3))))));
         stdstore.checked_write(address(test), "read_struct_lower(address)", address(uint160(1337)), 100);
     }
 
-    function testStorageCheckedWriteMapStructPackedSuccess() public {
-        Packed read = test.map_struct(address(1337));
+    function testStorageCheckedWriteMapPackedSuccess() public {
+        Packed read = test.map_packed(address(1337));
         uint256 full = Packed.unwrap(read);
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
-        stdstore.checked_write(address(test), "map_struct(address)", address(uint160(1337)), full);
+        stdstore.checked_write(address(test), "map_packed(address)", address(uint160(1337)), full);
         assertEq(1337, test.read_struct_lower(address(1337)));
     }
 }
@@ -64,20 +118,33 @@ contract StorageTest {
     uint256 public exists = 1;
     mapping(address => uint256) public map_addr;
     mapping(uint256 => uint256) public map_uint;
-    mapping(address => Packed) public map_struct;
+    mapping(address => Packed) public map_packed;
+    mapping(address => UnpackedStruct) public map_struct;
+    mapping(address => mapping(address => uint256)) public deep_map;
+    UnpackedStruct public basic;
+
+    struct UnpackedStruct {
+        uint256 a;
+        uint256 b;
+    }
 
     constructor() {
+        basic = UnpackedStruct({
+            a: 1337,
+            b: 1337
+        });
+
         uint256 two = (1<<128) | 1;
-        map_struct[msg.sender] = Packed.wrap(two);
-        map_struct[address(bytes20(uint160(1337)))] = Packed.wrap((1<<128));
+        map_packed[msg.sender] = Packed.wrap(two);
+        map_packed[address(bytes20(uint160(1337)))] = Packed.wrap((1<<128));
     }
 
     function read_struct_upper(address who) public returns (uint256) {
-        return Packed.unwrap(map_struct[who]) >> 128;
+        return Packed.unwrap(map_packed[who]) >> 128;
     }
 
     function read_struct_lower(address who) public returns (uint256) {
-        return Packed.unwrap(map_struct[who]) & ((1 << 128) - 1);
+        return Packed.unwrap(map_packed[who]) & ((1 << 128) - 1);
     }
 
     function hidden() public returns (bytes32 t) {
