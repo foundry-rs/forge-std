@@ -163,6 +163,11 @@ contract StdStorageTest is DSTest {
         stdstore.checked_write(address(test), "map_packed(address)", address(uint160(1337)), full);
         assertEq(1337, test.read_struct_lower(address(1337)));
     }
+
+    function testStorageConst() public {
+        vm.expectRevert(abi.encodeWithSignature("NotStorage(string)", string("const()")));
+        stdstore.find(address(test), "const()");
+    }
 }
 
 type Packed is uint256;
@@ -206,5 +211,9 @@ contract StorageTest {
         assembly {
             t := sload(slot)
         }
+    }
+
+    function const() public returns (bytes32 t) {
+        t = bytes32(hex"1337");
     }
 }
