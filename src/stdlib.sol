@@ -26,7 +26,7 @@ contract stdStorage {
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) public finds;
     Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
     
-    event SlotFound(address who, string sig, uint slot);
+    event SlotFound(address who, string sig, bytes32 keysHash, uint slot);
 
     function sigs(
         string memory sig
@@ -63,8 +63,9 @@ contract stdStorage {
         
         (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(address(who));
         if (reads.length == 1) {
-            slots[who][fsig][keccak256(abi.encodePacked(ins))] = uint256(reads[0]);
-            finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+            emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
+            slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
+            finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
                  bytes32 prev = vm.load(who, reads[i]);
@@ -78,8 +79,9 @@ contract stdStorage {
                 
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
-                    slots[who][fsig][keccak256(abi.encodePacked(ins))] = uint256(reads[i]);
-                    finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+                    emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
+                    slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[i]);
+                    finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
                     vm.store(who, reads[i], prev);
                     break;
                 }
@@ -89,8 +91,8 @@ contract stdStorage {
             revert NotStorage(sig);
         }
 
-        if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) revert NotFound(sig);
-        return slots[who][fsig][keccak256(abi.encodePacked(ins))];
+        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(sig);
+        return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
     }
 
     function find(
@@ -231,10 +233,10 @@ contract stdStorage {
     ) public {
         bytes4 fsig = bytes4(keccak256(bytes(sig)));
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        if (!finds[who][fsig][keccak256(abi.encodePacked(ins))]) {
+        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
             find(who, sig, ins, depth);
         }
-        bytes32 slot = bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins))]);
+        bytes32 slot = bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins, depth))]);
 
         bytes32 fdat;
         {
@@ -495,8 +497,8 @@ contract stdStorage {
     }
 
     // call this to speed up on known storage slots. See SlotFound and add to setup()
-    function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint slot) public {
-        slots[who][fsig][keccak256(abi.encodePacked(ins))] = slot;
-        finds[who][fsig][keccak256(abi.encodePacked(ins))] = true;
+    function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint256 depth, uint slot) public {
+        slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = slot;
+        finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
     }
 }
