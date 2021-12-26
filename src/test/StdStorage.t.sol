@@ -16,29 +16,29 @@ contract StdStorageTest is DSTest {
     }
 
     function testStorageHidden() public {
-        assertEq(stdstore.find(address(test), "hidden()"), uint256(keccak256("my.random.var")));
+        assertEq(uint256(keccak256("my.random.var")), stdstore.find(address(test), "hidden()"));
     }
 
     function testStorageObvious() public {
         assertEq(uint256(0), stdstore.find(address(test), "exists()"));
     }
 
-    function testStorageWriteHidden() public {
+    function testStorageCheckedWriteHidden() public {
         stdstore.checked_write(address(test), "hidden()", 100);
         assertEq(uint256(test.hidden()), 100);
     }
 
-    function testStorageWriteObvious() public {
+    function testStorageCheckedWriteObvious() public {
         stdstore.checked_write(address(test), "exists()", 100);
         assertEq(test.exists(), 100);
     }
 
     function testStorageMapStructA() public {
-        stdstore.find_struct(address(test), "map_struct(address)", address(this), 0);
+        assertEq(uint256(keccak256(abi.encode(address(this), 4))), stdstore.find_struct(address(test), "map_struct(address)", address(this), 0));
     }
 
     function testStorageMapStructB() public {
-        stdstore.find_struct(address(test), "map_struct(address)", address(this), 1);
+       assertEq(uint256(keccak256(abi.encode(address(this), 4))) + 1, stdstore.find_struct(address(test), "map_struct(address)", address(this), 1));
     }
 
     function testStorageDeepMap() public {
@@ -81,7 +81,6 @@ contract StdStorageTest is DSTest {
         (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
         assertEq(100, a);
         assertEq(0, b);
-        stdstore.checked_write_multi_key_struct(address(test), "deep_map_struct(address,address)", keys, depth, 100);
     }
 
     function testStorageCheckedWriteDeepMapStructB() public {
@@ -110,11 +109,11 @@ contract StdStorageTest is DSTest {
     }
 
     function testStorageStructA() public {
-        stdstore.find_struct(address(test), "basic()", 0);
+        assertEq(uint256(7), stdstore.find_struct(address(test), "basic()", 0));
     }
 
     function testStorageStructB() public {
-        stdstore.find_struct(address(test), "basic()", 1);
+        assertEq(uint256(7) + 1, stdstore.find_struct(address(test), "basic()", 1));
     }
 
     function testStorageCheckedWriteStructA() public {
