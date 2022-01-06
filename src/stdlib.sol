@@ -519,12 +519,12 @@ contract stdStorage {
     }
     
     function hoax(address who) public {
-        vm.prank(who);
         vm.deal(who, 100_000_000 ether);
+        vm.prank(who);
     }
     
     function hoax(address who, uint256 give) public {
-        vm.prank(who);
         vm.deal(who, give);
+        vm.prank(who);
     }
 }
