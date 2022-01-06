@@ -527,4 +527,14 @@ contract stdStorage {
         vm.deal(who, give);
         vm.prank(who);
     }
+    
+    function startHoax(address who) public {
+        vm.deal(who, 100_000_000 ether);
+        vm.startPrank(who);
+    }
+    
+    function startHoax(address who, uint256 give) public {
+        vm.deal(who, give);
+        vm.startPrank(who);
+    }
 }
