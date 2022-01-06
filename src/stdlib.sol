@@ -517,4 +517,9 @@ contract stdStorage {
         slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = slot;
         finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
     }
+    
+    function hoax(address who) public {
+        vm.prank(who);
+        vm.deal(who, 1000000 ether);
+    }
 }
