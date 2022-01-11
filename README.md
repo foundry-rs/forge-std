@@ -158,3 +158,60 @@ The concepts above can be combined in intuitive ways. Here is a full list of fun
 1. `find_multi_key_struct`: Same as above, but adds a `depth` input to specify the field depth
 
 With these 4 functions, you can find any slot (or write to it with their counterpart `checked_write_*`).
+
+
+### stdCheats
+
+This is a wrapper over miscellaneous cheatcodes that need wrappers to be more dev friendly. Currently there are only function related to `prank`. In general, users may expect ETH to be put into an address on `prank`, but this is not the case for safety reasons. Explicitly this `hoax` function should only be used for address that have expected balances as it will get overwritten. If an address already has Eth, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
+
+
+#### Example usage:
+```solidity
+
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.0;
+
+import "ds-test/test.sol";
+import {stdCheats} from "../stdlib.sol";
+import "../Vm.sol";
+
+// Inherit the stdCheats
+contract StdCheatsTest is DSTest, stdCheats {
+    Vm public constant vm = Vm(HEVM_ADDRESS);
+
+    Bar test;
+    function setUp() public {
+        test = new Bar();
+    }
+
+    function testHoax() public {
+        // we call the hoax, which gives the target address
+        // eth and then calls `prank`
+        hoax(address(1337));
+        test.bar{value: 100}(address(1337));
+
+        // overloaded to allow you to specify how much eth to
+        // initialize the addres with
+        hoax(address(1337), 1);
+        test.bar{value: 1}(address(1337));
+    }
+
+    function testStartHoax() public {
+        // we call the startHoax, which gives the target address
+        // eth and then calls `startPrank`
+        //
+        // it is also overloaded so that you can specify eth amount
+        startHoax(address(1337));
+        test.bar{value: 100}(address(1337));
+        test.bar{value: 100}(address(1337));
+        vm.stopPrank();
+        test.bar(address(this));
+    }
+}
+
+contract Bar {
+    function bar(address expectedSender) public payable {
+        require(msg.sender == expectedSender, "!prank");
+    }
+}
+```
