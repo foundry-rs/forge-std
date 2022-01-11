@@ -3,6 +3,35 @@ pragma solidity ^0.8.0;
 
 import "./Vm.sol";
 
+// Wrappers around Cheatcodes to avoid footguns
+abstract contract stdCheats {
+    // we use a custom name that is unlikely to cause collisions so this contract
+    // can be inherited easily
+    Vm constant vm_std_cheats = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+    // Setup a prank from an address that has some ether
+    function hoax(address who) public {
+        vm_std_cheats.deal(who, 1 << 128);
+        vm_std_cheats.prank(who);
+    }
+
+    function hoax(address who, uint256 give) public {
+        vm_std_cheats.deal(who, give);
+        vm_std_cheats.prank(who);
+    }
+
+    // Start perpetual prank from an address that has some ether
+    function startHoax(address who) public {
+        vm_std_cheats.deal(who, 1 << 128);
+        vm_std_cheats.startPrank(who);
+    }
+
+    function startHoax(address who, uint256 give) public {
+        vm_std_cheats.deal(who, give);
+        vm_std_cheats.startPrank(who);
+    }
+}
+
+
 library stdError {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
     bytes public constant arithmeticError = abi.encodeWithSignature("Panic(uint256)", 0x11);
@@ -13,7 +42,6 @@ library stdError {
     bytes public constant indexOOBError = abi.encodeWithSignature("Panic(uint256)", 0x32);
     bytes public constant memOverflowError = abi.encodeWithSignature("Panic(uint256)", 0x41);
     bytes public constant zeroVarError = abi.encodeWithSignature("Panic(uint256)", 0x51);
-
 }
 
 
