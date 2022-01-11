@@ -46,16 +46,23 @@ library stdError {
 
 
 contract stdStorage {
-    error NotFound(string);
-    error NotStorage(string);
+    error NotFound(bytes4);
+    error NotStorage(bytes4);
     error PackedSlot(bytes32);
 
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) public slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) public finds;
     Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
     
-    event SlotFound(address who, string sig, bytes32 keysHash, uint slot);
+    event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
+
+
+    bytes32[] _keys;
+    bytes4 _sig;
+    uint256 _depth;
+    address _target;
+
 
     function sigs(
         string memory sig
@@ -75,7 +82,7 @@ contract stdStorage {
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
         address who, // contract
-        string memory sig, // signature to check agains
+        bytes4 fsig, // signature to check agains
         bytes32[] memory ins, // see slot complexity
         uint256 depth
     ) 
@@ -83,7 +90,6 @@ contract stdStorage {
         returns (uint256)
     {
         // calldata to test against
-        bytes4 fsig = bytes4(keccak256(bytes(sig)));
         if (finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
             return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
         }
@@ -104,7 +110,7 @@ contract stdStorage {
             if (fdat != curr) {
                 revert PackedSlot(reads[0]);
             }
-            emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
+            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
             slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
             finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
         } else if (reads.length > 1) {
@@ -123,7 +129,7 @@ contract stdStorage {
                 
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
-                    emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
+                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
                     slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[i]);
                     finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
                     vm.store(who, reads[i], prev);
@@ -132,12 +138,61 @@ contract stdStorage {
                 vm.store(who, reads[i], prev);
             }
         } else {
-            revert NotStorage(sig);
+            revert NotStorage(fsig);
         }
 
-        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(sig);
+        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(fsig);
         return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
     }
+
+    function find(
+        address who, // contract
+        string memory sig, // signature to check agains
+        bytes32[] memory ins, // see slot complexity
+        uint256 depth
+    ) internal returns (uint256) {
+        return find(who, bytes4(keccak256(bytes(sig))), ins, depth);
+    }
+
+    function target(address target) public returns (stdStorage) {
+        _target = target;
+        return stdStorage(address(this));
+    }
+
+    function sig(bytes4 sig) public returns (stdStorage) {
+        _sig = sig;
+        return stdStorage(address(this));
+    }
+
+    function with_key(address who) public returns (stdStorage) {
+        _keys.push(bytes32(uint256(uint160(who))));
+        return stdStorage(address(this));
+    }
+
+    function with_key(uint256 amt) public returns (stdStorage) {
+        _keys.push(bytes32(amt));
+        return stdStorage(address(this));
+    }
+    function with_key(bytes32 key) public returns (stdStorage) {
+        _keys.push(key);
+        return stdStorage(address(this));
+    }
+
+    function depth(uint256 depth) public returns (stdStorage) {
+        _depth = depth;
+        return stdStorage(address(this));
+    }
+
+    function find() public returns (uint256) {
+        bytes32[] memory keys = _keys;
+        uint256 slot = find(_target, _sig, keys, _depth);
+        delete _target;
+        delete _sig;
+        delete _keys;
+        delete _depth; 
+        return slot;
+    }
+
 
     function find(
         address who, // contract

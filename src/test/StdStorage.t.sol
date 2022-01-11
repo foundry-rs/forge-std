@@ -15,6 +15,16 @@ contract StdStorageTest is DSTest {
         test = new StorageTest();
     }
 
+    function testBuilder() public {
+        uint256 slot = stdstore
+            .target(address(test))
+            .sig(test.deep_map.selector)
+            .with_key(address(this))
+            .with_key(address(this))
+            .find();
+        assertEq(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(5))))), bytes32(slot));
+    }
+
     function testStorageHidden() public {
         assertEq(uint256(keccak256("my.random.var")), stdstore.find(address(test), "hidden()"));
     }
@@ -165,7 +175,7 @@ contract StdStorageTest is DSTest {
     }
 
     function testStorageConst() public {
-        vm.expectRevert(abi.encodeWithSignature("NotStorage(string)", string("const()")));
+        vm.expectRevert(abi.encodeWithSignature("NotStorage(bytes4)", bytes4(keccak256("const()"))));
         stdstore.find(address(test), "const()");
     }
 
