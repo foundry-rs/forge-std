@@ -44,18 +44,27 @@ library stdError {
     bytes public constant zeroVarError = abi.encodeWithSignature("Panic(uint256)", 0x51);
 }
 
+struct StdStorage {
+    mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
+    mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
+    
+    bytes32[] _keys;
+    bytes4 _sig;
+    uint256 _depth;
+    address _target;
+    bytes32 _set;
+}
 
-contract stdStorage {
-    error NotFound(string);
-    error NotStorage(string);
+
+library stdStorage {
+    error NotFound(bytes4);
+    error NotStorage(bytes4);
     error PackedSlot(bytes32);
 
-    mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) public slots;
-    mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) public finds;
-    Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
-    
-    event SlotFound(address who, string sig, bytes32 keysHash, uint slot);
+    event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
+    
+    Vm constant stdstore_vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
 
     function sigs(
         string memory sig
@@ -74,47 +83,48 @@ contract stdStorage {
     //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory ins, // see slot complexity
-        uint256 depth
+        StdStorage storage self
     ) 
-        public 
+        internal 
         returns (uint256)
     {
+        address who = self._target;
+        bytes4 fsig = self._sig;
+        uint256 depth = self._depth;
+        bytes32[] memory ins = self._keys;
+
         // calldata to test against
-        bytes4 fsig = bytes4(keccak256(bytes(sig)));
-        if (finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
-            return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
+        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
+            return self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
         }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        vm.record();
+        stdstore_vm.record();
         bytes32 fdat;
         {
             (bool pass, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*depth);
         }
         
-        (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(address(who));
+        (bytes32[] memory reads, bytes32[] memory writes) = stdstore_vm.accesses(address(who));
         if (reads.length == 1) {
-            bytes32 curr = vm.load(who, reads[0]);
+            bytes32 curr = stdstore_vm.load(who, reads[0]);
             if (curr == bytes32(0)) {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
             if (fdat != curr) {
                 revert PackedSlot(reads[0]);
             }
-            emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
-            slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
-            finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
+            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
+            self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
+            self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
-                bytes32 prev = vm.load(who, reads[i]);
+                bytes32 prev = stdstore_vm.load(who, reads[i]);
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
                 }
                 // store
-                vm.store(who, reads[i], bytes32(hex"1337"));
+                stdstore_vm.store(who, reads[i], bytes32(hex"1337"));
                 bytes32 fdat;
                 {
                     (bool pass, bytes memory rdat) = who.staticcall(cald);
@@ -123,399 +133,100 @@ contract stdStorage {
                 
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
-                    emit SlotFound(who, sig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
-                    slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[i]);
-                    finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
-                    vm.store(who, reads[i], prev);
+                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
+                    self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[i]);
+                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
+                    stdstore_vm.store(who, reads[i], prev);
                     break;
                 }
-                vm.store(who, reads[i], prev);
+                stdstore_vm.store(who, reads[i], prev);
             }
         } else {
-            revert NotStorage(sig);
+            revert NotStorage(fsig);
         }
 
-        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(sig);
-        return slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(fsig);
+
+        delete self._target;
+        delete self._sig;
+        delete self._keys;
+        delete self._depth; 
+
+        return self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
     }
 
-    function find(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address target
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = bytes32(uint256(uint160(target)));
-        return find(who, sig, ins, 0);
+    function target(StdStorage storage self, address target) internal returns (StdStorage storage) {
+        self._target = target;
+        return self;
     }
 
-    function find_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        return find(who, sig, ins, 0);
+    function sig(StdStorage storage self, bytes4 sig) internal returns (StdStorage storage) {
+        self._sig = sig;
+        return self;
     }
 
-    function find_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256[] memory target
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        return find(who, sig, ins, 0);
+    function sig(StdStorage storage self, string memory sig) internal returns (StdStorage storage) {
+        self._sig = sigs(sig);
+        return self;
     }
 
-    function find_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory target
-    ) public returns (uint256) {
-        return find(who, sig, target, 0);
+    function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
+        self._keys.push(bytes32(uint256(uint160(who))));
+        return self;
     }
 
-    function find_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target,
-        uint256 depth
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        return find(who, sig, ins, depth);
+    function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
+        self._keys.push(bytes32(amt));
+        return self;
+    }
+    function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
+        self._keys.push(key);
+        return self;
     }
 
-    function find_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256[] memory target,
-        uint256 depth
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        return find(who, sig, ins, depth);
+    function depth(StdStorage storage self, uint256 depth) internal returns (StdStorage storage) {
+        self._depth = depth;
+        return self;
     }
 
-    function find_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory target,
-        uint256 depth
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        return find(who, sig, ins, depth);
+    function checked_write(StdStorage storage self, address who) internal {
+        checked_write(self, bytes32(uint256(uint160(who))));
     }
 
-    function find(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256 target
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = bytes32(target);
-        return find(who, sig, ins, 0);
-    }
-
-    function find(
-        address who, // contract
-        string memory sig // signature to check agains
-    ) public returns (uint256) {
-        return find(who, sig, new bytes32[](0), 0);
-    }
-
-    
-    function find_struct(
-        address who,
-        string memory sig,
-        uint256 depth
-    ) public returns (uint256) {
-        return find(who, sig, new bytes32[](0), depth);
-    }
-
-    function find_struct(
-        address who,
-        string memory sig,
-        uint256 target,
-        uint256 depth
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = bytes32(target);
-        return find(who, sig, ins, depth);
-    }
-
-    function find_struct(
-        address who,
-        string memory sig,
-        address target,
-        uint256 depth
-    ) public returns (uint256) {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = bytes32(uint256(uint160(target)));
-        return find(who, sig, ins, depth);
+    function checked_write(StdStorage storage self, uint256 amt) internal {
+        checked_write(self, bytes32(amt));
     }
 
     function checked_write(
-        address who,
-        string memory sig,
-        bytes32[] memory ins,
-        bytes32 set,
-        uint256 depth 
-    ) public {
-        bytes4 fsig = bytes4(keccak256(bytes(sig)));
+        StdStorage storage self,
+        bytes32 set
+    ) internal {
+        address who = self._target;
+        bytes4 fsig = self._sig;
+        uint256 depth = self._depth;
+        bytes32[] memory ins = self._keys;
+
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        if (!finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
-            find(who, sig, ins, depth);
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
+            find(self);
         }
-        bytes32 slot = bytes32(slots[who][fsig][keccak256(abi.encodePacked(ins, depth))]);
+        bytes32 slot = bytes32(self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))]);
 
         bytes32 fdat;
         {
             (bool pass, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*depth);
         }
-        bytes32 curr = vm.load(who, slot);
+        bytes32 curr = stdstore_vm.load(who, slot);
 
         if (fdat != curr) {
             revert PackedSlot(slot);
         }
-        vm.store(who, slot, set);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        bytes32 set
-    ) public {
-        checked_write(who, sig, new bytes32[](0), set, 0);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        address set
-    ) public {
-        checked_write(who, sig, new bytes32[](0), bytes32(bytes20(set)), 0);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        uint256 set
-    ) public {
-        checked_write(who, sig, new bytes32[](0), bytes32(set), 0);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        bytes32 target,
-        bytes32 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = target;
-        checked_write(who, sig, ins, set, 0);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        uint256 target,
-        bytes32 set
-    ) public {
-        checked_write(who, sig, bytes32(target), set);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        uint256 target,
-        uint256 set
-    ) public {
-        checked_write(who, sig, bytes32(target), bytes32(set));
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        address target,
-        bytes32 set
-    ) public {
-        checked_write(who, sig, bytes32(uint256(uint160(target))), set);
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        address target,
-        address set
-    ) public {
-        checked_write(who, sig, bytes32(uint256(uint160(target))), bytes32(uint256(uint160(set))));
-    }
-
-    function checked_write(
-        address who,
-        string memory sig,
-        address target,
-        uint256 set
-    ) public {
-        checked_write(who, sig, bytes32(uint256(uint160(target))), bytes32(set));
-    }
-
-    function checked_write_struct(
-        address who,
-        string memory sig,
-        address target,
-        uint256 depth,
-        uint256 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](1);
-        ins[0] = bytes32(uint256(uint160(target)));
-        checked_write(who, sig, ins, bytes32(set), depth);
-    }
-
-    function checked_write_struct(
-        address who,
-        string memory sig,
-        uint256 depth,
-        uint256 set
-    ) public {
-        checked_write(who, sig, new bytes32[](0), bytes32(set), depth);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target,
-        uint256 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        checked_write(who, sig, ins, bytes32(set), 0);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256[] memory target,
-        uint256 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        checked_write(who, sig, ins, bytes32(set), 0);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory target,
-        uint256 set
-    ) public {
-        checked_write(who, sig, target, bytes32(set), 0);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target,
-        address set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), 0);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256[] memory target,
-        address set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), 0);
-    }
-
-    function checked_write_multi_key(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory target,
-        address set
-    ) public {
-        checked_write(who, sig, target, bytes32(uint256(uint160(set))), 0);
-    }
-
-    function checked_write_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target,
-        uint256 depth,
-        address set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        checked_write(who, sig, ins, bytes32(uint256(uint160(set))), depth);
-    }
-
-    function checked_write_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        address[] memory target,
-        uint256 depth,
-        uint256 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(uint256(uint160(target[i])));
-        }
-        checked_write(who, sig, ins, bytes32(set), depth);
-    }
-
-    function checked_write_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        uint256[] memory target,
-        uint256 depth,
-        uint256 set
-    ) public {
-        bytes32[] memory ins = new bytes32[](target.length);
-        for (uint256 i = 0; i < target.length; i++) {
-            ins[i] = bytes32(target[i]);
-        }
-        checked_write(who, sig, ins, bytes32(set), depth);
-    }
-
-    function checked_write_multi_key_struct(
-        address who, // contract
-        string memory sig, // signature to check agains
-        bytes32[] memory target,
-        uint256 depth,
-        bytes32 set
-    ) public {
-        checked_write(who, sig, target, set, depth);
+        stdstore_vm.store(who, slot, set);
+        delete self._target;
+        delete self._sig;
+        delete self._keys;
+        delete self._depth; 
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
@@ -541,8 +252,8 @@ contract stdStorage {
     }
 
     // call this to speed up on known storage slots. See SlotFound and add to setup()
-    function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint256 depth, uint slot) public {
-        slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = slot;
-        finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
-    }
+    // function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint256 depth, uint slot) public {
+    //     slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = slot;
+    //     finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
+    // }
 }

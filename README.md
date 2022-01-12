@@ -67,18 +67,17 @@ contract TestContract is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     Storage test;
-    stdStorage stdstore;
+    StdStorage stdstore;
 
     function setUp() public {
         test = new Storage();
-        stdstore = new stdStorage();
     }
 
     function testFindExists() public {
         // Lets say we want to find the slot for the public
         // variable `exists`. We just pass in the function selector
         // to the `find` command
-        uint256 slot = stdstore.find(address(test), "exists()");
+        uint256 slot = stdstore.target(address(test)).sig("exists()").find();
         assertEq(slot, 0);
     }
 
@@ -86,7 +85,7 @@ contract TestContract is DSTest {
         // Lets say we want to write to the slot for the public
         // variable `exists`. We just pass in the function selector
         // to the `checked_write` command
-        stdstore.checked_write(address(test), "exists()", 100);
+        stdstore.target(address(test)).sig("exists()").checked_write(100);
         assertEq(test.exists(), 100);
     }
 
@@ -94,14 +93,19 @@ contract TestContract is DSTest {
     function testFindHidden() public {
         // hidden is a random hash of a bytes, iteration through slots would
         // not find it. Our mechanism does
-        uint256 slot = stdstore.find(address(test), "hidden()");
+        // Also, you can use the selector instead of string
+        uint256 slot = stdstore.target(address(test)).sig(test.hidden.selector).find();
         assertEq(slot, keccak256("my.random.var"));
     }
 
     // if targeting a mapping, you have to pass in the keys necessary to perform the find
     // i.e.:
     function testFindMapping() public {
-        uint256 slot = stdstore.find(address(test), "map_addr(address)", address(this));
+        uint256 slot = stdstore
+            .target(address(test))
+            .sig(test.map_addr.selector)
+            .with_key(address(this))
+            .find();
         // in the `Storage` constructor, we wrote that this address' value was 1 in the map
         // so when we load the slot, we expect it to be 1
         assertEq(vm.load(slot), 1);
@@ -111,8 +115,18 @@ contract TestContract is DSTest {
     function testFindStruct() public {
         // NOTE: see the `find_struct` -> we have to specify that it is a struct
         // we are looking for
-        uint256 slot_for_a_field = stdstore.find_struct(address(test), "basicStruct()", /*field depth: */ 0);.
-        uint256 slot_for_b_field = stdstore.find_struct(address(test), "basicStruct()", /*field depth: */ 1);
+        uint256 slot_for_a_field = stdstore
+            .target(address(test))
+            .sig(test.basicStruct.selector)
+            .depth(0)
+            .find();
+
+        uint256 slot_for_b_field = stdstore
+            .target(address(test))
+            .sig(test.basicStruct.selector)
+            .depth(1)
+            .find();
+
         assertEq(vm.load(slot_for_a_field), 1);
         assertEq(vm.load(slot_for_b_field), 2);
     }
