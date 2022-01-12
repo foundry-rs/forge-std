@@ -68,38 +68,38 @@ contract ErrorsTest {
 
     uint256[] someArr;
 
-    function assertionError() public {
+    function assertionError() public pure {
         assert(false);
     }
 
-    function arithmeticError(uint256 a) public {
-        uint256 a = a - 100;
+    function arithmeticError(uint256 a) public pure {
+        a -= 100;
     }
 
-    function divError(uint256 a) public {
-        uint256 a = 100 / a;
+    function divError(uint256 a) public pure {
+        100 / a;
     }
 
-    function modError(uint256 a) public {
-        uint256 a = 100 % a;
+    function modError(uint256 a) public pure {
+        100 % a;
     }
 
-    function enumConversion(uint256 a) public {
-        T someEnum = T(a);
+    function enumConversion(uint256 a) public pure {
+        T(a);
     }
 
     function pop() public {
         someArr.pop();
     }
 
-    function indexOOBError(uint256 a) public {
+    function indexOOBError(uint256 a) public pure {
         uint256[] memory t = new uint256[](0);
-        uint256 b = t[a];
+        t[a];
     }
 
-    function mem() public returns (uint256) {
+    function mem() public pure {
         uint256 l = 2**256 / 32;
-        uint256[] memory x = new uint256[](l);
+        new uint256[](l);
     }
 
     function intern() public returns (uint256) {

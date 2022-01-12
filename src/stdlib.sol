@@ -67,13 +67,13 @@ library stdStorage {
     Vm constant stdstore_vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
 
     function sigs(
-        string memory sig
+        string memory sigStr
     )
         internal
         pure
         returns (bytes4)
     {
-        return bytes4(keccak256(bytes(sig)));
+        return bytes4(keccak256(bytes(sigStr)));
     }
 
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
@@ -90,22 +90,22 @@ library stdStorage {
     {
         address who = self._target;
         bytes4 fsig = self._sig;
-        uint256 depth = self._depth;
+        uint256 field_depth = self._depth;
         bytes32[] memory ins = self._keys;
 
         // calldata to test against
-        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
-            return self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
+        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
+            return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
         }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
         stdstore_vm.record();
         bytes32 fdat;
         {
-            (bool pass, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 32*depth);
+            (, bytes memory rdat) = who.staticcall(cald);
+            fdat = bytesToBytes32(rdat, 32*field_depth);
         }
         
-        (bytes32[] memory reads, bytes32[] memory writes) = stdstore_vm.accesses(address(who));
+        (bytes32[] memory reads, ) = stdstore_vm.accesses(address(who));
         if (reads.length == 1) {
             bytes32 curr = stdstore_vm.load(who, reads[0]);
             if (curr == bytes32(0)) {
@@ -114,9 +114,9 @@ library stdStorage {
             if (fdat != curr) {
                 revert PackedSlot(reads[0]);
             }
-            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[0]));
-            self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[0]);
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
+            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
+            self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
+            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
                 bytes32 prev = stdstore_vm.load(who, reads[i]);
@@ -125,17 +125,16 @@ library stdStorage {
                 }
                 // store
                 stdstore_vm.store(who, reads[i], bytes32(hex"1337"));
-                bytes32 fdat;
                 {
-                    (bool pass, bytes memory rdat) = who.staticcall(cald);
-                    fdat = bytesToBytes32(rdat, 32*depth);
+                    (, bytes memory rdat) = who.staticcall(cald);
+                    fdat = bytesToBytes32(rdat, 32*field_depth);
                 }
                 
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
-                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, depth)), uint256(reads[i]));
-                    self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = uint256(reads[i]);
-                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
+                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
+                    self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
+                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
                     stdstore_vm.store(who, reads[i], prev);
                     break;
                 }
@@ -145,28 +144,28 @@ library stdStorage {
             revert NotStorage(fsig);
         }
 
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) revert NotFound(fsig);
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) revert NotFound(fsig);
 
         delete self._target;
         delete self._sig;
         delete self._keys;
         delete self._depth; 
 
-        return self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))];
+        return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
 
-    function target(StdStorage storage self, address target) internal returns (StdStorage storage) {
-        self._target = target;
+    function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
+        self._target = _target;
         return self;
     }
 
-    function sig(StdStorage storage self, bytes4 sig) internal returns (StdStorage storage) {
-        self._sig = sig;
+    function sig(StdStorage storage self, bytes4 _sig) internal returns (StdStorage storage) {
+        self._sig = _sig;
         return self;
     }
 
-    function sig(StdStorage storage self, string memory sig) internal returns (StdStorage storage) {
-        self._sig = sigs(sig);
+    function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
+        self._sig = sigs(_sig);
         return self;
     }
 
@@ -184,8 +183,8 @@ library stdStorage {
         return self;
     }
 
-    function depth(StdStorage storage self, uint256 depth) internal returns (StdStorage storage) {
-        self._depth = depth;
+    function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
+        self._depth = _depth;
         return self;
     }
 
@@ -203,19 +202,19 @@ library stdStorage {
     ) internal {
         address who = self._target;
         bytes4 fsig = self._sig;
-        uint256 depth = self._depth;
+        uint256 field_depth = self._depth;
         bytes32[] memory ins = self._keys;
 
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, depth))]) {
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
             find(self);
         }
-        bytes32 slot = bytes32(self.slots[who][fsig][keccak256(abi.encodePacked(ins, depth))]);
+        bytes32 slot = bytes32(self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]);
 
         bytes32 fdat;
         {
-            (bool pass, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 32*depth);
+            (, bytes memory rdat) = who.staticcall(cald);
+            fdat = bytesToBytes32(rdat, 32*field_depth);
         }
         bytes32 curr = stdstore_vm.load(who, slot);
 

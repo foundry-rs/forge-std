@@ -256,22 +256,22 @@ contract StorageTest {
         map_packed[address(bytes20(uint160(1337)))] = Packed.wrap((1<<128));
     }
 
-    function read_struct_upper(address who) public returns (uint256) {
+    function read_struct_upper(address who) public view returns (uint256) {
         return Packed.unwrap(map_packed[who]) >> 128;
     }
 
-    function read_struct_lower(address who) public returns (uint256) {
+    function read_struct_lower(address who) public view returns (uint256) {
         return Packed.unwrap(map_packed[who]) & ((1 << 128) - 1);
     }
 
-    function hidden() public returns (bytes32 t) {
+    function hidden() public view returns (bytes32 t) {
         bytes32 slot = keccak256("my.random.var");
         assembly {
             t := sload(slot)
         }
     }
 
-    function const() public returns (bytes32 t) {
+    function const() public pure returns (bytes32 t) {
         t = bytes32(hex"1337");
     }
 }
