@@ -64,6 +64,8 @@ import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
 contract TestContract is DSTest {
+    using stdStorage for StdStorage;
+
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     Storage test;
