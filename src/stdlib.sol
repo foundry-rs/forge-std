@@ -249,10 +249,4 @@ library stdStorage {
 
         return result;
     }
-
-    // call this to speed up on known storage slots. See SlotFound and add to setup()
-    // function addKnownVm(address who, bytes4 fsig, bytes32[] memory ins, uint256 depth, uint slot) public {
-    //     slots[who][fsig][keccak256(abi.encodePacked(ins, depth))] = slot;
-    //     finds[who][fsig][keccak256(abi.encodePacked(ins, depth))] = true;
-    // }
 }
