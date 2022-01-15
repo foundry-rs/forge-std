@@ -11,10 +11,34 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
+       - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          version: nightly
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      # Cached Installs adapted from https://github.com/FrankieIsLost/forge-template/blob/master/.github/workflows/CI.yml
+      - name: Set up rust cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Save git SHA for Foundry
+        run: |
+          echo "forge-sha=$(git ls-remote  https://github.com/gakonst/foundry HEAD | awk '{ print $1}')" >> $GITHUB_ENV
+      - name: Cache Forge
+        uses: actions/cache@v2
+        id: cache-forge
+        env:
+          cache-name: cache-forge
+        with:
+          path: ~/.cargo/bin/forge
+          key: ${{ env.cache-name }}-${{ env.forge-sha }}
+
+      # Install on cache miss
+      - name: Install Forge
+        if: steps.cache-forge.outputs.cache-hit != 'true'
+        run: |
+          cargo install --git https://github.com/gakonst/foundry --bin forge --locked
 
       - name: Install Dependencies
         run: forge install
