@@ -8,8 +8,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: foundry-toolchain
-        uses: onbjerg/foundry-action@1.0.1
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - name: Install Dependencies
         run: forge install
       - name: Run Tests
