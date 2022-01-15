@@ -18,6 +18,11 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.bar{value: 100}(address(1337));
     }
 
+    function testHoaxOrigin() public {
+        hoax(address(1337), address(1337));
+        test.origin{value: 100}(address(1337));
+    }
+
     function testStartHoax() public {
         startHoax(address(1337));
         test.bar{value: 100}(address(1337));
