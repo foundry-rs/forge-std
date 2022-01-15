@@ -25,10 +25,22 @@ contract StdCheatsTest is DSTest, stdCheats {
         vm.stopPrank();
         test.bar(address(this));
     }
+
+    function testStartHoaxOrigin() public {
+        startHoax(address(1337), address(1337));
+        test.origin{value: 100}(address(1337));
+        test.origin{value: 100}(address(1337));
+        vm.stopPrank();
+        test.bar(address(this));
+    }
 }
 
 contract Bar {
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
+    }
+    function origin(address expectedSender) public payable {
+        require(msg.sender == expectedSender, "!prank");
+        require(tx.origin == expectedSender, "!prank");
     }
 }
