@@ -19,6 +19,16 @@ abstract contract stdCheats {
         vm_std_cheats.prank(who);
     }
 
+    function hoax(address who, address origin) public {
+        vm_std_cheats.deal(who, 1 << 128);
+        vm_std_cheats.prank(who, who);
+    }
+
+    function hoax(address who, address origin, uint256 give) public {
+        vm_std_cheats.deal(who, give);
+        vm_std_cheats.prank(who, who);
+    }
+
     // Start perpetual prank from an address that has some ether
     function startHoax(address who) public {
         vm_std_cheats.deal(who, 1 << 128);
@@ -28,6 +38,18 @@ abstract contract stdCheats {
     function startHoax(address who, uint256 give) public {
         vm_std_cheats.deal(who, give);
         vm_std_cheats.startPrank(who);
+    }
+
+    // Start perpetual prank from an address that has some ether
+    // tx.origin is set to the origin parameter
+    function startHoax(address who, address origin) public {
+        vm_std_cheats.deal(who, 1 << 128);
+        vm_std_cheats.startPrank(who, origin);
+    }
+
+    function startHoax(address who, address origin, uint256 give) public {
+        vm_std_cheats.deal(who, give);
+        vm_std_cheats.startPrank(who, origin);
     }
 }
 
