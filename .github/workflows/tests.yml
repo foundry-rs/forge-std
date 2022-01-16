@@ -1,46 +1,21 @@
 name: Tests
-
 on: [push, pull_request]
 
 jobs:
-  tests:
+  check:
+    name: Foundry project
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          version: nightly
 
-      # Cached Installs adapted from https://github.com/FrankieIsLost/forge-template/blob/master/.github/workflows/CI.yml
-      - name: Set up rust cache
-        uses: Swatinem/rust-cache@v1
-
-      - name: Save git SHA for Foundry
-        run: |
-          echo "forge-sha=$(git ls-remote  https://github.com/gakonst/foundry HEAD | awk '{ print $1}')" >> $GITHUB_ENV
-      - name: Cache Forge
-        uses: actions/cache@v2
-        id: cache-forge
-        env:
-          cache-name: cache-forge
-        with:
-          path: ~/.cargo/bin/forge
-          key: ${{ env.cache-name }}-${{ env.forge-sha }}
-
-      # Install on cache miss
-      - name: Install Forge
-        if: steps.cache-forge.outputs.cache-hit != 'true'
-        run: |
-          cargo install --git https://github.com/gakonst/foundry --bin forge --locked
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: forge install
-      - name: Run Tests
-        run: forge test
+      - name: Run tests
+        run: forge test -vvv
