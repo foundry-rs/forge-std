@@ -7,7 +7,17 @@ import "./Vm.sol";
 abstract contract stdCheats {
     // we use a custom name that is unlikely to cause collisions so this contract
     // can be inherited easily
-    Vm constant vm_std_cheats = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+    Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+
+    // Skip forward or rewind time by the specified number of seconds
+    function skip(uint256 time) public {
+        vm_std_cheats.warp(block.timestamp + time);
+    }
+
+    function rewind(uint256 time) public {
+        vm_std_cheats.warp(block.timestamp - time);
+    }
+
     // Setup a prank from an address that has some ether
     function hoax(address who) public {
         vm_std_cheats.deal(who, 1 << 128);
@@ -86,7 +96,7 @@ library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
     
-    Vm constant stdstore_vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+    Vm constant stdstore_vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
         string memory sigStr

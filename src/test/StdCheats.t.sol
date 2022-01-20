@@ -13,6 +13,18 @@ contract StdCheatsTest is DSTest, stdCheats {
         test = new Bar();
     }
 
+    function testSkip() public {
+        vm.warp(100);
+        skip(25);
+        assertEq(block.timestamp, 125);
+    }
+
+    function testRewind() public {
+        vm.warp(100);
+        rewind(25);
+        assertEq(block.timestamp, 75);
+    }
+
     function testHoax() public {
         hoax(address(1337));
         test.bar{value: 100}(address(1337));
