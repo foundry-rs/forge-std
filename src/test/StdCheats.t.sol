@@ -50,6 +50,16 @@ contract StdCheatsTest is DSTest, stdCheats {
         vm.stopPrank();
         test.bar(address(this));
     }
+
+    function testTranscribe() public {
+        address deployed = transcribe("StdCheats.t.sol:StdCheatsTest", bytes(""));
+        assertEq(string(deployed.code), string(address(this).code));
+    }
+
+    function testTranscibeNoArgs() public {
+        address deployed = transcribe("StdCheats.t.sol:StdCheatsTest");
+        assertEq(string(deployed.code), string(address(this).code));
+    }
 }
 
 contract Bar {
