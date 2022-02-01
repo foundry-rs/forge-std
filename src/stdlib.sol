@@ -64,7 +64,7 @@ abstract contract stdCheats {
 
     // Deploys a contract by fetching the contract bytecode from
     // the artifacts directory
-    function transcribe(string memory what, bytes memory args)
+    function deployCode(string memory what, bytes memory args)
         public
         returns (address addr)
     {
@@ -74,7 +74,7 @@ abstract contract stdCheats {
         }
     }
 
-    function transcribe(string memory what)
+    function deployCode(string memory what)
         public
         returns (address addr)
     {
