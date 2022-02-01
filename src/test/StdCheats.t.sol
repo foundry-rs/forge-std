@@ -50,6 +50,16 @@ contract StdCheatsTest is DSTest, stdCheats {
         vm.stopPrank();
         test.bar(address(this));
     }
+
+    function testDeployCode() public {
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
+        assertEq(string(deployed.code), string(address(this).code));
+    }
+
+    function testDeployCodeNoArgs() public {
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest");
+        assertEq(string(deployed.code), string(address(this).code));
+    }
 }
 
 contract Bar {

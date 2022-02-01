@@ -61,6 +61,28 @@ abstract contract stdCheats {
         vm_std_cheats.deal(who, give);
         vm_std_cheats.startPrank(who, origin);
     }
+
+    // Deploys a contract by fetching the contract bytecode from
+    // the artifacts directory
+    function deployCode(string memory what, bytes memory args)
+        public
+        returns (address addr)
+    {
+        bytes memory bytecode = abi.encodePacked(vm_std_cheats.getCode(what), args);
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+    }
+
+    function deployCode(string memory what)
+        public
+        returns (address addr)
+    {
+        bytes memory bytecode = vm_std_cheats.getCode(what);
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+    }
 }
 
 
