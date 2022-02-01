@@ -101,12 +101,11 @@ library stdError {
 struct StdStorage {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
-    
-    bytes32[] _keys;
+
+    bytes _keys;
     bytes4 _sig;
     uint256 _depth;
     address _target;
-    bytes32 _set;
 }
 
 
@@ -145,20 +144,20 @@ library stdStorage {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
+        bytes memory ins = self._keys;
 
         // calldata to test against
         if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
             return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
         }
-        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
+        bytes memory cald = abi.encodePacked(fsig, ins);
         stdstore_vm.record();
         bytes32 fdat;
         {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*field_depth);
         }
-        
+
         (bytes32[] memory reads, ) = stdstore_vm.accesses(address(who));
         if (reads.length == 1) {
             bytes32 curr = stdstore_vm.load(who, reads[0]);
@@ -183,7 +182,7 @@ library stdStorage {
                     (, bytes memory rdat) = who.staticcall(cald);
                     fdat = bytesToBytes32(rdat, 32*field_depth);
                 }
-                
+
                 if (fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
@@ -203,7 +202,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
 
         return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
@@ -223,17 +222,11 @@ library stdStorage {
         return self;
     }
 
-    function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
-        self._keys.push(bytes32(uint256(uint160(who))));
-        return self;
-    }
-
-    function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
-        self._keys.push(bytes32(amt));
-        return self;
-    }
-    function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
-        self._keys.push(key);
+    function with_keys(StdStorage storage self, bytes memory keys)
+        internal
+        returns (StdStorage storage)
+    {
+        self._keys = keys;
         return self;
     }
 
@@ -257,9 +250,9 @@ library stdStorage {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
+        bytes memory ins = self._keys;
 
-        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
+        bytes memory cald = abi.encodePacked(fsig, ins);
         if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
             find(self);
         }
@@ -279,7 +272,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
@@ -289,18 +282,5 @@ library stdStorage {
             out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
         }
         return out;
-    }
-
-    function flatten(bytes32[] memory b) private pure returns (bytes memory)
-    {
-        bytes memory result = new bytes(b.length * 32);
-        for (uint256 i = 0; i < b.length; i++) {
-            bytes32 k = b[i];
-            assembly {
-                mstore(add(result, add(32, mul(32, i))), k)
-            }
-        }
-
-        return result;
     }
 }
