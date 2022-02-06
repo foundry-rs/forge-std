@@ -191,6 +191,11 @@ contract StdStorageTest is DSTest {
         assertEq(100, test.map_addr(address(this)));
     }
 
+    function testStorageCheckedWriteMapBool() public {
+        stdstore.target(address(test)).sig(test.map_bool.selector).with_key(address(this)).checked_write(true);
+        assertTrue(test.map_bool(address(this)));
+    }
+
     function testFailStorageCheckedWriteMapPacked() public {
         // expect PackedSlot error but not external call so cant expectRevert
         stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(address(uint160(1337))).checked_write(100);
@@ -244,6 +249,8 @@ contract StorageTest {
         uint256 a;
         uint256 b;
     }
+
+    mapping(address => bool) public map_bool;
 
     constructor() {
         basic = UnpackedStruct({
