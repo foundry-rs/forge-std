@@ -250,10 +250,6 @@ library stdStorage {
         checked_write(self, bytes32(amt));
     }
 
-    function checked_write(StdStorage storage self, bytes32 chunk) internal {
-        checked_write(self, chunk);
-    }
-
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
         assembly {
