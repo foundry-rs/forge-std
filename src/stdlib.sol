@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 import "./Vm.sol";
 
@@ -111,10 +111,6 @@ struct StdStorage {
 
 
 library stdStorage {
-    error NotFound(bytes4);
-    error NotStorage(bytes4);
-    error PackedSlot(bytes32);
-
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
     
@@ -166,7 +162,7 @@ library stdStorage {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
             if (fdat != curr) {
-                revert PackedSlot(reads[0]);
+                require(false, "Packed slot. This would cause dangerous overwriting and currently isnt supported");
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
             self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
@@ -195,10 +191,10 @@ library stdStorage {
                 stdstore_vm.store(who, reads[i], prev);
             }
         } else {
-            revert NotStorage(fsig);
+            require(false, "No storage use detected for target");
         }
 
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) revert NotFound(fsig);
+        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "NotFound");
 
         delete self._target;
         delete self._sig;
@@ -281,7 +277,7 @@ library stdStorage {
         bytes32 curr = stdstore_vm.load(who, slot);
 
         if (fdat != curr) {
-            revert PackedSlot(slot);
+            require(false, "Packed slot. This would cause dangerous overwriting and currently isnt supported");
         }
         stdstore_vm.store(who, slot, set);
         delete self._target;

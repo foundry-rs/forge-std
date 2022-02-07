@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 import "ds-test/test.sol";
 import "../stdlib.sol";
@@ -202,8 +202,7 @@ contract StdStorageTest is DSTest {
     }
 
     function testStorageCheckedWriteMapPackedSuccess() public {
-        Packed read = test.map_packed(address(1337));
-        uint256 full = Packed.unwrap(read);
+        uint256 full = test.map_packed(address(1337));
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
         stdstore.target(address(test)).sig(test.map_packed.selector).with_key(address(uint160(1337))).checked_write(full);
@@ -225,13 +224,11 @@ contract StdStorageTest is DSTest {
     }
 }
 
-type Packed is uint256;
-
 contract StorageTest {
     uint256 public exists = 1;
     mapping(address => uint256) public map_addr;
     mapping(uint256 => uint256) public map_uint;
-    mapping(address => Packed) public map_packed;
+    mapping(address => uint256) public map_packed;
     mapping(address => UnpackedStruct) public map_struct;
     mapping(address => mapping(address => uint256)) public deep_map;
     mapping(address => mapping(address => UnpackedStruct)) public deep_map_struct;
@@ -252,23 +249,23 @@ contract StorageTest {
 
     mapping(address => bool) public map_bool;
 
-    constructor() {
+    constructor() public {
         basic = UnpackedStruct({
             a: 1337,
             b: 1337
         });
 
         uint256 two = (1<<128) | 1;
-        map_packed[msg.sender] = Packed.wrap(two);
-        map_packed[address(bytes20(uint160(1337)))] = Packed.wrap((1<<128));
+        map_packed[msg.sender] = two;
+        map_packed[address(bytes20(uint160(1337)))] = 1<<128;
     }
 
     function read_struct_upper(address who) public view returns (uint256) {
-        return Packed.unwrap(map_packed[who]) >> 128;
+        return map_packed[who] >> 128;
     }
 
     function read_struct_lower(address who) public view returns (uint256) {
-        return Packed.unwrap(map_packed[who]) & ((1 << 128) - 1);
+        return map_packed[who] & ((1 << 128) - 1);
     }
 
     function hidden() public view returns (bytes32 t) {
