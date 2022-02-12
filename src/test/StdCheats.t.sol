@@ -66,7 +66,7 @@ contract StdCheatsTest is DSTest, stdCheats {
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
     }
 
-    function getCode(address who) internal returns (bytes memory o_code) {
+    function getCode(address who) internal view returns (bytes memory o_code) {
         assembly {
             // retrieve the size of the code, this needs assembly
             let size := extcodesize(who)
