@@ -35,6 +35,11 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.origin{value: 100}(address(1337));
     }
 
+    function testHoaxDifferentAddresses() public {
+        hoax(address(1337), address(7331));
+        test.origin{value: 100}(address(1337), address(7331));
+    }
+
     function testStartHoax() public {
         startHoax(address(1337));
         test.bar{value: 100}(address(1337));
@@ -85,5 +90,9 @@ contract Bar {
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedSender, "!prank");
+    }
+    function origin(address expectedSender, address expectedOrigin) public payable {
+        require(msg.sender == expectedSender, "!prank");
+        require(tx.origin == expectedOrigin, "!prank");
     }
 }
