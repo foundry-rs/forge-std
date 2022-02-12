@@ -35,6 +35,11 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.origin{value: 100}(address(1337));
     }
 
+    function testHoaxDifferentAddresses() public {
+        hoax(address(1337), address(7331));
+        test.origin{value: 100}(address(1337), address(7331));
+    }
+
     function testStartHoax() public {
         startHoax(address(1337));
         test.bar{value: 100}(address(1337));
@@ -61,7 +66,7 @@ contract StdCheatsTest is DSTest, stdCheats {
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
     }
 
-    function getCode(address who) internal returns (bytes memory o_code) {
+    function getCode(address who) internal view returns (bytes memory o_code) {
         assembly {
             // retrieve the size of the code, this needs assembly
             let size := extcodesize(who)
@@ -85,5 +90,9 @@ contract Bar {
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedSender, "!prank");
+    }
+    function origin(address expectedSender, address expectedOrigin) public payable {
+        require(msg.sender == expectedSender, "!prank");
+        require(tx.origin == expectedOrigin, "!prank");
     }
 }
