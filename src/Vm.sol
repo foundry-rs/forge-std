@@ -58,4 +58,6 @@ interface Vm {
     function getCode(string calldata) external returns (bytes memory);
     // Labels an address in call traces
     function label(address, string calldata) external;
+    // If the condition is false, discard this run's fuzz inputs and generate new ones
+    function assume(bool) external;
 }
