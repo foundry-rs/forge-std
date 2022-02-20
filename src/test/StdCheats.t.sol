@@ -56,6 +56,12 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.bar(address(this));
     }
 
+    function testTip() public {
+        Bar token = new Bar();
+        tip(address(token), 10000e18, address(this));
+        assertEq(token.balanceOf(address(this)), 10000e18);
+    }
+
     function testDeployCode() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
@@ -84,6 +90,7 @@ contract StdCheatsTest is DSTest, stdCheats {
 }
 
 contract Bar {
+    mapping (address => uint) public  balanceOf;
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
