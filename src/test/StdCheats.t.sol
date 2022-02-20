@@ -57,15 +57,17 @@ contract StdCheatsTest is DSTest, stdCheats {
     }
 
     function testTip() public {
-        Bar token = new Bar();
-        tip(address(token), 10000e18, address(this));
-        assertEq(token.balanceOf(address(this)), 10000e18);
+        Bar barToken = new Bar();
+        address bar = address(barToken);
+        tip(address(this), 10000e18, bar);
+        assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
     function testTipAtypical() public {
-        Bar token = new Bar();
-        tip(address(token), "balanceOf", 10000e18, address(this));
-        assertEq(token.balanceOf(address(this)), 10000e18);
+        Bar barToken = new Bar();
+        address bar = address(barToken);
+        tip(address(this), 10000e18, bar, "balanceOf");
+        assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
     function testDeployCode() public {

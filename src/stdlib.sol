@@ -67,7 +67,7 @@ abstract contract stdCheats {
 
     // Allows you to set an account's balance for a majority of tokens
     // Be careful not to break something!
-    function tip(address which, uint256 give, address to) public {
+    function tip(address to, uint256 give, address which) public {
         vm_std_cheats.record();
         (bool sent, ) = which.call(abi.encodeWithSelector(0x70a08231, to));
         require(sent, "Failed to access `balanceOf` method.");
@@ -77,7 +77,7 @@ abstract contract stdCheats {
     
     // If a token's `balanceOf` method does not read the balance immediately,
     // pass the name of the mapping that holds balances
-    function tip(address which, string memory where, uint256 give, address to) public {
+    function tip(address to, uint256 give, address which, string memory where) public {
         uint256 slot = std_store_std_cheats
             .target(which)
             .sig(bytes4(keccak256(abi.encodePacked(where, "(address)"))))
