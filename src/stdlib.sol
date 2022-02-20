@@ -75,8 +75,8 @@ abstract contract stdCheats {
         vm_std_cheats.store(which, reads[0], bytes32(give));
     }
     
-    // If a token's `balanceOf` method does not return the balance immediately,
-    // you can pass the name of the mapping that holds the balances
+    // If a token's `balanceOf` method does not read the balance immediately,
+    // pass the name of the mapping that holds balances
     function tip(address which, string memory where, uint256 give, address to) public {
         uint256 slot = std_store_std_cheats
             .target(which)
