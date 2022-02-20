@@ -65,16 +65,16 @@ abstract contract stdCheats {
         vm_std_cheats.startPrank(who, origin);
     }
 
-    // Set the balance of an account for any token
+    // Allows you to set an account's balance for a majority of tokens
     // Be careful not to break something!
-    function tip(
-        address which,
-        uint256 give,
-        address to
-    ) public {
+    function tip(address which, uint256 give, address to) public {
+        tip(which, "balanceOf", give, to);
+    }
+
+    function tip(address which, string memory where, uint256 give, address to) public {
         uint256 slot = std_store_std_cheats
             .target(which)
-            .sig(0x70a08231)
+            .sig(bytes4(keccak256(abi.encodePacked(where, "(address)"))))
             .with_key(to)
             .find();
         vm_std_cheats.store(which, bytes32(slot), bytes32(give));

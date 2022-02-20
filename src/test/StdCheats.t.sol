@@ -62,6 +62,12 @@ contract StdCheatsTest is DSTest, stdCheats {
         assertEq(token.balanceOf(address(this)), 10000e18);
     }
 
+    function testTipAtypical() public {
+        Bar token = new Bar();
+        tip(address(token), "balanceOf", 10000e18, address(this));
+        assertEq(token.balanceOf(address(this)), 10000e18);
+    }
+
     function testDeployCode() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
