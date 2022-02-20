@@ -5,9 +5,12 @@ import "./Vm.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
 abstract contract stdCheats {
-    // we use a custom name that is unlikely to cause collisions so this contract
+    using stdStorage for StdStorage;
+
+    // we use custom names that are unlikely to cause collisions so this contract
     // can be inherited easily
     Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+    StdStorage std_store_std_cheats;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
@@ -60,6 +63,21 @@ abstract contract stdCheats {
     function startHoax(address who, address origin, uint256 give) public {
         vm_std_cheats.deal(who, give);
         vm_std_cheats.startPrank(who, origin);
+    }
+
+    // Set the balance of an account for any token
+    // Be careful not to break something!
+    function tip(
+        address which,
+        uint256 give,
+        address to
+    ) public {
+        uint256 slot = std_store_std_cheats
+            .target(which)
+            .sig(0x70a08231)
+            .with_key(to)
+            .find();
+        vm_std_cheats.store(which, bytes32(slot), bytes32(give));
     }
 
     // Deploys a contract by fetching the contract bytecode from
