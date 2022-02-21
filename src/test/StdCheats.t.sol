@@ -63,11 +63,10 @@ contract StdCheatsTest is DSTest, stdCheats {
         assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
-    function testTipAtypical() public {
-        Bar barToken = new Bar();
-        address bar = address(barToken);
-        tip(address(this), 10000e18, bar, "balanceOf");
-        assertEq(barToken.balanceOf(address(this)), 10000e18);
+    function testFailTip() public {
+        Baz bazToken = new Baz();
+        address baz = address(bazToken);
+        tip(address(this), 10000e18, baz);
     }
 
     function testDeployCode() public {
@@ -98,7 +97,7 @@ contract StdCheatsTest is DSTest, stdCheats {
 }
 
 contract Bar {
-    mapping (address => uint) public  balanceOf;
+    /// `HOAX` STDCHEATS
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
@@ -109,5 +108,17 @@ contract Bar {
     function origin(address expectedSender, address expectedOrigin) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
+    }
+    /// `TIP` STDCHEAT
+    mapping (address => uint256) public balanceOf;
+}
+
+contract Baz {
+    /// `TIP` STDCHEAT
+    uint256 something;
+    mapping (address => uint256) private balances;
+    function balanceOf(address account) public returns (uint256) {
+        something++;
+        return balances[account];
     }
 }

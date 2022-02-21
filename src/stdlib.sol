@@ -5,12 +5,9 @@ import "./Vm.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
 abstract contract stdCheats {
-    using stdStorage for StdStorage;
-
-    // we use custom names that are unlikely to cause collisions so this contract
+    // we use a custom name that is unlikely to cause collisions so this contract
     // can be inherited easily
     Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
-    StdStorage std_store_std_cheats;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
@@ -65,25 +62,16 @@ abstract contract stdCheats {
         vm_std_cheats.startPrank(who, origin);
     }
 
-    // Allows you to set an account's balance for a majority of tokens
+    // Allows you to the balance of an account for a majority of tokens
     // Be careful not to break something!
     function tip(address to, uint256 give, address which) public {
         vm_std_cheats.record();
         (bool sent, ) = which.call(abi.encodeWithSelector(0x70a08231, to));
-        require(sent, "Failed to access `balanceOf` method.");
+        require(sent, "Failed to access `balanceOf`.");
         (bytes32[] memory reads, ) = vm_std_cheats.accesses(which);
         vm_std_cheats.store(which, reads[0], bytes32(give));
-    }
-    
-    // If a token's `balanceOf` method does not read the balance immediately,
-    // pass the name of the mapping that holds balances
-    function tip(address to, uint256 give, address which, string memory where) public {
-        uint256 slot = std_store_std_cheats
-            .target(which)
-            .sig(bytes4(keccak256(abi.encodePacked(where, "(address)"))))
-            .with_key(to)
-            .find();
-        vm_std_cheats.store(which, bytes32(slot), bytes32(give));
+        ( , bytes memory data) = which.call(abi.encodeWithSelector(0x70a08231, to));
+        require(uint256(bytes32(data)) == give, "Could not tip. You will have to set the balance manually.");
     }
 
     // Deploys a contract by fetching the contract bytecode from
