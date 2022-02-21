@@ -63,12 +63,6 @@ contract StdCheatsTest is DSTest, stdCheats {
         assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
-    function testFailTip() public {
-        Baz bazToken = new Baz();
-        address baz = address(bazToken);
-        tip(address(this), 10000e18, baz);
-    }
-
     function testDeployCode() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
@@ -111,14 +105,4 @@ contract Bar {
     }
     /// `TIP` STDCHEAT
     mapping (address => uint256) public balanceOf;
-}
-
-contract Baz {
-    /// `TIP` STDCHEAT
-    uint256 something;
-    mapping (address => uint256) private balances;
-    function balanceOf(address account) public returns (uint256) {
-        something++;
-        return balances[account];
-    }
 }
