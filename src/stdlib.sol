@@ -62,15 +62,15 @@ abstract contract stdCheats {
         vm_std_cheats.startPrank(who, origin);
     }
 
-    // Allows you to the balance of an account for a majority of tokens
+    // Allows you to set the balance of an account for a majority of tokens
     // Be careful not to break something!
-    function tip(address to, uint256 give, address which) public {
+    function tip(address token, address to, uint256 give) public {
         vm_std_cheats.record();
-        (bool sent, ) = which.call(abi.encodeWithSelector(0x70a08231, to));
-        require(sent, "Failed to access `balanceOf`.");
-        (bytes32[] memory reads, ) = vm_std_cheats.accesses(which);
-        vm_std_cheats.store(which, reads[0], bytes32(give));
-        ( , bytes memory data) = which.call(abi.encodeWithSelector(0x70a08231, to));
+        (bool sent, ) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        require(sent, "Failed to access `balanceOf`. Make sure this is an ERC20 token.");
+        (bytes32[] memory reads, ) = vm_std_cheats.accesses(token);
+        vm_std_cheats.store(token, reads[0], bytes32(give));
+        ( , bytes memory data) = token.call(abi.encodeWithSelector(0x70a08231, to));
         require(uint256(bytes32(data)) == give, "Could not tip. You will have to set the balance manually.");
     }
 
