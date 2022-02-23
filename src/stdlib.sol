@@ -5,9 +5,12 @@ import "./Vm.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
 abstract contract stdCheats {
-    // we use a custom name that is unlikely to cause collisions so this contract
+    using stdStorage for StdStorage;
+
+    // we use a custom names that are unlikely to cause collisions so this contract
     // can be inherited easily
     Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+    StdStorage std_store_std_cheats;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
@@ -65,13 +68,10 @@ abstract contract stdCheats {
     // Allows you to set the balance of an account for a majority of tokens
     // Be careful not to break something!
     function tip(address token, address to, uint256 give) public {
-        vm_std_cheats.record();
-        (bool sent, ) = token.call(abi.encodeWithSelector(0x70a08231, to));
-        require(sent, "Failed to access `balanceOf`. Make sure this is an ERC20 token.");
-        (bytes32[] memory reads, ) = vm_std_cheats.accesses(token);
-        vm_std_cheats.store(token, reads[0], bytes32(give));
-        ( , bytes memory data) = token.call(abi.encodeWithSelector(0x70a08231, to));
-        require(uint256(bytes32(data)) == give, "Could not tip. You will have to set the balance manually.");
+        std_store_std_cheats.target(token)
+            .sig(0x70a08231)
+            .with_key(to)
+            .checked_write(give);
     }
 
     // Deploys a contract by fetching the contract bytecode from
