@@ -68,7 +68,8 @@ abstract contract stdCheats {
     // Allows you to set the balance of an account for a majority of tokens
     // Be careful not to break something!
     function tip(address token, address to, uint256 give) public {
-        std_store_std_cheats.target(token)
+        std_store_std_cheats
+            .target(token)
             .sig(0x70a08231)
             .with_key(to)
             .checked_write(give);
