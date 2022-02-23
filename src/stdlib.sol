@@ -7,7 +7,7 @@ import "./Vm.sol";
 abstract contract stdCheats {
     using stdStorage for StdStorage;
 
-    // we use a custom names that are unlikely to cause collisions so this contract
+    // we use custom names that are unlikely to cause collisions so this contract
     // can be inherited easily
     Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
     StdStorage std_store_std_cheats;
