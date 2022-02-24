@@ -217,7 +217,7 @@ contract StdStorageTest is DSTest {
     function testFailStorageNativePack() public {
         stdstore.target(address(test)).sig(test.tA.selector).find();
         stdstore.target(address(test)).sig(test.tB.selector).find();
-
+        
         // these both would fail
         stdstore.target(address(test)).sig(test.tC.selector).find();
         stdstore.target(address(test)).sig(test.tD.selector).find();
@@ -239,7 +239,7 @@ contract StorageTest {
 
 
     bool public tC = false;
-    uint248 public tD = 1;
+    uint248 public tD = 1;    
 
 
     struct UnpackedStruct {
@@ -249,7 +249,7 @@ contract StorageTest {
 
     mapping(address => bool) public map_bool;
 
-    constructor() {
+    constructor() public {
         basic = UnpackedStruct({
             a: 1337,
             b: 1337
