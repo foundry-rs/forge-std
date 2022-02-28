@@ -58,6 +58,11 @@ contract StdErrorsTest is DSTest {
         test.intern();
     }
 
+    function testExpectLowLvl() public {
+        vm.expectRevert(stdError.lowLevelError);
+        test.someArr(0);
+    }
+
     // TODO: figure out how to trigger encodeStorageError?
 }
 
@@ -66,7 +71,7 @@ contract ErrorsTest {
         T1
     }
 
-    uint256[] someArr;
+    uint256[] public someArr;
 
     function assertionError() public pure {
         assert(false);
