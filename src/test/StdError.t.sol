@@ -38,6 +38,11 @@ contract StdErrorsTest is DSTest {
         test.enumConversion(1);
     }
 
+    function testExpectEncodeStg() public {
+        vm.expectRevert(stdError.encodeStorageError);
+        test.encodeStgError();
+    }
+
     function testExpectPop() public {
         vm.expectRevert(stdError.popError);
         test.pop();
@@ -72,6 +77,7 @@ contract ErrorsTest {
     }
 
     uint256[] public someArr;
+    bytes someBytes;
 
     function assertionError() public pure {
         assert(false);
@@ -91,6 +97,13 @@ contract ErrorsTest {
 
     function enumConversion(uint256 a) public pure {
         T(a);
+    }
+
+    function encodeStgError() public {
+        assembly {
+            sstore(someBytes.slot, 1)
+        }
+        bytes memory b = someBytes;
     }
 
     function pop() public {
