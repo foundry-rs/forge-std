@@ -11,7 +11,7 @@ forge install brockelmore/forge-std
 ## Contracts
 ### stdError
 
-This is a helper contract for errors and reverts in solidity. In `forge`, this contract is particularly helpful for the `expectRevert` cheatcode, as it provides all compiler builtin errors.
+This is a helper contract for errors and reverts. In `forge`, this contract is particularly helpful for the `expectRevert` cheatcode, as it provides all compiler builtin errors.
 
 See the contract itself for all error codes.
 
@@ -23,7 +23,7 @@ import "ds-test/test.sol";
 import "forge-std/stdlib.sol";
 import "forge-std/Vm.sol";
 
-contract TestContract is DSTest, stdError {
+contract TestContract is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     ErrorsTest test;
@@ -47,7 +47,7 @@ contract ErrorsTest {
 
 ### stdStorage
 
-This is a rather large contract due to all of the overloading to make the UX decent. Primarly, it is a wrapper around the `record` and `accesses` cheatcodes. It can *always* find and write the storage slot(s) associated with a particular variable without knowing the storage layout. The one _major_ caveat to this is while a slot can be found for packed storage variables, we can't write to that variable safely. If a user tries to write to a packed slot, the execution throws an error, unless it is uninitialized (`bytes32(0)`).
+This is a rather large contract due to all of the overloading to make the UX decent. Primarily, it is a wrapper around the `record` and `accesses` cheatcodes. It can *always* find and write the storage slot(s) associated with a particular variable without knowing the storage layout. The one _major_ caveat to this is while a slot can be found for packed storage variables, we can't write to that variable safely. If a user tries to write to a packed slot, the execution throws an error, unless it is uninitialized (`bytes32(0)`).
 
 This works by recording all `SLOAD`s and `SSTORE`s during a function call. If there is a single slot read or written to, it immediately returns the slot. Otherwise, behind the scenes, we iterate through and check each one (assuming the user passed in a `depth` parameter). If the variable is a struct, you can pass in a `depth` parameter which is basically the field depth.
 
@@ -99,14 +99,14 @@ contract TestContract is DSTest {
 
     // It supports arbitrary storage layouts, like assembly based storage locations
     function testFindHidden() public {
-        // hidden is a random hash of a bytes, iteration through slots would
+        // `hidden` is a random hash of a bytes, iteration through slots would
         // not find it. Our mechanism does
-        // Also, you can use the selector instead of string
+        // Also, you can use the selector instead of a string
         uint256 slot = stdstore.target(address(test)).sig(test.hidden.selector).find();
         assertEq(slot, keccak256("my.random.var"));
     }
 
-    // if targeting a mapping, you have to pass in the keys necessary to perform the find
+    // If targeting a mapping, you have to pass in the keys necessary to perform the find
     // i.e.:
     function testFindMapping() public {
         uint256 slot = stdstore
@@ -183,7 +183,7 @@ With these 4 functions, you can find any slot (or write to it with their counter
 
 ### stdCheats
 
-This is a wrapper over miscellaneous cheatcodes that need wrappers to be more dev friendly. Currently there are only function related to `prank`. In general, users may expect ETH to be put into an address on `prank`, but this is not the case for safety reasons. Explicitly this `hoax` function should only be used for address that have expected balances as it will get overwritten. If an address already has Eth, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
+This is a wrapper over miscellaneous cheatcodes that need wrappers to be more dev friendly. Currently there are only functions related to `prank`. In general, users may expect ETH to be put into an address on `prank`, but this is not the case for safety reasons. Explicitly this `hoax` function should only be used for address that have expected balances as it will get overwritten. If an address already has ETH, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
 
 
 #### Example usage:
@@ -206,22 +206,22 @@ contract StdCheatsTest is DSTest, stdCheats {
     }
 
     function testHoax() public {
-        // we call the hoax, which gives the target address
+        // we call `hoax`, which gives the target address
         // eth and then calls `prank`
         hoax(address(1337));
         test.bar{value: 100}(address(1337));
 
         // overloaded to allow you to specify how much eth to
-        // initialize the addres with
+        // initialize the address with
         hoax(address(1337), 1);
         test.bar{value: 1}(address(1337));
     }
 
     function testStartHoax() public {
-        // we call the startHoax, which gives the target address
+        // we call `startHoax`, which gives the target address
         // eth and then calls `startPrank`
         //
-        // it is also overloaded so that you can specify eth amount
+        // it is also overloaded so that you can specify an eth amount
         startHoax(address(1337));
         test.bar{value: 100}(address(1337));
         test.bar{value: 100}(address(1337));
