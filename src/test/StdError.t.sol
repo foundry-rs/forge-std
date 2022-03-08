@@ -38,6 +38,11 @@ contract StdErrorsTest is DSTest {
         test.enumConversion(1);
     }
 
+    function testExpectEncodeStg() public {
+        vm.expectRevert(stdError.encodeStorageError);
+        test.encodeStgError();
+    }
+
     function testExpectPop() public {
         vm.expectRevert(stdError.popError);
         test.pop();
@@ -58,6 +63,11 @@ contract StdErrorsTest is DSTest {
         test.intern();
     }
 
+    function testExpectLowLvl() public {
+        vm.expectRevert(stdError.lowLevelError);
+        test.someArr(0);
+    }
+
     // TODO: figure out how to trigger encodeStorageError?
 }
 
@@ -66,7 +76,8 @@ contract ErrorsTest {
         T1
     }
 
-    uint256[] someArr;
+    uint256[] public someArr;
+    bytes someBytes;
 
     function assertionError() public pure {
         assert(false);
@@ -86,6 +97,13 @@ contract ErrorsTest {
 
     function enumConversion(uint256 a) public pure {
         T(a);
+    }
+
+    function encodeStgError() public {
+        assembly {
+            sstore(someBytes.slot, 1)
+        }
+        bytes memory b = someBytes;
     }
 
     function pop() public {
