@@ -77,6 +77,7 @@ abstract contract stdCheats {
 
     // Deploys a contract by fetching the contract bytecode from
     // the artifacts directory
+    // e.g deployCode(code, abi.encode(arg1,arg2,arg3))
     function deployCode(string memory what, bytes memory args)
         public
         returns (address addr)
