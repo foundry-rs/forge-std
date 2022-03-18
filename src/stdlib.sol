@@ -9,8 +9,8 @@ abstract contract stdCheats {
 
     // we use custom names that are unlikely to cause collisions so this contract
     // can be inherited easily
-    Vm constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
-    StdStorage std_store_std_cheats;
+    Vm private constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+    StdStorage private std_store_std_cheats;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
@@ -129,7 +129,7 @@ library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
     
-    Vm constant stdstore_vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+    Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
         string memory sigStr
@@ -163,16 +163,16 @@ library stdStorage {
             return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
         }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        stdstore_vm.record();
+        vm_std_store.record();
         bytes32 fdat;
         {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*field_depth);
         }
         
-        (bytes32[] memory reads, ) = stdstore_vm.accesses(address(who));
+        (bytes32[] memory reads, ) = vm_std_store.accesses(address(who));
         if (reads.length == 1) {
-            bytes32 curr = stdstore_vm.load(who, reads[0]);
+            bytes32 curr = vm_std_store.load(who, reads[0]);
             if (curr == bytes32(0)) {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
@@ -184,12 +184,12 @@ library stdStorage {
             self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
-                bytes32 prev = stdstore_vm.load(who, reads[i]);
+                bytes32 prev = vm_std_store.load(who, reads[i]);
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
                 }
                 // store
-                stdstore_vm.store(who, reads[i], bytes32(hex"1337"));
+                vm_std_store.store(who, reads[i], bytes32(hex"1337"));
                 {
                     (, bytes memory rdat) = who.staticcall(cald);
                     fdat = bytesToBytes32(rdat, 32*field_depth);
@@ -200,10 +200,10 @@ library stdStorage {
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
                     self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
                     self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
-                    stdstore_vm.store(who, reads[i], prev);
+                    vm_std_store.store(who, reads[i], prev);
                     break;
                 }
-                stdstore_vm.store(who, reads[i], prev);
+                vm_std_store.store(who, reads[i], prev);
             }
         } else {
             require(false, "No storage use detected for target");
@@ -289,12 +289,12 @@ library stdStorage {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*field_depth);
         }
-        bytes32 curr = stdstore_vm.load(who, slot);
+        bytes32 curr = vm_std_store.load(who, slot);
 
         if (fdat != curr) {
             require(false, "Packed slot. This would cause dangerous overwriting and currently isnt supported");
         }
-        stdstore_vm.store(who, slot, set);
+        vm_std_store.store(who, slot, set);
         delete self._target;
         delete self._sig;
         delete self._keys;
