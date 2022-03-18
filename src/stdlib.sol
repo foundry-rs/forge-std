@@ -190,12 +190,14 @@ library stdStorage {
                 }
                 // store
                 vm_std_store.store(who, reads[i], bytes32(hex"1337"));
+                bool success;
+                bytes memory rdat;
                 {
-                    (, bytes memory rdat) = who.staticcall(cald);
+                    (success, rdat) = who.staticcall(cald);
                     fdat = bytesToBytes32(rdat, 32*field_depth);
                 }
                 
-                if (fdat == bytes32(hex"1337")) {
+                if (success && fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
                     self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
@@ -304,7 +306,8 @@ library stdStorage {
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
         bytes32 out;
 
-        for (uint i = 0; i < 32; i++) {
+        uint256 max = b.length > 32 ? 32 : b.length;
+        for (uint i = 0; i < max; i++) {
             out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
         }
         return out;
