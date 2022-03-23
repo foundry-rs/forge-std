@@ -67,7 +67,7 @@ abstract contract stdCheats {
         vm_std_cheats.startPrank(who, origin);
     }
 
-    // DEPRECATED: Use `allot` instead
+    // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
         emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `allot` instead.");
         std_store_std_cheats
@@ -77,13 +77,26 @@ abstract contract stdCheats {
             .checked_write(give);
     }
 
-    // Set the balance of an account for any ERC20 token
-    // Use the alternative signature to update `totalSupply`
-    function allot(address token, address to, uint256 give) public {
-        allot(token, to, give, false);
+    // The same as Hevm's `deal`
+    // Use the alternative signature for ERC20 tokens
+    function deal(address to, uint256 give) public {
+        // custom addr ETHERSTDCHEATS
+        deal(address(0xE78E257DC8EA75), to, give, false);
     }
 
-    function allot(address token, address to, uint256 give, bool adjust) public {
+    // Set the balance of an account for any ERC20 token
+    // Use the alternative signature to update `totalSupply`
+    function deal(address token, address to, uint256 give) public {
+        deal(token, to, give, false);
+    }
+
+    function deal(address token, address to, uint256 give, bool adjust) public {
+        // fallback to hevm's `deal` if `token` not specified
+        if(token == address(0xE78E257DC8EA75)){
+            vm_std_cheats.deal(to, give);
+            return;
+        }
+
         // get current balance
         (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));

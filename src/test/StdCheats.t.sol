@@ -57,20 +57,25 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.bar(address(this));
     }
 
-    function testAllot() public {
+    function testDeal() public {
+        deal(address(this), 1 ether);
+        assertEq(address(this).balance, 1 ether);
+    }
+
+    function testDealToken() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
-        allot(bar, address(this), 10000e18);
+        deal(bar, address(this), 10000e18);
         assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
-    function testAllotAdjustTS() public {
+    function testDealTokenAdjustTS() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
-        allot(bar, address(this), 10000e18, true);
+        deal(bar, address(this), 10000e18, true);
         assertEq(barToken.balanceOf(address(this)), 10000e18);
         assertEq(barToken.totalSupply(), 20000e18);
-        allot(bar, address(this), 0, true);
+        deal(bar, address(this), 0, true);
         assertEq(barToken.balanceOf(address(this)), 0);
         assertEq(barToken.totalSupply(), 10000e18);
     }
