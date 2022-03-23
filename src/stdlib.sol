@@ -80,8 +80,7 @@ abstract contract stdCheats {
     // The same as Hevm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) public {
-        // custom addr ETHERSTDCHEATS
-        deal(address(0xE78E257DC8EA75), to, give, false);
+        vm_std_cheats.deal(to, give);
     }
 
     // Set the balance of an account for any ERC20 token
@@ -91,12 +90,6 @@ abstract contract stdCheats {
     }
 
     function deal(address token, address to, uint256 give, bool adjust) public {
-        // fallback to hevm's `deal` if `token` not specified
-        if(token == address(0xE78E257DC8EA75)){
-            vm_std_cheats.deal(to, give);
-            return;
-        }
-
         // get current balance
         (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
