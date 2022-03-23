@@ -69,7 +69,7 @@ abstract contract stdCheats {
 
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
-        emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `allot` instead.");
+        emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `deal` instead.");
         std_store_std_cheats
             .target(token)
             .sig(0x70a08231)
