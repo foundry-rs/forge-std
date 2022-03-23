@@ -7,6 +7,8 @@ import "./Vm.sol";
 abstract contract stdCheats {
     using stdStorage for StdStorage;
 
+    event WARNING_Deprecated(string msg);
+
     // we use custom names that are unlikely to cause collisions so this contract
     // can be inherited easily
     Vm private constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
@@ -65,9 +67,9 @@ abstract contract stdCheats {
         vm_std_cheats.startPrank(who, origin);
     }
 
-    // Allows you to set the balance of an account for a majority of tokens
-    // Be careful not to break something!
+    // DEPRECATED: Use `allot` instead
     function tip(address token, address to, uint256 give) public {
+        emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `allot` instead.");
         std_store_std_cheats
             .target(token)
             .sig(0x70a08231)
@@ -75,9 +77,43 @@ abstract contract stdCheats {
             .checked_write(give);
     }
 
-    // Deploys a contract by fetching the contract bytecode from
+    // Set the balance of an account for any ERC20 token
+    // Use the alternative signature to update `totalSupply`
+    function allot(address token, address to, uint256 give) public {
+        allot(token, to, give, false);
+    }
+
+    function allot(address token, address to, uint256 give, bool adjust) public {
+        // get current balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        uint256 prevBal = abi.decode(balData, (uint256));
+
+        // update balance
+        std_store_std_cheats
+            .target(token)
+            .sig(0x70a08231)
+            .with_key(to)
+            .checked_write(give);
+
+        // update total supply
+        if(adjust){
+            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
+            uint256 totSup = abi.decode(totSupData, (uint256));
+            if(give < prevBal) {
+                totSup -= (prevBal - give);
+            } else {
+                totSup += (give - prevBal);
+            }
+            std_store_std_cheats
+                .target(token)
+                .sig(0x18160ddd)
+                .checked_write(totSup);
+        }
+    }
+
+    // Deploy a contract by fetching the contract bytecode from
     // the artifacts directory
-    // e.g deployCode(code, abi.encode(arg1,arg2,arg3))
+    // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
     function deployCode(string memory what, bytes memory args)
         public
         returns (address addr)

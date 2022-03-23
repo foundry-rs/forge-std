@@ -9,6 +9,7 @@ contract StdCheatsTest is DSTest, stdCheats {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     Bar test;
+    
     function setUp() public {
         test = new Bar();
     }
@@ -56,11 +57,22 @@ contract StdCheatsTest is DSTest, stdCheats {
         test.bar(address(this));
     }
 
-    function testTip() public {
+    function testAllot() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
-        tip(bar, address(this), 10000e18);
+        allot(bar, address(this), 10000e18);
         assertEq(barToken.balanceOf(address(this)), 10000e18);
+    }
+
+    function testAllotAdjustTS() public {
+        Bar barToken = new Bar();
+        address bar = address(barToken);
+        allot(bar, address(this), 10000e18, true);
+        assertEq(barToken.balanceOf(address(this)), 10000e18);
+        assertEq(barToken.totalSupply(), 20000e18);
+        allot(bar, address(this), 0, true);
+        assertEq(barToken.balanceOf(address(this)), 0);
+        assertEq(barToken.totalSupply(), 10000e18);
     }
 
     function testDeployCode() public {
@@ -91,6 +103,12 @@ contract StdCheatsTest is DSTest, stdCheats {
 }
 
 contract Bar {
+    constructor() public {
+        /// `ALLOT` STDCHEAT
+        totalSupply = 10000e18;
+        balanceOf[address(this)] = totalSupply;
+    }
+
     /// `HOAX` STDCHEATS
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
@@ -103,6 +121,8 @@ contract Bar {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
     }
-    /// `TIP` STDCHEAT
+
+    /// `ALLOT` STDCHEAT
     mapping (address => uint256) public balanceOf;
+    uint256 public totalSupply;
 }
