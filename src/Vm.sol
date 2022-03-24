@@ -36,6 +36,7 @@ interface Vm {
     // Expects an error on next call
     function expectRevert(bytes calldata) external;
     function expectRevert(bytes4) external;
+    function expectRevert() external;
     // Record all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
