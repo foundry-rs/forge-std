@@ -152,6 +152,7 @@ library stdError {
     bytes public constant indexOOBError = abi.encodeWithSignature("Panic(uint256)", 0x32);
     bytes public constant memOverflowError = abi.encodeWithSignature("Panic(uint256)", 0x41);
     bytes public constant zeroVarError = abi.encodeWithSignature("Panic(uint256)", 0x51);
+    // DEPRECATED: Use Hevm's `expectRevert` without any arguments instead
     bytes public constant lowLevelError = bytes(""); // `0x`
 }
 
