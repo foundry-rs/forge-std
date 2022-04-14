@@ -9,6 +9,7 @@ contract StdErrorsTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
 
     ErrorsTest test;
+
     function setUp() public {
         test = new ErrorsTest();
     }
@@ -67,8 +68,6 @@ contract StdErrorsTest is DSTest {
         vm.expectRevert(stdError.lowLevelError);
         test.someArr(0);
     }
-
-    // TODO: figure out how to trigger encodeStorageError?
 }
 
 contract ErrorsTest {
@@ -103,7 +102,7 @@ contract ErrorsTest {
         assembly {
             sstore(someBytes.slot, 1)
         }
-        bytes memory b = someBytes;
+        keccak256(someBytes);
     }
 
     function pop() public {
@@ -121,7 +120,7 @@ contract ErrorsTest {
     }
 
     function intern() public returns (uint256) {
-        function (uint256) internal returns (uint256) x;
+        function(uint256) internal returns (uint256) x;
         x(2);
         return 7;
     }
