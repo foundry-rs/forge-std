@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity >=0.6.0 <0.9.0;
 
-import "ds-test/test.sol";
-import {stdCheats} from "../stdlib.sol";
-import "../Vm.sol";
+import "../Test.sol";
 
-contract StdCheatsTest is DSTest, stdCheats {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
-
+contract StdCheatsTest is Test {
     Bar test;
     
     function setUp() public {
@@ -108,7 +104,7 @@ contract StdCheatsTest is DSTest, stdCheats {
 }
 
 contract Bar {
-    constructor() public {
+    constructor() {
         /// `DEAL` STDCHEAT
         totalSupply = 10000e18;
         balanceOf[address(this)] = totalSupply;

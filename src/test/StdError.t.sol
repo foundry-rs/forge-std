@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.10;
 
-import "ds-test/test.sol";
-import {stdError} from "../stdlib.sol";
-import "../Vm.sol";
+import "../Test.sol";
 
-contract StdErrorsTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
-
+contract StdErrorsTest is Test {
     ErrorsTest test;
 
     function setUp() public {
