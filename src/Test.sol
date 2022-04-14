@@ -2,73 +2,75 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Vm.sol";
+import "ds-test/test.sol";
+import "./console.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
-abstract contract stdCheats {
+abstract contract Test is DSTest {
     using stdStorage for StdStorage;
 
     event WARNING_Deprecated(string msg);
 
-    Vm private constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
-    StdStorage private std_store_std_cheats;
+    Vm public constant vm = Vm(HEVM_ADDRESS);
+    StdStorage internal stdstore;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
-        vm_std_cheats.warp(block.timestamp + time);
+        vm.warp(block.timestamp + time);
     }
 
     function rewind(uint256 time) public {
-        vm_std_cheats.warp(block.timestamp - time);
+        vm.warp(block.timestamp - time);
     }
 
     // Setup a prank from an address that has some ether
     function hoax(address who) public {
-        vm_std_cheats.deal(who, 1 << 128);
-        vm_std_cheats.prank(who);
+        vm.deal(who, 1 << 128);
+        vm.prank(who);
     }
 
     function hoax(address who, uint256 give) public {
-        vm_std_cheats.deal(who, give);
-        vm_std_cheats.prank(who);
+        vm.deal(who, give);
+        vm.prank(who);
     }
 
     function hoax(address who, address origin) public {
-        vm_std_cheats.deal(who, 1 << 128);
-        vm_std_cheats.prank(who, origin);
+        vm.deal(who, 1 << 128);
+        vm.prank(who, origin);
     }
 
     function hoax(address who, address origin, uint256 give) public {
-        vm_std_cheats.deal(who, give);
-        vm_std_cheats.prank(who, origin);
+        vm.deal(who, give);
+        vm.prank(who, origin);
     }
 
     // Start perpetual prank from an address that has some ether
     function startHoax(address who) public {
-        vm_std_cheats.deal(who, 1 << 128);
-        vm_std_cheats.startPrank(who);
+        vm.deal(who, 1 << 128);
+        vm.startPrank(who);
     }
 
     function startHoax(address who, uint256 give) public {
-        vm_std_cheats.deal(who, give);
-        vm_std_cheats.startPrank(who);
+        vm.deal(who, give);
+        vm.startPrank(who);
     }
 
     // Start perpetual prank from an address that has some ether
     // tx.origin is set to the origin parameter
     function startHoax(address who, address origin) public {
-        vm_std_cheats.deal(who, 1 << 128);
-        vm_std_cheats.startPrank(who, origin);
+        vm.deal(who, 1 << 128);
+        vm.startPrank(who, origin);
     }
 
     function startHoax(address who, address origin, uint256 give) public {
-        vm_std_cheats.deal(who, give);
-        vm_std_cheats.startPrank(who, origin);
+        vm.deal(who, give);
+        vm.startPrank(who, origin);
     }
 
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
         emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `deal` instead.");
-        std_store_std_cheats
+        stdstore
             .target(token)
             .sig(0x70a08231)
             .with_key(to)
@@ -78,7 +80,7 @@ abstract contract stdCheats {
     // The same as Hevm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) public {
-        vm_std_cheats.deal(to, give);
+        vm.deal(to, give);
     }
 
     // Set the balance of an account for any ERC20 token
@@ -93,7 +95,7 @@ abstract contract stdCheats {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        std_store_std_cheats
+        stdstore
             .target(token)
             .sig(0x70a08231)
             .with_key(to)
@@ -108,7 +110,7 @@ abstract contract stdCheats {
             } else {
                 totSup += (give - prevBal);
             }
-            std_store_std_cheats
+            stdstore
                 .target(token)
                 .sig(0x18160ddd)
                 .checked_write(totSup);
@@ -122,7 +124,7 @@ abstract contract stdCheats {
         public
         returns (address addr)
     {
-        bytes memory bytecode = abi.encodePacked(vm_std_cheats.getCode(what), args);
+        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
@@ -132,7 +134,7 @@ abstract contract stdCheats {
         public
         returns (address addr)
     {
-        bytes memory bytecode = vm_std_cheats.getCode(what);
+        bytes memory bytecode = vm.getCode(what);
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }

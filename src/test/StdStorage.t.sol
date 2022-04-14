@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity >=0.6.0 <0.9.0;
 
-import "ds-test/test.sol";
-import "../stdlib.sol";
-import "../Vm.sol";
+import "../Test.sol";
 
-contract StdStorageTest is DSTest {
+contract StdStorageTest is Test {
     using stdStorage for StdStorage;
 
-    Vm public constant vm = Vm(HEVM_ADDRESS);
-
-    StdStorage stdstore;
     StorageTest test;
 
     function setUp() public {
@@ -249,7 +244,7 @@ contract StorageTest {
 
     mapping(address => bool) public map_bool;
 
-    constructor() public {
+    constructor() {
         basic = UnpackedStruct({
             a: 1337,
             b: 1337
