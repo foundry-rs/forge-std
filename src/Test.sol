@@ -11,7 +11,7 @@ abstract contract Test is DSTest {
     event WARNING_Deprecated(string msg);
 
     Vm public constant vm = Vm(HEVM_ADDRESS);
-    StdStorage private std_store_std_cheats;
+    StdStorage internal stdstore;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
@@ -69,7 +69,7 @@ abstract contract Test is DSTest {
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
         emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `deal` instead.");
-        std_store_std_cheats
+        stdstore
             .target(token)
             .sig(0x70a08231)
             .with_key(to)
@@ -94,7 +94,7 @@ abstract contract Test is DSTest {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        std_store_std_cheats
+        stdstore
             .target(token)
             .sig(0x70a08231)
             .with_key(to)
@@ -109,7 +109,7 @@ abstract contract Test is DSTest {
             } else {
                 totSup += (give - prevBal);
             }
-            std_store_std_cheats
+            stdstore
                 .target(token)
                 .sig(0x18160ddd)
                 .checked_write(totSup);
