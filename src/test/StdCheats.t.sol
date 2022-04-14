@@ -109,7 +109,7 @@ contract StdCheatsTest is DSTest, stdCheats {
 
 contract Bar {
     constructor() public {
-        /// `ALLOT` STDCHEAT
+        /// `DEAL` STDCHEAT
         totalSupply = 10000e18;
         balanceOf[address(this)] = totalSupply;
     }
@@ -127,7 +127,7 @@ contract Bar {
         require(tx.origin == expectedOrigin, "!prank");
     }
 
-    /// `ALLOT` STDCHEAT
+    /// `DEAL` STDCHEAT
     mapping (address => uint256) public balanceOf;
     uint256 public totalSupply;
 }

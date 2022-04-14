@@ -9,8 +9,6 @@ abstract contract stdCheats {
 
     event WARNING_Deprecated(string msg);
 
-    // we use custom names that are unlikely to cause collisions so this contract
-    // can be inherited easily
     Vm private constant vm_std_cheats = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
     StdStorage private std_store_std_cheats;
 
