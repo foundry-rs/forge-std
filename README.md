@@ -5,7 +5,7 @@ Forge Standard Library is a collection of helpful contracts for use with [`forge
 ## Install
 
 ```bash
-forge install brockelmore/forge-std
+forge install foundry-rs/forge-std
 ```
 
 ## Contracts
