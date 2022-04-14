@@ -171,16 +171,6 @@ contract Storage {
 }
 ```
 
-The concepts above can be combined in intuitive ways. Here is a full list of functions provided for `find` - all `checked_write` concepts are the same and should exist as well:
-
-1. `find`: Finds flat data structures or shallow mappings
-1. `find_struct`: Same as above, but adds a `depth` input to specify the field depth
-1. `find_multi_key`: Finds deeply nested mappings, i.e. `mapping(uint => mapping(uint => uint))`
-1. `find_multi_key_struct`: Same as above, but adds a `depth` input to specify the field depth
-
-With these 4 functions, you can find any slot (or write to it with their counterpart `checked_write_*`).
-
-
 ### stdCheats
 
 This is a wrapper over miscellaneous cheatcodes that need wrappers to be more dev friendly. Currently there are only functions related to `prank`. In general, users may expect ETH to be put into an address on `prank`, but this is not the case for safety reasons. Explicitly this `hoax` function should only be used for address that have expected balances as it will get overwritten. If an address already has ETH, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
