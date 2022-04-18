@@ -95,6 +95,7 @@ contract ErrorsTest {
     }
 
     function encodeStgError() public {
+        /// @solidity memory-safe-assembly
         assembly {
             sstore(someBytes.slot, 1)
         }

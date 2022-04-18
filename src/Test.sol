@@ -125,6 +125,7 @@ abstract contract Test is DSTest {
         returns (address addr)
     {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
+        /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
@@ -135,6 +136,7 @@ abstract contract Test is DSTest {
         returns (address addr)
     {
         bytes memory bytecode = vm.getCode(what);
+        /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
@@ -308,6 +310,7 @@ library stdStorage {
 
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
+        /// @solidity memory-safe-assembly
         assembly {
             t := write
         }
@@ -361,6 +364,7 @@ library stdStorage {
         bytes memory result = new bytes(b.length * 32);
         for (uint256 i = 0; i < b.length; i++) {
             bytes32 k = b[i];
+            /// @solidity memory-safe-assembly
             assembly {
                 mstore(add(result, add(32, mul(32, i))), k)
             }

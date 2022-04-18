@@ -87,6 +87,7 @@ contract StdCheatsTest is Test {
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {
+        /// @solidity memory-safe-assembly
         assembly {
             // retrieve the size of the code, this needs assembly
             let size := extcodesize(who)

@@ -265,6 +265,7 @@ contract StorageTest {
 
     function hidden() public view returns (bytes32 t) {
         bytes32 slot = keccak256("my.random.var");
+        /// @solidity memory-safe-assembly
         assembly {
             t := sload(slot)
         }
