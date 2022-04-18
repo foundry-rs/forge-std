@@ -139,6 +139,192 @@ abstract contract Test is DSTest {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    APPROX EQUAL
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertApproxEq(uint256 a, uint256 b, uint256 errorMargin) internal {
+        if (a > b) {
+            if (a - b > errorMargin) {
+                emit log("Error a not equal to b");
+                emit log_named_uint("  Expected", b);
+                emit log_named_uint("    Actual", a);
+                fail();
+            }
+        } else {
+            if (b - a > errorMargin) {
+                emit log("Error a not equal to b");
+                emit log_named_uint("  Expected", b);
+                emit log_named_uint("    Actual", a);
+                fail();
+            }
+        }
+    }
+
+    function assertApproxEq(uint256 a, uint256 b, uint256 errorMargin, string memory err) internal {
+        if (a > b) {
+            if (a - b > errorMargin) {
+                emit log_named_string("Error", err);
+                emit log_named_uint("  Expected", b);
+                emit log_named_uint("    Actual", a);
+                fail();
+            }
+        } else {
+            if (b - a > errorMargin) {
+                emit log_named_string("Error", err);
+                emit log_named_uint("  Expected", b);
+                emit log_named_uint("    Actual", a);
+                fail();
+            }
+        }
+    }
+
+    function assertApproxEq(int256 a, int256 b, int256 errorMargin) internal {
+        if (a > b) {
+            if (a - b > errorMargin) {
+                emit log("Error a not equal to b");
+                emit log_named_int("  Expected", b);
+                emit log_named_int("    Actual", a);
+                fail();
+            }
+        } else {
+            if (b - a > errorMargin) {
+                emit log("Error a not equal to b");
+                emit log_named_int("  Expected", b);
+                emit log_named_int("    Actual", a);
+                fail();
+            }
+        }
+    }
+
+    function assertApproxEq(int256 a, int256 b, int256 errorMargin, string memory err) internal {
+        if (a > b) {
+            if (a - b > errorMargin) {
+                emit log_named_string("Error", err);
+                emit log_named_int("  Expected", b);
+                emit log_named_int("    Actual", a);
+                fail();
+            }
+        } else {
+            if (b - a > errorMargin) {
+                emit log_named_string("Error", err);
+                emit log_named_int("  Expected", b);
+                emit log_named_int("    Actual", a);
+                fail();
+            }
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    NOT EQUAL
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertNotEq(address a, address b) internal {
+        if (a == b) {
+            emit log("Error: a != b not satisfied [address]");
+            emit log_named_address("  Expected", b);
+            emit log_named_address("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertNotEq(address a, address b, string memory err) internal {
+        if (a == b) {
+            emit log_named_string ("Error", err);
+            assertNotEq(a, b);
+        }
+    }
+
+    function assertNotEq(bytes32 a, bytes32 b) internal {
+        if (a == b) {
+            emit log("Error: a != b not satisfied [bytes32]");
+            emit log_named_bytes32("  Expected", b);
+            emit log_named_bytes32("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertNotEq(bytes32 a, bytes32 b, string memory err) internal {
+        if (a == b) {
+            emit log_named_string("Error", err);
+            assertNotEq(a, b);
+        }
+    }
+
+    function assertNotEq32(bytes32 a, bytes32 b) internal {
+        assertNotEq(a, b);
+    }
+
+    function assertNotEq32(bytes32 a, bytes32 b, string memory err) internal {
+        assertNotEq(a, b, err);
+    }
+
+    function assertNotEq(int a, int b) internal {
+        if (a == b) {
+            emit log("Error: a != b not satisfied [int]");
+            emit log_named_int("  Expected", b);
+            emit log_named_int("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertNotEq(int a, int b, string memory err) internal {
+        if (a == b) {
+            emit log_named_string("Error", err);
+            assertNotEq(a, b);
+        }
+    }
+
+    function assertNotEq(uint a, uint b) internal {
+        if (a == b) {
+            emit log("Error: a != b not satisfied [uint]");
+            emit log_named_uint("  Expected", b);
+            emit log_named_uint("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertNotEq(uint a, uint b, string memory err) internal {
+        if (a == b) {
+            emit log_named_string("Error", err);
+            assertNotEq(a, b);
+        }
+    }
+
+    function assertNotEq(string memory a, string memory b) internal {
+        if (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b))) {
+            emit log("Error: a != b not satisfied [string]");
+            emit log_named_string("  Value a", a);
+            emit log_named_string("  Value b", b);
+            fail();
+        }
+    }
+
+    function assertNotEq(string memory a, string memory b, string memory err) internal {
+        if (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b))) {
+            emit log_named_string("Error", err);
+            assertNotEq(a, b);
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    ASSERT FALSE
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertFalse(bool condition) internal {
+        if (condition) {
+            emit log("Error: Assertion Failed");
+            fail();
+        }
+    }
+
+    function assertFalse(bool condition, string memory err) internal {
+        if (condition) {
+            emit log_named_string("Error", err);
+            assertFalse(condition);
+        }
+    }
 }
 
 
@@ -159,7 +345,7 @@ library stdError {
 struct StdStorage {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
-    
+
     bytes32[] _keys;
     bytes4 _sig;
     uint256 _depth;
@@ -171,7 +357,7 @@ struct StdStorage {
 library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
-    
+
     Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
@@ -192,8 +378,8 @@ library stdStorage {
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
         StdStorage storage self
-    ) 
-        internal 
+    )
+        internal
         returns (uint256)
     {
         address who = self._target;
@@ -212,7 +398,7 @@ library stdStorage {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*field_depth);
         }
-        
+
         (bytes32[] memory reads, ) = vm_std_store.accesses(address(who));
         if (reads.length == 1) {
             bytes32 curr = vm_std_store.load(who, reads[0]);
@@ -239,7 +425,7 @@ library stdStorage {
                     (success, rdat) = who.staticcall(cald);
                     fdat = bytesToBytes32(rdat, 32*field_depth);
                 }
-                
+
                 if (success && fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
@@ -259,7 +445,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
 
         return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
@@ -343,7 +529,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
