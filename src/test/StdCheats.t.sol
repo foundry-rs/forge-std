@@ -29,6 +29,16 @@ contract StdCheatsTest is Test {
         test.iRevert();
     }
 
+    function testKey(uint256 pvk) public {
+        address pubKey = key(pvk);
+        if (pvk == 0 || pvk >= SECP256K1_ORDER) {
+            assertEq(pubKey, address(0));
+        } else {
+            // If this breaks, there's a private key for address 0 ;_;
+            assertTrue(pubKey != address(0));
+        }
+    }
+
     function testEmission() public {
         emission();
         emit Car(address(this));

@@ -14,6 +14,9 @@ abstract contract Test is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
     StdStorage internal stdstore;
 
+    // The order of the secp256k1 curve
+    uint256 public constant SECP256K1_ORDER = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141;
+
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
         vm.warp(block.timestamp + time);
@@ -26,6 +29,16 @@ abstract contract Test is DSTest {
     // Abstract redundant signature encoding
     function reverie(string memory sig) public {
         vm.expectRevert(abi.encodeWithSignature(sig));
+    }
+
+    // Address Footguns
+    // A valid private key for secp256k1 must not be:
+    // 1. Equal to 0
+    // 2. Greater than or equal to the order of the secp256k1 curve
+    // ** Returns address(0) in either case, assuming no private key **
+    function key(uint256 pvk) public returns(address) {
+        if (pvk == 0 || pvk >= SECP256K1_ORDER) return address(0);
+        return vm.addr(pvk);
     }
 
     // Expect a full event
