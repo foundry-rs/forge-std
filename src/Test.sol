@@ -23,6 +23,16 @@ abstract contract Test is DSTest {
         vm.warp(block.timestamp - time);
     }
 
+    // Abstract redundant signature encoding
+    function reverie(string memory sig) public {
+        vm.expectRevert(abi.encodeWithSignature(sig));
+    }
+
+    // Expect a full event
+    function emission() public {
+        vm.expectEmit(true, true, true, true);
+    }
+
     // Setup a prank from an address that has some ether
     function hoax(address who) public {
         vm.deal(who, 1 << 128);

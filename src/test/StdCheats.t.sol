@@ -5,6 +5,8 @@ import "../Test.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
+
+    event Car(address sender);
     
     function setUp() public {
         test = new Bar();
@@ -20,6 +22,17 @@ contract StdCheatsTest is Test {
         vm.warp(100);
         rewind(25);
         assertEq(block.timestamp, 75);
+    }
+
+    function testReverie() public {
+        reverie("Reverie()");
+        test.iRevert();
+    }
+
+    function testEmission() public {
+        emission();
+        emit Car(address(this));
+        test.bar(address(this));
     }
 
     function testHoax() public {
@@ -105,6 +118,8 @@ contract StdCheatsTest is Test {
 }
 
 contract Bar {
+    error Reverie();
+    event Car(address sender);
     constructor() {
         /// `DEAL` STDCHEAT
         totalSupply = 10000e18;
@@ -114,6 +129,7 @@ contract Bar {
     /// `HOAX` STDCHEATS
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
+        emit Car(msg.sender);
     }
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
@@ -122,6 +138,9 @@ contract Bar {
     function origin(address expectedSender, address expectedOrigin) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
+    }
+    function iRevert() public pure {
+        revert Reverie();
     }
 
     /// `DEAL` STDCHEAT
