@@ -349,21 +349,19 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT FALSE
+                                    BOOL ASSERTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertFalse(bool condition) internal {
-        if (condition) {
-            emit log    ("Error: Assertion Failed");
-            fail();
-        }
+    function assertEq(bool a, bool b) internal virtual {
+        b ? assertTrue(a) : assertFalse(a);
     }
 
-    function assertFalse(bool condition, string memory err) internal {
-        if (condition) {
-            emit log_named_string   ("Error", err);
-            assertFalse(condition);
-        }
+    function assertFalse(bool data) internal virtual {
+        assertTrue(!data);
+    }
+
+    function assertFalse(bool data, string memory err) internal virtual {
+        assertTrue(!data, err);
     }
 }
 
