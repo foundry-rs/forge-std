@@ -367,6 +367,28 @@ abstract contract Test is DSTest {
     function assertFalse(bool data, string memory err) internal virtual {
         assertTrue(!data, err);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    BYTES ASSERTS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertEq(bytes memory a, bytes memory b) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log            ("Error: a == b not satisfied [bytes]");
+            emit log_named_bytes("  Expected", b);
+            emit log_named_bytes("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log_named_string   ("Error", err);
+            emit log_named_bytes    ("  Expected", b);
+            emit log_named_bytes    ("    Actual", a);
+            fail();
+        }
+    }
 }
 
 
