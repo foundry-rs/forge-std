@@ -356,6 +356,10 @@ abstract contract Test is DSTest {
         b ? assertTrue(a) : assertFalse(a);
     }
 
+    function assertEq(bool a, bool b, string memory err) internal virtual {
+        b ? assertTrue(a, err) : assertFalse(a, err);
+    }
+
     function assertFalse(bool data) internal virtual {
         assertTrue(!data);
     }
