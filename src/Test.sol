@@ -170,11 +170,11 @@ abstract contract Test is DSTest {
         uint256 delta = a > b ? a - b : b - a;
 
         if (delta > maxDelta) {
-            emit log            ("Error", err);
-            emit log_named_uint ("  Expected", b);
-            emit log_named_uint ("    Actual", a);
-            emit log_named_uint (" Max Delta", maxDelta);
-            emit log_named_uint ("     Delta", delta);
+            emit log_named_string   ("Error", err);
+            emit log_named_uint     ("  Expected", b);
+            emit log_named_uint     ("    Actual", a);
+            emit log_named_uint     (" Max Delta", maxDelta);
+            emit log_named_uint     ("     Delta", delta);
             fail();
         }
     }
@@ -183,7 +183,7 @@ abstract contract Test is DSTest {
         int256 b,
         int256 maxDelta
     ) internal virtual {
-        uint256 delta = a > b ? a - b : b - a;
+        int256 delta = a > b ? a - b : b - a;
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [int]");
@@ -201,14 +201,14 @@ abstract contract Test is DSTest {
         int256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = a > b ? a - b : b - a;
+        int256 delta = a > b ? a - b : b - a;
 
         if (delta > maxDelta) {
-            emit log            ("Error", err);
-            emit log_named_int  ("  Expected", b);
-            emit log_named_int  ("    Actual", a);
-            emit log_named_int  (" Max Delta", maxDelta);
-            emit log_named_int  ("     Delta", delta);
+            emit log_named_string   ("Error", err);
+            emit log_named_int      ("  Expected", b);
+            emit log_named_int      ("    Actual", a);
+            emit log_named_int      (" Max Delta", maxDelta);
+            emit log_named_int      ("     Delta", delta);
             fail();
         }
     }
@@ -247,7 +247,7 @@ abstract contract Test is DSTest {
         uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
 
         if (percentDelta > maxPercentDelta) {
-            emit log                    ("Error", err);
+            emit log_named_string       ("Error", err);
             emit log_named_uint         ("    Expected", b);
             emit log_named_uint         ("      Actual", a);
             emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
