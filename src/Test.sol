@@ -144,75 +144,72 @@ abstract contract Test is DSTest {
                                     APPROX EQUAL
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertApproxEq(uint256 a, uint256 b, uint256 errorMargin) internal {
-        if (a > b) {
-            if (a - b > errorMargin) {
-                emit log("Error a not equal to b");
-                emit log_named_uint("  Expected", b);
-                emit log_named_uint("    Actual", a);
-                fail();
-            }
-        } else {
-            if (b - a > errorMargin) {
-                emit log("Error a not equal to b");
-                emit log_named_uint("  Expected", b);
-                emit log_named_uint("    Actual", a);
-                fail();
-            }
+    function assertApproxEq(
+        uint256 a,
+        uint256 b,
+        uint256 maxDelta
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log            ("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint ("  Expected", b);
+            emit log_named_uint ("    Actual", a);
+            emit log_named_uint (" Max Delta", maxDelta);
+            emit log_named_uint ("     Delta", delta);
+            fail();
         }
     }
 
-    function assertApproxEq(uint256 a, uint256 b, uint256 errorMargin, string memory err) internal {
-        if (a > b) {
-            if (a - b > errorMargin) {
-                emit log_named_string("Error", err);
-                emit log_named_uint("  Expected", b);
-                emit log_named_uint("    Actual", a);
-                fail();
-            }
-        } else {
-            if (b - a > errorMargin) {
-                emit log_named_string("Error", err);
-                emit log_named_uint("  Expected", b);
-                emit log_named_uint("    Actual", a);
-                fail();
-            }
+    function assertApproxEq(
+        uint256 a,
+        uint256 b,
+        uint256 maxDelta,
+        string memory err
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log            ("Error", err);
+            emit log_named_uint ("  Expected", b);
+            emit log_named_uint ("    Actual", a);
+            emit log_named_uint (" Max Delta", maxDelta);
+            emit log_named_uint ("     Delta", delta);
+            fail();
+        }
+    }
+    function assertApproxEq(
+        int256 a,
+        int256 b,
+        int256 maxDelta
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log            ("Error: a ~= b not satisfied [int]");
+            emit log_named_int  ("  Expected", b);
+            emit log_named_int  ("    Actual", a);
+            emit log_named_int  (" Max Delta", maxDelta);
+            emit log_named_int  ("     Delta", delta);
+            fail();
         }
     }
 
-    function assertApproxEq(int256 a, int256 b, int256 errorMargin) internal {
-        if (a > b) {
-            if (a - b > errorMargin) {
-                emit log("Error a not equal to b");
-                emit log_named_int("  Expected", b);
-                emit log_named_int("    Actual", a);
-                fail();
-            }
-        } else {
-            if (b - a > errorMargin) {
-                emit log("Error a not equal to b");
-                emit log_named_int("  Expected", b);
-                emit log_named_int("    Actual", a);
-                fail();
-            }
-        }
-    }
+    function assertApproxEq(
+        int256 a,
+        int256 b,
+        int256 maxDelta,
+        string memory err
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
 
-    function assertApproxEq(int256 a, int256 b, int256 errorMargin, string memory err) internal {
-        if (a > b) {
-            if (a - b > errorMargin) {
-                emit log_named_string("Error", err);
-                emit log_named_int("  Expected", b);
-                emit log_named_int("    Actual", a);
-                fail();
-            }
-        } else {
-            if (b - a > errorMargin) {
-                emit log_named_string("Error", err);
-                emit log_named_int("  Expected", b);
-                emit log_named_int("    Actual", a);
-                fail();
-            }
+        if (delta > maxDelta) {
+            emit log            ("Error", err);
+            emit log_named_int  ("  Expected", b);
+            emit log_named_int  ("    Actual", a);
+            emit log_named_int  (" Max Delta", maxDelta);
+            emit log_named_int  ("     Delta", delta);
+            fail();
         }
     }
 
