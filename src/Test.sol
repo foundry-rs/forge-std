@@ -257,6 +257,45 @@ abstract contract Test is DSTest {
         }
     }
 
+    function assertApproxEqRel(
+        int256 a,
+        int256 b,
+        int256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log                   ("Error: a ~= b not satisfied [uint]");
+            emit log_named_int         ("    Expected", b);
+            emit log_named_int         ("      Actual", a);
+            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
+
+    function assertApproxEqRel(
+        int256 a,
+        int256 b,
+        int256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
+        string memory err
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log_named_string      ("Error", err);
+            emit log_named_int         ("    Expected", b);
+            emit log_named_int         ("      Actual", a);
+            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     BOOL ASSERTS
     //////////////////////////////////////////////////////////////////////////*/
