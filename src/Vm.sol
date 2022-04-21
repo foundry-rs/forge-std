@@ -19,6 +19,10 @@ interface Vm {
     function sign(uint256,bytes32) external returns (uint8,bytes32,bytes32);
     // Gets address for a given private key, (privateKey) => (address)
     function addr(uint256) external returns (address);
+    // Gets the nonce of an account
+    function getNonce(address) external returns (uint64);
+    // Sets the nonce of an account; must be higher than the current nonce of the account
+    function setNonce(address, uint64) external;
     // Performs a foreign function call via terminal, (stringInputs) => (result)
     function ffi(string[] calldata) external returns (bytes memory);
     // Sets the *next* call's msg.sender to be the input address
