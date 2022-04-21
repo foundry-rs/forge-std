@@ -144,7 +144,7 @@ abstract contract Test is DSTest {
                                     APPROX EQUAL
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertApproxEq(
+    function assertApproxEqAbs(
         uint256 a,
         uint256 b,
         uint256 maxDelta
@@ -161,7 +161,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertApproxEq(
+    function assertApproxEqAbs(
         uint256 a,
         uint256 b,
         uint256 maxDelta,
@@ -178,7 +178,8 @@ abstract contract Test is DSTest {
             fail();
         }
     }
-    function assertApproxEq(
+
+    function assertApproxEqAbs(
         int256 a,
         int256 b,
         int256 maxDelta
@@ -195,7 +196,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertApproxEq(
+    function assertApproxEqAbs(
         int256 a,
         int256 b,
         int256 maxDelta,
@@ -217,7 +218,7 @@ abstract contract Test is DSTest {
                                     REL APPROX EQUAL
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertRelApproxEq(
+    function assertApproxEqRel(
         uint256 a,
         uint256 b,
         uint256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
@@ -236,7 +237,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertRelApproxEq(
+    function assertApproxEqRel(
         uint256 a,
         uint256 b,
         uint256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
