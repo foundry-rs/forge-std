@@ -141,7 +141,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX EQUAL
+                                    ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertApproxEqAbs(
@@ -261,8 +261,22 @@ abstract contract Test is DSTest {
                                     BOOL ASSERTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertEq(bool a, bool b) internal virtual {
-        b ? assertTrue(a) : assertFalse(a);
+    function assertEq(bool a, bool b) internal {
+        if (a != b) {
+            emit log_named_string("Error: a == b not satisfied [bool]");
+            emit log_named_string("  Expected", b ? "true" : "false");
+            emit log_named_string("    Actual", a ? "true" : "false");
+            fail();
+        }
+    }
+
+    function assertEq(bool a, bool b, string memory err) internal {
+        if (a != b) {
+            emit log_named_string("Error", err);
+            emit log_named_string("  Expected", b ? "true" : "false");
+            emit log_named_string("    Actual", a ? "true" : "false");
+            fail();
+        }
     }
 
     function assertEq(bool a, bool b, string memory err) internal virtual {
