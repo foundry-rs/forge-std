@@ -263,9 +263,9 @@ abstract contract Test is DSTest {
 
     function assertEq(bool a, bool b) internal {
         if (a != b) {
-            emit log_named_string("Error: a == b not satisfied [bool]");
-            emit log_named_string("  Expected", b ? "true" : "false");
-            emit log_named_string("    Actual", a ? "true" : "false");
+            emit log                ("Error: a == b not satisfied [bool]");
+            emit log_named_string   ("  Expected", b ? "true" : "false");
+            emit log_named_string   ("    Actual", a ? "true" : "false");
             fail();
         }
     }
