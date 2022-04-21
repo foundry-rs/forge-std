@@ -141,7 +141,59 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERTIONS
+                                    ASSERT EQ
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertEq(bool a, bool b) internal {
+        if (a != b) {
+            emit log                ("Error: a == b not satisfied [bool]");
+            emit log_named_string   ("  Expected", b ? "true" : "false");
+            emit log_named_string   ("    Actual", a ? "true" : "false");
+            fail();
+        }
+    }
+
+    function assertEq(bool a, bool b, string memory err) internal {
+        if (a != b) {
+            emit log_named_string("Error", err);
+            emit log_named_string("  Expected", b ? "true" : "false");
+            emit log_named_string("    Actual", a ? "true" : "false");
+            fail();
+        }
+    }
+
+    function assertEq(bytes memory a, bytes memory b) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log            ("Error: a == b not satisfied [bytes]");
+            emit log_named_bytes("  Expected", b);
+            emit log_named_bytes("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log_named_string   ("Error", err);
+            emit log_named_bytes    ("  Expected", b);
+            emit log_named_bytes    ("    Actual", a);
+            fail();
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    ASSERT FALSE
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertFalse(bool data) internal virtual {
+        assertTrue(!data);
+    }
+
+    function assertFalse(bool data, string memory err) internal virtual {
+        assertTrue(!data, err);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    ASSERT APPROX EQ ABS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertApproxEqAbs(
@@ -215,7 +267,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    REL APPROX EQUAL
+                                    ASSERT APPROX EQ REL
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertApproxEqRel(
@@ -292,58 +344,6 @@ abstract contract Test is DSTest {
             emit log_named_int         ("      Actual", a);
             emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
             emit log_named_decimal_int ("     % Delta", percentDelta, 18);
-            fail();
-        }
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    BOOL ASSERTS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function assertEq(bool a, bool b) internal {
-        if (a != b) {
-            emit log                ("Error: a == b not satisfied [bool]");
-            emit log_named_string   ("  Expected", b ? "true" : "false");
-            emit log_named_string   ("    Actual", a ? "true" : "false");
-            fail();
-        }
-    }
-
-    function assertEq(bool a, bool b, string memory err) internal {
-        if (a != b) {
-            emit log_named_string("Error", err);
-            emit log_named_string("  Expected", b ? "true" : "false");
-            emit log_named_string("    Actual", a ? "true" : "false");
-            fail();
-        }
-    }
-
-    function assertFalse(bool data) internal virtual {
-        assertTrue(!data);
-    }
-
-    function assertFalse(bool data, string memory err) internal virtual {
-        assertTrue(!data, err);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    BYTES ASSERTS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function assertEq(bytes memory a, bytes memory b) internal virtual {
-        if (keccak256(a) != keccak256(b)) {
-            emit log            ("Error: a == b not satisfied [bytes]");
-            emit log_named_bytes("  Expected", b);
-            emit log_named_bytes("    Actual", a);
-            fail();
-        }
-    }
-
-    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
-        if (keccak256(a) != keccak256(b)) {
-            emit log_named_string   ("Error", err);
-            emit log_named_bytes    ("  Expected", b);
-            emit log_named_bytes    ("    Actual", a);
             fail();
         }
     }
