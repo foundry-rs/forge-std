@@ -141,7 +141,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT EQ
+                                    STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertEq(bool a, bool b) internal {
@@ -180,10 +180,6 @@ abstract contract Test is DSTest {
         }
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT FALSE
-    //////////////////////////////////////////////////////////////////////////*/
-
     function assertFalse(bool data) internal virtual {
         assertTrue(!data);
     }
@@ -191,10 +187,6 @@ abstract contract Test is DSTest {
     function assertFalse(bool data, string memory err) internal virtual {
         assertTrue(!data, err);
     }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT APPROX EQ ABS
-    //////////////////////////////////////////////////////////////////////////*/
 
     function assertApproxEqAbs(
         uint256 a,
@@ -265,10 +257,6 @@ abstract contract Test is DSTest {
             fail();
         }
     }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT APPROX EQ REL
-    //////////////////////////////////////////////////////////////////////////*/
 
     function assertApproxEqRel(
         uint256 a,
