@@ -14,6 +14,10 @@ abstract contract Test is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
     StdStorage internal stdstore;
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                    STD-CHEATS
+    //////////////////////////////////////////////////////////////////////////*/
+
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
         vm.warp(block.timestamp + time);
