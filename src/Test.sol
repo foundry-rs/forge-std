@@ -16,7 +16,7 @@ abstract contract Test is DSTest {
     StdStorage internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    STD-CHEATS
+                                     STD-CHEATS
     //////////////////////////////////////////////////////////////////////////*/
 
     // Skip forward or rewind time by the specified number of seconds
@@ -148,7 +148,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    STD-ASSERTIONS
+                                   STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertFalse(bool data) internal virtual {
@@ -345,7 +345,7 @@ abstract contract Test is DSTest {
 }
 
 /*//////////////////////////////////////////////////////////////////////////
-                                STD-ERRORS
+                                 STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
 
 library stdError {
@@ -362,6 +362,10 @@ library stdError {
     bytes public constant lowLevelError = bytes(""); // `0x`
 }
 
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-STORAGE
+//////////////////////////////////////////////////////////////////////////*/
+
 struct StdStorage {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
@@ -372,10 +376,6 @@ struct StdStorage {
     address _target;
     bytes32 _set;
 }
-
-/*//////////////////////////////////////////////////////////////////////////
-                                STD-STORAGE
-//////////////////////////////////////////////////////////////////////////*/
 
 library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
