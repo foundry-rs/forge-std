@@ -341,6 +341,9 @@ abstract contract Test is DSTest {
     }
 }
 
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-ERRORS
+//////////////////////////////////////////////////////////////////////////*/
 
 library stdError {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
@@ -367,6 +370,9 @@ struct StdStorage {
     bytes32 _set;
 }
 
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-STORAGE
+//////////////////////////////////////////////////////////////////////////*/
 
 library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
