@@ -144,6 +144,14 @@ abstract contract Test is DSTest {
                                     STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    function assertFalse(bool data) internal virtual {
+        assertTrue(!data);
+    }
+
+    function assertFalse(bool data, string memory err) internal virtual {
+        assertTrue(!data, err);
+    }
+
     function assertEq(bool a, bool b) internal {
         if (a != b) {
             emit log                ("Error: a == b not satisfied [bool]");
@@ -178,14 +186,6 @@ abstract contract Test is DSTest {
             emit log_named_bytes    ("    Actual", a);
             fail();
         }
-    }
-
-    function assertFalse(bool data) internal virtual {
-        assertTrue(!data);
-    }
-
-    function assertFalse(bool data, string memory err) internal virtual {
-        assertTrue(!data, err);
     }
 
     function assertApproxEqAbs(
