@@ -15,6 +15,10 @@ abstract contract Test is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
     StdStorage internal stdstore;
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                    STD-CHEATS
+    //////////////////////////////////////////////////////////////////////////*/
+
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) public {
         vm.warp(block.timestamp + time);
@@ -142,8 +146,207 @@ abstract contract Test is DSTest {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    STD-ASSERTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function assertFalse(bool data) internal virtual {
+        assertTrue(!data);
+    }
+
+    function assertFalse(bool data, string memory err) internal virtual {
+        assertTrue(!data, err);
+    }
+
+    function assertEq(bool a, bool b) internal {
+        if (a != b) {
+            emit log                ("Error: a == b not satisfied [bool]");
+            emit log_named_string   ("  Expected", b ? "true" : "false");
+            emit log_named_string   ("    Actual", a ? "true" : "false");
+            fail();
+        }
+    }
+
+    function assertEq(bool a, bool b, string memory err) internal {
+        if (a != b) {
+            emit log_named_string("Error", err);
+            emit log_named_string("  Expected", b ? "true" : "false");
+            emit log_named_string("    Actual", a ? "true" : "false");
+            fail();
+        }
+    }
+
+    function assertEq(bytes memory a, bytes memory b) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log            ("Error: a == b not satisfied [bytes]");
+            emit log_named_bytes("  Expected", b);
+            emit log_named_bytes("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
+        if (keccak256(a) != keccak256(b)) {
+            emit log_named_string   ("Error", err);
+            emit log_named_bytes    ("  Expected", b);
+            emit log_named_bytes    ("    Actual", a);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbs(
+        uint256 a,
+        uint256 b,
+        uint256 maxDelta
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log            ("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint ("  Expected", b);
+            emit log_named_uint ("    Actual", a);
+            emit log_named_uint (" Max Delta", maxDelta);
+            emit log_named_uint ("     Delta", delta);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbs(
+        uint256 a,
+        uint256 b,
+        uint256 maxDelta,
+        string memory err
+    ) internal virtual {
+        uint256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log_named_string   ("Error", err);
+            emit log_named_uint     ("  Expected", b);
+            emit log_named_uint     ("    Actual", a);
+            emit log_named_uint     (" Max Delta", maxDelta);
+            emit log_named_uint     ("     Delta", delta);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbs(
+        int256 a,
+        int256 b,
+        int256 maxDelta
+    ) internal virtual {
+        int256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log            ("Error: a ~= b not satisfied [int]");
+            emit log_named_int  ("  Expected", b);
+            emit log_named_int  ("    Actual", a);
+            emit log_named_int  (" Max Delta", maxDelta);
+            emit log_named_int  ("     Delta", delta);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbs(
+        int256 a,
+        int256 b,
+        int256 maxDelta,
+        string memory err
+    ) internal virtual {
+        int256 delta = a > b ? a - b : b - a;
+
+        if (delta > maxDelta) {
+            emit log_named_string   ("Error", err);
+            emit log_named_int      ("  Expected", b);
+            emit log_named_int      ("    Actual", a);
+            emit log_named_int      (" Max Delta", maxDelta);
+            emit log_named_int      ("     Delta", delta);
+            fail();
+        }
+    }
+
+    function assertApproxEqRel(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log                    ("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint         ("    Expected", b);
+            emit log_named_uint         ("      Actual", a);
+            emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_uint ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
+
+    function assertApproxEqRel(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
+        string memory err
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log_named_string       ("Error", err);
+            emit log_named_uint         ("    Expected", b);
+            emit log_named_uint         ("      Actual", a);
+            emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_uint ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
+
+    function assertApproxEqRel(
+        int256 a,
+        int256 b,
+        int256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log                   ("Error: a ~= b not satisfied [uint]");
+            emit log_named_int         ("    Expected", b);
+            emit log_named_int         ("      Actual", a);
+            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
+
+    function assertApproxEqRel(
+        int256 a,
+        int256 b,
+        int256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
+        string memory err
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log_named_string      ("Error", err);
+            emit log_named_int         ("    Expected", b);
+            emit log_named_int         ("      Actual", a);
+            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
+            fail();
+        }
+    }
 }
 
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-ERRORS
+//////////////////////////////////////////////////////////////////////////*/
 
 library stdError {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
@@ -162,7 +365,7 @@ library stdError {
 struct StdStorage {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
-    
+
     bytes32[] _keys;
     bytes4 _sig;
     uint256 _depth;
@@ -170,11 +373,14 @@ struct StdStorage {
     bytes32 _set;
 }
 
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-STORAGE
+//////////////////////////////////////////////////////////////////////////*/
 
 library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
-    
+
     Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
@@ -195,8 +401,8 @@ library stdStorage {
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
         StdStorage storage self
-    ) 
-        internal 
+    )
+        internal
         returns (uint256)
     {
         address who = self._target;
@@ -215,7 +421,7 @@ library stdStorage {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32*field_depth);
         }
-        
+
         (bytes32[] memory reads, ) = vm_std_store.accesses(address(who));
         if (reads.length == 1) {
             bytes32 curr = vm_std_store.load(who, reads[0]);
@@ -242,7 +448,7 @@ library stdStorage {
                     (success, rdat) = who.staticcall(cald);
                     fdat = bytesToBytes32(rdat, 32*field_depth);
                 }
-                
+
                 if (success && fdat == bytes32(hex"1337")) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
@@ -262,7 +468,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
 
         return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
@@ -347,7 +553,7 @@ library stdStorage {
         delete self._target;
         delete self._sig;
         delete self._keys;
-        delete self._depth; 
+        delete self._depth;
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
