@@ -588,9 +588,10 @@ library stdStorage {
 library deltaMaths {
     function abs(int256 a) internal pure returns (uint256) {
         if (a < 0) {
-            return a == type(int256).min
-                ? uint256(type(int256).max) + 1 // solidity integer is not symmetrical
-                : uint256(-a);
+            // lifted from: @OpenZeppelin/utils/math/SignedMath.sol
+            unchecked {
+                return uint256(-a);
+            }
         }
 
         return uint256(a);
