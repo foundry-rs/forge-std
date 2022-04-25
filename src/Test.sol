@@ -159,7 +159,7 @@ abstract contract Test is DSTest {
         assertTrue(!data, err);
     }
 
-    function assertEq(bool a, bool b) internal {
+    function assertEq(bool a, bool b) internal virtual {
         if (a != b) {
             emit log                ("Error: a == b not satisfied [bool]");
             emit log_named_string   ("  Expected", b ? "true" : "false");
@@ -168,7 +168,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertEq(bool a, bool b, string memory err) internal {
+    function assertEq(bool a, bool b, string memory err) internal virtual {
         if (a != b) {
             emit log_named_string("Error", err);
             emit log_named_string("  Expected", b ? "true" : "false");
