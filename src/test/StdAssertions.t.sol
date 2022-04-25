@@ -253,12 +253,12 @@ contract TestTest is Test
         }
 
         if (expectFail) {
-            require(postState == true, "failure not triggered");
+            require(postState == true, "expected failure not triggered");
 
             // unwind the expected failure
             vm.store(HEVM_ADDRESS, bytes32("failed"), bytes32(uint256(0x00)));
         } else {
-            require(postState == false, "failure was triggered");
+            require(postState == false, "unexpected failure was triggered");
         }
     }
 
