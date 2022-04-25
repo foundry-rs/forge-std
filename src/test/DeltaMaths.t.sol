@@ -5,6 +5,24 @@ import "../Test.sol";
 
 contract DeltaMathsTest is Test
 {
+    function testGetAbs() external {
+        assertEq(deltaMaths.abs(-50),   50);
+        assertEq(deltaMaths.abs(50),    50);
+        assertEq(deltaMaths.abs(-1337), 1337);
+        assertEq(deltaMaths.abs(0),     0);
+
+        assertEq(deltaMaths.abs(type(int256).min), (type(uint256).max >> 1) + 1);
+        assertEq(deltaMaths.abs(type(int256).max), (type(uint256).max >> 1));
+    }
+
+    function testGetAbs_Fuzz(int256 a) external {
+        uint256 manualAbs = getAbs(a);
+
+        uint256 abs = deltaMaths.abs(a);
+
+        assertEq(abs, manualAbs);
+    }
+
     function testGetDelta_Uint() external {
         assertEq(deltaMaths.getDelta(uint256(0),        uint256(0)),        0);
         assertEq(deltaMaths.getDelta(uint256(0),        uint256(1337)),     1337);
@@ -36,7 +54,7 @@ contract DeltaMathsTest is Test
         assertEq(delta, manualDelta);
     }
 
-    function testGetDelta_Int2() external {
+    function testGetDelta_Int() external {
         assertEq(deltaMaths.getDelta(int256(0),         int256(0)),         0);
         assertEq(deltaMaths.getDelta(int256(0),         int256(1337)),      1337);
         assertEq(deltaMaths.getDelta(int256(0),         type(int64).max),   type(uint64).max >> 1);
@@ -93,7 +111,7 @@ contract DeltaMathsTest is Test
                                    HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function getAbs(int256 a) private returns (uint256) {
+    function getAbs(int256 a) private pure returns (uint256) {
         if (a < 0)
             return a == type(int256).min ? uint256(type(int256).max) + 1 : uint256(-a);
 

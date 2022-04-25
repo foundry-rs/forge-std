@@ -586,43 +586,39 @@ library stdStorage {
 //////////////////////////////////////////////////////////////////////////*/
 
 library deltaMaths {
-    function getDelta(uint256 a, uint256 b) public pure returns (uint256) {
+    function abs(int256 a) internal pure returns (uint256) {
+        if (a < 0) {
+            return a == type(int256).min
+                ? uint256(type(int256).max) + 1 // solidity integer is not symmetrical
+                : uint256(-a);
+        }
+
+        return uint256(a);
+    }
+
+    function getDelta(uint256 a, uint256 b) internal pure returns (uint256) {
         return a > b
             ? a - b
             : b - a;
     }
 
-    function getDelta(int256 a, int256 b) public pure returns (uint256) {
-        if (a >= 0 && b >= 0) {
-            return getDelta(uint256(a), uint256(b));
-        }
-        else if (a >= 0 && b <= 0) {
-            if (b == type(int256).min)
-                return uint256(a) + uint256(type(int256).max) + 1;
-
-            return uint256(a) + uint256(-b);
-        }
-        else if (a <= 0 && b >= 0) {
-            if (a == type(int256).min)
-                return uint256(b) + uint256(type(int256).max) + 1;
-
-            return uint256(-a) + uint256(b);
+    function getDelta(int256 a, int256 b) internal pure returns (uint256) {
+        // a and b are of the same sign
+        if (a >= 0 && b >= 0 || a < 0 && b < 0) {
+            return getDelta(abs(a), abs(b));
         }
 
-        // else must be (a <= 0 && b <= 0)
-        return getDelta(
-            a == type(int256).min ? uint256(type(int256).max) + 1 : uint256(-a),
-            b == type(int256).min ? uint256(type(int256).max) + 1 : uint256(-b)
-        );
+        // a and b are of opposite signs
+        return abs(a) + abs(b);
     }
 
-    function getPercentDelta(uint256 a, uint256 b) public pure returns (uint256) {
+    function getPercentDelta(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 delta = getDelta(a, b);
 
         return delta * 1e18 / b;
     }
 
-    function getPercentDelta(int256 a, int256 b) public pure returns (uint256) {
+    function getPercentDelta(int256 a, int256 b) internal pure returns (uint256) {
         uint256 delta = getDelta(a, b);
         uint256 absB = b > 0
             ? uint256(b)
