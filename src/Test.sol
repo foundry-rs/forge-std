@@ -200,7 +200,7 @@ abstract contract Test is DSTest {
         uint256 b,
         uint256 maxDelta
     ) internal virtual {
-        uint256 delta = deltaMaths.getDelta(a, b);
+        uint256 delta = deltaMaths.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [uint]");
@@ -218,7 +218,7 @@ abstract contract Test is DSTest {
         uint256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = deltaMaths.getDelta(a, b);
+        uint256 delta = deltaMaths.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
@@ -235,7 +235,7 @@ abstract contract Test is DSTest {
         int256 b,
         uint256 maxDelta
     ) internal virtual {
-        uint256 delta = deltaMaths.getDelta(a, b);
+        uint256 delta = deltaMaths.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [int]");
@@ -253,7 +253,7 @@ abstract contract Test is DSTest {
         uint256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = deltaMaths.getDelta(a, b);
+        uint256 delta = deltaMaths.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
@@ -272,7 +272,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+        uint256 percentDelta = deltaMaths.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log                    ("Error: a ~= b not satisfied [uint]");
@@ -292,7 +292,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+        uint256 percentDelta = deltaMaths.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string       ("Error", err);
@@ -311,7 +311,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+        uint256 percentDelta = deltaMaths.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log                   ("Error: a ~= b not satisfied [int]");
@@ -331,7 +331,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+        uint256 percentDelta = deltaMaths.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string      ("Error", err);
@@ -597,32 +597,32 @@ library deltaMaths {
         return uint256(a);
     }
 
-    function getDelta(uint256 a, uint256 b) internal pure returns (uint256) {
+    function delta(uint256 a, uint256 b) internal pure returns (uint256) {
         return a > b
             ? a - b
             : b - a;
     }
 
-    function getDelta(int256 a, int256 b) internal pure returns (uint256) {
+    function delta(int256 a, int256 b) internal pure returns (uint256) {
         // a and b are of the same sign
         if (a >= 0 && b >= 0 || a < 0 && b < 0) {
-            return getDelta(abs(a), abs(b));
+            return delta(abs(a), abs(b));
         }
 
         // a and b are of opposite signs
         return abs(a) + abs(b);
     }
 
-    function getPercentDelta(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 delta = getDelta(a, b);
+    function percentDelta(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 absDelta = delta(a, b);
 
-        return delta * 1e18 / b;
+        return absDelta * 1e18 / b;
     }
 
-    function getPercentDelta(int256 a, int256 b) internal pure returns (uint256) {
-        uint256 delta = getDelta(a, b);
+    function percentDelta(int256 a, int256 b) internal pure returns (uint256) {
+        uint256 absDelta = delta(a, b);
         uint256 absB = abs(b);
 
-        return delta * 1e18 / absB;
+        return absDelta * 1e18 / absB;
     }
 }
