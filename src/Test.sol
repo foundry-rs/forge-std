@@ -620,9 +620,7 @@ library deltaMaths {
 
     function getPercentDelta(int256 a, int256 b) internal pure returns (uint256) {
         uint256 delta = getDelta(a, b);
-        uint256 absB = b > 0
-            ? uint256(b)
-            : uint256(-b);
+        uint256 absB = abs(b);
 
         return delta * 1e18 / absB;
     }

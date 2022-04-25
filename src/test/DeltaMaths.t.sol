@@ -107,6 +107,86 @@ contract DeltaMathsTest is Test
         assertEq(delta, manualDelta);
     }
 
+    function testGetPercentDelta_Uint() external {
+        assertEq(deltaMaths.getPercentDelta(uint256(0),        uint256(1337)),     1e18);
+        assertEq(deltaMaths.getPercentDelta(uint256(0),        type(uint64).max),  1e18);
+        assertEq(deltaMaths.getPercentDelta(uint256(0),        type(uint128).max), 1e18);
+        assertEq(deltaMaths.getPercentDelta(uint256(0),        type(uint192).max), 1e18);
+
+        assertEq(deltaMaths.getPercentDelta(1337,              uint256(1337)),     0);
+        assertEq(deltaMaths.getPercentDelta(type(uint192).max, type(uint192).max), 0);
+        assertEq(deltaMaths.getPercentDelta(0,                 uint256(2500)),     1e18);
+        assertEq(deltaMaths.getPercentDelta(2500,              uint256(2500)),     0);
+        assertEq(deltaMaths.getPercentDelta(5000,              uint256(2500)),     1e18);
+        assertEq(deltaMaths.getPercentDelta(7500,              uint256(2500)),     2e18);
+
+        vm.expectRevert(stdError.divisionError);
+        deltaMaths.getPercentDelta(uint256(1), 0);
+    }
+
+    function testGetPercentDelta_Uint_Fuzz(uint192 a, uint192 b) external {
+        vm.assume(b != 0);
+        uint256 manualDelta;
+        if (a > b) {
+            manualDelta = a - b;
+        } else {
+            manualDelta = b - a;
+        }
+
+        uint256 manualPercentDelta = manualDelta * 1e18 / b;
+        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+
+        assertEq(percentDelta, manualPercentDelta);
+    }
+
+    function testGetPercentDelta_Int() external {
+        assertEq(deltaMaths.getPercentDelta(int256(0),         int256(1337)),     1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         -1337),            1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int64).min),  1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int128).min), 1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int192).min), 1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int64).max),  1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int128).max), 1e18);
+        assertEq(deltaMaths.getPercentDelta(int256(0),         type(int192).max), 1e18);
+
+        assertEq(deltaMaths.getPercentDelta(1337,              int256(1337)),      0);
+        assertEq(deltaMaths.getPercentDelta(type(int192).max,  type(int192).max),  0);
+        assertEq(deltaMaths.getPercentDelta(type(int192).min,  type(int192).min),  0);
+
+        assertEq(deltaMaths.getPercentDelta(type(int192).min,  type(int192).max),  2e18); // rounds the 1 wei diff down
+        assertEq(deltaMaths.getPercentDelta(type(int192).max,  type(int192).min),  2e18 - 1); // rounds the 1 wei diff down
+        assertEq(deltaMaths.getPercentDelta(0,                 int256(2500)),      1e18);
+        assertEq(deltaMaths.getPercentDelta(2500,              int256(2500)),      0);
+        assertEq(deltaMaths.getPercentDelta(5000,              int256(2500)),      1e18);
+        assertEq(deltaMaths.getPercentDelta(7500,              int256(2500)),      2e18);
+
+        vm.expectRevert(stdError.divisionError);
+        deltaMaths.getPercentDelta(int256(1), 0);
+    }
+
+    function testGetPercentDelta_Int_Fuzz(int192 a, int192 b) external {
+        vm.assume(b != 0);
+        uint256 absA = getAbs(a);
+        uint256 absB = getAbs(b);
+        uint256 absDelta = absA > absB
+            ? absA - absB
+            : absB - absA;
+
+        uint256 manualDelta;
+        if ((a >= 0 && b >= 0) || (a < 0 && b < 0)) {
+            manualDelta = absDelta;
+        }
+        // (a < 0 && b >= 0) || (a >= 0 && b < 0)
+        else {
+            manualDelta = absA + absB;
+        }
+
+        uint256 manualPercentDelta = manualDelta * 1e18 / absB;
+        uint256 percentDelta = deltaMaths.getPercentDelta(a, b);
+
+        assertEq(percentDelta, manualPercentDelta);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                    HELPERS
     //////////////////////////////////////////////////////////////////////////*/
