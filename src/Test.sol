@@ -200,7 +200,7 @@ abstract contract Test is DSTest {
         uint256 b,
         uint256 maxDelta
     ) internal virtual {
-        uint256 delta = deltaMaths.delta(a, b);
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [uint]");
@@ -218,7 +218,7 @@ abstract contract Test is DSTest {
         uint256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = deltaMaths.delta(a, b);
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
@@ -235,7 +235,7 @@ abstract contract Test is DSTest {
         int256 b,
         uint256 maxDelta
     ) internal virtual {
-        uint256 delta = deltaMaths.delta(a, b);
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [int]");
@@ -253,7 +253,7 @@ abstract contract Test is DSTest {
         uint256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = deltaMaths.delta(a, b);
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
@@ -272,7 +272,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.percentDelta(a, b);
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log                    ("Error: a ~= b not satisfied [uint]");
@@ -292,7 +292,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.percentDelta(a, b);
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string       ("Error", err);
@@ -311,7 +311,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.percentDelta(a, b);
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log                   ("Error: a ~= b not satisfied [int]");
@@ -331,7 +331,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = deltaMaths.percentDelta(a, b);
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string      ("Error", err);
@@ -585,7 +585,7 @@ library stdStorage {
                                 DELTA MATHS
 //////////////////////////////////////////////////////////////////////////*/
 
-library deltaMaths {
+library stdMath {
     function abs(int256 a) internal pure returns (uint256) {
         if (a < 0) {
             // lifted from: @OpenZeppelin/utils/math/SignedMath.sol
