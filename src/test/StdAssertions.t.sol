@@ -5,8 +5,6 @@ import "../Test.sol";
 
 contract StdAssertionsTest is Test
 {
-    // todo: figure out how to expectEmit multiple events
-
     string constant CUSTOM_ERROR = "guh!";
 
     bool constant EXPECT_PASS = false;
@@ -34,7 +32,6 @@ contract StdAssertionsTest is Test
 
     function testAssertFalse_Err_Fail() external {
         vm.expectEmit(true, false, false, true);
-        // todo: check the 2nd event that DSTest emits
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertFalse(true, CUSTOM_ERROR, EXPECT_FAIL);
     }

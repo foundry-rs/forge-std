@@ -171,9 +171,7 @@ abstract contract Test is DSTest {
     function assertEq(bool a, bool b, string memory err) internal {
         if (a != b) {
             emit log_named_string("Error", err);
-            emit log_named_string("  Expected", b ? "true" : "false");
-            emit log_named_string("    Actual", a ? "true" : "false");
-            fail();
+            assertEq(a, b);
         }
     }
 
@@ -189,9 +187,7 @@ abstract contract Test is DSTest {
     function assertEq(bytes memory a, bytes memory b, string memory err) internal {
         if (keccak256(a) != keccak256(b)) {
             emit log_named_string   ("Error", err);
-            emit log_named_bytes    ("  Expected", b);
-            emit log_named_bytes    ("    Actual", a);
-            fail();
+            assertEq(a, b);
         }
     }
 
@@ -222,11 +218,7 @@ abstract contract Test is DSTest {
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
-            emit log_named_uint     ("  Expected", b);
-            emit log_named_uint     ("    Actual", a);
-            emit log_named_uint     (" Max Delta", maxDelta);
-            emit log_named_uint     ("     Delta", delta);
-            fail();
+            assertApproxEqAbs(a, b, maxDelta);
         }
     }
 
@@ -257,11 +249,7 @@ abstract contract Test is DSTest {
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
-            emit log_named_int      ("  Expected", b);
-            emit log_named_int      ("    Actual", a);
-            emit log_named_uint     (" Max Delta", maxDelta);
-            emit log_named_uint     ("     Delta", delta);
-            fail();
+            assertApproxEqAbs(a, b, maxDelta);
         }
     }
 
@@ -296,11 +284,7 @@ abstract contract Test is DSTest {
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string       ("Error", err);
-            emit log_named_uint         ("    Expected", b);
-            emit log_named_uint         ("      Actual", a);
-            emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint ("     % Delta", percentDelta, 18);
-            fail();
+            assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
 
@@ -335,11 +319,7 @@ abstract contract Test is DSTest {
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string      ("Error", err);
-            emit log_named_int         ("    Expected", b);
-            emit log_named_int         ("      Actual", a);
-            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
-            fail();
+            assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
 }
