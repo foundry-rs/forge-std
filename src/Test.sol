@@ -588,8 +588,8 @@ library stdStorage {
 library stdMath {
     function abs(int256 a) internal pure returns (uint256) {
          unchecked {
-             // must be unchecked in order to support `n = type(int256).min`
-            return uint256(n >= 0 ? n : -n);
+             // must be unchecked in order to support `a = type(int256).min`
+            return uint256(a >= 0 ? a : -a);
         }
     }
 
