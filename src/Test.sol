@@ -159,7 +159,7 @@ abstract contract Test is DSTest {
         assertTrue(!data, err);
     }
 
-    function assertEq(bool a, bool b) internal virtual {
+    function assertEq(bool a, bool b) internal {
         if (a != b) {
             emit log                ("Error: a == b not satisfied [bool]");
             emit log_named_string   ("  Expected", b ? "true" : "false");
@@ -168,7 +168,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertEq(bool a, bool b, string memory err) internal virtual {
+    function assertEq(bool a, bool b, string memory err) internal {
         if (a != b) {
             emit log_named_string("Error", err);
             emit log_named_string("  Expected", b ? "true" : "false");
@@ -177,7 +177,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertEq(bytes memory a, bytes memory b) internal virtual {
+    function assertEq(bytes memory a, bytes memory b) internal {
         if (keccak256(a) != keccak256(b)) {
             emit log            ("Error: a == b not satisfied [bytes]");
             emit log_named_bytes("  Expected", b);
@@ -186,7 +186,7 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal {
         if (keccak256(a) != keccak256(b)) {
             emit log_named_string   ("Error", err);
             emit log_named_bytes    ("  Expected", b);
