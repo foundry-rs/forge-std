@@ -16,7 +16,7 @@ abstract contract Test is DSTest {
     StdStorage internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                     STD-CHEATS
+                                    STD-CHEATS
     //////////////////////////////////////////////////////////////////////////*/
 
     // Skip forward or rewind time by the specified number of seconds
@@ -148,7 +148,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                   STD-ASSERTIONS
+                                    STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertFalse(bool data) internal virtual {
@@ -171,13 +171,11 @@ abstract contract Test is DSTest {
     function assertEq(bool a, bool b, string memory err) internal {
         if (a != b) {
             emit log_named_string("Error", err);
-            emit log_named_string("  Expected", b ? "true" : "false");
-            emit log_named_string("    Actual", a ? "true" : "false");
-            fail();
+            assertEq(a, b);
         }
     }
 
-    function assertEq(bytes memory a, bytes memory b) internal virtual {
+    function assertEq(bytes memory a, bytes memory b) internal {
         if (keccak256(a) != keccak256(b)) {
             emit log            ("Error: a == b not satisfied [bytes]");
             emit log_named_bytes("  Expected", b);
@@ -186,12 +184,10 @@ abstract contract Test is DSTest {
         }
     }
 
-    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal {
         if (keccak256(a) != keccak256(b)) {
             emit log_named_string   ("Error", err);
-            emit log_named_bytes    ("  Expected", b);
-            emit log_named_bytes    ("    Actual", a);
-            fail();
+            assertEq(a, b);
         }
     }
 
@@ -200,7 +196,7 @@ abstract contract Test is DSTest {
         uint256 b,
         uint256 maxDelta
     ) internal virtual {
-        uint256 delta = a > b ? a - b : b - a;
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [uint]");
@@ -218,31 +214,27 @@ abstract contract Test is DSTest {
         uint256 maxDelta,
         string memory err
     ) internal virtual {
-        uint256 delta = a > b ? a - b : b - a;
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
-            emit log_named_uint     ("  Expected", b);
-            emit log_named_uint     ("    Actual", a);
-            emit log_named_uint     (" Max Delta", maxDelta);
-            emit log_named_uint     ("     Delta", delta);
-            fail();
+            assertApproxEqAbs(a, b, maxDelta);
         }
     }
 
     function assertApproxEqAbs(
         int256 a,
         int256 b,
-        int256 maxDelta
+        uint256 maxDelta
     ) internal virtual {
-        int256 delta = a > b ? a - b : b - a;
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log            ("Error: a ~= b not satisfied [int]");
             emit log_named_int  ("  Expected", b);
             emit log_named_int  ("    Actual", a);
-            emit log_named_int  (" Max Delta", maxDelta);
-            emit log_named_int  ("     Delta", delta);
+            emit log_named_uint (" Max Delta", maxDelta);
+            emit log_named_uint ("     Delta", delta);
             fail();
         }
     }
@@ -250,18 +242,14 @@ abstract contract Test is DSTest {
     function assertApproxEqAbs(
         int256 a,
         int256 b,
-        int256 maxDelta,
+        uint256 maxDelta,
         string memory err
     ) internal virtual {
-        int256 delta = a > b ? a - b : b - a;
+        uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
             emit log_named_string   ("Error", err);
-            emit log_named_int      ("  Expected", b);
-            emit log_named_int      ("    Actual", a);
-            emit log_named_int      (" Max Delta", maxDelta);
-            emit log_named_int      ("     Delta", delta);
-            fail();
+            assertApproxEqAbs(a, b, maxDelta);
         }
     }
 
@@ -272,7 +260,7 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log                    ("Error: a ~= b not satisfied [uint]");
@@ -292,33 +280,29 @@ abstract contract Test is DSTest {
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string       ("Error", err);
-            emit log_named_uint         ("    Expected", b);
-            emit log_named_uint         ("      Actual", a);
-            emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint ("     % Delta", percentDelta, 18);
-            fail();
+            assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
 
     function assertApproxEqRel(
         int256 a,
         int256 b,
-        int256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
+        uint256 maxPercentDelta
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
-            emit log                   ("Error: a ~= b not satisfied [uint]");
+            emit log                   ("Error: a ~= b not satisfied [int]");
             emit log_named_int         ("    Expected", b);
             emit log_named_int         ("      Actual", a);
-            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
             fail();
         }
     }
@@ -326,26 +310,22 @@ abstract contract Test is DSTest {
     function assertApproxEqRel(
         int256 a,
         int256 b,
-        int256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
+        uint256 maxPercentDelta,
         string memory err
     ) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
-        int256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+        uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log_named_string      ("Error", err);
-            emit log_named_int         ("    Expected", b);
-            emit log_named_int         ("      Actual", a);
-            emit log_named_decimal_int (" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_int ("     % Delta", percentDelta, 18);
-            fail();
+            assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
 }
 
 /*//////////////////////////////////////////////////////////////////////////
-                                 STD-ERRORS
+                                STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
 
 library stdError {
@@ -578,5 +558,47 @@ library stdStorage {
         }
 
         return result;
+    }
+}
+
+/*//////////////////////////////////////////////////////////////////////////
+                                STD-MATH
+//////////////////////////////////////////////////////////////////////////*/
+
+library stdMath {
+    function abs(int256 a) internal pure returns (uint256) {
+         unchecked {
+             // must be unchecked in order to support `a = type(int256).min`
+            return uint256(a >= 0 ? a : -a);
+        }
+    }
+
+    function delta(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a > b
+            ? a - b
+            : b - a;
+    }
+
+    function delta(int256 a, int256 b) internal pure returns (uint256) {
+        // a and b are of the same sign
+        if (a >= 0 && b >= 0 || a < 0 && b < 0) {
+            return delta(abs(a), abs(b));
+        }
+
+        // a and b are of opposite signs
+        return abs(a) + abs(b);
+    }
+
+    function percentDelta(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 absDelta = delta(a, b);
+
+        return absDelta * 1e18 / b;
+    }
+
+    function percentDelta(int256 a, int256 b) internal pure returns (uint256) {
+        uint256 absDelta = delta(a, b);
+        uint256 absB = abs(b);
+
+        return absDelta * 1e18 / absB;
     }
 }
