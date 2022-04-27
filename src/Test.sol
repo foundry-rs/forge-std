@@ -16,7 +16,7 @@ abstract contract Test is DSTest {
     StdStorage internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                     STD-CHEATS
+                                    STD-CHEATS
     //////////////////////////////////////////////////////////////////////////*/
 
     // Skip forward or rewind time by the specified number of seconds
@@ -148,7 +148,7 @@ abstract contract Test is DSTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                   STD-ASSERTIONS
+                                    STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function assertFalse(bool data) internal virtual {
@@ -325,7 +325,7 @@ abstract contract Test is DSTest {
 }
 
 /*//////////////////////////////////////////////////////////////////////////
-                                 STD-ERRORS
+                                STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
 
 library stdError {
