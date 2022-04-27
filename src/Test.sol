@@ -587,14 +587,10 @@ library stdStorage {
 
 library stdMath {
     function abs(int256 a) internal pure returns (uint256) {
-        if (a < 0) {
-            // lifted from: @OpenZeppelin/utils/math/SignedMath.sol
-            unchecked {
-                return uint256(-a);
-            }
+         unchecked {
+             // must be unchecked in order to support `n = type(int256).min`
+            return uint256(n >= 0 ? n : -n);
         }
-
-        return uint256(a);
     }
 
     function delta(uint256 a, uint256 b) internal pure returns (uint256) {
