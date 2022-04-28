@@ -1,6 +1,8 @@
 # Forge Standard Library • [![tests](https://github.com/brockelmore/forge-std/actions/workflows/tests.yml/badge.svg)](https://github.com/brockelmore/forge-std/actions/workflows/tests.yml)
 
-Forge Standard Library is a collection of helpful contracts for use with [`forge` and `foundry`](https://github.com/gakonst/foundry). It leverages `forge`'s cheatcodes to make writing tests easier and faster, while improving the UX of cheatcodes. For more in-depth usage examples checkout the [tests](https://github.com/brockelmore/forge-std/blob/master/src/test).
+Forge Standard Library is a collection of helpful contracts for use with [`forge` and `foundry`](https://github.com/foundry-rs/foundry). It leverages `forge`'s cheatcodes to make writing tests easier and faster, while improving the UX of cheatcodes.
+
+**Learn how to use Forge Std with the [📖 Foundry Book (Forge Std Guide)](https://book.getfoundry.sh/forge/forge-std.html).**
 
 ## Install
 
@@ -212,6 +214,10 @@ contract Bar {
     }
 }
 ```
+
+### Std Assertions
+
+Expand upon the assertion functions from the `DSTest` library.
 
 ### `console.log`
 
