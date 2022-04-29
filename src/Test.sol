@@ -122,6 +122,29 @@ abstract contract Test is DSTest {
         }
     }
 
+    function bound(
+        uint256 x,
+        uint256 min,
+        uint256 max
+    ) internal returns (uint256 result) {
+        require(max >= min, "MAX_LESS_THAN_MIN");
+
+        uint256 size = max - min;
+
+        if (max != type(uint256).max) size++; // Make the max inclusive.
+        if (size == 0) return min; // Using max would be equivalent as well.
+        // Ensure max is inclusive in cases where x != 0 and max is at uint max.
+        if (max == type(uint256).max && x != 0) x--; // Accounted for later.
+
+        if (x < min) x += size * (((min - x) / size) + 1);
+        result = min + ((x - min) % size);
+
+        // Account for decrementing x to make max inclusive.
+        if (max == type(uint256).max && x != 0) result++;
+
+        emit log_named_uint("Bound Result", result);
+    }
+
     // Deploy a contract by fetching the contract bytecode from
     // the artifacts directory
     // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
@@ -320,6 +343,25 @@ abstract contract Test is DSTest {
         if (percentDelta > maxPercentDelta) {
             emit log_named_string      ("Error", err);
             assertApproxEqRel(a, b, maxPercentDelta);
+        }
+    }
+
+    function assertRelApproxEq(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
+    ) internal virtual {
+        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+
+        uint256 percentDelta = ((a > b ? a - b : b - a) * 1e18) / b;
+
+        if (percentDelta > maxPercentDelta) {
+            emit log("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint("    Expected", b);
+            emit log_named_uint("      Actual", a);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
+            fail();
         }
     }
 }
