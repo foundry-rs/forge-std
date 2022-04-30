@@ -91,11 +91,6 @@ contract StdCheatsTest is Test {
         bound(5, 100, 10);
     }
 
-    function testRelApproxEqBothZeroesPasses() public {
-        assertRelApproxEq(0, 0, 1e18);
-        assertRelApproxEq(0, 0, 0);
-    }
-
     function testBound(
         uint256 num,
         uint256 min,
@@ -109,7 +104,7 @@ contract StdCheatsTest is Test {
         assertLe(bounded, max);
     }
 
-    function testBound_Uint256Max() public {
+    function testBoundUint256Max() public {
         assertEq(bound(0, type(uint256).max - 1, type(uint256).max), type(uint256).max);
     }
 
@@ -118,14 +113,7 @@ contract StdCheatsTest is Test {
         uint256 min,
         uint256 max
     ) public {
-        if (max == min) {
-            unchecked {
-                min++; // Overflow is handled below.
-            }
-        }
-
-        if (max > min) (min, max) = (max, min);
-
+        vm.assume(min > max);
         vm.expectRevert(bytes("MAX_LESS_THAN_MIN"));
         bound(num, min, max);
     }
