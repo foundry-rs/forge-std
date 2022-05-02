@@ -106,6 +106,7 @@ contract StdCheatsTest is Test {
 
     function testBoundUint256Max() public {
         assertEq(bound(0, type(uint256).max - 1, type(uint256).max), type(uint256).max - 1);
+        assertEq(bound(1, type(uint256).max - 1, type(uint256).max), type(uint256).max);
     }
 
     function testCannotBoundMaxLessThanMin(
