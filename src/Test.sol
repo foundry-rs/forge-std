@@ -12,7 +12,6 @@ abstract contract Test is DSTest {
 
     event WARNING_Deprecated(string msg);
 
-    /// @custom:security non-reentrant
     Vm public constant vm = Vm(HEVM_ADDRESS);
     StdStorage internal stdstore;
 
@@ -385,7 +384,6 @@ library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
 
-    /// @custom:security non-reentrant
     Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
