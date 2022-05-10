@@ -217,6 +217,31 @@ contract StdStorageTest is Test {
         stdstore.target(address(test)).sig(test.tC.selector).find();
         stdstore.target(address(test)).sig(test.tD.selector).find();
     }
+
+    function testStorageReadBytes32() public {
+        bytes32 val = stdstore.target(address(test)).sig(test.tE.selector).read_bytes32();
+        assertEq(val, hex"1337");
+    }
+
+    function testStorageReadBool() public {
+        bool val = stdstore.target(address(test)).sig(test.tB.selector).read_bool();
+        assertEq(val, false);
+    }
+
+    function testStorageReadAddress() public {
+        address val = stdstore.target(address(test)).sig(test.tF.selector).read_address();
+        assertEq(val, address(1337));
+    }
+
+    function testStorageReadUint() public {
+        uint256 val = stdstore.target(address(test)).sig(test.exists.selector).read_uint();
+        assertEq(val, 1);
+    }
+
+    function testStorageReadInt() public {
+        int256 val = stdstore.target(address(test)).sig(test.tG.selector).read_int();
+        assertEq(val, type(int256).min);
+    }
 }
 
 contract StorageTest {
@@ -243,6 +268,10 @@ contract StorageTest {
     }
 
     mapping(address => bool) public map_bool;
+
+    bytes32 public tE = hex"1337";
+    address public tF = address(1337);
+    int256 public tG = type(int256).min;
 
     constructor() {
         basic = UnpackedStruct({
