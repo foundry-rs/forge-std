@@ -564,27 +564,23 @@ library stdStorage {
         delete self._depth;
     }
 
-    function read(StdStorage storage self) private returns (bytes32) {
+    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
         address t = self._target;
         uint256 s = find(self);
         return vm_std_store.load(t, bytes32(s));
     }
 
-    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
-        return read(self);
-    }
-
 
     function read_bool(StdStorage storage self) internal returns (bool) {
-        return read(self) == hex"00" ? false : true;
+        return read_bytes32(self) == hex"00" ? false : true;
     }
 
     function read_address(StdStorage storage self) internal returns (address) {
-        return address(uint160(uint256(read(self))));
+        return address(uint160(uint256(read_bytes32(self))));
     }
 
     function read_uint(StdStorage storage self) internal returns (uint256) {
-        return uint256(read(self));
+        return uint256(read_bytes32(self));
     }
 
     function read_int(StdStorage storage self) internal returns (int256) {
