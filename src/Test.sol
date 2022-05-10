@@ -10,6 +10,8 @@ import "./console2.sol";
 abstract contract Test is DSTest {
     using stdStorage for StdStorage;
 
+    uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+
     event WARNING_Deprecated(string msg);
 
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -131,7 +133,7 @@ abstract contract Test is DSTest {
         {
             result = min;
         }
-        else if (size == 115792089237316195423570985008687907853269984665640564039457584007913129639935)
+        else if (size == UINT256_MAX)
         {
             result = x;
         }
@@ -624,9 +626,11 @@ library stdStorage {
 //////////////////////////////////////////////////////////////////////////*/
 
 library stdMath {
+    int256 private constant INT256_MIN = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+
     function abs(int256 a) internal pure returns (uint256) {
         // Required or it will fail when `a = type(int256).min`
-        if (a == -57896044618658097711785492504343953926634992332820282019728792003956564819968)
+        if (a == INT256_MIN)
             return 57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
         return uint256(a >= 0 ? a : -a);
