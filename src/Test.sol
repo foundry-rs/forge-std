@@ -384,6 +384,9 @@ library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
 
+    uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    int256 private constant INT256_MAX = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
+
     Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
@@ -557,6 +560,38 @@ library stdStorage {
         delete self._sig;
         delete self._keys;
         delete self._depth;
+    }
+
+    function read(StdStorage storage self) private returns (bytes32) {
+        address t = self._target;
+        uint256 s = find(self);
+        return vm_std_store.load(t, bytes32(s));
+    }
+
+    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
+        return read(self);
+    }
+
+
+    function read_bool(StdStorage storage self) internal returns (bool) {
+        return read(self) == hex"00" ? false : true;
+    }
+
+    function read_address(StdStorage storage self) internal returns (address) {
+        return address(uint160(uint256(read(self))));
+    }
+
+    function read_uint(StdStorage storage self) internal returns (uint256) {
+        return uint256(read(self));
+    }
+
+    function read_int(StdStorage storage self) internal returns (int256) {
+        uint256 u = read_uint(self);
+        // convert from `uint` to `int`
+        if(u > uint256(INT256_MAX)) {
+            return 0 - int256(UINT256_MAX - u) - 1;
+        }
+        return int256(u);
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
