@@ -105,13 +105,13 @@ contract StdAssertionsTest is Test
     //////////////////////////////////////////////////////////////////////////*/
 
     function testAssertApproxEqAbs_Uint_Pass(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        vm.assume(StdMath.delta(a, b) <= maxDelta);
 
         t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
     }
 
     function testAssertApproxEqAbs_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+        vm.assume(StdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a ~= b not satisfied [uint]");
@@ -119,13 +119,13 @@ contract StdAssertionsTest is Test
     }
 
     function testAssertApproxEqAbs_UintErr_Pass(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        vm.assume(StdMath.delta(a, b) <= maxDelta);
 
         t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testAssertApproxEqAbs_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+        vm.assume(StdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
@@ -137,13 +137,13 @@ contract StdAssertionsTest is Test
     //////////////////////////////////////////////////////////////////////////*/
 
     function testAssertApproxEqAbs_Int_Pass(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        vm.assume(StdMath.delta(a, b) <= maxDelta);
 
         t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
     }
 
     function testAssertApproxEqAbs_Int_Fail(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+        vm.assume(StdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a ~= b not satisfied [int]");
@@ -151,13 +151,13 @@ contract StdAssertionsTest is Test
     }
 
     function testAssertApproxEqAbs_IntErr_Pass(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        vm.assume(StdMath.delta(a, b) <= maxDelta);
 
         t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testAssertApproxEqAbs_IntErr_Fail(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+        vm.assume(StdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
@@ -170,14 +170,14 @@ contract StdAssertionsTest is Test
 
     function testAssertApproxEqRel_Uint_Pass(uint256 a, uint256 b, uint256 maxPercentDelta) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
     }
 
     function testAssertApproxEqRel_Uint_Fail(uint256 a, uint256 b, uint256 maxPercentDelta) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) > maxPercentDelta);
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a ~= b not satisfied [uint]");
@@ -186,14 +186,14 @@ contract StdAssertionsTest is Test
 
     function testAssertApproxEqRel_UintErr_Pass(uint256 a, uint256 b, uint256 maxPercentDelta) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testAssertApproxEqRel_UintErr_Fail(uint256 a, uint256 b, uint256 maxPercentDelta) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) > maxPercentDelta);
 
         vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
@@ -206,14 +206,14 @@ contract StdAssertionsTest is Test
 
     function testAssertApproxEqRel_Int_Pass(int128 a, int128 b, uint128 maxPercentDelta) external {
         vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
     }
 
     function testAssertApproxEqRel_Int_Fail(int128 a, int128 b, uint128 maxPercentDelta) external {
         vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) > maxPercentDelta);
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a ~= b not satisfied [int]");
@@ -222,14 +222,14 @@ contract StdAssertionsTest is Test
 
     function testAssertApproxEqRel_IntErr_Pass(int128 a, int128 b, uint128 maxPercentDelta) external {
         vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testAssertApproxEqRel_IntErr_Fail(int128 a, int128 b, uint128 maxPercentDelta) external {
         vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+        vm.assume(StdMath.percentDelta(a, b) > maxPercentDelta);
 
         vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);

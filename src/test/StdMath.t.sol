@@ -6,39 +6,39 @@ import "../Test.sol";
 contract StdMathTest is Test
 {
     function testGetAbs() external {
-        assertEq(stdMath.abs(-50),      50);
-        assertEq(stdMath.abs(50),       50);
-        assertEq(stdMath.abs(-1337),    1337);
-        assertEq(stdMath.abs(0),        0);
+        assertEq(StdMath.abs(-50),      50);
+        assertEq(StdMath.abs(50),       50);
+        assertEq(StdMath.abs(-1337),    1337);
+        assertEq(StdMath.abs(0),        0);
 
-        assertEq(stdMath.abs(type(int256).min), (type(uint256).max >> 1) + 1);
-        assertEq(stdMath.abs(type(int256).max), (type(uint256).max >> 1));
+        assertEq(StdMath.abs(type(int256).min), (type(uint256).max >> 1) + 1);
+        assertEq(StdMath.abs(type(int256).max), (type(uint256).max >> 1));
     }
 
     function testGetAbs_Fuzz(int256 a) external {
         uint256 manualAbs = getAbs(a);
 
-        uint256 abs = stdMath.abs(a);
+        uint256 abs = StdMath.abs(a);
 
         assertEq(abs, manualAbs);
     }
 
     function testGetDelta_Uint() external {
-        assertEq(stdMath.delta(uint256(0),          uint256(0)),        0);
-        assertEq(stdMath.delta(uint256(0),          uint256(1337)),     1337);
-        assertEq(stdMath.delta(uint256(0),          type(uint64).max),  type(uint64).max);
-        assertEq(stdMath.delta(uint256(0),          type(uint128).max), type(uint128).max);
-        assertEq(stdMath.delta(uint256(0),          type(uint256).max), type(uint256).max);
+        assertEq(StdMath.delta(uint256(0),          uint256(0)),        0);
+        assertEq(StdMath.delta(uint256(0),          uint256(1337)),     1337);
+        assertEq(StdMath.delta(uint256(0),          type(uint64).max),  type(uint64).max);
+        assertEq(StdMath.delta(uint256(0),          type(uint128).max), type(uint128).max);
+        assertEq(StdMath.delta(uint256(0),          type(uint256).max), type(uint256).max);
 
-        assertEq(stdMath.delta(0,                   uint256(0)),        0);
-        assertEq(stdMath.delta(1337,                uint256(0)),        1337);
-        assertEq(stdMath.delta(type(uint64).max,    uint256(0)),        type(uint64).max);
-        assertEq(stdMath.delta(type(uint128).max,   uint256(0)),        type(uint128).max);
-        assertEq(stdMath.delta(type(uint256).max,   uint256(0)),        type(uint256).max);
+        assertEq(StdMath.delta(0,                   uint256(0)),        0);
+        assertEq(StdMath.delta(1337,                uint256(0)),        1337);
+        assertEq(StdMath.delta(type(uint64).max,    uint256(0)),        type(uint64).max);
+        assertEq(StdMath.delta(type(uint128).max,   uint256(0)),        type(uint128).max);
+        assertEq(StdMath.delta(type(uint256).max,   uint256(0)),        type(uint256).max);
 
-        assertEq(stdMath.delta(1337,                uint256(1337)),     0);
-        assertEq(stdMath.delta(type(uint256).max,   type(uint256).max), 0);
-        assertEq(stdMath.delta(5000,                uint256(1250)),     3750);
+        assertEq(StdMath.delta(1337,                uint256(1337)),     0);
+        assertEq(StdMath.delta(type(uint256).max,   type(uint256).max), 0);
+        assertEq(StdMath.delta(5000,                uint256(1250)),     3750);
     }
 
     function testGetDelta_Uint_Fuzz(uint256 a, uint256 b) external {
@@ -49,41 +49,41 @@ contract StdMathTest is Test
             manualDelta = b - a;
         }
 
-        uint256 delta = stdMath.delta(a, b);
+        uint256 delta = StdMath.delta(a, b);
 
         assertEq(delta, manualDelta);
     }
 
     function testGetDelta_Int() external {
-        assertEq(stdMath.delta(int256(0),           int256(0)),         0);
-        assertEq(stdMath.delta(int256(0),           int256(1337)),      1337);
-        assertEq(stdMath.delta(int256(0),           type(int64).max),   type(uint64).max >> 1);
-        assertEq(stdMath.delta(int256(0),           type(int128).max),  type(uint128).max >> 1);
-        assertEq(stdMath.delta(int256(0),           type(int256).max),  type(uint256).max >> 1);
+        assertEq(StdMath.delta(int256(0),           int256(0)),         0);
+        assertEq(StdMath.delta(int256(0),           int256(1337)),      1337);
+        assertEq(StdMath.delta(int256(0),           type(int64).max),   type(uint64).max >> 1);
+        assertEq(StdMath.delta(int256(0),           type(int128).max),  type(uint128).max >> 1);
+        assertEq(StdMath.delta(int256(0),           type(int256).max),  type(uint256).max >> 1);
 
-        assertEq(stdMath.delta(0,                   int256(0)),         0);
-        assertEq(stdMath.delta(1337,                int256(0)),         1337);
-        assertEq(stdMath.delta(type(int64).max,     int256(0)),         type(uint64).max >> 1);
-        assertEq(stdMath.delta(type(int128).max,    int256(0)),         type(uint128).max >> 1);
-        assertEq(stdMath.delta(type(int256).max,    int256(0)),         type(uint256).max >> 1);
+        assertEq(StdMath.delta(0,                   int256(0)),         0);
+        assertEq(StdMath.delta(1337,                int256(0)),         1337);
+        assertEq(StdMath.delta(type(int64).max,     int256(0)),         type(uint64).max >> 1);
+        assertEq(StdMath.delta(type(int128).max,    int256(0)),         type(uint128).max >> 1);
+        assertEq(StdMath.delta(type(int256).max,    int256(0)),         type(uint256).max >> 1);
 
-        assertEq(stdMath.delta(-0,                  int256(0)),         0);
-        assertEq(stdMath.delta(-1337,               int256(0)),         1337);
-        assertEq(stdMath.delta(type(int64).min,     int256(0)),         (type(uint64).max >> 1) + 1);
-        assertEq(stdMath.delta(type(int128).min,    int256(0)),         (type(uint128).max >> 1) + 1);
-        assertEq(stdMath.delta(type(int256).min,    int256(0)),         (type(uint256).max >> 1) + 1);
+        assertEq(StdMath.delta(-0,                  int256(0)),         0);
+        assertEq(StdMath.delta(-1337,               int256(0)),         1337);
+        assertEq(StdMath.delta(type(int64).min,     int256(0)),         (type(uint64).max >> 1) + 1);
+        assertEq(StdMath.delta(type(int128).min,    int256(0)),         (type(uint128).max >> 1) + 1);
+        assertEq(StdMath.delta(type(int256).min,    int256(0)),         (type(uint256).max >> 1) + 1);
 
-        assertEq(stdMath.delta(int256(0),           -0),                0);
-        assertEq(stdMath.delta(int256(0),           -1337),             1337);
-        assertEq(stdMath.delta(int256(0),           type(int64).min),   (type(uint64).max >> 1) + 1);
-        assertEq(stdMath.delta(int256(0),           type(int128).min),  (type(uint128).max >> 1) + 1);
-        assertEq(stdMath.delta(int256(0),           type(int256).min),  (type(uint256).max >> 1) + 1);
+        assertEq(StdMath.delta(int256(0),           -0),                0);
+        assertEq(StdMath.delta(int256(0),           -1337),             1337);
+        assertEq(StdMath.delta(int256(0),           type(int64).min),   (type(uint64).max >> 1) + 1);
+        assertEq(StdMath.delta(int256(0),           type(int128).min),  (type(uint128).max >> 1) + 1);
+        assertEq(StdMath.delta(int256(0),           type(int256).min),  (type(uint256).max >> 1) + 1);
 
-        assertEq(stdMath.delta(1337,                int256(1337)),      0);
-        assertEq(stdMath.delta(type(int256).max,    type(int256).max),  0);
-        assertEq(stdMath.delta(type(int256).min,    type(int256).min),  0);
-        assertEq(stdMath.delta(type(int256).min,    type(int256).max),  type(uint256).max);
-        assertEq(stdMath.delta(5000,                int256(1250)),      3750);
+        assertEq(StdMath.delta(1337,                int256(1337)),      0);
+        assertEq(StdMath.delta(type(int256).max,    type(int256).max),  0);
+        assertEq(StdMath.delta(type(int256).min,    type(int256).min),  0);
+        assertEq(StdMath.delta(type(int256).min,    type(int256).max),  type(uint256).max);
+        assertEq(StdMath.delta(5000,                int256(1250)),      3750);
     }
 
     function testGetDelta_Int_Fuzz(int256 a, int256 b) external {
@@ -102,26 +102,26 @@ contract StdMathTest is Test
             manualDelta = absA + absB;
         }
 
-        uint256 delta = stdMath.delta(a, b);
+        uint256 delta = StdMath.delta(a, b);
 
         assertEq(delta, manualDelta);
     }
 
     function testGetPercentDelta_Uint() external {
-        assertEq(stdMath.percentDelta(uint256(0),           uint256(1337)),     1e18);
-        assertEq(stdMath.percentDelta(uint256(0),           type(uint64).max),  1e18);
-        assertEq(stdMath.percentDelta(uint256(0),           type(uint128).max), 1e18);
-        assertEq(stdMath.percentDelta(uint256(0),           type(uint192).max), 1e18);
+        assertEq(StdMath.percentDelta(uint256(0),           uint256(1337)),     1e18);
+        assertEq(StdMath.percentDelta(uint256(0),           type(uint64).max),  1e18);
+        assertEq(StdMath.percentDelta(uint256(0),           type(uint128).max), 1e18);
+        assertEq(StdMath.percentDelta(uint256(0),           type(uint192).max), 1e18);
 
-        assertEq(stdMath.percentDelta(1337,                 uint256(1337)),     0);
-        assertEq(stdMath.percentDelta(type(uint192).max,    type(uint192).max), 0);
-        assertEq(stdMath.percentDelta(0,                    uint256(2500)),     1e18);
-        assertEq(stdMath.percentDelta(2500,                 uint256(2500)),     0);
-        assertEq(stdMath.percentDelta(5000,                 uint256(2500)),     1e18);
-        assertEq(stdMath.percentDelta(7500,                 uint256(2500)),     2e18);
+        assertEq(StdMath.percentDelta(1337,                 uint256(1337)),     0);
+        assertEq(StdMath.percentDelta(type(uint192).max,    type(uint192).max), 0);
+        assertEq(StdMath.percentDelta(0,                    uint256(2500)),     1e18);
+        assertEq(StdMath.percentDelta(2500,                 uint256(2500)),     0);
+        assertEq(StdMath.percentDelta(5000,                 uint256(2500)),     1e18);
+        assertEq(StdMath.percentDelta(7500,                 uint256(2500)),     2e18);
 
         vm.expectRevert(StdError.divisionError);
-        stdMath.percentDelta(uint256(1), 0);
+        StdMath.percentDelta(uint256(1), 0);
     }
 
     function testGetPercentDelta_Uint_Fuzz(uint192 a, uint192 b) external {
@@ -134,34 +134,34 @@ contract StdMathTest is Test
         }
 
         uint256 manualPercentDelta = manualDelta * 1e18 / b;
-        uint256 percentDelta = stdMath.percentDelta(a, b);
+        uint256 percentDelta = StdMath.percentDelta(a, b);
 
         assertEq(percentDelta, manualPercentDelta);
     }
 
     function testGetPercentDelta_Int() external {
-        assertEq(stdMath.percentDelta(int256(0),        int256(1337)),      1e18);
-        assertEq(stdMath.percentDelta(int256(0),        -1337),             1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int64).min),   1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int128).min),  1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int192).min),  1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int64).max),   1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int128).max),  1e18);
-        assertEq(stdMath.percentDelta(int256(0),        type(int192).max),  1e18);
+        assertEq(StdMath.percentDelta(int256(0),        int256(1337)),      1e18);
+        assertEq(StdMath.percentDelta(int256(0),        -1337),             1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int64).min),   1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int128).min),  1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int192).min),  1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int64).max),   1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int128).max),  1e18);
+        assertEq(StdMath.percentDelta(int256(0),        type(int192).max),  1e18);
 
-        assertEq(stdMath.percentDelta(1337,             int256(1337)),      0);
-        assertEq(stdMath.percentDelta(type(int192).max, type(int192).max),  0);
-        assertEq(stdMath.percentDelta(type(int192).min, type(int192).min),  0);
+        assertEq(StdMath.percentDelta(1337,             int256(1337)),      0);
+        assertEq(StdMath.percentDelta(type(int192).max, type(int192).max),  0);
+        assertEq(StdMath.percentDelta(type(int192).min, type(int192).min),  0);
 
-        assertEq(stdMath.percentDelta(type(int192).min, type(int192).max),  2e18); // rounds the 1 wei diff down
-        assertEq(stdMath.percentDelta(type(int192).max, type(int192).min),  2e18 - 1); // rounds the 1 wei diff down
-        assertEq(stdMath.percentDelta(0,                int256(2500)),      1e18);
-        assertEq(stdMath.percentDelta(2500,             int256(2500)),      0);
-        assertEq(stdMath.percentDelta(5000,             int256(2500)),      1e18);
-        assertEq(stdMath.percentDelta(7500,             int256(2500)),      2e18);
+        assertEq(StdMath.percentDelta(type(int192).min, type(int192).max),  2e18); // rounds the 1 wei diff down
+        assertEq(StdMath.percentDelta(type(int192).max, type(int192).min),  2e18 - 1); // rounds the 1 wei diff down
+        assertEq(StdMath.percentDelta(0,                int256(2500)),      1e18);
+        assertEq(StdMath.percentDelta(2500,             int256(2500)),      0);
+        assertEq(StdMath.percentDelta(5000,             int256(2500)),      1e18);
+        assertEq(StdMath.percentDelta(7500,             int256(2500)),      2e18);
 
         vm.expectRevert(StdError.divisionError);
-        stdMath.percentDelta(int256(1), 0);
+        StdMath.percentDelta(int256(1), 0);
     }
 
     function testGetPercentDelta_Int_Fuzz(int192 a, int192 b) external {
@@ -182,7 +182,7 @@ contract StdMathTest is Test
         }
 
         uint256 manualPercentDelta = manualDelta * 1e18 / absB;
-        uint256 percentDelta = stdMath.percentDelta(a, b);
+        uint256 percentDelta = StdMath.percentDelta(a, b);
 
         assertEq(percentDelta, manualPercentDelta);
     }
