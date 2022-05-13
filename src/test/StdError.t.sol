@@ -11,57 +11,57 @@ contract StdErrorsTest is Test {
     }
 
     function testExpectAssertion() public {
-        vm.expectRevert(stdError.assertionError);
+        vm.expectRevert(StdError.assertionError);
         test.assertionError();
     }
 
     function testExpectArithmetic() public {
-        vm.expectRevert(stdError.arithmeticError);
+        vm.expectRevert(StdError.arithmeticError);
         test.arithmeticError(10);
     }
 
     function testExpectDiv() public {
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert(StdError.divisionError);
         test.divError(0);
     }
 
     function testExpectMod() public {
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert(StdError.divisionError);
         test.modError(0);
     }
 
     function testExpectEnum() public {
-        vm.expectRevert(stdError.enumConversionError);
+        vm.expectRevert(StdError.enumConversionError);
         test.enumConversion(1);
     }
 
     function testExpectEncodeStg() public {
-        vm.expectRevert(stdError.encodeStorageError);
+        vm.expectRevert(StdError.encodeStorageError);
         test.encodeStgError();
     }
 
     function testExpectPop() public {
-        vm.expectRevert(stdError.popError);
+        vm.expectRevert(StdError.popError);
         test.pop();
     }
 
     function testExpectOOB() public {
-        vm.expectRevert(stdError.indexOOBError);
+        vm.expectRevert(StdError.indexOOBError);
         test.indexOOBError(1);
     }
 
     function testExpectMem() public {
-        vm.expectRevert(stdError.memOverflowError);
+        vm.expectRevert(StdError.memOverflowError);
         test.mem();
     }
 
     function testExpectIntern() public {
-        vm.expectRevert(stdError.zeroVarError);
+        vm.expectRevert(StdError.zeroVarError);
         test.intern();
     }
 
     function testExpectLowLvl() public {
-        vm.expectRevert(stdError.lowLevelError);
+        vm.expectRevert(StdError.lowLevelError);
         test.someArr(0);
     }
 }

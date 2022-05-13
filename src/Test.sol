@@ -351,7 +351,7 @@ abstract contract Test is DSTest {
                                 STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
 
-library stdError {
+library StdError {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
     bytes public constant arithmeticError = abi.encodeWithSignature("Panic(uint256)", 0x11);
     bytes public constant divisionError = abi.encodeWithSignature("Panic(uint256)", 0x12);

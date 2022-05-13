@@ -31,7 +31,7 @@ contract TestContract is Test {
     }
 
     function testExpectArithmetic() public {
-        vm.expectRevert(stdError.arithmeticError);
+        vm.expectRevert(StdError.arithmeticError);
         test.arithmeticError(10);
     }
 }
