@@ -72,6 +72,11 @@ abstract contract Test is DSTest {
         vm.startPrank(who, origin);
     }
 
+    function changePrank(address who) internal {
+        vm.stopPrank();
+        vm.startPrank(who);
+    }
+
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
         emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `deal` instead.");
