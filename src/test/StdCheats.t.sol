@@ -5,7 +5,7 @@ import "../Test.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
-    
+
     function setUp() public {
         test = new Bar();
     }
@@ -53,6 +53,16 @@ contract StdCheatsTest is Test {
         test.bar(address(this));
     }
 
+    function testChangePrank() public {
+        vm.startPrank(address(1337));
+        test.bar(address(1337));
+        changePrank(address(0xdead));
+        test.bar(address(0xdead));
+        changePrank(address(1337));
+        test.bar(address(1337));
+        vm.stopPrank();
+    }
+
     function testDeal() public {
         deal(address(this), 1 ether);
         assertEq(address(this).balance, 1 ether);
@@ -83,7 +93,6 @@ contract StdCheatsTest is Test {
         assertEq(bound(10, 150, 190), 160);
         assertEq(bound(300, 2800, 3200), 3100);
         assertEq(bound(9999, 1337, 6666), 6006);
-        
     }
 
     function testCannotBoundMaxLessThanMin() public {
