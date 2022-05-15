@@ -8,12 +8,12 @@ import "./Console2.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
 abstract contract Test is DSTest {
-    using stdStorage for StdStorage;
+    using StdStorage for StdStore;
 
     event WARNING_Deprecated(string msg);
 
     Vm public constant vm = Vm(HEVM_ADDRESS);
-    StdStorage internal stdstore;
+    StdStore internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     STD-CHEATS
@@ -369,7 +369,7 @@ library StdError {
                                 STD-STORAGE
 //////////////////////////////////////////////////////////////////////////*/
 
-struct StdStorage {
+struct StdStore {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
 
@@ -380,7 +380,7 @@ struct StdStorage {
     bytes32 _set;
 }
 
-library stdStorage {
+library StdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
 
@@ -403,7 +403,7 @@ library stdStorage {
     //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
-        StdStorage storage self
+        StdStore storage self
     )
         internal
         returns (uint256)
@@ -476,49 +476,49 @@ library stdStorage {
         return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
 
-    function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
+    function target(StdStore storage self, address _target) internal returns (StdStore storage) {
         self._target = _target;
         return self;
     }
 
-    function sig(StdStorage storage self, bytes4 _sig) internal returns (StdStorage storage) {
+    function sig(StdStore storage self, bytes4 _sig) internal returns (StdStore storage) {
         self._sig = _sig;
         return self;
     }
 
-    function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
+    function sig(StdStore storage self, string memory _sig) internal returns (StdStore storage) {
         self._sig = sigs(_sig);
         return self;
     }
 
-    function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
+    function with_key(StdStore storage self, address who) internal returns (StdStore storage) {
         self._keys.push(bytes32(uint256(uint160(who))));
         return self;
     }
 
-    function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
+    function with_key(StdStore storage self, uint256 amt) internal returns (StdStore storage) {
         self._keys.push(bytes32(amt));
         return self;
     }
-    function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
+    function with_key(StdStore storage self, bytes32 key) internal returns (StdStore storage) {
         self._keys.push(key);
         return self;
     }
 
-    function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
+    function depth(StdStore storage self, uint256 _depth) internal returns (StdStore storage) {
         self._depth = _depth;
         return self;
     }
 
-    function checked_write(StdStorage storage self, address who) internal {
+    function checked_write(StdStore storage self, address who) internal {
         checked_write(self, bytes32(uint256(uint160(who))));
     }
 
-    function checked_write(StdStorage storage self, uint256 amt) internal {
+    function checked_write(StdStore storage self, uint256 amt) internal {
         checked_write(self, bytes32(amt));
     }
 
-    function checked_write(StdStorage storage self, bool write) internal {
+    function checked_write(StdStore storage self, bool write) internal {
         bytes32 t;
         /// @solidity memory-safe-assembly
         assembly {
@@ -528,7 +528,7 @@ library stdStorage {
     }
 
     function checked_write(
-        StdStorage storage self,
+        StdStore storage self,
         bytes32 set
     ) internal {
         address who = self._target;

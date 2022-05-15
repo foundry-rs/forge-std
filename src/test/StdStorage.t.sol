@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../Test.sol";
 
 contract StdStorageTest is Test {
-    using stdStorage for StdStorage;
+    using StdStorage for StdStore;
 
     StorageTest test;
 
