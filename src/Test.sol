@@ -564,32 +564,31 @@ library stdStorage {
         delete self._depth;
     }
 
-    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
+    function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
         uint256 s = find(self);
-        return vm_std_store.load(t, bytes32(s));
+        return abi.encode(vm_std_store.load(t, bytes32(s)));
+    }
+
+    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
+        return abi.decode(read(self), (bytes32));
     }
 
 
     function read_bool(StdStorage storage self) internal returns (bool) {
-        return read_bytes32(self) == hex"00" ? false : true;
+        return abi.decode(read(self), (bool));
     }
 
     function read_address(StdStorage storage self) internal returns (address) {
-        return address(uint160(uint256(read_bytes32(self))));
+        return abi.decode(read(self), (address));
     }
 
     function read_uint(StdStorage storage self) internal returns (uint256) {
-        return uint256(read_bytes32(self));
+        return abi.decode(read(self), (uint256));
     }
 
     function read_int(StdStorage storage self) internal returns (int256) {
-        uint256 u = read_uint(self);
-        // convert from `uint` to `int`
-        if(u > uint256(INT256_MAX)) {
-            return 0 - int256(UINT256_MAX - u) - 1;
-        }
-        return int256(u);
+        return abi.decode(read(self), (int256));
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
