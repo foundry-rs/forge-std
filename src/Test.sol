@@ -128,7 +128,7 @@ abstract contract Test is DSTest {
     }
 
     function bound(uint256 x, uint256 min, uint256 max) public returns (uint256 result) {
-        require(min <= max, "MAX_LESS_THAN_MIN");
+        require(min <= max, "StdCheats bound(uint256,uint256,uint256): MAX_LESS_THAN_MIN");
 
         uint256 size = max - min;
 
@@ -162,6 +162,11 @@ abstract contract Test is DSTest {
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
+
+        require(
+            addr != address(0),
+            "StdCheats deployCode(string memory,bytes memory): Deployment failed"
+        );
     }
 
     function deployCode(string memory what)
@@ -173,6 +178,11 @@ abstract contract Test is DSTest {
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
+
+        require(
+            addr != address(0),
+            "StdCheats deployCode(string memory): Deployment failed"
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -468,10 +478,10 @@ library stdStorage {
                 vm_std_store.store(who, reads[i], prev);
             }
         } else {
-            require(false, "No storage use detected for target");
+            require(false, "StdCheats find(StdStorage storage): No storage use detected for target");
         }
 
-        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "NotFound");
+        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "StdCheats find(StdStorage storage): NotFound");
 
         delete self._target;
         delete self._sig;
