@@ -16,10 +16,10 @@ contract StdAssertionsTest is Test
                                     FAIL(STRING)
     //////////////////////////////////////////////////////////////////////////*/
 
-    function testShouldFail(string memory err) external {
-        vm.expectEmit(true, false, false, true);
-        emit log_named_string("Error", err);
-        t._fail(err);
+    function testShouldFail() external {
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        t._fail(CUSTOM_ERROR);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
