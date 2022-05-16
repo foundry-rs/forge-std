@@ -128,7 +128,7 @@ abstract contract Test is DSTest {
     }
 
     function bound(uint256 x, uint256 min, uint256 max) public returns (uint256 result) {
-        require(min <= max, "StdCheats bound(uint256,uint256,uint256): MAX_LESS_THAN_MIN");
+        require(min <= max, "Test bound(uint256,uint256,uint256): Max is less than min.");
 
         uint256 size = max - min;
 
@@ -165,7 +165,7 @@ abstract contract Test is DSTest {
 
         require(
             addr != address(0),
-            "StdCheats deployCode(string memory,bytes memory): Deployment failed"
+            "Test deployCode(string,bytes): Deployment failed."
         );
     }
 
@@ -181,7 +181,7 @@ abstract contract Test is DSTest {
 
         require(
             addr != address(0),
-            "StdCheats deployCode(string memory): Deployment failed"
+            "Test deployCode(string): Deployment failed."
         );
     }
 
@@ -447,7 +447,7 @@ library stdStorage {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
             if (fdat != curr) {
-                require(false, "Packed slot. This would cause dangerous overwriting and currently isnt supported");
+                require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isnt supported");
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
             self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
@@ -478,10 +478,10 @@ library stdStorage {
                 vm_std_store.store(who, reads[i], prev);
             }
         } else {
-            require(false, "StdCheats find(StdStorage storage): No storage use detected for target");
+            require(false, "stdStorage find(StdStorage): No storage use detected for target.");
         }
 
-        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "StdCheats find(StdStorage storage): NotFound");
+        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "stdStorage find(StdStorage): Slot(s) not found.");
 
         delete self._target;
         delete self._sig;
@@ -565,7 +565,7 @@ library stdStorage {
         bytes32 curr = vm_std_store.load(who, slot);
 
         if (fdat != curr) {
-            require(false, "Packed slot. This would cause dangerous overwriting and currently isnt supported");
+            require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isnt supported.");
         }
         vm_std_store.store(who, slot, set);
         delete self._target;
