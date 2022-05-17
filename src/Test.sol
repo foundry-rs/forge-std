@@ -10,6 +10,8 @@ import "./console2.sol";
 abstract contract Test is DSTest {
     using stdStorage for StdStorage;
 
+    uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+
     event WARNING_Deprecated(string msg);
 
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -136,7 +138,7 @@ abstract contract Test is DSTest {
         {
             result = min;
         }
-        else if (size == 115792089237316195423570985008687907853269984665640564039457584007913129639935)
+        else if (size == UINT256_MAX)
         {
             result = x;
         }
@@ -394,6 +396,9 @@ library stdStorage {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
 
+    uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    int256 private constant INT256_MAX = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
+
     Vm private constant vm_std_store = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(
@@ -569,6 +574,33 @@ library stdStorage {
         delete self._depth;
     }
 
+    function read(StdStorage storage self) private returns (bytes memory) {
+        address t = self._target;
+        uint256 s = find(self);
+        return abi.encode(vm_std_store.load(t, bytes32(s)));
+    }
+
+    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
+        return abi.decode(read(self), (bytes32));
+    }
+
+
+    function read_bool(StdStorage storage self) internal returns (bool) {
+        return abi.decode(read(self), (bool));
+    }
+
+    function read_address(StdStorage storage self) internal returns (address) {
+        return abi.decode(read(self), (address));
+    }
+
+    function read_uint(StdStorage storage self) internal returns (uint256) {
+        return abi.decode(read(self), (uint256));
+    }
+
+    function read_int(StdStorage storage self) internal returns (int256) {
+        return abi.decode(read(self), (int256));
+    }
+
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
         bytes32 out;
 
@@ -599,9 +631,11 @@ library stdStorage {
 //////////////////////////////////////////////////////////////////////////*/
 
 library stdMath {
+    int256 private constant INT256_MIN = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+
     function abs(int256 a) internal pure returns (uint256) {
         // Required or it will fail when `a = type(int256).min`
-        if (a == -57896044618658097711785492504343953926634992332820282019728792003956564819968)
+        if (a == INT256_MIN)
             return 57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
         return uint256(a >= 0 ? a : -a);
