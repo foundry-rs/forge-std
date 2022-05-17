@@ -13,6 +13,16 @@ contract StdAssertionsTest is Test
     TestTest t = new TestTest();
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    FAIL(STRING)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testShouldFail() external {
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        t._fail(CUSTOM_ERROR);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                     ASSERT_FALSE
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -257,6 +267,10 @@ contract TestTest is Test
         } else {
             require(postState == false, "unexpected failure was triggered");
         }
+    }
+
+    function _fail(string memory err) external expectFailure(true) {
+        fail(err);
     }
 
     function _assertFalse(bool data, bool expectFail) external expectFailure(expectFail) {

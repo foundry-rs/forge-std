@@ -179,6 +179,11 @@ abstract contract Test is DSTest {
                                     STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    function fail(string memory err) internal virtual {
+        emit log_named_string("Error", err);
+        fail();
+    }
+
     function assertFalse(bool data) internal virtual {
         assertTrue(!data);
     }
