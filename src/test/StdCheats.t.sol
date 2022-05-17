@@ -96,7 +96,7 @@ contract StdCheatsTest is Test {
     }
 
     function testCannotBoundMaxLessThanMin() public {
-        vm.expectRevert(bytes("MAX_LESS_THAN_MIN"));
+        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
         bound(5, 100, 10);
     }
 
@@ -124,7 +124,7 @@ contract StdCheatsTest is Test {
         uint256 max
     ) public {
         vm.assume(min > max);
-        vm.expectRevert(bytes("MAX_LESS_THAN_MIN"));
+        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);
     }
 
@@ -136,6 +136,11 @@ contract StdCheatsTest is Test {
     function testDeployCodeNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest");
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
+    }
+
+    function testDeployCodeFail() public {
+        vm.expectRevert(bytes("Test deployCode(string): Deployment failed."));
+        this.deployCode("StdCheats.t.sol:RevertingContract");
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {
@@ -179,4 +184,10 @@ contract Bar {
     /// `DEAL` STDCHEAT
     mapping (address => uint256) public balanceOf;
     uint256 public totalSupply;
+}
+
+contract RevertingContract {
+    constructor() {
+        revert();
+    }
 }
