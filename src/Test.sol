@@ -221,19 +221,11 @@ abstract contract Test is DSTest {
     }
 
     function assertEq(bytes memory a, bytes memory b) internal {
-        if (keccak256(a) != keccak256(b)) {
-            emit log            ("Error: a == b not satisfied [bytes]");
-            emit log_named_bytes("  Expected", b);
-            emit log_named_bytes("    Actual", a);
-            fail();
-        }
+        assertEq0(a, b);
     }
 
     function assertEq(bytes memory a, bytes memory b, string memory err) internal {
-        if (keccak256(a) != keccak256(b)) {
-            emit log_named_string   ("Error", err);
-            assertEq(a, b);
-        }
+        assertEq0(a, b, err);
     }
 
     function assertApproxEqAbs(
