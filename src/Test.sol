@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./Vm.sol";
+import "./Script.sol";
 import "ds-test/test.sol";
-import "./console.sol";
-import "./console2.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
-abstract contract Test is DSTest {
+abstract contract Test is DSTest, Script {
     using stdStorage for StdStorage;
 
     uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     event WARNING_Deprecated(string msg);
 
-    Vm public constant vm = Vm(HEVM_ADDRESS);
     StdStorage internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
