@@ -225,6 +225,40 @@ abstract contract Test is DSTest, Script {
         assertEq0(a, b, err);
     }
 
+    function assertEq(uint256[] memory a, uint256[] memory b) internal {
+        if (a.length != b.length) {
+            emit log("Error: a.length == b.length not satisifed");
+            fail();
+        }
+
+        for (uint256 i = 0; i < a.length;) {
+            if (a[i] != b[i]) {
+                emit log("Error: a[] == b[] not satisifed");
+                assertEq(a[i], b[i]);
+            }
+            unchecked {
+                i += 1;
+            }
+        }
+    }
+
+    function assertEq(int256[] memory a, int256[] memory b) internal {
+        if (a.length != b.length) {
+            emit log("Error: a.length == b.length not satisifed");
+            fail();
+        }
+
+        for (uint256 i = 0; i < a.length;) {
+            if (a[i] != b[i]) {
+                emit log("Error: a[] == b[] not satisifed");
+                assertEq(a[i], b[i]);
+            }
+            unchecked {
+                i += 1;
+            }
+        }
+    }
+
     function assertApproxEqAbs(
         uint256 a,
         uint256 b,
