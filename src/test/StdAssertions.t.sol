@@ -111,6 +111,136 @@ contract StdAssertionsTest is Test
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    ASSERT_EQ(ARRAY)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertEq_UintArr_Pass(uint256 e0, uint256 e1, uint256 e2) public {
+        uint256[] memory a = new uint256[](3);
+        a[0] = e0;
+        a[1] = e1;
+        a[2] = e2;
+        uint256[] memory b = new uint256[](3);
+        b[0] = e0;
+        b[1] = e1;
+        b[2] = e2;
+
+        t._assertEq(a, b, EXPECT_PASS);
+    }
+
+    function testAssertEq_IntArr_Pass(int256 e0, int256 e1, int256 e2) public {
+        int256[] memory a = new int256[](3);
+        a[0] = e0;
+        a[1] = e1;
+        a[2] = e2;
+        int256[] memory b = new int256[](3);
+        b[0] = e0;
+        b[1] = e1;
+        b[2] = e2;
+
+        t._assertEq(a, b, EXPECT_PASS);
+    }
+
+    function testAssertEq_UintArr_FailEl(uint256 e1) public {
+        vm.assume(e1 != 0);
+        uint256[] memory a = new uint256[](3);
+        uint256[] memory b = new uint256[](3);
+        b[1] = e1;
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a[] == b[] not satisfied");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+    function testAssertEq_IntArr_FailEl(int256 e1) public {
+        vm.assume(e1 != 0);
+        int256[] memory a = new int256[](3);
+        int256[] memory b = new int256[](3);
+        b[1] = e1;
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a[] == b[] not satisfied");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+    function testAssertEq_UintArrErr_FailEl(uint256 e1) public {
+        vm.assume(e1 != 0);
+        uint256[] memory a = new uint256[](3);
+        uint256[] memory b = new uint256[](3);
+        b[1] = e1;
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a[] == b[] not satisfied");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    function testAssertEq_IntArrErr_FailEl(int256 e1) public {
+        vm.assume(e1 != 0);
+        int256[] memory a = new int256[](3);
+        int256[] memory b = new int256[](3);
+        b[1] = e1;
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a[] == b[] not satisfied");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    function testAssertEq_UintArr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        uint256[] memory a = new uint256[](lenA);
+        uint256[] memory b = new uint256[](lenB);
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a.length == b.length not satisfied");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+    function testAssertEq_IntArr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        int256[] memory a = new int256[](lenA);
+        int256[] memory b = new int256[](lenB);
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a.length == b.length not satisfied");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+    function testAssertEq_UintArrErr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        uint256[] memory a = new uint256[](lenA);
+        uint256[] memory b = new uint256[](lenB);
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a.length == b.length not satisfied");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    function testAssertEq_IntArrErr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        int256[] memory a = new int256[](lenA);
+        int256[] memory b = new int256[](lenB);
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a.length == b.length not satisfied");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                     APPROX_EQ_ABS(UINT)
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -300,6 +430,22 @@ contract TestTest is Test
     ) external expectFailure(expectFail) {
         assertEq(a, b, err);
     }
+
+    function _assertEq(uint256[] memory a, uint256[] memory b, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b);
+    }    
+
+    function _assertEq(int256[] memory a, int256[] memory b, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b);
+    }   
+
+    function _assertEq(uint256[] memory a, uint256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b, err);
+    }    
+
+    function _assertEq(int256[] memory a, int256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b, err);
+    }   
 
     function _assertApproxEqAbs(
         uint256 a,

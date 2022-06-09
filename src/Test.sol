@@ -225,6 +225,62 @@ abstract contract Test is DSTest, Script {
         assertEq0(a, b, err);
     }
 
+    function assertEq(uint256[] memory a, uint256[] memory b) internal {
+        if (a.length != b.length) {
+            emit log("Error: a.length == b.length not satisfied");
+            fail();
+        } else {
+            for (uint256 i = 0; i < a.length; ++i) {
+                if (a[i] != b[i]) {
+                    emit log("Error: a[] == b[] not satisfied");
+                    assertEq(a[i], b[i]);
+                }
+            }
+        }
+    }
+
+    function assertEq(int256[] memory a, int256[] memory b) internal {
+        if (a.length != b.length) {
+            emit log("Error: a.length == b.length not satisfied");
+            fail();
+        } else {
+            for (uint256 i = 0; i < a.length; ++i) {
+                if (a[i] != b[i]) {
+                    emit log("Error: a[] == b[] not satisfied");
+                    assertEq(a[i], b[i]);
+                }
+            }
+        }
+    }
+
+    function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal {
+        if (a.length != b.length) {
+            emit log_named_string("Error", err);
+            assertEq(a, b);
+        } else {
+            for (uint256 i = 0; i < a.length; ++i) {
+                if (a[i] != b[i]) {
+                    emit log_named_string("Error", err);
+                    assertEq(a, b);
+                }
+            }
+        }
+    }
+
+    function assertEq(int256[] memory a, int256[] memory b, string memory err) internal {
+        if (a.length != b.length) {
+            emit log_named_string("Error", err);
+            assertEq(a, b);
+        } else {
+            for (uint256 i = 0; i < a.length; ++i) {
+                if (a[i] != b[i]) {
+                    emit log_named_string("Error", err);
+                    assertEq(a, b);
+                }
+            }
+        }
+    }
+
     function assertApproxEqAbs(
         uint256 a,
         uint256 b,
