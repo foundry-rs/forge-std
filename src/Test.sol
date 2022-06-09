@@ -251,6 +251,7 @@ abstract contract Test is DSTest, Script {
                 }
             }
         }
+    }
 
     function assertApproxEqAbs(
         uint256 a,
