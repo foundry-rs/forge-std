@@ -249,12 +249,14 @@ abstract contract Test is DSTest, Script {
 
     function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log_named_string("Error", err);
             assertEq(a, b);
         }
     }
 
     function assertEq(int256[] memory a, int256[] memory b, string memory err) internal {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log_named_string("Error", err);
             assertEq(a, b);
         }
     }
