@@ -11,6 +11,10 @@ abstract contract Test is DSTest, Script {
     uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     event WARNING_Deprecated(string msg);
+    event log_array(uint256[] val);
+    event log_array(int256[] val);
+    event log_named_array(string key, uint256[] val);
+    event log_named_array(string key, int256[] val);
 
     StdStorage internal stdstore;
 
@@ -226,58 +230,34 @@ abstract contract Test is DSTest, Script {
     }
 
     function assertEq(uint256[] memory a, uint256[] memory b) internal {
-        if (a.length != b.length) {
-            emit log("Error: a.length == b.length not satisfied");
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log("Error: a == b not satisfied [uint[]]");
+            emit log_named_array("  Expected", b);
+            emit log_named_array("    Actual", a);
             fail();
-        } else {
-            for (uint256 i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    emit log("Error: a[] == b[] not satisfied");
-                    assertEq(a[i], b[i]);
-                }
-            }
         }
     }
 
     function assertEq(int256[] memory a, int256[] memory b) internal {
-        if (a.length != b.length) {
-            emit log("Error: a.length == b.length not satisfied");
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log("Error: a == b not satisfied [int[]]");
+            emit log_named_array("  Expected", b);
+            emit log_named_array("    Actual", a);
             fail();
-        } else {
-            for (uint256 i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    emit log("Error: a[] == b[] not satisfied");
-                    assertEq(a[i], b[i]);
-                }
-            }
         }
     }
 
     function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal {
-        if (a.length != b.length) {
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
-        } else {
-            for (uint256 i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    emit log_named_string("Error", err);
-                    assertEq(a, b);
-                }
-            }
         }
     }
 
     function assertEq(int256[] memory a, int256[] memory b, string memory err) internal {
-        if (a.length != b.length) {
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
-        } else {
-            for (uint256 i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    emit log_named_string("Error", err);
-                    assertEq(a, b);
-                }
-            }
         }
     }
 

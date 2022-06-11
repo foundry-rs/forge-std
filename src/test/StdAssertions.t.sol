@@ -147,7 +147,7 @@ contract StdAssertionsTest is Test
         b[1] = e1;
 
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a[] == b[] not satisfied");
+        emit log("Error: a == b not satisfied [uint[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -158,7 +158,7 @@ contract StdAssertionsTest is Test
         b[1] = e1;
 
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a[] == b[] not satisfied");
+        emit log("Error: a == b not satisfied [int[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -168,10 +168,10 @@ contract StdAssertionsTest is Test
         uint256[] memory b = new uint256[](3);
         b[1] = e1;
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a[] == b[] not satisfied");
+        emit log("Error: a == b not satisfied [uint[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
@@ -181,10 +181,10 @@ contract StdAssertionsTest is Test
         int256[] memory b = new int256[](3);
         b[1] = e1;
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a[] == b[] not satisfied");
+        emit log("Error: a == b not satisfied [int[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
@@ -196,7 +196,7 @@ contract StdAssertionsTest is Test
         uint256[] memory b = new uint256[](lenB);
 
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a.length == b.length not satisfied");
+        emit log("Error: a == b not satisfied [uint[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -208,7 +208,7 @@ contract StdAssertionsTest is Test
         int256[] memory b = new int256[](lenB);
 
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a.length == b.length not satisfied");
+        emit log("Error: a == b not satisfied [int[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -219,10 +219,10 @@ contract StdAssertionsTest is Test
         uint256[] memory a = new uint256[](lenA);
         uint256[] memory b = new uint256[](lenB);
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a.length == b.length not satisfied");
+        emit log("Error: a == b not satisfied [uint[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
@@ -233,10 +233,10 @@ contract StdAssertionsTest is Test
         int256[] memory a = new int256[](lenA);
         int256[] memory b = new int256[](lenB);
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
-        emit log("Error: a.length == b.length not satisfied");
+        emit log("Error: a == b not satisfied [int[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
