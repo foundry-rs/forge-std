@@ -486,7 +486,7 @@ library stdStorage {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
             if (fdat != curr) {
-                require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isnt supported");
+                require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
             self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
@@ -604,7 +604,7 @@ library stdStorage {
         bytes32 curr = vm_std_store.load(who, slot);
 
         if (fdat != curr) {
-            require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isnt supported.");
+            require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
         }
         vm_std_store.store(who, slot, set);
         delete self._target;
