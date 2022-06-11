@@ -8,15 +8,21 @@ import "ds-test/test.sol";
 abstract contract Test is DSTest, Script {
     using stdStorage for StdStorage;
 
-    uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
-
     event WARNING_Deprecated(string msg);
+
+    uint256 private constant UINT256_MAX =
+        115792089237316195423570985008687907853269984665640564039457584007913129639935;
+
+    StdStorage internal stdstore;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    STD-LOGS
+    //////////////////////////////////////////////////////////////////////////*/
+
     event log_array(uint256[] val);
     event log_array(int256[] val);
     event log_named_array(string key, uint256[] val);
     event log_named_array(string key, int256[] val);
-
-    StdStorage internal stdstore;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     STD-CHEATS
@@ -90,7 +96,7 @@ abstract contract Test is DSTest, Script {
             .checked_write(give);
     }
 
-    // The same as Hevm's `deal`
+    // The same as Vm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) public {
         vm.deal(to, give);
@@ -408,7 +414,7 @@ library stdError {
     bytes public constant indexOOBError = abi.encodeWithSignature("Panic(uint256)", 0x32);
     bytes public constant memOverflowError = abi.encodeWithSignature("Panic(uint256)", 0x41);
     bytes public constant zeroVarError = abi.encodeWithSignature("Panic(uint256)", 0x51);
-    // DEPRECATED: Use Hevm's `expectRevert` without any arguments instead
+    // DEPRECATED: Use Vm's `expectRevert` without any arguments instead
     bytes public constant lowLevelError = bytes(""); // `0x`
 }
 
