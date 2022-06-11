@@ -8,8 +8,6 @@ import "ds-test/test.sol";
 abstract contract Test is DSTest, Script {
     using stdStorage for StdStorage;
 
-    event WARNING_Deprecated(string msg);
-
     uint256 private constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
@@ -88,7 +86,7 @@ abstract contract Test is DSTest, Script {
 
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) public {
-        emit WARNING_Deprecated("The `tip` stdcheat has been deprecated. Use `deal` instead.");
+        emit log_named_string("WARNING", "Test tip(address,address,uint256): The `tip` stdcheat has been deprecated. Use `deal` instead.");
         stdstore
             .target(token)
             .sig(0x70a08231)
