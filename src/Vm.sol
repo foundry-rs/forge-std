@@ -3,13 +3,13 @@ pragma solidity >=0.6.0;
 pragma experimental ABIEncoderV2;
 
 interface Vm {
-    // Set block.timestamp (newTimestamp)
+    // Sets block.timestamp (newTimestamp)
     function warp(uint256) external;
-    // Set block.height (newHeight)
+    // Sets block.height (newHeight)
     function roll(uint256) external;
-    // Set block.basefee (newBasefee)
+    // Sets block.basefee (newBasefee)
     function fee(uint256) external;
-    // Set block.chainid
+    // Sets block.chainid
     function chainId(uint256) external;
     // Loads a storage slot from an address (who, slot)
     function load(address,bytes32) external returns (bytes32);
@@ -17,17 +17,17 @@ interface Vm {
     function store(address,bytes32,bytes32) external;
     // Signs data, (privateKey, digest) => (v, r, s)
     function sign(uint256,bytes32) external returns (uint8,bytes32,bytes32);
-    // Gets address for a given private key, (privateKey) => (address)
+    // Gets the address for a given private key, (privateKey) => (address)
     function addr(uint256) external returns (address);
     // Gets the nonce of an account
     function getNonce(address) external returns (uint64);
     // Sets the nonce of an account; must be higher than the current nonce of the account
     function setNonce(address, uint64) external;
-    // Performs a foreign function call via terminal, (stringInputs) => (result)
+    // Performs a foreign function call via the terminal, (stringInputs) => (result)
     function ffi(string[] calldata) external returns (bytes memory);
-    // Set environment variables, (name, value)
+    // Sets environment variables, (name, value)
     function setEnv(string calldata, string calldata) external;
-    // Read environment variables, (name) => (value)
+    // Reads environment variables, (name) => (value)
     function envBool(string calldata) external returns (bool);
     function envUint(string calldata) external returns (uint256);
     function envInt(string calldata) external returns (int256);
@@ -35,7 +35,7 @@ interface Vm {
     function envBytes32(string calldata) external returns (bytes32);
     function envString(string calldata) external returns (string memory);
     function envBytes(string calldata) external returns (bytes memory);
-    // Read environment variables as arrays, (name, delim) => (value[])
+    // Reads environment variables as arrays, (name, delim) => (value[])
     function envBool(string calldata, string calldata) external returns (bool[] memory);
     function envUint(string calldata, string calldata) external returns (uint256[] memory);
     function envInt(string calldata, string calldata) external returns (int256[] memory);
@@ -61,7 +61,7 @@ interface Vm {
     function expectRevert(bytes calldata) external;
     function expectRevert(bytes4) external;
     function expectRevert() external;
-    // Record all storage reads and writes
+    // Records all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
     function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
@@ -80,10 +80,10 @@ interface Vm {
     function mockCall(address,uint256,bytes calldata,bytes calldata) external;
     // Clears all mocked calls
     function clearMockedCalls() external;
-    // Expect a call to an address with the specified calldata.
-    // Calldata can either be strict or a partial match
+    // Expects a call to an address with the specified calldata.
+    // Calldata can either be a strict or a partial match
     function expectCall(address,bytes calldata) external;
-    // Expect a call to an address with the specified msg.value and calldata
+    // Expects a call to an address with the specified msg.value and calldata
     function expectCall(address,uint256,bytes calldata) external;
     // Gets the code from an artifact file. Takes in the relative path to the json file
     function getCode(string calldata) external returns (bytes memory);
@@ -91,15 +91,15 @@ interface Vm {
     function label(address, string calldata) external;
     // If the condition is false, discard this run's fuzz inputs and generate new ones
     function assume(bool) external;
-    // Set block.coinbase (who)
+    // Sets block.coinbase (who)
     function coinbase(address) external;
     // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
     function broadcast() external;
     // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
     function broadcast(address) external;
-    // Using the address that calls the test contract, has the all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
+    // Using the address that calls the test contract, has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
     function startBroadcast() external;
-    // Has the all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
+    // Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
     function startBroadcast(address) external;
     // Stops collecting onchain transactions
     function stopBroadcast() external;
