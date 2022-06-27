@@ -140,6 +140,19 @@ contract StdAssertionsTest is Test
         t._assertEq(a, b, EXPECT_PASS);
     }
 
+    function testAssertEq_AddressArr_Pass(address e0, address e1, address e2) public {
+        address[] memory a = new address[](3);
+        a[0] = e0;
+        a[1] = e1;
+        a[2] = e2;
+        address[] memory b = new address[](3);
+        b[0] = e0;
+        b[1] = e1;
+        b[2] = e2;
+
+        t._assertEq(a, b, EXPECT_PASS);
+    }
+
     function testAssertEq_UintArr_FailEl(uint256 e1) public {
         vm.assume(e1 != 0);
         uint256[] memory a = new uint256[](3);
@@ -159,6 +172,18 @@ contract StdAssertionsTest is Test
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [int[]]");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+
+    function testAssertEq_AddressArr_FailEl(address e1) public {
+        vm.assume(e1 != address(0));
+        address[] memory a = new address[](3);
+        address[] memory b = new address[](3);
+        b[1] = e1;
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a == b not satisfied [address[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -188,6 +213,20 @@ contract StdAssertionsTest is Test
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
+
+    function testAssertEq_AddressArrErr_FailEl(address e1) public {
+        vm.assume(e1 != address(0));
+        address[] memory a = new address[](3);
+        address[] memory b = new address[](3);
+        b[1] = e1;
+
+        vm.expectEmit(true, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a == b not satisfied [address[]]");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
     function testAssertEq_UintArr_FailLen(uint256 lenA, uint256 lenB) public {
         vm.assume(lenA != lenB);
         vm.assume(lenA <= 10000);
@@ -209,6 +248,18 @@ contract StdAssertionsTest is Test
 
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [int[]]");
+        t._assertEq(a, b, EXPECT_FAIL);
+    }
+
+    function testAssertEq_AddressArr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        address[] memory a = new address[](lenA);
+        address[] memory b = new address[](lenB);
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a == b not satisfied [address[]]");
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
@@ -237,6 +288,20 @@ contract StdAssertionsTest is Test
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [int[]]");
+        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    function testAssertEq_AddressArrErr_FailLen(uint256 lenA, uint256 lenB) public {
+        vm.assume(lenA != lenB);
+        vm.assume(lenA <= 10000);
+        vm.assume(lenB <= 10000);
+        address[] memory a = new address[](lenA);
+        address[] memory b = new address[](lenB);
+
+        vm.expectEmit(true, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a == b not satisfied [address[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
@@ -433,19 +498,28 @@ contract TestTest is Test
 
     function _assertEq(uint256[] memory a, uint256[] memory b, bool expectFail) external expectFailure(expectFail) {
         assertEq(a, b);
-    }    
+    }
 
     function _assertEq(int256[] memory a, int256[] memory b, bool expectFail) external expectFailure(expectFail) {
         assertEq(a, b);
-    }   
+    }
+
+    function _assertEq(address[] memory a, address[] memory b, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b);
+    }
 
     function _assertEq(uint256[] memory a, uint256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
         assertEq(a, b, err);
-    }    
+    }
 
     function _assertEq(int256[] memory a, int256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
         assertEq(a, b, err);
-    }   
+    }
+
+    function _assertEq(address[] memory a, address[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+        assertEq(a, b, err);
+    }
+
 
     function _assertApproxEqAbs(
         uint256 a,
