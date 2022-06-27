@@ -134,7 +134,7 @@ abstract contract Test is DSTest, Script {
         }
     }
 
-    function bound(uint256 x, uint256 min, uint256 max) public returns (uint256 result) {
+    function bound(uint256 x, uint256 min, uint256 max) internal virtual returns (uint256 result) {
         require(min <= max, "Test bound(uint256,uint256,uint256): Max is less than min.");
 
         uint256 size = max - min;
