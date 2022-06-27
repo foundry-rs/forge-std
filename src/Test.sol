@@ -19,8 +19,10 @@ abstract contract Test is DSTest, Script {
 
     event log_array(uint256[] val);
     event log_array(int256[] val);
+    event log_array(address[] val);
     event log_named_array(string key, uint256[] val);
     event log_named_array(string key, int256[] val);
+    event log_named_array(string key, address[] val);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     STD-CHEATS
@@ -251,6 +253,15 @@ abstract contract Test is DSTest, Script {
         }
     }
 
+    function assertEq(address[] memory a, address[] memory b) internal {
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log("Error: a == b not satisfied [address[]]");
+            emit log_named_array("  Expected", b);
+            emit log_named_array("    Actual", a);
+            fail();
+        }
+    }
+
     function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
@@ -259,6 +270,14 @@ abstract contract Test is DSTest, Script {
     }
 
     function assertEq(int256[] memory a, int256[] memory b, string memory err) internal {
+        if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
+            emit log_named_string("Error", err);
+            assertEq(a, b);
+        }
+    }
+
+
+    function assertEq(address[] memory a, address[] memory b, string memory err) internal {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
