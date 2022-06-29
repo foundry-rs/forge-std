@@ -223,9 +223,23 @@ contract StdStorageTest is Test {
         assertEq(val, hex"1337");
     }
 
-    function testStorageReadBool() public {
+    function testStorageReadBool_False() public {
         bool val = stdstore.target(address(test)).sig(test.tB.selector).read_bool();
         assertEq(val, false);
+    }
+
+    function testStorageReadBool_True() public {
+        bool val = stdstore.target(address(test)).sig(test.tH.selector).read_bool();
+        assertEq(val, true);
+    }
+
+    function testStorageReadBool_Revert() public {
+        vm.expectRevert("stdStorage find(StdStorage): Cannot decode. Make sure you are reading a bool.");
+        this.readNonBoolValue();
+    }
+
+    function readNonBoolValue() public {
+        stdstore.target(address(test)).sig(test.tE.selector).read_bool();
     }
 
     function testStorageReadAddress() public {
@@ -272,6 +286,7 @@ contract StorageTest {
     bytes32 public tE = hex"1337";
     address public tF = address(1337);
     int256 public tG = type(int256).min;
+    bool public tH = true;
 
     constructor() {
         basic = UnpackedStruct({
