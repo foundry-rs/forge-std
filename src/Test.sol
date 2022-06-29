@@ -647,7 +647,7 @@ library stdStorage {
         int256 v = read_int(self);
         if (v == 0) return false;
         if (v == 1) return true;
-        revert("stdStorage find(StdStorage): Cannot decode. Make sure you are reading a bool.");
+        revert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
     }
 
     function read_address(StdStorage storage self) internal returns (address) {
