@@ -234,7 +234,7 @@ contract StdStorageTest is Test {
     }
 
     function testStorageReadBool_Revert() public {
-        vm.expectRevert("stdStorage find(StdStorage): Cannot decode. Make sure you are reading a bool.");
+        vm.expectRevert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
         this.readNonBoolValue();
     }
 
