@@ -41,7 +41,7 @@ contract StdAssertionsTest is Test
     }
 
     function testAssertFalse_Err_Fail() external {
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertFalse(true, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -73,7 +73,7 @@ contract StdAssertionsTest is Test
     function testAssertEq_BoolErr_Fail(bool a, bool b) external {
         vm.assume(a != b);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -105,7 +105,7 @@ contract StdAssertionsTest is Test
     function testAssertEq_BytesErr_Fail(bytes calldata a, bytes calldata b) external {
         vm.assume(keccak256(a) != keccak256(b));
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -193,7 +193,7 @@ contract StdAssertionsTest is Test
         uint256[] memory b = new uint256[](3);
         b[1] = e1;
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [uint[]]");
@@ -206,7 +206,7 @@ contract StdAssertionsTest is Test
         int256[] memory b = new int256[](3);
         b[1] = e1;
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [int[]]");
@@ -220,7 +220,7 @@ contract StdAssertionsTest is Test
         address[] memory b = new address[](3);
         b[1] = e1;
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [address[]]");
@@ -270,7 +270,7 @@ contract StdAssertionsTest is Test
         uint256[] memory a = new uint256[](lenA);
         uint256[] memory b = new uint256[](lenB);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [uint[]]");
@@ -284,7 +284,7 @@ contract StdAssertionsTest is Test
         int256[] memory a = new int256[](lenA);
         int256[] memory b = new int256[](lenB);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [int[]]");
@@ -298,7 +298,7 @@ contract StdAssertionsTest is Test
         address[] memory a = new address[](lenA);
         address[] memory b = new address[](lenB);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         vm.expectEmit(false, false, false, true);
         emit log("Error: a == b not satisfied [address[]]");
@@ -332,7 +332,7 @@ contract StdAssertionsTest is Test
     function testAssertApproxEqAbs_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) > maxDelta);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -364,7 +364,7 @@ contract StdAssertionsTest is Test
     function testAssertApproxEqAbs_IntErr_Fail(int256 a, int256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) > maxDelta);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -400,7 +400,7 @@ contract StdAssertionsTest is Test
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_FAIL);
     }
@@ -436,7 +436,7 @@ contract StdAssertionsTest is Test
         vm.assume(b != 0);
         vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_FAIL);
     }
