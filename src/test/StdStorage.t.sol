@@ -13,11 +13,11 @@ contract StdStorageTest is Test {
     }
 
     function testStorageHidden() public {
-        assertEq(uint256(keccak256("my.random.var")), stdstore.target(address(test)).sig("hidden()").find());
+        assertEq(stdstore.target(address(test)).sig("hidden()").find(), uint256(keccak256("my.random.var")));
     }
 
     function testStorageObvious() public {
-        assertEq(uint256(0), stdstore.target(address(test)).sig("exists()").find());
+        assertEq(stdstore.target(address(test)).sig("exists()").find(), uint256(0));
     }
 
     function testStorageCheckedWriteHidden() public {
@@ -37,7 +37,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .depth(0)
             .find();
-        assertEq(uint256(keccak256(abi.encode(address(this), 4))), slot);
+        assertEq(slot, uint256(keccak256(abi.encode(address(this), 4))));
     }
 
     function testStorageMapStructB() public {
@@ -47,7 +47,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .depth(1)
             .find();
-       assertEq(uint256(keccak256(abi.encode(address(this), 4))) + 1, slot);
+       assertEq(slot, uint256(keccak256(abi.encode(address(this), 4))) + 1);
     }
 
     function testStorageDeepMap() public {
@@ -57,7 +57,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .with_key(address(this))
             .find();
-        assertEq(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(5)))))), slot);
+        assertEq(slot, uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(5)))))));
     }
 
     function testStorageCheckedWriteDeepMap() public {
@@ -67,7 +67,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .with_key(address(this))
             .checked_write(100);
-        assertEq(100, test.deep_map(address(this), address(this)));
+        assertEq(test.deep_map(address(this), address(this)), 100);
     }
 
     function testStorageDeepMapStructA() public {
@@ -78,7 +78,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .depth(0)
             .find();
-        assertEq(bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 0), bytes32(slot));
+        assertEq(bytes32(slot), bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 0));
     }
 
     function testStorageDeepMapStructB() public {
@@ -89,7 +89,7 @@ contract StdStorageTest is Test {
             .with_key(address(this))
             .depth(1)
             .find();
-        assertEq(bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 1), bytes32(slot));
+        assertEq(bytes32(slot), bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 1));
     }
 
     function testStorageCheckedWriteDeepMapStructA() public {
@@ -101,8 +101,8 @@ contract StdStorageTest is Test {
             .depth(0)
             .checked_write(100);
         (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
-        assertEq(100, a);
-        assertEq(0, b);
+        assertEq(a, 100);
+        assertEq(b, 0);
     }
 
     function testStorageCheckedWriteDeepMapStructB() public {
@@ -114,8 +114,8 @@ contract StdStorageTest is Test {
             .depth(1)
             .checked_write(100);
         (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
-        assertEq(0, a);
-        assertEq(100, b);
+        assertEq(a, 0);
+        assertEq(b, 100);
     }
 
     function testStorageCheckedWriteMapStructA() public {
@@ -144,12 +144,12 @@ contract StdStorageTest is Test {
 
     function testStorageStructA() public {
         uint256 slot = stdstore.target(address(test)).sig(test.basic.selector).depth(0).find();
-        assertEq(uint256(7), slot);
+        assertEq(slot, uint256(7));
     }
 
     function testStorageStructB() public {
         uint256 slot = stdstore.target(address(test)).sig(test.basic.selector).depth(1).find();
-        assertEq(uint256(7) + 1, slot);
+        assertEq(slot, uint256(7) + 1);
     }
 
     function testStorageCheckedWriteStructA() public {
@@ -192,22 +192,22 @@ contract StdStorageTest is Test {
 
     function testStorageMapAddrFound() public {
         uint256 slot = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).find();
-        assertEq(uint256(keccak256(abi.encode(address(this), uint(1)))), slot);
+        assertEq(slot, uint256(keccak256(abi.encode(address(this), uint(1)))));
     }
 
     function testStorageMapUintFound() public {
         uint256 slot = stdstore.target(address(test)).sig(test.map_uint.selector).with_key(100).find();
-        assertEq(uint256(keccak256(abi.encode(100, uint(2)))), slot);
+        assertEq(slot, uint256(keccak256(abi.encode(100, uint(2)))));
     }
 
     function testStorageCheckedWriteMapUint() public {
         stdstore.target(address(test)).sig(test.map_uint.selector).with_key(100).checked_write(100);
-        assertEq(100, test.map_uint(100));
+        assertEq(test.map_uint(100), 100);
     }
 
     function testStorageCheckedWriteMapAddr() public {
         stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).checked_write(100);
-        assertEq(100, test.map_addr(address(this)));
+        assertEq(test.map_addr(address(this)), 100);
     }
 
     function testStorageCheckedWriteMapBool() public {
@@ -225,7 +225,7 @@ contract StdStorageTest is Test {
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
         stdstore.target(address(test)).sig(test.map_packed.selector).with_key(address(uint160(1337))).checked_write(full);
-        assertEq(1337, test.read_struct_lower(address(1337)));
+        assertEq(test.read_struct_lower(address(1337)), 1337);
     }
 
     function testFailStorageConst() public {
