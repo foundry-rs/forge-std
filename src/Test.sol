@@ -486,6 +486,14 @@ library stdStorage {
         uint256 field_depth = self._depth;
         bytes32[] memory ins = self._keys;
 
+        // Helpful message for some reverts
+        string memory tips = who == address(0) || fsig == bytes4(0) ? string(abi.encodePacked(
+            " Did you forget to set ",
+            who == address(0) ? "target" : "",
+            who == address(0) && fsig == bytes4(0) ? ", sig" : (fsig == bytes4(0) ? "sig" : ""),
+            "?"
+            )) : "";
+
         // calldata to test against
         if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
             return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
@@ -505,7 +513,7 @@ library stdStorage {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
             if (fdat != curr) {
-                require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
+                require(false, "stdStorage find(StdStorage): Possibly packed slot. This would cause dangerous overwriting and currently isn't supported.");
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
             self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
@@ -551,10 +559,10 @@ library stdStorage {
                 vm_std_store.store(who, reads[i], prev);
             }
         } else {
-            require(false, "stdStorage find(StdStorage): No storage use detected for target.");
+            require(false, string(abi.encodePacked("stdStorage find(StdStorage): No storage use detected for target.", tips)));
         }
 
-        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "stdStorage find(StdStorage): Slot(s) not found.");
+        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], string(abi.encodePacked("stdStorage find(StdStorage): Slot(s) not found.", tips)));
 
         delete self._target;
         delete self._sig;
@@ -638,7 +646,7 @@ library stdStorage {
         bytes32 curr = vm_std_store.load(who, slot);
 
         if (fdat != curr) {
-            require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
+            require(false, "stdStorage find(StdStorage): Possibly packed slot. This would cause dangerous overwriting and currently isn't supported.");
         }
         vm_std_store.store(who, slot, set);
         delete self._target;
