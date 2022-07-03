@@ -160,10 +160,34 @@ contract StdStorageTest is Test {
     }
 
     function testStorageCheckedWriteStructB() public {
-         stdstore.target(address(test)).sig(test.basic.selector).depth(1).checked_write(100);
+        stdstore.target(address(test)).sig(test.basic.selector).depth(1).checked_write(100);
         (uint256 a, uint256 b) = test.basic();
         assertEq(a, 1337);
         assertEq(b, 100);
+    }
+
+    function testStorageStructWithBoolA() public {
+        uint256 slot = stdstore.target(address(test)).sig(test.basicWithBool.selector).depth(0).find();
+        assertEq(slot, 9);
+    }
+
+    function testStorageStructWithBoolB() public {
+        uint256 slot = stdstore.target(address(test)).sig(test.basicWithBool.selector).depth(1).find();
+        assertEq(slot, 10);
+    }
+
+    function testStorageCheckedWriteStructWithBoolA() public {
+        stdstore.target(address(test)).sig(test.basicWithBool.selector).depth(0).checked_write(100);
+        (uint256 a, bool b) = test.basicWithBool();
+        assertEq(a, 100);
+        assertTrue(b);
+    }
+
+    function testStorageCheckedWriteStructWithBoolB() public {
+        stdstore.target(address(test)).sig(test.basicWithBool.selector).depth(1).checked_write(false);
+        (uint256 a, bool b) = test.basicWithBool();
+        assertEq(a, 1337);
+        assertFalse(b);
     }
 
     function testStorageMapAddrFound() public {
@@ -267,6 +291,7 @@ contract StorageTest {
     mapping(address => mapping(address => uint256)) public deep_map;
     mapping(address => mapping(address => UnpackedStruct)) public deep_map_struct;
     UnpackedStruct public basic;
+    UnpackedStructWithBool public basicWithBool;
 
     uint248 public tA;
     bool public tB;
@@ -281,6 +306,11 @@ contract StorageTest {
         uint256 b;
     }
 
+    struct UnpackedStructWithBool {
+        uint256 a;
+        bool b;
+    }
+
     mapping(address => bool) public map_bool;
 
     bytes32 public tE = hex"1337";
@@ -292,6 +322,10 @@ contract StorageTest {
         basic = UnpackedStruct({
             a: 1337,
             b: 1337
+        });
+        basicWithBool = UnpackedStructWithBool({
+            a: 1337,
+            b: true
         });
 
         uint256 two = (1<<128) | 1;
