@@ -3,6 +3,11 @@ pragma solidity >=0.6.0;
 pragma experimental ABIEncoderV2;
 
 interface Vm {
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+    }
+
     // Sets block.timestamp (newTimestamp)
     function warp(uint256) external;
     // Sets block.height (newHeight)
@@ -122,4 +127,8 @@ interface Vm {
     // - The user lacks permissions to remove the file.
     // (path) => ()
     function removeFile(string calldata) external;
+    // Record all the transaction logs
+    function recordLogs() external;
+    // Gets all the recorded logs, () => (logs)
+    function getRecordedLogs() external returns (Log[] memory);
 }
