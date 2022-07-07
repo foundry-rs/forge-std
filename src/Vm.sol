@@ -127,6 +127,13 @@ interface Vm {
     // - The user lacks permissions to remove the file.
     // (path) => ()
     function removeFile(string calldata) external;
+    // Convert values to a string, (value) => (stringified value)
+    function toString(address) external returns(string memory);
+    function toString(bytes calldata) external returns(string memory);
+    function toString(bytes32) external returns(string memory);
+    function toString(bool) external returns(string memory);
+    function toString(uint256) external returns(string memory);
+    function toString(int256) external returns(string memory);
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
