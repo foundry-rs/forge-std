@@ -699,7 +699,7 @@ library stdMath {
         if (a == INT256_MIN)
             return 57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
-        return uint256(a >= 0 ? a : -a);
+        return uint256(a > 0 ? a : -a);
     }
 
     function delta(uint256 a, uint256 b) internal pure returns (uint256) {
