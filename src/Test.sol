@@ -81,7 +81,7 @@ abstract contract Test is DSTest, Script {
         vm.startPrank(who, origin);
     }
 
-    function changePrank(address who) internal {
+    function changePrank(address who) public {
         vm.stopPrank();
         vm.startPrank(who);
     }
