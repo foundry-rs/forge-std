@@ -140,7 +140,7 @@ contract StdCheatsTest is Test {
 
     function testDeployCodeFail() public {
         vm.expectRevert(bytes("Test deployCode(string): Deployment failed."));
-        this.deployCode("StdCheats.t.sol:RevertingContract");
+        deployCode("StdCheats.t.sol:RevertingContract");
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {
