@@ -3,8 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../Test.sol";
 
-contract StdMathTest is Test
-{
+contract StdMathTest is Test {
     function testGetAbs() external {
         assertEq(stdMath.abs(-50),      50);
         assertEq(stdMath.abs(50),       50);

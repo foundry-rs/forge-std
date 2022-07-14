@@ -3,8 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../Test.sol";
 
-contract StdAssertionsTest is Test
-{
+contract StdAssertionsTest is Test {
     string constant CUSTOM_ERROR = "guh!";
 
     bool constant EXPECT_PASS = false;
@@ -443,8 +442,7 @@ contract StdAssertionsTest is Test
 }
 
 
-contract TestTest is Test
-{
+contract TestTest is Test {
     modifier expectFailure(bool expectFail) {
         bool preState = vm.load(HEVM_ADDRESS, bytes32("failed")) != bytes32(0x00);
         _;
