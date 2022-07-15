@@ -138,9 +138,14 @@ contract StdCheatsTest is Test {
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
     }
 
+    // We need this so we can call "this.deployCode" rather than "deployCode" directly
+    function deployCodeHelper(string memory what) external {
+        deployCode(what);
+    }
+    
     function testDeployCodeFail() public {
         vm.expectRevert(bytes("Test deployCode(string): Deployment failed."));
-        this.deployCode("StdCheats.t.sol:RevertingContract");
+        this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {

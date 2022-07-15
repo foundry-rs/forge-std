@@ -29,54 +29,54 @@ abstract contract Test is DSTest, Script {
     //////////////////////////////////////////////////////////////////////////*/
 
     // Skip forward or rewind time by the specified number of seconds
-    function skip(uint256 time) public {
+    function skip(uint256 time) internal {
         vm.warp(block.timestamp + time);
     }
 
-    function rewind(uint256 time) public {
+    function rewind(uint256 time) internal {
         vm.warp(block.timestamp - time);
     }
 
     // Setup a prank from an address that has some ether
-    function hoax(address who) public {
+    function hoax(address who) internal {
         vm.deal(who, 1 << 128);
         vm.prank(who);
     }
 
-    function hoax(address who, uint256 give) public {
+    function hoax(address who, uint256 give) internal {
         vm.deal(who, give);
         vm.prank(who);
     }
 
-    function hoax(address who, address origin) public {
+    function hoax(address who, address origin) internal {
         vm.deal(who, 1 << 128);
         vm.prank(who, origin);
     }
 
-    function hoax(address who, address origin, uint256 give) public {
+    function hoax(address who, address origin, uint256 give) internal {
         vm.deal(who, give);
         vm.prank(who, origin);
     }
 
     // Start perpetual prank from an address that has some ether
-    function startHoax(address who) public {
+    function startHoax(address who) internal {
         vm.deal(who, 1 << 128);
         vm.startPrank(who);
     }
 
-    function startHoax(address who, uint256 give) public {
+    function startHoax(address who, uint256 give) internal {
         vm.deal(who, give);
         vm.startPrank(who);
     }
 
     // Start perpetual prank from an address that has some ether
     // tx.origin is set to the origin parameter
-    function startHoax(address who, address origin) public {
+    function startHoax(address who, address origin) internal {
         vm.deal(who, 1 << 128);
         vm.startPrank(who, origin);
     }
 
-    function startHoax(address who, address origin, uint256 give) public {
+    function startHoax(address who, address origin, uint256 give) internal {
         vm.deal(who, give);
         vm.startPrank(who, origin);
     }
@@ -87,7 +87,7 @@ abstract contract Test is DSTest, Script {
     }
 
     // DEPRECATED: Use `deal` instead
-    function tip(address token, address to, uint256 give) public {
+    function tip(address token, address to, uint256 give) internal {
         emit log_named_string("WARNING", "Test tip(address,address,uint256): The `tip` stdcheat has been deprecated. Use `deal` instead.");
         stdstore
             .target(token)
@@ -98,17 +98,17 @@ abstract contract Test is DSTest, Script {
 
     // The same as Vm's `deal`
     // Use the alternative signature for ERC20 tokens
-    function deal(address to, uint256 give) public {
+    function deal(address to, uint256 give) internal {
         vm.deal(to, give);
     }
 
     // Set the balance of an account for any ERC20 token
     // Use the alternative signature to update `totalSupply`
-    function deal(address token, address to, uint256 give) public {
+    function deal(address token, address to, uint256 give) internal {
         deal(token, to, give, false);
     }
 
-    function deal(address token, address to, uint256 give, bool adjust) public {
+    function deal(address token, address to, uint256 give, bool adjust) internal {
         // get current balance
         (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
@@ -163,7 +163,7 @@ abstract contract Test is DSTest, Script {
     // the artifacts directory
     // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
     function deployCode(string memory what, bytes memory args)
-        public
+        internal
         returns (address addr)
     {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
@@ -179,7 +179,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function deployCode(string memory what)
-        public
+        internal
         returns (address addr)
     {
         bytes memory bytecode = vm.getCode(what);
