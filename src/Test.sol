@@ -8,6 +8,10 @@ import "./Storage.sol";
 abstract contract Test is DSTest, Cheats {
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    address internal constant VM_ADDRESS =
+        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+
+    Vm internal constant vm = Vm(VM_ADDRESS);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     STD-LOGS

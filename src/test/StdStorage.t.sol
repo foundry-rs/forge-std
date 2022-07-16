@@ -6,8 +6,9 @@ import "../Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
-    
-    StorageTest test;
+
+    StdStorage internal stdstore;    
+    StorageTest internal test;
 
     function setUp() public {
         test = new StorageTest();

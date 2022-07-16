@@ -8,75 +8,72 @@ import "./Vm.sol";
 contract Cheats {
     using stdStorage for StdStorage;
 
-    address internal constant VM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-
-    StdStorage internal stdstore;
-    Vm internal constant vm = Vm(VM_ADDRESS);
+    StdStorage private stdstore;
+    Vm private constant vm_cheats = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
-        vm.warp(block.timestamp + time);
+        vm_cheats.warp(block.timestamp + time);
     }
 
     function rewind(uint256 time) internal virtual {
-        vm.warp(block.timestamp - time);
+        vm_cheats.warp(block.timestamp - time);
     }
 
     // Setup a prank from an address that has some ether
     function hoax(address who) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.prank(who);
+        vm_cheats.deal(who, 1 << 128);
+        vm_cheats.prank(who);
     }
 
     function hoax(address who, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.prank(who);
+        vm_cheats.deal(who, give);
+        vm_cheats.prank(who);
     }
 
     function hoax(address who, address origin) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.prank(who, origin);
+        vm_cheats.deal(who, 1 << 128);
+        vm_cheats.prank(who, origin);
     }
 
     function hoax(address who, address origin, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.prank(who, origin);
+        vm_cheats.deal(who, give);
+        vm_cheats.prank(who, origin);
     }
 
     // Start perpetual prank from an address that has some ether
     function startHoax(address who) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.startPrank(who);
+        vm_cheats.deal(who, 1 << 128);
+        vm_cheats.startPrank(who);
     }
 
     function startHoax(address who, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.startPrank(who);
+        vm_cheats.deal(who, give);
+        vm_cheats.startPrank(who);
     }
 
     // Start perpetual prank from an address that has some ether
     // tx.origin is set to the origin parameter
     function startHoax(address who, address origin) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.startPrank(who, origin);
+        vm_cheats.deal(who, 1 << 128);
+        vm_cheats.startPrank(who, origin);
     }
 
     function startHoax(address who, address origin, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.startPrank(who, origin);
+        vm_cheats.deal(who, give);
+        vm_cheats.startPrank(who, origin);
     }
 
     function changePrank(address who) internal virtual {
-        vm.stopPrank();
-        vm.startPrank(who);
+        vm_cheats.stopPrank();
+        vm_cheats.startPrank(who);
     }
 
     // The same as Vm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) internal virtual {
-        vm.deal(to, give);
+        vm_cheats.deal(to, give);
     }
 
     // Set the balance of an account for any ERC20 token
@@ -120,7 +117,7 @@ contract Cheats {
         internal virtual
         returns (address addr)
     {
-        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
+        bytes memory bytecode = abi.encodePacked(vm_cheats.getCode(what), args);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
@@ -136,7 +133,7 @@ contract Cheats {
         internal virtual
         returns (address addr)
     {
-        bytes memory bytecode = vm.getCode(what);
+        bytes memory bytecode = vm_cheats.getCode(what);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
