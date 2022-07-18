@@ -194,6 +194,39 @@ abstract contract Test is DSTest, Script {
         );
     }
 
+    /// deploy contract with value on construction
+    function deployCode(string memory what, bytes memory args, uint256 val)
+        internal
+        returns (address addr)
+    {
+        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(val, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string,bytes,uint256): Deployment failed."
+        );
+    }
+
+    function deployCode(string memory what, uint256 val)
+        internal
+        returns (address addr)
+    {
+        bytes memory bytecode = vm.getCode(what);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(val, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string,uint256): Deployment failed."
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     STD-ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
