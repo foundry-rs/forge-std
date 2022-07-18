@@ -8,8 +8,6 @@ import "./Math.sol";
 import "./Storage.sol";
 
 abstract contract Test is DSTest, Cheats {
-    using stdStorage for StdStorage;
-
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
     address internal constant VM_ADDRESS =

@@ -3,10 +3,6 @@
 // Adjusted for compatibility with Test
 pragma solidity >=0.6.0 <0.9.0;
 
-/*//////////////////////////////////////////////////////////////////////////
-                                STD-ERRORS
-//////////////////////////////////////////////////////////////////////////*/
-
 library stdError {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
     bytes public constant arithmeticError = abi.encodeWithSignature("Panic(uint256)", 0x11);
