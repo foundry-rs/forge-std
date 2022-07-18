@@ -8,4 +8,8 @@ import "./Utils.sol";
 
 abstract contract Script is Cheats, Utils {
     bool public IS_SCRIPT = true;
+
+    address internal constant VM_ADDRESS =
+        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm internal constant vm = Vm(VM_ADDRESS);
 }
