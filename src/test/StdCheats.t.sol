@@ -138,6 +138,25 @@ contract StdCheatsTest is Test {
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
     }
 
+    // We need that payable constructor in order to send ETH on construction
+    constructor() payable {}
+
+    function testDeployCodeVal() public {
+	uint256 val = 1 ether;
+	vm.deal(address(this), val * 2);
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), val);
+        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+	assertEq(deployed.balance, val);
+    }
+
+    function testDeployCodeValNoArgs() public {
+	uint256 val = 1 ether;
+	vm.deal(address(this), val * 2);
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", val);
+        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+	assertEq(deployed.balance, val);
+    }
+
     // We need this so we can call "this.deployCode" rather than "deployCode" directly
     function deployCodeHelper(string memory what) external {
         deployCode(what);
