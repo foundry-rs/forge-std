@@ -142,19 +142,15 @@ contract StdCheatsTest is Test {
     constructor() payable {}
 
     function testDeployCodeVal() public {
-	uint256 val = 1 ether;
-	vm.deal(address(this), val * 2);
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), val);
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, val);
+	assertEq(deployed.balance, 1 ether);
     }
 
     function testDeployCodeValNoArgs() public {
-	uint256 val = 1 ether;
-	vm.deal(address(this), val * 2);
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", val);
+        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, val);
+	assertEq(deployed.balance, 1 ether);
     }
 
     // We need this so we can call "this.deployCode" rather than "deployCode" directly
