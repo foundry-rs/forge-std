@@ -19,6 +19,11 @@ contract Utils {
             uint256 mod = x % size;
             result = min + mod;
         }
+        
+        // log the result with console if supported
+        address(0x000000000000000000636F6e736F6c652e6c6f67).staticcall(
+            abi.encodeWithSignature("log(string,uint)", "Bound result", result)
+        );
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
