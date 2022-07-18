@@ -59,11 +59,6 @@ contract StdErrorsTest is Test {
         vm.expectRevert(stdError.zeroVarError);
         test.intern();
     }
-
-    function testExpectLowLvl() public {
-        vm.expectRevert(stdError.lowLevelError);
-        test.someArr(0);
-    }
 }
 
 contract ErrorsTest {
