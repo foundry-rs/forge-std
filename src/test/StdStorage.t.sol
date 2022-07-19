@@ -297,7 +297,7 @@ contract StorageTest {
 
         uint256 two = (1<<128) | 1;
         map_packed[msg.sender] = two;
-        map_packed[address(bytes20(uint160(1337)))] = 1<<128;
+        map_packed[address(uint160(1337))] = 1<<128;
     }
 
     function read_struct_upper(address who) public view returns (uint256) {

@@ -11,8 +11,7 @@ import "./Storage.sol";
 import "./Utils.sol";
 
 abstract contract Test is Assertions, Cheats, Utils {
-    address internal constant VM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+    address internal constant VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
 
     StdStorage internal stdstore;
     Vm internal constant vm = Vm(VM_ADDRESS);
