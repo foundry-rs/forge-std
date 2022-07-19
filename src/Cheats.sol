@@ -95,10 +95,10 @@ contract Cheats {
             .checked_write(give);
 
         // update total supply
-        if(adjust){
+        if (adjust) {
             (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
             uint256 totSup = abi.decode(totSupData, (uint256));
-            if(give < prevBal) {
+            if (give < prevBal) {
                 totSup -= (prevBal - give);
             } else {
                 totSup += (give - prevBal);
