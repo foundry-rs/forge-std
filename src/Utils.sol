@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.9.0;
 
+import "./console2.sol";
+
 contract Utils {
-    address internal constant CONSOLE2_ADDRESS = address(0x000000000000000000636F6e736F6c652e6c6f67);
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
@@ -21,12 +22,7 @@ contract Utils {
             result = min + mod;
         }
         
-        // Log the result with console2.log if supported
-        (bool status, ) = address(CONSOLE2_ADDRESS).staticcall(
-            abi.encodeWithSignature("log(string,uint)", "Bound result", result)
-        );
-        // Silence compiler warning
-        status; 
+        console2.log("Bound Result", result);
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
