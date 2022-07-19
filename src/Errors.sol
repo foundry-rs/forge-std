@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Errors work for versions >= 0.8.0 (officially >=0.8.10)
-// Adjusted for compatibility with Test
+// Panics work for versions >=0.8.0, but we lowered the pragma to make this compatible with Test
 pragma solidity >=0.6.0 <0.9.0;
 
 library stdError {
