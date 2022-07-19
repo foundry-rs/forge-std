@@ -7,7 +7,6 @@ import "../Test.sol";
 contract StdCheatsTest is Test {
     Bar test;
 
-
     function setUp() public {
         test = new Bar();
     }
