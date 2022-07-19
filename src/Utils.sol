@@ -50,6 +50,10 @@ contract Utils {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xda), bytes1(0x94), deployer, bytes1(0x84), uint32(nonce))));
     }
 
+    function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer) internal pure returns (address) {
+        return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
+    }
+
     function addressFromLast20Bytes(bytes32 bytesValue) internal pure virtual returns (address) {
         return address(uint160(uint256(bytesValue)));
     }

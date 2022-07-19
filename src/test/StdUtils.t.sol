@@ -47,8 +47,18 @@ contract StdUtilsTest is Test {
         bound(num, min, max);
     }
 
-    function testGenerateCorrectAddress() external {
-        address creation = computeCreateAddress(0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9, 14);
-        assertEq(creation, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
+    function testGenerateCreateAddress() external {
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        uint256 nonce = 14;
+        address createAddress = computeCreateAddress(deployer, nonce);
+        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
+    }
+
+    function testGenerateCreate2Address() external {
+        bytes32 salt = bytes32(uint256(31415));
+        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
+        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
 }
