@@ -147,7 +147,7 @@ contract Cheats {
 
     /// @dev deploy contract with value on construction
     function deployCode(string memory what, bytes memory args, uint256 val)
-        internal
+        internal virtual
         returns (address addr)
     {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
@@ -163,7 +163,7 @@ contract Cheats {
     }
 
     function deployCode(string memory what, uint256 val)
-        internal
+        internal virtual
         returns (address addr)
     {
         bytes memory bytecode = vm.getCode(what);
