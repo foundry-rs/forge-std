@@ -25,7 +25,7 @@ contract Assertions is DSTest {
         assertTrue(!data, err);
     }
 
-    function assertEq(bool a, bool b) internal {
+    function assertEq(bool a, bool b) internal virtual {
         if (a != b) {
             emit log                ("Error: a == b not satisfied [bool]");
             emit log_named_string   ("  Expected", b ? "true" : "false");
@@ -34,22 +34,22 @@ contract Assertions is DSTest {
         }
     }
 
-    function assertEq(bool a, bool b, string memory err) internal {
+    function assertEq(bool a, bool b, string memory err) internal virtual {
         if (a != b) {
             emit log_named_string("Error", err);
             assertEq(a, b);
         }
     }
 
-    function assertEq(bytes memory a, bytes memory b) internal {
+    function assertEq(bytes memory a, bytes memory b) internal virtual {
         assertEq0(a, b);
     }
 
-    function assertEq(bytes memory a, bytes memory b, string memory err) internal {
+    function assertEq(bytes memory a, bytes memory b, string memory err) internal virtual {
         assertEq0(a, b, err);
     }
 
-    function assertEq(uint256[] memory a, uint256[] memory b) internal {
+    function assertEq(uint256[] memory a, uint256[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [uint[]]");
             emit log_named_array("  Expected", b);
@@ -58,7 +58,7 @@ contract Assertions is DSTest {
         }
     }
 
-    function assertEq(int256[] memory a, int256[] memory b) internal {
+    function assertEq(int256[] memory a, int256[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [int[]]");
             emit log_named_array("  Expected", b);
@@ -67,7 +67,7 @@ contract Assertions is DSTest {
         }
     }
 
-    function assertEq(address[] memory a, address[] memory b) internal {
+    function assertEq(address[] memory a, address[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [address[]]");
             emit log_named_array("  Expected", b);
@@ -76,14 +76,14 @@ contract Assertions is DSTest {
         }
     }
 
-    function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal {
+    function assertEq(uint256[] memory a, uint256[] memory b, string memory err) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
         }
     }
 
-    function assertEq(int256[] memory a, int256[] memory b, string memory err) internal {
+    function assertEq(int256[] memory a, int256[] memory b, string memory err) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
@@ -91,7 +91,7 @@ contract Assertions is DSTest {
     }
 
 
-    function assertEq(address[] memory a, address[] memory b, string memory err) internal {
+    function assertEq(address[] memory a, address[] memory b, string memory err) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
             assertEq(a, b);
