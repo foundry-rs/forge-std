@@ -6,6 +6,5 @@ import "./Cheats.sol";
 import "./Errors.sol";
 import "./Math.sol";
 import "./Storage.sol";
-import "./TestBase.sol";
 import "./Utils.sol";
 import "./Vm.sol";
