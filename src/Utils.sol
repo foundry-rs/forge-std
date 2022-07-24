@@ -7,7 +7,7 @@ contract Utils {
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
-    function bound(uint256 x, uint256 min, uint256 max) internal virtual returns (uint256 result) {
+    function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
         require(min <= max, "Test bound(uint256,uint256,uint256): Max is less than min.");
 
         uint256 size = max - min;
