@@ -5,6 +5,7 @@ import "./Cheats.sol";
 import "./console.sol";
 import "./console2.sol";
 import "./Utils.sol";
+import "./Vm.sol";
 
 abstract contract ScriptBase {
     address internal constant VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
