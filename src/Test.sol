@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.9.0;
 
+import "ds-test/test.sol";
 import "./Assertions.sol";
 import "./Cheats.sol";
 import "./console.sol";
@@ -11,4 +12,4 @@ import "./Storage.sol";
 import "./TestBase.sol";
 import "./Utils.sol";
 
-abstract contract Test is TestBase, Assertions, Cheats, Utils {}
+abstract contract Test is TestBase, DSTest, Assertions, Cheats, Utils {}
