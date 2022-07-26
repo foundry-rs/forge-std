@@ -723,9 +723,45 @@ library stdStorage {
                               JSON PARSING
     //////////////////////////////////////////////////////////////*/
 
+   struct Transaction {
+    bytes data;
+    address from;
+    uint256 gas;
+    uint256 nonce;
+    address to;
+    uint256 txType;
+    uint256 value;
+  }
 
+  struct TransactionDetail {
+    bytes32 hash;
+    // e.g. F0 for CREATE, this is called `type` in the output but that's a solidity keyword.
+    // We should consider changing that for consistency.
+    bytes1 opcode;
+    string contractName;
+    address contractAddress;
+    Transaction transaction;
+  }
+
+  struct Receipt {
+    bytes32 transactionHash;
+  }
+
+  function readTransactions(string memory path) internal view returns (TransactionDetail[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions[]");
+    return abi.decode(parsedDeployData, (TransactionDetail[]));
+  }
+
+  // Analogous to readTransactions, but for receipts.
+  function readReceipts(string memory path) internal view returns (Receipt[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
+    return abi.decode(parsedDeployData, (Receipt[]));
+  }
 
   // Helpers for parsing keys into types. We'd include these for all value types
+  // as well as `bytes`, `string`, `uint256[]`, and `int256[]`. Only two are shown below.
   function readUint256(string memory json, string memory key) internal view returns (uint256) {
       return abi.decode(vm.parseJson(json, key), (uint256));
   }
