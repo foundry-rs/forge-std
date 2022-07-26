@@ -783,7 +783,7 @@ struct TransactionWithContractName {
       string path;
       string[] pending;
       uint256 timestamp;
-      mapping (string => TransactionReturn txReturn;
+      mapping (string => TransactionReturn) txReturn;
   }
 
   // Read in all deployments transactions.
@@ -806,15 +806,15 @@ struct TransactionWithContractName {
       return abi.decode(vm.parseJson(json, key), (uint256));
   }
 
-  function readUintArray(string memory json, string memory key) internal view returns (uint256) {
-      return abi.decode(vm.parseJson(json, key), (uint256[] memory));
+  function readUintArray(string memory json, string memory key) internal view returns (uint256[]) {
+      return abi.decode(vm.parseJson(json, key), (uint256[]));
   }
 
-  function readInt(string memory json, string memory key) internal view returns (bytes32) {
+  function readInt(string memory json, string memory key) internal view returns (int256) {
       return abi.decode(vm.parseJson(json, key), (int256));
   }
 
-  function readIntArray(string memory json, string memory key) internal view returns (bytes32) {
+  function readIntArray(string memory json, string memory key) internal view returns (int256[]) {
       return abi.decode(vm.parseJson(json, key), (int256[]));
   }
 
@@ -822,40 +822,40 @@ struct TransactionWithContractName {
       return abi.decode(vm.parseJson(json, key), (bytes32));
   }
 
-  function readBytes32Array(string memory json, string memory key) internal view returns (bytes32) {
+  function readBytes32Array(string memory json, string memory key) internal view returns (bytes32[]) {
       return abi.decode(vm.parseJson(json, key), (bytes32[]));
   }
 
-  function readString(string memory json, string memory key) internal view returns (bytes32) {
-      return abi.decode(vm.parseJson(json, key), (string memory));
+  function readString(string memory json, string memory key) internal view returns (string memory) {
+      return abi.decode(vm.parseJson(json, key), (string));
   }
 
-  function readStringArray(string memory json, string memory key) internal view returns (bytes32) {
-      return abi.decode(vm.parseJson(json, key), (string[] memory));
+  function readStringArray(string memory json, string memory key) internal view returns (string[] memory) {
+      return abi.decode(vm.parseJson(json, key), (string[]));
   }
 
-  function readAddress(string memory json, string memory key) internal view returns (bytes32) {
+  function readAddress(string memory json, string memory key) internal view returns (address) {
       return abi.decode(vm.parseJson(json, key), (address));
   }
 
-  function readAddressArray(string memory json, string memory key) internal view returns (bytes32) {
+  function readAddressArray(string memory json, string memory key) internal view returns (address[]) {
       return abi.decode(vm.parseJson(json, key), (address[]));
   }
 
-  function readBool(string memory json, string memory key) internal view returns (bytes32) {
+  function readBool(string memory json, string memory key) internal view returns (bool){
       return abi.decode(vm.parseJson(json, key), (bool));
   }
 
-  function readBoolArray(string memory json, string memory key) internal view returns (bytes32) {
+  function readBoolArray(string memory json, string memory key) internal view returns (bool[]) {
       return abi.decode(vm.parseJson(json, key), (bool[]));
   }
 
-  function readBytes(string memory json, string memory key) internal view returns (bytes32) {
-      return abi.decode(vm.parseJson(json, key), (bytes memory));
+  function readBytes(string memory json, string memory key) internal view returns (bytes) {
+      return abi.decode(vm.parseJson(json, key), (bytes));
   }
 
-  function readBytesArray(string memory json, string memory key) internal view returns (bytes32) {
-      return abi.decode(vm.parseJson(json, key), (bytes[] memory));
+  function readBytesArray(string memory json, string memory key) internal view returns (bytes[]) {
+      return abi.decode(vm.parseJson(json, key), (bytes[]));
   }
 }
 
