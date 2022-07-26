@@ -723,6 +723,82 @@ library stdStorage {
                               JSON PARSING
     //////////////////////////////////////////////////////////////*/
 
+struct Transaction {
+    address contractAddress;
+    string hash;
+    TransactionDetail tx;
+  }
+struct TransactionWithContractName {
+    address contractAddress;
+    string contractName;
+    string hash;
+    TransactionDetail tx;
+  }
+
+  struct TransactionWithFunction{
+    address contractAddress;
+    string contractName;
+    string functionName;
+    string arguments;
+    string hash;
+    TransactionDetail tx;
+  }
+
+  struct TransactionDetail {
+    bytes data;
+    address from;
+    uint256 gas;
+    bytes32 hash;
+    uint256 nonce;
+    bytes1 opcode;
+    address to;
+    uint256 value;
+
+  }
+
+  struct Receipt {
+    string blockHash;
+    uint256 blockNumber;
+    address contractAddress;
+    uint256 cumulativeGasUsed;
+    uint256 effectiveGasPrice;
+    address from;
+    uint256 gasUsed;
+    address to;
+    string transactionHash;
+    uint256 transactionIndex;
+    string[] logs;
+    bytes logsBloom;
+    bool status;
+  }
+
+  struct TransactionReturn {
+      string internalType;
+      string value;
+  }
+
+  struct Receipts {
+      Receipt[] receipts;
+      string[] libraries;
+      string path;
+      string[] pending;
+      uint256 timestamp;
+      mapping (string => TransactionReturn txReturn;
+  }
+
+  // Read in all deployments transactions.
+  function readTransactions(string memory path) internal view returns (TransactionDetail[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions[]");
+    return abi.decode(parsedDeployData, (TransactionDetail[]));
+  }
+
+  // Analogous to readTransactions, but for receipts.
+  function readReceipts(string memory path) internal view returns (Receipt[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
+    return abi.decode(parsedDeployData, (Receipts[]));
+  }
 
 
   // Helpers for parsing keys into types. We'd include these for all value types
