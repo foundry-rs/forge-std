@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../Storage.sol";
 import "../Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
 
-    StorageTest test;
+    StorageTest internal test;
 
     function setUp() public {
         test = new StorageTest();
@@ -296,7 +297,7 @@ contract StorageTest {
 
         uint256 two = (1<<128) | 1;
         map_packed[msg.sender] = two;
-        map_packed[address(bytes20(uint160(1337)))] = 1<<128;
+        map_packed[address(uint160(1337))] = 1<<128;
     }
 
     function read_struct_upper(address who) public view returns (uint256) {

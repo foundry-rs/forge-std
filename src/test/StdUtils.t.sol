@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.0 <0.9.0;
+
+import "../Test.sol";
+
+contract StdUtilsTest is Test {
+    function testBound() public {
+        assertEq(bound(5, 0, 4), 0);
+        assertEq(bound(0, 69, 69), 69);
+        assertEq(bound(0, 68, 69), 68);
+        assertEq(bound(10, 150, 190), 160);
+        assertEq(bound(300, 2800, 3200), 3100);
+        assertEq(bound(9999, 1337, 6666), 6006);
+    }
+
+    function testBound(
+        uint256 num,
+        uint256 min,
+        uint256 max
+    ) public {
+        if (min > max) (min, max) = (max, min);
+
+        uint256 bounded = bound(num, min, max);
+
+        assertGe(bounded, min);
+        assertLe(bounded, max);
+    }
+
+    function testBoundUint256Max() public {
+        assertEq(bound(0, type(uint256).max - 1, type(uint256).max), type(uint256).max - 1);
+        assertEq(bound(1, type(uint256).max - 1, type(uint256).max), type(uint256).max);
+    }
+
+
+    function testCannotBoundMaxLessThanMin() public {
+        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        bound(5, 100, 10);
+    }
+
+    function testCannotBoundMaxLessThanMin(
+        uint256 num,
+        uint256 min,
+        uint256 max
+    ) public {
+        vm.assume(min > max);
+        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        bound(num, min, max);
+    }
+
+    function testGenerateCreateAddress() external {
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        uint256 nonce = 14;
+        address createAddress = computeCreateAddress(deployer, nonce);
+        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
+    }
+
+    function testGenerateCreate2Address() external {
+        bytes32 salt = bytes32(uint256(31415));
+        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
+        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
+    }
+}
