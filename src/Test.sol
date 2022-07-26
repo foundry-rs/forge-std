@@ -718,6 +718,145 @@ library stdStorage {
 
         return result;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              JSON PARSING
+    //////////////////////////////////////////////////////////////*/
+
+struct Transaction {
+    address contractAddress;
+    string hash;
+    TransactionDetail tx;
+  }
+struct TransactionWithContractName {
+    address contractAddress;
+    string contractName;
+    string hash;
+    TransactionDetail tx;
+  }
+
+  struct TransactionWithFunction{
+    address contractAddress;
+    string contractName;
+    string functionName;
+    string arguments;
+    string hash;
+    TransactionDetail tx;
+  }
+
+  struct TransactionDetail {
+    bytes data;
+    address from;
+    uint256 gas;
+    bytes32 hash;
+    uint256 nonce;
+    bytes1 opcode;
+    address to;
+    uint256 value;
+
+  }
+
+  struct Receipt {
+    string blockHash;
+    uint256 blockNumber;
+    address contractAddress;
+    uint256 cumulativeGasUsed;
+    uint256 effectiveGasPrice;
+    address from;
+    uint256 gasUsed;
+    address to;
+    string transactionHash;
+    uint256 transactionIndex;
+    string[] logs;
+    bytes logsBloom;
+    bool status;
+  }
+
+  struct TransactionReturn {
+      string internalType;
+      string value;
+  }
+
+  struct Receipts {
+      Receipt[] receipts;
+      string[] libraries;
+      string path;
+      string[] pending;
+      uint256 timestamp;
+      mapping (string => TransactionReturn) txReturn;
+  }
+
+  // Read in all deployments transactions.
+  function readTransactions(string memory path) internal view returns (TransactionDetail[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions[]");
+    return abi.decode(parsedDeployData, (TransactionDetail[]));
+  }
+
+  // Analogous to readTransactions, but for receipts.
+  function readReceipts(string memory path) internal view returns (Receipt[] memory) {
+    string memory deployData = vm.readFile(path);
+    bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
+    return abi.decode(parsedDeployData, (Receipts[]));
+  }
+
+
+  // Helpers for parsing keys into types. We'd include these for all value types
+  function readUint256(string memory json, string memory key) internal view returns (uint256) {
+      return abi.decode(vm.parseJson(json, key), (uint256));
+  }
+
+  function readUintArray(string memory json, string memory key) internal view returns (uint256[]) {
+      return abi.decode(vm.parseJson(json, key), (uint256[]));
+  }
+
+  function readInt(string memory json, string memory key) internal view returns (int256) {
+      return abi.decode(vm.parseJson(json, key), (int256));
+  }
+
+  function readIntArray(string memory json, string memory key) internal view returns (int256[]) {
+      return abi.decode(vm.parseJson(json, key), (int256[]));
+  }
+
+  function readBytes32(string memory json, string memory key) internal view returns (bytes32) {
+      return abi.decode(vm.parseJson(json, key), (bytes32));
+  }
+
+  function readBytes32Array(string memory json, string memory key) internal view returns (bytes32[]) {
+      return abi.decode(vm.parseJson(json, key), (bytes32[]));
+  }
+
+  function readString(string memory json, string memory key) internal view returns (string memory) {
+      return abi.decode(vm.parseJson(json, key), (string));
+  }
+
+  function readStringArray(string memory json, string memory key) internal view returns (string[] memory) {
+      return abi.decode(vm.parseJson(json, key), (string[]));
+  }
+
+  function readAddress(string memory json, string memory key) internal view returns (address) {
+      return abi.decode(vm.parseJson(json, key), (address));
+  }
+
+  function readAddressArray(string memory json, string memory key) internal view returns (address[]) {
+      return abi.decode(vm.parseJson(json, key), (address[]));
+  }
+
+  function readBool(string memory json, string memory key) internal view returns (bool){
+      return abi.decode(vm.parseJson(json, key), (bool));
+  }
+
+  function readBoolArray(string memory json, string memory key) internal view returns (bool[]) {
+      return abi.decode(vm.parseJson(json, key), (bool[]));
+  }
+
+  function readBytes(string memory json, string memory key) internal view returns (bytes) {
+      return abi.decode(vm.parseJson(json, key), (bytes));
+  }
+
+  function readBytesArray(string memory json, string memory key) internal view returns (bytes[]) {
+      return abi.decode(vm.parseJson(json, key), (bytes[]));
+  }
 }
 
 /*//////////////////////////////////////////////////////////////////////////
