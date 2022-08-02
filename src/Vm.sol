@@ -165,6 +165,19 @@ interface Vm {
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
     /// Returns the RPC url for the given alias
+
+    // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
+    // Meaning, changes made to the state of this account will be kept when switching forks
+    function makePersistent(address) external;
+    function makePersistent(address, address) external;
+    function makePersistent(address, address, address) external;
+    function makePersistent(address[] calldata) external;
+    // Revokes persistent status from the address, previously added via `makePersistent`
+    function revokePersistent(address) external;
+    function revokePersistent(address[] calldata) external;
+    // Returns true if the account is marked as persistent
+    function isPersistent(address) external returns (bool);
+
     function rpcUrl(string calldata) external returns(string memory);
     /// Returns all rpc urls and their aliases `[alias, url][]`
     function rpcUrls() external returns(string[2][] memory);
