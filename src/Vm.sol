@@ -156,14 +156,25 @@ interface Vm {
     function createSelectFork(string calldata) external returns(uint256);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256) external;
-    /// Returns the currently active fork
-    /// Reverts if no fork is currently active
+    // Returns the currently active fork
+    // Reverts if no fork is currently active
     function activeFork() external returns(uint256);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256) external;
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
+    // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
+    // Meaning, changes made to the state of this account will be kept when switching forks
+    function makePersistent(address) external;
+    function makePersistent(address, address) external;
+    function makePersistent(address, address, address) external;
+    function makePersistent(address[] calldata) external;
+    // Revokes persistent status from the address, previously added via `makePersistent`
+    function revokePersistent(address) external;
+    function revokePersistent(address[] calldata) external;
+    // Returns true if the account is marked as persistent
+    function isPersistent(address) external returns (bool);
     /// Returns the RPC url for the given alias
     function rpcUrl(string calldata) external returns(string memory);
     /// Returns all rpc urls and their aliases `[alias, url][]`
