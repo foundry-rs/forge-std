@@ -88,7 +88,7 @@ abstract contract Test is DSTest, Script {
 
     // creates a labeled address and the corresponding private key
     function makeAddrAndKey(string memory name) internal returns(address addr, uint256 privateKey) {
-        privateKey = uint256(keccak256(bytes(abi.encodePacked(name))));
+        privateKey = uint256(keccak256(abi.encodePacked(name)));
         addr = vm.addr(privateKey);
         vm.label(addr, name);
     }
