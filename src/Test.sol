@@ -86,6 +86,18 @@ abstract contract Test is DSTest, Script {
         vm.startPrank(who);
     }
 
+    // creates a labeled address and the corresponding private key
+    function makeAddrAndKey(string memory name) internal returns(address addr, uint256 privateKey) {
+        privateKey = uint256(keccak256(abi.encodePacked(name)));
+        addr = vm.addr(privateKey);
+        vm.label(addr, name);
+    }
+
+    // creates a labeled address
+    function makeAddr(string memory name) internal returns(address addr) {
+        (addr,) = makeAddrAndKey(name);
+    }
+
     // DEPRECATED: Use `deal` instead
     function tip(address token, address to, uint256 give) internal {
         emit log_named_string("WARNING", "Test tip(address,address,uint256): The `tip` stdcheat has been deprecated. Use `deal` instead.");

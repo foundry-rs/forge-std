@@ -63,6 +63,19 @@ contract StdCheatsTest is Test {
         vm.stopPrank();
     }
 
+    function testMakeAddrEquivalence() public {
+        (address addr, ) = makeAddrAndKey("1337");
+        assertEq(makeAddr("1337"), addr);
+    }
+
+    function testMakeAddrSigning() public {
+        (address addr, uint256 key) = makeAddrAndKey("1337");
+        bytes32 hash = keccak256("some_message");
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, hash);
+        assertEq(ecrecover(hash, v, r, s), addr);
+    }
+
     function testDeal() public {
         deal(address(this), 1 ether);
         assertEq(address(this).balance, 1 ether);
@@ -157,7 +170,7 @@ contract StdCheatsTest is Test {
     function deployCodeHelper(string memory what) external {
         deployCode(what);
     }
-    
+
     function testDeployCodeFail() public {
         vm.expectRevert(bytes("Test deployCode(string): Deployment failed."));
         this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
