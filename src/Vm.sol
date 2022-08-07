@@ -2,6 +2,108 @@
 pragma solidity >=0.6.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+interface VmSafe {
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+    }
+
+    // Loads a storage slot from an address (who, slot)
+    function load(address,bytes32) external returns (bytes32);
+    // Signs data, (privateKey, digest) => (v, r, s)
+    function sign(uint256,bytes32) external returns (uint8,bytes32,bytes32);
+    // Gets the address for a given private key, (privateKey) => (address)
+    function addr(uint256) external returns (address);
+    // Gets the nonce of an account
+    function getNonce(address) external returns (uint64);
+    // Performs a foreign function call via the terminal, (stringInputs) => (result)
+    function ffi(string[] calldata) external returns (bytes memory);
+    // Sets environment variables, (name, value)
+    function setEnv(string calldata, string calldata) external;
+    // Reads environment variables, (name) => (value)
+    function envBool(string calldata) external returns (bool);
+    function envUint(string calldata) external returns (uint256);
+    function envInt(string calldata) external returns (int256);
+    function envAddress(string calldata) external returns (address);
+    function envBytes32(string calldata) external returns (bytes32);
+    function envString(string calldata) external returns (string memory);
+    function envBytes(string calldata) external returns (bytes memory);
+    // Reads environment variables as arrays, (name, delim) => (value[])
+    function envBool(string calldata, string calldata) external returns (bool[] memory);
+    function envUint(string calldata, string calldata) external returns (uint256[] memory);
+    function envInt(string calldata, string calldata) external returns (int256[] memory);
+    function envAddress(string calldata, string calldata) external returns (address[] memory);
+    function envBytes32(string calldata, string calldata) external returns (bytes32[] memory);
+    function envString(string calldata, string calldata) external returns (string[] memory);
+    function envBytes(string calldata, string calldata) external returns (bytes[] memory);
+    // Expects an error on next call
+    function expectRevert(bytes calldata) external;
+    function expectRevert(bytes4) external;
+    function expectRevert() external;
+    // Records all storage reads and writes
+    function record() external;
+    // Gets all accessed reads and write slot from a recording session, for a given address
+    function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
+    // Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
+    // Call this function, then emit an event, then call a function. Internally after the call, we check if
+    // logs were emitted in the expected order with the expected topics and data (as specified by the booleans)
+    function expectEmit(bool,bool,bool,bool) external;
+    function expectEmit(bool,bool,bool,bool,address) external;
+    // Expects a call to an address with the specified calldata.
+    // Calldata can either be a strict or a partial match
+    function expectCall(address,bytes calldata) external;
+    // Expects a call to an address with the specified msg.value and calldata
+    function expectCall(address,uint256,bytes calldata) external;
+    // Gets the code from an artifact file. Takes in the relative path to the json file
+    function getCode(string calldata) external returns (bytes memory);
+    // Labels an address in call traces
+    function label(address, string calldata) external;
+    // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
+    function broadcast() external;
+    // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
+    function broadcast(address) external;
+    // Using the address that calls the test contract, has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
+    function startBroadcast() external;
+    // Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
+    function startBroadcast(address) external;
+    // Stops collecting onchain transactions
+    function stopBroadcast() external;
+    // Reads the entire content of file to string, (path) => (data)
+    function readFile(string calldata) external returns (string memory);
+    // Reads next line of file to string, (path) => (line)
+    function readLine(string calldata) external returns (string memory);
+    // Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
+    // (path, data) => ()
+    function writeFile(string calldata, string calldata) external;
+    // Writes line to file, creating a file if it does not exist.
+    // (path, data) => ()
+    function writeLine(string calldata, string calldata) external;
+    // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
+    // (path) => ()
+    function closeFile(string calldata) external;
+    // Removes file. This cheatcode will revert in the following situations, but is not limited to just these cases:
+    // - Path points to a directory.
+    // - The file doesn't exist.
+    // - The user lacks permissions to remove the file.
+    // (path) => ()
+    function removeFile(string calldata) external;
+    // Convert values to a string, (value) => (stringified value)
+    function toString(address) external returns(string memory);
+    function toString(bytes calldata) external returns(string memory);
+    function toString(bytes32) external returns(string memory);
+    function toString(bool) external returns(string memory);
+    function toString(uint256) external returns(string memory);
+    function toString(int256) external returns(string memory);
+    // Record all the transaction logs
+    function recordLogs() external;
+    // Gets all the recorded logs, () => (logs)
+    function getRecordedLogs() external returns (Log[] memory);
+    // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
+    function deriveKey(string calldata, uint32) external returns (uint256);
+    // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
+    function deriveKey(string calldata, string calldata, uint32) external returns (uint256);
+}
+
 interface Vm {
     struct Log {
         bytes32[] topics;

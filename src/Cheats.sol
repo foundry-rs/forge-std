@@ -5,7 +5,7 @@ import "./Storage.sol";
 import "./Vm.sol";
 
 abstract contract CheatsSafe {
-    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     // Deploy a contract by fetching the contract bytecode from
     // the artifacts directory
