@@ -4,8 +4,80 @@ pragma solidity >=0.6.0 <0.9.0;
 import "./Storage.sol";
 import "./Vm.sol";
 
+abstract contract CheatsSafe {
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    // Deploy a contract by fetching the contract bytecode from
+    // the artifacts directory
+    // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
+    function deployCode(string memory what, bytes memory args)
+        internal virtual
+        returns (address addr)
+    {
+        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string,bytes): Deployment failed."
+        );
+    }
+
+    function deployCode(string memory what)
+        internal virtual
+        returns (address addr)
+    {
+        bytes memory bytecode = vm.getCode(what);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string): Deployment failed."
+        );
+    }
+
+    /// @dev deploy contract with value on construction
+    function deployCode(string memory what, bytes memory args, uint256 val)
+        internal virtual
+        returns (address addr)
+    {
+        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(val, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string,bytes,uint256): Deployment failed."
+        );
+    }
+
+    function deployCode(string memory what, uint256 val)
+        internal virtual
+        returns (address addr)
+    {
+        bytes memory bytecode = vm.getCode(what);
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create(val, add(bytecode, 0x20), mload(bytecode))
+        }
+
+        require(
+            addr != address(0),
+            "Test deployCode(string,uint256): Deployment failed."
+        );
+    }
+}
+
 // Wrappers around Cheats to avoid footguns
-abstract contract Cheats {
+abstract contract Cheats is CheatsSafe {
     using stdStorage for StdStorage;
 
     StdStorage private stdstore;
@@ -108,73 +180,5 @@ abstract contract Cheats {
                 .sig(0x18160ddd)
                 .checked_write(totSup);
         }
-    }
-
-    // Deploy a contract by fetching the contract bytecode from
-    // the artifacts directory
-    // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
-    function deployCode(string memory what, bytes memory args)
-        internal virtual
-        returns (address addr)
-    {
-        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
-        /// @solidity memory-safe-assembly
-        assembly {
-            addr := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        require(
-            addr != address(0),
-            "Test deployCode(string,bytes): Deployment failed."
-        );
-    }
-
-    function deployCode(string memory what)
-        internal virtual
-        returns (address addr)
-    {
-        bytes memory bytecode = vm.getCode(what);
-        /// @solidity memory-safe-assembly
-        assembly {
-            addr := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        require(
-            addr != address(0),
-            "Test deployCode(string): Deployment failed."
-        );
-    }
-
-    /// @dev deploy contract with value on construction
-    function deployCode(string memory what, bytes memory args, uint256 val)
-        internal virtual
-        returns (address addr)
-    {
-        bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
-        /// @solidity memory-safe-assembly
-        assembly {
-            addr := create(val, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        require(
-            addr != address(0),
-            "Test deployCode(string,bytes,uint256): Deployment failed."
-        );
-    }
-
-    function deployCode(string memory what, uint256 val)
-        internal virtual
-        returns (address addr)
-    {
-        bytes memory bytecode = vm.getCode(what);
-        /// @solidity memory-safe-assembly
-        assembly {
-            addr := create(val, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        require(
-            addr != address(0),
-            "Test deployCode(string,uint256): Deployment failed."
-        );
     }
 }
