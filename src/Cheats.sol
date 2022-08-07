@@ -5,7 +5,7 @@ import "./Storage.sol";
 import "./Vm.sol";
 
 // Wrappers around Cheats to avoid footguns
-contract Cheats {
+abstract contract Cheats {
     using stdStorage for StdStorage;
 
     StdStorage private stdstore;
