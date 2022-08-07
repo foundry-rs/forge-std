@@ -14,7 +14,7 @@ struct StdStorage {
     bytes32 _set;
 }
 
-library stdStorage {
+library stdStorageSafe {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
     event WARNING_UninitedSlot(address who, uint slot);
 
@@ -144,6 +144,116 @@ library stdStorage {
         return self;
     }
 
+    function read(StdStorage storage self) private returns (bytes memory) {
+        address t = self._target;
+        uint256 s = find(self);
+        return abi.encode(vm.load(t, bytes32(s)));
+    }
+
+    function read_bytes32(StdStorage storage self) internal returns (bytes32) {
+        return abi.decode(read(self), (bytes32));
+    }
+
+
+    function read_bool(StdStorage storage self) internal returns (bool) {
+        int256 v = read_int(self);
+        if (v == 0) return false;
+        if (v == 1) return true;
+        revert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
+    }
+
+    function read_address(StdStorage storage self) internal returns (address) {
+        return abi.decode(read(self), (address));
+    }
+
+    function read_uint(StdStorage storage self) internal returns (uint256) {
+        return abi.decode(read(self), (uint256));
+    }
+
+    function read_int(StdStorage storage self) internal returns (int256) {
+        return abi.decode(read(self), (int256));
+    }
+
+    function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
+        bytes32 out;
+
+        uint256 max = b.length > 32 ? 32 : b.length;
+        for (uint i = 0; i < max; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+        return out;
+    }
+
+    function flatten(bytes32[] memory b) private pure returns (bytes memory)
+    {
+        bytes memory result = new bytes(b.length * 32);
+        for (uint256 i = 0; i < b.length; i++) {
+            bytes32 k = b[i];
+            /// @solidity memory-safe-assembly
+            assembly {
+                mstore(add(result, add(32, mul(32, i))), k)
+            }
+        }
+
+        return result;
+    }
+}
+
+library stdStorage {
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    function sigs(
+        string memory sigStr
+    )
+        internal
+        pure
+        returns (bytes4)
+    {
+        return stdStorageSafe.sigs(sigStr);
+    }
+
+    /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
+    // slot complexity:
+    //  if flat, will be bytes32(uint256(uint));
+    //  if map, will be keccak256(abi.encode(key, uint(slot)));
+    //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
+    //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
+    function find(
+        StdStorage storage self
+    )
+        internal
+        returns (uint256)
+    {
+        return stdStorageSafe.find(self);
+    }
+
+    function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
+        return stdStorageSafe.target(self, _target);
+    }
+
+    function sig(StdStorage storage self, bytes4 _sig) internal returns (StdStorage storage) {
+        return stdStorageSafe.sig(self, _sig);
+    }
+
+    function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
+        return stdStorageSafe.sig(self, _sig);
+    }
+
+    function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
+        return stdStorageSafe.with_key(self, who);
+    }
+
+    function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
+        return stdStorageSafe.with_key(self, amt);
+    }
+    function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
+        return stdStorageSafe.with_key(self, key);
+    }
+
+    function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
+        return stdStorageSafe.depth(self, _depth);
+    }
+
     function checked_write(StdStorage storage self, address who) internal {
         checked_write(self, bytes32(uint256(uint160(who))));
     }
@@ -193,46 +303,31 @@ library stdStorage {
         delete self._depth;
     }
 
-    function read(StdStorage storage self) private returns (bytes memory) {
-        address t = self._target;
-        uint256 s = find(self);
-        return abi.encode(vm.load(t, bytes32(s)));
-    }
-
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
-        return abi.decode(read(self), (bytes32));
+        return stdStorageSafe.read_bytes32(self);
     }
-
 
     function read_bool(StdStorage storage self) internal returns (bool) {
-        int256 v = read_int(self);
-        if (v == 0) return false;
-        if (v == 1) return true;
-        revert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
+        return stdStorageSafe.read_bool(self);
     }
 
     function read_address(StdStorage storage self) internal returns (address) {
-        return abi.decode(read(self), (address));
+        return stdStorageSafe.read_address(self);
     }
 
     function read_uint(StdStorage storage self) internal returns (uint256) {
-        return abi.decode(read(self), (uint256));
+        return stdStorageSafe.read_uint(self);
     }
 
     function read_int(StdStorage storage self) internal returns (int256) {
-        return abi.decode(read(self), (int256));
+        return stdStorageSafe.read_int(self);
     }
 
     function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
-        bytes32 out;
-
-        uint256 max = b.length > 32 ? 32 : b.length;
-        for (uint i = 0; i < max; i++) {
-            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
-        }
-        return out;
+        return stdStorageSafe.bytesToBytes32(b, offset);
     }
 
+    // Private function so needs to be copied over
     function flatten(bytes32[] memory b) private pure returns (bytes memory)
     {
         bytes memory result = new bytes(b.length * 32);
