@@ -486,18 +486,27 @@ library stdError {
 
 struct StdStorage {
     mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
+    mapping (address => mapping(bytes4 => mapping(bytes32 => bool))) packed;
+    mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) packedSlotRightBits;
+    mapping (address => mapping(bytes4 => mapping(bytes32 => uint256))) packedSlotLeftBits;
     mapping (address => mapping(bytes4 =>  mapping(bytes32 => bool))) finds;
+
+
+    bool enablePackedSlots;
 
     bytes32[] _keys;
     bytes4 _sig;
     uint256 _depth;
     address _target;
     bytes32 _set;
+
+    bytes _manualCalldata;
 }
 
 library stdStorage {
-    event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot);
+    event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint slot, bool packed, uint256 leftBits, uint256 rightBits);
     event WARNING_UninitedSlot(address who, uint slot);
+    event Debug(string name, uint256 val);
 
     uint256 private constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
     int256 private constant INT256_MAX = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
@@ -514,6 +523,29 @@ library stdStorage {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
+    function fsigKeyCalc(bytes32[] memory ins, uint256 field_depth) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(ins, field_depth));
+    }
+
+    function fsigKeyCalc(bytes memory cald, uint256 field_depth) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(cald, field_depth));
+    }
+
+    function fsigKeyCalc(StdStorage storage self) internal view returns (bytes32) {
+        bytes32 fsigKey;
+
+        if (self._manualCalldata.length == 0) {
+            fsigKey = fsigKeyCalc(self._keys, self._depth);
+        } else {
+            fsigKey = fsigKeyCalc(self._manualCalldata, self._depth);
+        }
+        return fsigKey;
+    }
+
+    function packedInfo(StdStorage storage self, address who, bytes4 fsig, bytes32 fsigKey) internal view returns (uint256, uint256) {
+        return (self.packedSlotLeftBits[who][fsig][fsigKey], self.packedSlotRightBits[who][fsig][fsigKey]);
+    }
+
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
     // slot complexity:
     //  if flat, will be bytes32(uint256(uint));
@@ -526,72 +558,131 @@ library stdStorage {
         internal
         returns (uint256)
     {
+        bytes32 fsigKey;
         address who = self._target;
         bytes4 fsig = self._sig;
-        uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
 
-        // calldata to test against
-        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
-            return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
-        }
-        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        vm_std_store.record();
-        bytes32 fdat;
         {
-            (, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 32*field_depth);
-        }
+            if (self._keys.length > 0) {
+                require(self._manualCalldata.length == 0, "stdStorage find(StdStorage): manual calldata must be empty if given keys");
+            }
 
-        (bytes32[] memory reads, ) = vm_std_store.accesses(address(who));
-        if (reads.length == 1) {
-            bytes32 curr = vm_std_store.load(who, reads[0]);
-            if (curr == bytes32(0)) {
-                emit WARNING_UninitedSlot(who, uint256(reads[0]));
-            }
-            if (fdat != curr) {
-                require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
-            }
-            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
-            self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
-        } else if (reads.length > 1) {
-            for (uint256 i = 0; i < reads.length; i++) {
-                bytes32 prev = vm_std_store.load(who, reads[i]);
-                if (prev == bytes32(0)) {
-                    emit WARNING_UninitedSlot(who, uint256(reads[i]));
+            uint256 field_depth = self._depth;
+            bytes32[] memory ins = self._keys;
+            bytes memory cald;
+
+
+            if (self._manualCalldata.length == 0) {
+                fsigKey = fsigKeyCalc(ins, field_depth);
+                // calldata to test against
+                if (self.finds[who][fsig][fsigKey]) {
+                    return self.slots[who][fsig][fsigKey];
                 }
-                // store
-                vm_std_store.store(who, reads[i], bytes32(hex"1337"));
-                bool success;
-                bytes memory rdat;
-                {
-                    (success, rdat) = who.staticcall(cald);
-                    fdat = bytesToBytes32(rdat, 32*field_depth);
+                cald = abi.encodePacked(fsig, flatten(ins));
+            } else {
+                fsigKey = fsigKeyCalc(self._manualCalldata, field_depth);
+                if (self.finds[who][fsig][fsigKey]) {
+                    return self.slots[who][fsig][fsigKey];
                 }
 
-                if (success && fdat == bytes32(hex"1337")) {
-                    // we found which of the slots is the actual one
-                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
-                    self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
-                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
+                cald = abi.encodePacked(fsig, self._manualCalldata);
+            }
+
+
+            vm_std_store.record();
+            bytes32 fdat;
+            {
+                (, bytes memory rdat) = who.staticcall(cald);
+                fdat = bytesToBytes32(rdat, 32*field_depth);
+            }
+
+            (bytes32[] memory reads, ) = vm_std_store.accesses(address(who));
+            if (reads.length == 1) {
+                bytes32 curr = vm_std_store.load(who, reads[0]);
+                if (curr == bytes32(0)) {
+                    emit WARNING_UninitedSlot(who, uint256(reads[0]));
+                }
+                if (fdat != curr) {
+                    if (self.enablePackedSlots) {
+                        // TODO: Binary search instead of iter
+                        // packed slot
+                        self.packed[who][fsig][fsigKey] = true;
+
+                        bool rightBitsFound = false;
+                        for (uint256 i; i < 256; i++) {
+                            vm_std_store.store(who, reads[0], bytes32(1 << i));
+                            {
+                                (, bytes memory rdat) = who.staticcall(cald);
+                                fdat = bytesToBytes32(rdat, 32*field_depth);
+                            }
+
+                            if (uint256(fdat) == 1) {
+                                // we found right bits
+                                self.packedSlotRightBits[who][fsig][fsigKey] = i;
+                                rightBitsFound = true;
+                            } else {
+                                if (rightBitsFound) {
+                                    if (fdat == 0) {
+                                        // the bit just moved outside the range
+                                        self.packedSlotLeftBits[who][fsig][fsigKey] = 256 - i;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        vm_std_store.store(who, reads[0], curr);
+                    } else {
+                        require(false, "stdStorage find(StdStorage): Packed slot. You can enable packed slot writing via `stdStorage.enabledPackedSlots(true)`; Be aware this will slow down execution and have heavy output in a call trace.");
+                    }
+                }
+
+                self.slots[who][fsig][fsigKey] = uint256(reads[0]);
+                self.finds[who][fsig][fsigKey] = true;
+            } else if (reads.length > 1) {
+                for (uint256 i = 0; i < reads.length; i++) {
+                    bytes32 prev = vm_std_store.load(who, reads[i]);
+                    if (prev == bytes32(0)) {
+                        emit WARNING_UninitedSlot(who, uint256(reads[i]));
+                    }
+                    // store
+                    vm_std_store.store(who, reads[i], bytes32(hex"1337"));
+                    bool success;
+                    bytes memory rdat;
+                    {
+                        (success, rdat) = who.staticcall(cald);
+                        fdat = bytesToBytes32(rdat, 32*field_depth);
+                    }
+
+                    if (success && fdat == bytes32(hex"1337")) {
+                        // we found which of the slots is the actual one
+                        self.slots[who][fsig][fsigKey] = uint256(reads[i]);
+                        self.finds[who][fsig][fsigKey] = true;
+                        vm_std_store.store(who, reads[i], prev);
+                        break;
+                    }
                     vm_std_store.store(who, reads[i], prev);
-                    break;
                 }
-                vm_std_store.store(who, reads[i], prev);
+            } else {
+                require(false, "stdStorage find(StdStorage): No storage use detected for target.");
             }
-        } else {
-            require(false, "stdStorage find(StdStorage): No storage use detected for target.");
+
+            require(self.finds[who][fsig][fsigKey], "stdStorage find(StdStorage): Slot(s) not found.");
         }
 
-        require(self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))], "stdStorage find(StdStorage): Slot(s) not found.");
-
+        emit SlotFound(who, fsig, fsigKey, uint256(self.slots[who][fsig][fsigKey]), self.packed[who][fsig][fsigKey], self.packedSlotLeftBits[who][fsig][fsigKey], self.packedSlotRightBits[who][fsig][fsigKey]);
         delete self._target;
         delete self._sig;
         delete self._keys;
         delete self._depth;
+        delete self._manualCalldata;
 
-        return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        return self.slots[who][fsig][fsigKey];
+    }
+
+    function enabledPackedSlots(StdStorage storage self, bool toggle) public returns (StdStorage storage) {
+        self.enablePackedSlots = toggle;
+        return self;
     }
 
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
@@ -611,6 +702,11 @@ library stdStorage {
 
     function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
         self._keys.push(bytes32(uint256(uint160(who))));
+        return self;
+    }
+
+    function with_calldata(StdStorage storage self, bytes memory data) internal returns (StdStorage storage) {
+        self._manualCalldata = data;
         return self;
     }
 
@@ -651,36 +747,52 @@ library stdStorage {
     ) internal {
         address who = self._target;
         bytes4 fsig = self._sig;
-        uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
 
-        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
+        bytes32 fsigKey = fsigKeyCalc(self);
+
+        if (!self.finds[who][fsig][fsigKey]) {
             find(self);
         }
-        bytes32 slot = bytes32(self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]);
 
-        bytes32 fdat;
-        {
-            (, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 32*field_depth);
-        }
-        bytes32 curr = vm_std_store.load(who, slot);
+        bytes32 slot = bytes32(self.slots[who][fsig][fsigKey]);
+        bool isPacked = self.packed[who][fsig][fsigKey];
 
-        if (fdat != curr) {
-            require(false, "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported.");
+        if (isPacked) {
+            bytes32 curr = vm_std_store.load(who, slot);
+            uint256 leftBits =  self.packedSlotLeftBits[who][fsig][fsigKey];
+            uint256 rightBits =  self.packedSlotRightBits[who][fsig][fsigKey];
+            uint256 size = 256 - leftBits - rightBits;
+            if (uint256(set) > 2**size - 1) {
+                require(false, "stdStorage checked_write(StdStorage): Packed slot, the value to set is larger than the size of allocated region of the slot.");
+            }
+
+            // creates a 0xffff..0000..ff style mask
+            uint256 mask = ~(2**size - 1 << rightBits);
+            // shifts the set value to the correct location
+            uint256 shifted = uint256(set) << rightBits;
+            // zeros out the existing value's set allocation then ors it with the shifted `set` value 
+            set = bytes32(uint256(curr) & mask | shifted);
         }
+        
         vm_std_store.store(who, slot, set);
+
         delete self._target;
         delete self._sig;
         delete self._keys;
         delete self._depth;
+        delete self._manualCalldata;
     }
 
     function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
+        bytes4 fsig = self._sig;
+        bytes32 fsigKey = fsigKeyCalc(self);
         uint256 s = find(self);
-        return abi.encode(vm_std_store.load(t, bytes32(s)));
+
+        (uint256 leftBits, uint256 rightBits) = packedInfo(self, t, fsig, fsigKey);
+
+        uint256 val = uint256(vm_std_store.load(t, bytes32(s)));
+        return abi.encode((val << leftBits) >> (leftBits + rightBits));
     }
 
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
