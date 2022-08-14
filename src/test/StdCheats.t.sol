@@ -88,27 +88,24 @@ contract StdCheatsTest is Test {
     }
 
     function testDeployCode() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
-        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+        address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""));
+        assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
     function testDeployCodeNoArgs() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest");
-        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+        address deployed = deployCode("StdCheats.t.sol:Bar");
+        assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
-    // We need the payable constructor in order to send ETH on construction
-    constructor() payable {}
-
     function testDeployCodeVal() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), 1 ether);
-        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+        address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""), 1 ether);
+        assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
     }
 
     function testDeployCodeValNoArgs() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", 1 ether);
-        assertEq(string(getCode(deployed)), string(getCode(address(this))));
+        address deployed = deployCode("StdCheats.t.sol:Bar", 1 ether);
+        assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
     }
 
@@ -141,7 +138,7 @@ contract StdCheatsTest is Test {
 }
 
 contract Bar {
-    constructor() {
+    constructor() payable {
         /// `DEAL` STDCHEAT
         totalSupply = 10000e18;
         balanceOf[address(this)] = totalSupply;
