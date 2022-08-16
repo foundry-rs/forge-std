@@ -2,6 +2,7 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Script.sol";
+import "./Vm.sol";
 import "ds-test/test.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
@@ -448,8 +449,266 @@ abstract contract Test is DSTest, Script {
             assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              JSON PARSING
+    //////////////////////////////////////////////////////////////*/
+
+   struct EIP1559Transaction {
+        string[] arguments;
+        address contractAddress;
+        string contractName;
+        string functionName;
+        string hash;
+        string opcode;
+        EIP1559TransactionDetail transaction;
+    }
+
+    struct EIP1559TransactionDetail {
+        AccesssList[] accessList;
+        uint256 chainId;
+        bytes data;
+        address from;
+        uint256 gas;
+        bytes32 hash;
+        uint256 nonce;
+        bytes1 opcode;
+        bytes32 r;
+        bytes32 s;
+        uint256 txType;
+        address to;
+        uint8 v;
+        uint256 value;
+    }
+
+    struct LegacyTransaction {
+        string[] arguments;
+        address contractAddress;
+        string contractName;
+        string functionName;
+        string hash;
+        string opcode;
+        LegacyTransactionDetail transaction;
+    }
+
+    struct LegacyTransactionDetail {
+        AccesssList[] accessList;
+        uint256 chainId;
+        bytes data;
+        address from;
+        uint256 gas;
+        uint256 gasPrice;
+        bytes32 hash;
+        uint256 nonce;
+        bytes1 opcode;
+        bytes32 r;
+        bytes32 s;
+        uint256 txType;
+        address to;
+        uint8 v;
+        uint256 value;
+    }
+
+    struct AccesssList {
+        address accessAddress;
+        bytes32[] storageKeys;
+    }
+
+    struct Receipt {
+        string blockHash;
+        uint256 blockNumber;
+        address contractAddress;
+        uint256 cumulativeGasUsed;
+        uint256 effectiveGasPrice;
+        address from;
+        uint256 gasUsed;
+        address to;
+        string transactionHash;
+        uint256 transactionIndex;
+        string[] logs;
+        bytes logsBloom;
+        bool status;
+    }
+
+    struct TransactionReturn {
+        string internalType;
+        string value;
+    }
+
+    struct EIP1559ScriptArtifact {
+        string[] libraries;
+        string path;
+        string[] pending;
+        Receipt[] receipts;
+        uint256 timestamp;
+        EIP1559Transaction[] transactions;
+        TransactionReturn[] txReturns;
+    }
+
+    function readScriptArtifact(string memory path)
+        internal
+        returns(EIP1559ScriptArtifact memory)
+    {
+        string memory data = vm.readFile(path);
+        bytes memory parsedData = vm.parseJson(data);
+        return abi.decode(parsedData, (EIP1559ScriptArtifact));
+    }
+
+    // Read in all EIP1559 deployments transactions.
+    function readEIP1559Transactions(string memory path)
+        internal
+        returns (EIP1559Transaction[] memory)
+    {
+        string memory deployData = vm.readFile(path);
+        bytes memory parsedDeployData =
+            vm.parseJson(deployData, ".transactions[]");
+        return abi.decode(parsedDeployData, (EIP1559Transaction[]));
+    }
+
+    // Read in all Legacy deployments transactions.
+    function readLegacyTransactions(string memory path)
+        internal
+        returns (LegacyTransaction[] memory)
+    {
+        string memory deployData = vm.readFile(path);
+        bytes memory parsedDeployData =
+            vm.parseJson(deployData, ".transactions[]");
+        return abi.decode(parsedDeployData, (LegacyTransaction[]));
+    }
+
+    // Analogous to readTransactions, but for receipts.
+    function readReceipts(string memory path)
+        internal
+        returns (Receipt[] memory)
+    {
+        string memory deployData = vm.readFile(path);
+        bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
+        return abi.decode(parsedDeployData, (Receipt[]));
+    }
 }
 
+// Helpers for parsing keys into types. We'd include these for all value types
+contract JsonParser is Test {
+    string path;
+    string json;
+
+    constructor(string memory _path){
+        path = _path;
+        console2.log("Created JSON parser for json at", path);
+    }
+
+    function readJson()
+        public
+    {
+        json = vm.readFile(path);
+    }
+
+    function printRaw()
+        view
+        public
+    {
+        console2.log(json);
+    }
+
+    function readUint256(string memory key)
+        public
+        returns (uint256)
+    {
+        return abi.decode(vm.parseJson(json, key), (uint256));
+    }
+
+    function readUintArray(string memory key)
+        public
+        returns (uint256[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (uint256[]));
+    }
+
+    function readInt(string memory key)
+        public
+        returns (int256)
+    {
+        return abi.decode(vm.parseJson(json, key), (int256));
+    }
+
+    function readIntArray(string memory key)
+        public
+        returns (int256[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (int256[]));
+    }
+
+    function readBytes32(string memory key)
+        public
+        returns (bytes32)
+    {
+        return abi.decode(vm.parseJson(json, key), (bytes32));
+    }
+
+    function readBytes32Array(string memory key)
+        public
+        returns (bytes32[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (bytes32[]));
+    }
+
+    function readString(string memory key)
+        public
+        returns (string memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (string));
+    }
+
+    function readStringArray(string memory key)
+        public
+        returns (string[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (string[]));
+    }
+
+    function readAddress(string memory key)
+        public
+        returns (address)
+    {
+        return abi.decode(vm.parseJson(json, key), (address));
+    }
+
+    function readAddressArray(string memory key)
+        public
+        returns (address[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (address[]));
+    }
+
+    function readBool(string memory key)
+        public
+        returns (bool)
+    {
+        return abi.decode(vm.parseJson(json, key), (bool));
+    }
+
+    function readBoolArray(string memory key)
+        public
+        returns (bool[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (bool[]));
+    }
+
+    function readBytes(string memory key)
+        public
+        returns (bytes memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (bytes));
+    }
+
+    function readBytesArray(string memory key)
+        public
+        returns (bytes[] memory)
+    {
+        return abi.decode(vm.parseJson(json, key), (bytes[]));
+    }
+
+}
 /*//////////////////////////////////////////////////////////////////////////
                                 STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
@@ -719,145 +978,10 @@ library stdStorage {
         return result;
     }
 
-    /*//////////////////////////////////////////////////////////////
-                              JSON PARSING
-    //////////////////////////////////////////////////////////////*/
-
-struct Transaction {
-    address contractAddress;
-    string hash;
-    TransactionDetail tx;
-  }
-struct TransactionWithContractName {
-    address contractAddress;
-    string contractName;
-    string hash;
-    TransactionDetail tx;
-  }
-
-  struct TransactionWithFunction{
-    address contractAddress;
-    string contractName;
-    string functionName;
-    string arguments;
-    string hash;
-    TransactionDetail tx;
-  }
-
-  struct TransactionDetail {
-    bytes data;
-    address from;
-    uint256 gas;
-    bytes32 hash;
-    uint256 nonce;
-    bytes1 opcode;
-    address to;
-    uint256 value;
-
-  }
-
-  struct Receipt {
-    string blockHash;
-    uint256 blockNumber;
-    address contractAddress;
-    uint256 cumulativeGasUsed;
-    uint256 effectiveGasPrice;
-    address from;
-    uint256 gasUsed;
-    address to;
-    string transactionHash;
-    uint256 transactionIndex;
-    string[] logs;
-    bytes logsBloom;
-    bool status;
-  }
-
-  struct TransactionReturn {
-      string internalType;
-      string value;
-  }
-
-  struct Receipts {
-      Receipt[] receipts;
-      string[] libraries;
-      string path;
-      string[] pending;
-      uint256 timestamp;
-      mapping (string => TransactionReturn) txReturn;
-  }
-
-  // Read in all deployments transactions.
-  function readTransactions(string memory path) internal view returns (TransactionDetail[] memory) {
-    string memory deployData = vm.readFile(path);
-    bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions[]");
-    return abi.decode(parsedDeployData, (TransactionDetail[]));
-  }
-
-  // Analogous to readTransactions, but for receipts.
-  function readReceipts(string memory path) internal view returns (Receipt[] memory) {
-    string memory deployData = vm.readFile(path);
-    bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
-    return abi.decode(parsedDeployData, (Receipts[]));
-  }
 
 
-  // Helpers for parsing keys into types. We'd include these for all value types
-  function readUint256(string memory json, string memory key) internal view returns (uint256) {
-      return abi.decode(vm.parseJson(json, key), (uint256));
-  }
-
-  function readUintArray(string memory json, string memory key) internal view returns (uint256[]) {
-      return abi.decode(vm.parseJson(json, key), (uint256[]));
-  }
-
-  function readInt(string memory json, string memory key) internal view returns (int256) {
-      return abi.decode(vm.parseJson(json, key), (int256));
-  }
-
-  function readIntArray(string memory json, string memory key) internal view returns (int256[]) {
-      return abi.decode(vm.parseJson(json, key), (int256[]));
-  }
-
-  function readBytes32(string memory json, string memory key) internal view returns (bytes32) {
-      return abi.decode(vm.parseJson(json, key), (bytes32));
-  }
-
-  function readBytes32Array(string memory json, string memory key) internal view returns (bytes32[]) {
-      return abi.decode(vm.parseJson(json, key), (bytes32[]));
-  }
-
-  function readString(string memory json, string memory key) internal view returns (string memory) {
-      return abi.decode(vm.parseJson(json, key), (string));
-  }
-
-  function readStringArray(string memory json, string memory key) internal view returns (string[] memory) {
-      return abi.decode(vm.parseJson(json, key), (string[]));
-  }
-
-  function readAddress(string memory json, string memory key) internal view returns (address) {
-      return abi.decode(vm.parseJson(json, key), (address));
-  }
-
-  function readAddressArray(string memory json, string memory key) internal view returns (address[]) {
-      return abi.decode(vm.parseJson(json, key), (address[]));
-  }
-
-  function readBool(string memory json, string memory key) internal view returns (bool){
-      return abi.decode(vm.parseJson(json, key), (bool));
-  }
-
-  function readBoolArray(string memory json, string memory key) internal view returns (bool[]) {
-      return abi.decode(vm.parseJson(json, key), (bool[]));
-  }
-
-  function readBytes(string memory json, string memory key) internal view returns (bytes) {
-      return abi.decode(vm.parseJson(json, key), (bytes));
-  }
-
-  function readBytesArray(string memory json, string memory key) internal view returns (bytes[]) {
-      return abi.decode(vm.parseJson(json, key), (bytes[]));
-  }
 }
+
 
 /*//////////////////////////////////////////////////////////////////////////
                                 STD-MATH
