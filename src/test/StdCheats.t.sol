@@ -204,6 +204,11 @@ contract StdCheatsTest is Test {
         runScript("StdCheats.t.sol:ScriptWithoutSetup");
         assertTrue(vm.envBool("SCRIPT_RUN_CALLED"));
     }
+
+    function testRunReturnsData() public {
+        bytes memory data = runScript("StdCheats.t.sol:ScriptRunReturnsData");
+        assertEq(abi.decode(data, (uint256)), 1);
+    }
 }
 
 contract Bar {
@@ -250,5 +255,11 @@ contract ScriptWithSetup is Script {
 contract ScriptWithoutSetup is Script {
     function run() public {
         vm.setEnv("SCRIPT_RUN_CALLED", "true");
+    }
+}
+
+contract ScriptRunReturnsData is Script {
+    function run() public returns (uint256) {
+        return 1;
     }
 }
