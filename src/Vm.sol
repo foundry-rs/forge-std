@@ -14,6 +14,8 @@ interface Vm {
     function roll(uint256) external;
     // Sets block.basefee (newBasefee)
     function fee(uint256) external;
+    // Sets block.difficulty (newDifficulty)
+    function difficulty(uint256) external;
     // Sets block.chainid
     function chainId(uint256) external;
     // Loads a storage slot from an address (who, slot)
