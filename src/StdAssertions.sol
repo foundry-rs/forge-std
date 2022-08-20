@@ -2,9 +2,9 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "ds-test/test.sol";
-import "./Math.sol";
+import "./StdMath.sol";
 
-abstract contract Assertions is DSTest {
+abstract contract StdAssertions is DSTest {
     event log_array(uint256[] val);
     event log_array(int256[] val);
     event log_array(address[] val);
