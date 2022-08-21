@@ -5,7 +5,7 @@ import "./console.sol";
 import "./console2.sol";
 import "./StdAssertions.sol";
 import "./StdCheats.sol";
-import "./StdErrors.sol";
+import "./StdError.sol";
 import "./StdMath.sol";
 import "./StdStorage.sol";
 import "./StdUtils.sol";
