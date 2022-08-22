@@ -454,16 +454,16 @@ abstract contract Test is DSTest, Script {
                               JSON PARSING
     //////////////////////////////////////////////////////////////*/
 
-   struct rawEIP1559Transaction {
+   struct RawEIP1559Transaction {
         string[] arguments;
         address contractAddress;
         string contractName;
         string functionName;
         bytes32 hash;
-        rawEIP1559TransactionDetail detail;
+        RawEIP1559TransactionDetail detail;
     }
 
-    struct rawEIP1559TransactionDetail {
+    struct RawEIP1559TransactionDetail {
         AccessList[] accessList;
         bytes data;
         address from;
@@ -529,7 +529,7 @@ abstract contract Test is DSTest, Script {
         bytes32[] storageKeys;
     }
 
-    struct rawReceipt {
+    struct RawReceipt {
         bytes32 blockHash;
         bytes blockNumber;
         address contractAddress;
@@ -539,10 +539,26 @@ abstract contract Test is DSTest, Script {
         bytes gasUsed;
         address to;
         bytes32 transactionHash;
-        uint256 transactionIndex;
+        bytes transactionIndex;
         string[] logs;
         bytes logsBloom;
         bytes status;
+    }
+
+    struct Receipt {
+        bytes32 blockHash;
+        uint256 blockNumber;
+        address contractAddress;
+        uint256 cumulativeGasUsed;
+        uint256 effectiveGasPrice;
+        address from;
+        uint256 gasUsed;
+        address to;
+        bytes32 transactionHash;
+        uint256 transactionIndex;
+        string[] logs;
+        bytes logsBloom;
+        uint256 status;
     }
 
     struct TransactionReturn {
@@ -560,16 +576,36 @@ abstract contract Test is DSTest, Script {
         TransactionReturn[] transactionReturns;
     }
 
-    function readScriptArtifact(string memory path)
+    struct RawEIP1559ScriptArtifact {
+        string[] libraries;
+        string path;
+        string[] pending;
+        RawReceipt[] receipts;
+        uint256 timestamp;
+        RawEIP1559Transaction[] transactions;
+        TransactionReturn[] transactionReturns;
+    }
+
+    function readEIP1559ScriptArtifact(string memory path)
         internal
         returns(EIP1559ScriptArtifact memory)
     {
         string memory data = vm.readFile(path);
         bytes memory parsedData = vm.parseJson(data);
-        abi.decode(parsedData, (EIP1559ScriptArtifact));
+        RawEIP1559ScriptArtifact memory rawArtifact = abi.decode(parsedData, (RawEIP1559ScriptArtifact));
+        EIP1559ScriptArtifact memory artifact;
+        artifact.libraries = rawArtifact.libraries;
+        artifact.path = rawArtifact.path;
+        artifact.timestamp = rawArtifact.timestamp;
+        artifact.pending = rawArtifact.pending;
+        artifact.transactionReturns = rawArtifact.transactionReturns;
+        artifact.receipts = rawToConvertedReceipts(rawArtifact.receipts);
+        artifact.transactions = rawToConvertedEIP1559Tx(rawArtifact.transactions);
+        return artifact;
     }
 
-    function rawToConvertedEIP1559Tx(rawEIP1559Transaction[] memory rawTxs)
+    // break into two functions
+    function rawToConvertedEIP1559Tx(RawEIP1559Transaction[] memory rawTxs)
         internal
         returns (EIP1559Transaction[] memory)
     {
@@ -584,7 +620,7 @@ abstract contract Test is DSTest, Script {
         return txs;
     }
 
-    function rawToConvertedEIP1559Detail(rawEIP1559TransactionDetail memory rawDetail)
+    function rawToConvertedEIP1559Detail(RawEIP1559TransactionDetail memory rawDetail)
         internal
         returns (EIP1559TransactionDetail memory)
     {
@@ -610,7 +646,7 @@ abstract contract Test is DSTest, Script {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData =
             vm.parseJson(deployData, ".transactions[]");
-        rawEIP1559Transaction[] memory rawTxs = abi.decode(parsedDeployData, (rawEIP1559Transaction[]));
+        RawEIP1559Transaction[] memory rawTxs = abi.decode(parsedDeployData, (RawEIP1559Transaction[]));
         return rawToConvertedEIP1559Tx(rawTxs);
     }
 
@@ -622,7 +658,33 @@ abstract contract Test is DSTest, Script {
     {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
-        return abi.decode(parsedDeployData, (Receipt[]));
+        RawReceipt[] memory rawReceipts = abi.decode(parsedDeployData, (RawReceipt[]));
+        return rawToConvertedReceipts(rawReceipts);
+    }
+
+    // TODO fix stack too deep
+    // break into two functions
+    function rawToConvertedReceipts(RawReceipt[] memory rawReceipts)
+        internal
+        returns(Receipt[] memory)
+    {
+        Receipt[] memory receipts = new Receipt[](rawReceipts.length);
+        for(uint i;i<rawReceipts.length;i++){
+            receipts[i].blockHash = rawReceipts[i].blockHash;
+            receipts[i].to = rawReceipts[i].to;
+            receipts[i].from = rawReceipts[i].from;
+            receipts[i].contractAddress = rawReceipts[i].contractAddress;
+            receipts[i].effectiveGasPrice = bytesToUint(rawReceipts[i].effectiveGasPrice);
+            receipts[i].cumulativeGasUsed= bytesToUint(rawReceipts[i].cumulativeGasUsed);
+            receipts[i].gasUsed = bytesToUint(rawReceipts[i].gasUsed);
+            receipts[i].status = bytesToUint(rawReceipts[i].status);
+            receipts[i].transactionIndex = bytesToUint(rawReceipts[i].transactionIndex);
+            receipts[i].blockNumber = bytesToUint(rawReceipts[i].blockNumber);
+            receipts[i].logs = rawReceipts[i].logs;
+            receipts[i].logsBloom = rawReceipts[i].logsBloom;
+            receipts[i].transactionHash = rawReceipts[i].transactionHash;
+        }
+        return receipts;
     }
 
     function bytesToUint(bytes memory b) internal pure returns (uint256){
