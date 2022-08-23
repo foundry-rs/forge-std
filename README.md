@@ -244,3 +244,7 @@ import "forge-std/console.sol";
 ...
 console.log(someValue);
 ```
+
+## License
+
+Forge Standard Library is offered under either [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE) license.
