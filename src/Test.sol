@@ -458,9 +458,13 @@ abstract contract Test is DSTest, Script {
         string[] arguments;
         address contractAddress;
         string contractName;
+        // json value name = function
         string functionName;
         bytes32 hash;
+        // json value name = tx
         RawEIP1559TransactionDetail detail;
+        // json value name = type
+        string contractType;
     }
 
     struct RawEIP1559TransactionDetail {
@@ -600,24 +604,32 @@ abstract contract Test is DSTest, Script {
         artifact.pending = rawArtifact.pending;
         artifact.transactionReturns = rawArtifact.transactionReturns;
         artifact.receipts = rawToConvertedReceipts(rawArtifact.receipts);
-        artifact.transactions = rawToConvertedEIP1559Tx(rawArtifact.transactions);
+        artifact.transactions = rawToConvertedEIP1559Txs(rawArtifact.transactions);
         return artifact;
     }
 
     // break into two functions
-    function rawToConvertedEIP1559Tx(RawEIP1559Transaction[] memory rawTxs)
+    function rawToConvertedEIP1559Txs(RawEIP1559Transaction[] memory rawTxs)
         internal
         returns (EIP1559Transaction[] memory)
     {
         EIP1559Transaction[] memory txs = new EIP1559Transaction[](rawTxs.length);
         for(uint i;i<rawTxs.length;i++){
-            txs[i].arguments = rawTxs[i].arguments;
-            txs[i].contractName = rawTxs[i].contractName;
-            txs[i].functionName = rawTxs[i].functionName;
-            txs[i].hash= rawTxs[i].hash;
-            txs[i].detail = rawToConvertedEIP1559Detail(rawTxs[i].detail);
+            txs[i] = rawToConvertedEIP1559Tx(rawTxs[i]);
         }
         return txs;
+    }
+
+    function rawToConvertedEIP1559Tx(RawEIP1559Transaction memory rawTx)
+        internal
+        returns (EIP1559Transaction memory)
+    {
+            EIP1559Transaction memory transaction;
+            transaction.arguments = rawTx.arguments;
+            transaction.contractName = rawTx.contractName;
+            transaction.functionName = rawTx.functionName;
+            transaction.hash= rawTx.hash;
+            transaction.detail = rawToConvertedEIP1559Detail(rawTx.detail);
     }
 
     function rawToConvertedEIP1559Detail(RawEIP1559TransactionDetail memory rawDetail)
@@ -647,7 +659,7 @@ abstract contract Test is DSTest, Script {
         bytes memory parsedDeployData =
             vm.parseJson(deployData, ".transactions[]");
         RawEIP1559Transaction[] memory rawTxs = abi.decode(parsedDeployData, (RawEIP1559Transaction[]));
-        return rawToConvertedEIP1559Tx(rawTxs);
+        return rawToConvertedEIP1559Txs(rawTxs);
     }
 
 
@@ -662,29 +674,36 @@ abstract contract Test is DSTest, Script {
         return rawToConvertedReceipts(rawReceipts);
     }
 
-    // TODO fix stack too deep
-    // break into two functions
     function rawToConvertedReceipts(RawReceipt[] memory rawReceipts)
         internal
         returns(Receipt[] memory)
     {
         Receipt[] memory receipts = new Receipt[](rawReceipts.length);
         for(uint i;i<rawReceipts.length;i++){
-            receipts[i].blockHash = rawReceipts[i].blockHash;
-            receipts[i].to = rawReceipts[i].to;
-            receipts[i].from = rawReceipts[i].from;
-            receipts[i].contractAddress = rawReceipts[i].contractAddress;
-            receipts[i].effectiveGasPrice = bytesToUint(rawReceipts[i].effectiveGasPrice);
-            receipts[i].cumulativeGasUsed= bytesToUint(rawReceipts[i].cumulativeGasUsed);
-            receipts[i].gasUsed = bytesToUint(rawReceipts[i].gasUsed);
-            receipts[i].status = bytesToUint(rawReceipts[i].status);
-            receipts[i].transactionIndex = bytesToUint(rawReceipts[i].transactionIndex);
-            receipts[i].blockNumber = bytesToUint(rawReceipts[i].blockNumber);
-            receipts[i].logs = rawReceipts[i].logs;
-            receipts[i].logsBloom = rawReceipts[i].logsBloom;
-            receipts[i].transactionHash = rawReceipts[i].transactionHash;
+            receipts[i] = rawToConvertedReceipt(rawReceipts[i]);
         }
         return receipts;
+    }
+
+    function rawToConvertedReceipt(RawReceipt memory rawReceipt)
+        internal
+        returns(Receipt memory)
+    {
+        Receipt memory receipt;
+        receipt.blockHash = rawReceipt.blockHash;
+        receipt.to = rawReceipt.to;
+        receipt.from = rawReceipt.from;
+        receipt.contractAddress = rawReceipt.contractAddress;
+        receipt.effectiveGasPrice = bytesToUint(rawReceipt.effectiveGasPrice);
+        receipt.cumulativeGasUsed= bytesToUint(rawReceipt.cumulativeGasUsed);
+        receipt.gasUsed = bytesToUint(rawReceipt.gasUsed);
+        receipt.status = bytesToUint(rawReceipt.status);
+        receipt.transactionIndex = bytesToUint(rawReceipt.transactionIndex);
+        receipt.blockNumber = bytesToUint(rawReceipt.blockNumber);
+        receipt.logs = rawReceipt.logs;
+        receipt.logsBloom = rawReceipt.logsBloom;
+        receipt.transactionHash = rawReceipt.transactionHash;
+        return receipt;
     }
 
     function bytesToUint(bytes memory b) internal pure returns (uint256){
