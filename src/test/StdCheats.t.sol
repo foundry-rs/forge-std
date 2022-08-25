@@ -211,13 +211,24 @@ contract StdCheatsTest is Test {
         EIP1559Transaction[] memory transactions = readEIP1559Transactions(path);
     }
 
-    function testReadReceipt() public {
+    // Will fail due to it's logsBloom field. If the logsBloom is replaced with another (say from Receipt 6), then
+    // it will be decoded correctly.
+    function testReadReceipt5() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
         uint index = 5;
         Receipt memory receipt = readReceipt(path, index);
     }
 
+    // Succeeds
+    function testReadReceipt6() public {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        uint index = 6;
+        Receipt memory receipt = readReceipt(path, index);
+    }
+
+    // LogsBlooms are correctly decoded into Bytes.
     function testReadBytes() public{
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
