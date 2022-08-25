@@ -151,7 +151,7 @@
           "blockHash": "0xcf61faca67dbb2c28952b0b8a379e53b1505ae0821e84779679390cb8571cadb",
           "blockNumber": "0x6",
           "transactionHash": "0xa57e8e3981a6c861442e46c9471bd19cb3e21f9a8a6c63a72e7b5c47c6675a7c",
-          "transactionIndex": "0x0",
+          "transactionIndex": "0x1",
           "logIndex": "0x0",
           "transactionLogIndex": "0x0",
           "removed": false
