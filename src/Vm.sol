@@ -172,11 +172,7 @@ interface Vm {
     function deriveKey(string calldata, uint32) external returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
     function deriveKey(string calldata, string calldata, uint32) external returns (uint256);
-        // Returns the path to the project root, () => (path)
-    function projectRoot() external returns (string memory);
-
     // parseJson
-
     // Given a string of JSON, return the ABI-encoded value of provided key
     // (stringified json, key) => (ABI-encoded data)
     // Read the note below!
