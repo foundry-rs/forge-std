@@ -225,6 +225,7 @@ contract StdCheatsTest is Test {
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
     }
+
 }
 
 contract Bar {

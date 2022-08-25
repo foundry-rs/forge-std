@@ -612,9 +612,9 @@ abstract contract Test is DSTest, Script {
         string path;
         string[] pending;
         RawReceipt[] receipts;
+        TransactionReturn[] transactionReturns;
         uint256 timestamp;
         RawEIP1559Transaction[] transactions;
-        TransactionReturn[] transactionReturns;
     }
 
     function readEIP1559ScriptArtifact(string memory path)
