@@ -541,7 +541,7 @@ abstract contract Test is DSTest, Script {
         bytes effectiveGasPrice;
         address from;
         bytes gasUsed;
-        RawReceiptLog logs;
+        RawReceiptLog[] logs;
         bytes logsBloom;
         bytes status;
         address to;
@@ -557,7 +557,7 @@ abstract contract Test is DSTest, Script {
         uint256 effectiveGasPrice;
         address from;
         uint256 gasUsed;
-        ReceiptLog logs;
+        ReceiptLog[] logs;
         bytes logsBloom;
         uint256 status;
         address to;
@@ -758,20 +758,22 @@ abstract contract Test is DSTest, Script {
         return receipt;
     }
 
-    function rawToConvertedReceiptLogs(RawReceiptLog memory rawLogs)
+    function rawToConvertedReceiptLogs(RawReceiptLog[] memory rawLogs)
         internal
-        returns (ReceiptLog memory)
+        returns (ReceiptLog[] memory)
     {
-        ReceiptLog memory logs;
-        logs.logAddress = rawLogs.logAddress;
-        logs.blockHash = rawLogs.blockHash;
-        logs.blockNumber = bytesToUint(rawLogs.blockNumber);
-        logs.data = rawLogs.data;
-        logs.logIndex = bytesToUint(rawLogs.logIndex);
-        logs.topics = rawLogs.topics;
-        logs.transactionIndex = bytesToUint(rawLogs.transactionIndex);
-        logs.transactionLogIndex = bytesToUint(rawLogs.transactionLogIndex);
-        logs.removed = rawLogs.removed;
+        ReceiptLog[] memory logs = new ReceiptLog[](rawLogs.length);
+        for(uint i; i<rawLogs.length;i++){
+            logs[i].logAddress = rawLogs[i].logAddress;
+            logs[i].blockHash = rawLogs[i].blockHash;
+            logs[i].blockNumber = bytesToUint(rawLogs[i].blockNumber);
+            logs[i].data = rawLogs[i].data;
+            logs[i].logIndex = bytesToUint(rawLogs[i].logIndex);
+            logs[i].topics = rawLogs[i].topics;
+            logs[i].transactionIndex = bytesToUint(rawLogs[i].transactionIndex);
+            logs[i].transactionLogIndex = bytesToUint(rawLogs[i].transactionLogIndex);
+            logs[i].removed = rawLogs[i].removed;
+        }
         return logs;
 
     }
