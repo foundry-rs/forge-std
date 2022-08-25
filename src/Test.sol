@@ -541,12 +541,12 @@ abstract contract Test is DSTest, Script {
         bytes effectiveGasPrice;
         address from;
         bytes gasUsed;
+        RawReceiptLog logs;
+        bytes logsBloom;
+        bytes status;
         address to;
         bytes32 transactionHash;
         bytes transactionIndex;
-        string[] logs;
-        bytes logsBloom;
-        bytes status;
     }
 
     struct Receipt {
@@ -557,12 +557,39 @@ abstract contract Test is DSTest, Script {
         uint256 effectiveGasPrice;
         address from;
         uint256 gasUsed;
+        ReceiptLog logs;
+        bytes logsBloom;
+        uint256 status;
         address to;
         bytes32 transactionHash;
         uint256 transactionIndex;
-        string[] logs;
-        bytes logsBloom;
-        uint256 status;
+    }
+
+    struct RawReceiptLog {
+        // json value = address
+        address logAddress;
+        bytes32 blockHash;
+        bytes blockNumber;
+        bytes data;
+        bytes logIndex;
+        bool removed;
+        bytes32[] topics;
+        bytes32 transactionHash;
+        bytes transactionIndex;
+        bytes transactionLogIndex;
+    }
+
+    struct ReceiptLog {
+        // json value = address
+        address logAddress;
+        bytes32 blockHash;
+        uint256 blockNumber;
+        bytes data;
+        uint256 logIndex;
+        bytes32[] topics;
+        uint256 transactionIndex;
+        uint256 transactionLogIndex;
+        bool removed;
     }
 
     struct TransactionReturn {
@@ -657,21 +684,46 @@ abstract contract Test is DSTest, Script {
     {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData =
-            vm.parseJson(deployData, ".transactions[]");
+            vm.parseJson(deployData, ".transactions");
         RawEIP1559Transaction[] memory rawTxs = abi.decode(parsedDeployData, (RawEIP1559Transaction[]));
         return rawToConvertedEIP1559Txs(rawTxs);
     }
 
 
+    function readEIP1559Transaction(string memory path, uint256 index)
+        internal
+        returns (EIP1559Transaction memory)
+    {
+        string memory deployData = vm.readFile(path);
+        string memory key = string(abi.encodePacked(".transactions[",vm.toString(index), "]"));
+        bytes memory parsedDeployData =
+            vm.parseJson(deployData, key);
+        RawEIP1559Transaction memory rawTx = abi.decode(parsedDeployData, (RawEIP1559Transaction));
+        return rawToConvertedEIP1559Tx(rawTx);
+    }
+
+
     // Analogous to readTransactions, but for receipts.
+    // It requires --via-ir to avoid `stack too deep errors`
     function readReceipts(string memory path)
         internal
         returns (Receipt[] memory)
     {
         string memory deployData = vm.readFile(path);
-        bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts[]");
+        bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts");
         RawReceipt[] memory rawReceipts = abi.decode(parsedDeployData, (RawReceipt[]));
         return rawToConvertedReceipts(rawReceipts);
+    }
+
+    function readReceipt(string memory path, uint index)
+        internal
+        returns (Receipt memory)
+    {
+        string memory deployData = vm.readFile(path);
+        string memory key = string(abi.encodePacked(".receipts[",vm.toString(index), "]"));
+        bytes memory parsedDeployData = vm.parseJson(deployData, key);
+        RawReceipt memory rawReceipt = abi.decode(parsedDeployData, (RawReceipt));
+        return rawToConvertedReceipt(rawReceipt);
     }
 
     function rawToConvertedReceipts(RawReceipt[] memory rawReceipts)
@@ -700,10 +752,28 @@ abstract contract Test is DSTest, Script {
         receipt.status = bytesToUint(rawReceipt.status);
         receipt.transactionIndex = bytesToUint(rawReceipt.transactionIndex);
         receipt.blockNumber = bytesToUint(rawReceipt.blockNumber);
-        receipt.logs = rawReceipt.logs;
+        receipt.logs = rawToConvertedReceiptLogs(rawReceipt.logs);
         receipt.logsBloom = rawReceipt.logsBloom;
         receipt.transactionHash = rawReceipt.transactionHash;
         return receipt;
+    }
+
+    function rawToConvertedReceiptLogs(RawReceiptLog memory rawLogs)
+        internal
+        returns (ReceiptLog memory)
+    {
+        ReceiptLog memory logs;
+        logs.logAddress = rawLogs.logAddress;
+        logs.blockHash = rawLogs.blockHash;
+        logs.blockNumber = bytesToUint(rawLogs.blockNumber);
+        logs.data = rawLogs.data;
+        logs.logIndex = bytesToUint(rawLogs.logIndex);
+        logs.topics = rawLogs.topics;
+        logs.transactionIndex = bytesToUint(rawLogs.transactionIndex);
+        logs.transactionLogIndex = bytesToUint(rawLogs.transactionLogIndex);
+        logs.removed = rawLogs.removed;
+        return logs;
+
     }
 
     function bytesToUint(bytes memory b) internal pure returns (uint256){

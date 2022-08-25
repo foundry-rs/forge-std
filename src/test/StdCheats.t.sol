@@ -198,16 +198,38 @@ contract StdCheatsTest is Test {
         assertEq(txDetail.value, 0);
     }
 
-    function testParseJsonTx() public {
+    function testReadEIP1559Transaction() public {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        uint256 index = 0;
+        EIP1559Transaction memory transaction = readEIP1559Transaction(path, index);
+    }
+
+    function testReadEIP1559Transactions() public {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        EIP1559Transaction[] memory transactions = readEIP1559Transactions(path);
+    }
+
+    function testReadReceipt() public {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        uint index = 5;
+        Receipt memory receipt = readReceipt(path, index);
+    }
+
+    function testReadBytes() public{
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
         JsonParser parser = new JsonParser(path);
         parser.readJson();
-        bytes memory rawJson = parser.parseRaw(".transactions[0]");
-        RawEIP1559Transaction memory rawTx = abi.decode(rawJson, (RawEIP1559Transaction));
-        EIP1559Transaction memory transaction = rawToConvertedEIP1559Tx(rawTx);
+        bytes memory data5 = parser.readBytes(".receipts[5].logsBloom");
+        bytes memory data6 = parser.readBytes(".receipts[6].logsBloom");
+        assertEq(data5,
+                 hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100");
+        assertEq(data6,
+                 hex"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     }
-
 }
 
 contract Bar {
