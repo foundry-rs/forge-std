@@ -150,6 +150,7 @@ interface Vm {
     // Takes the snapshot id to revert to.
     // This deletes the snapshot and all snapshots taken after the given snapshot id.
     function revertTo(uint256) external returns(bool);
+
     // Creates a new fork with the given endpoint and block and returns the identifier of the fork
     function createFork(string calldata,uint256) external returns(uint256);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
@@ -168,7 +169,6 @@ interface Vm {
     function rollFork(uint256) external;
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
-    /// Returns the RPC url for the given alias
 
     // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
     // Meaning, changes made to the state of this account will be kept when switching forks
@@ -182,9 +182,11 @@ interface Vm {
     // Returns true if the account is marked as persistent
     function isPersistent(address) external returns (bool);
 
+    // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external returns(string memory);
-    /// Returns all rpc urls and their aliases `[alias, url][]`
+    // Returns all rpc urls and their aliases `[alias, url][]`
     function rpcUrls() external returns(string[2][] memory);
+
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata, uint32) external returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
