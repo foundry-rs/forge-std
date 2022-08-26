@@ -110,6 +110,7 @@ interface Vm {
     function startBroadcast(address) external;
     // Stops collecting onchain transactions
     function stopBroadcast() external;
+
     // Reads the entire content of file to string, (path) => (data)
     function readFile(string calldata) external returns (string memory);
     // Get the path of the current project root
@@ -131,6 +132,7 @@ interface Vm {
     // - The user lacks permissions to remove the file.
     // (path) => ()
     function removeFile(string calldata) external;
+
     // Convert values to a string, (value) => (stringified value)
     function toString(address) external returns(string memory);
     function toString(bytes calldata) external returns(string memory);
@@ -138,6 +140,15 @@ interface Vm {
     function toString(bool) external returns(string memory);
     function toString(uint256) external returns(string memory);
     function toString(int256) external returns(string memory);
+
+    // Convert values from a string, (string) => (parsed value)
+    function parseBytes(string calldata) external returns (bytes memory);
+    function parseAddress(string calldata) external returns (address);
+    function parseUint256(string calldata) external returns (uint256);
+    function parseInt256(string calldata) external returns (int256);
+    function parseBytes32(string calldata) external returns (bytes32);
+    function parseBool(string calldata) external returns (bool);
+
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
