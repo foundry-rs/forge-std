@@ -14,6 +14,8 @@ interface Vm {
     function roll(uint256) external;
     // Sets block.basefee (newBasefee)
     function fee(uint256) external;
+    // Sets block.difficulty (newDifficulty)
+    function difficulty(uint256) external;
     // Sets block.chainid
     function chainId(uint256) external;
     // Loads a storage slot from an address (who, slot)
@@ -108,8 +110,11 @@ interface Vm {
     function startBroadcast(address) external;
     // Stops collecting onchain transactions
     function stopBroadcast() external;
+
     // Reads the entire content of file to string, (path) => (data)
     function readFile(string calldata) external returns (string memory);
+    // Get the path of the current project root
+    function projectRoot() external returns (string memory);
     // Reads next line of file to string, (path) => (line)
     function readLine(string calldata) external returns (string memory);
     // Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
@@ -127,6 +132,7 @@ interface Vm {
     // - The user lacks permissions to remove the file.
     // (path) => ()
     function removeFile(string calldata) external;
+
     // Convert values to a string, (value) => (stringified value)
     function toString(address) external returns(string memory);
     function toString(bytes calldata) external returns(string memory);
@@ -134,6 +140,15 @@ interface Vm {
     function toString(bool) external returns(string memory);
     function toString(uint256) external returns(string memory);
     function toString(int256) external returns(string memory);
+
+    // Convert values from a string, (string) => (parsed value)
+    function parseBytes(string calldata) external returns (bytes memory);
+    function parseAddress(string calldata) external returns (address);
+    function parseUint256(string calldata) external returns (uint256);
+    function parseInt256(string calldata) external returns (int256);
+    function parseBytes32(string calldata) external returns (bytes32);
+    function parseBool(string calldata) external returns (bool);
+
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
@@ -146,6 +161,7 @@ interface Vm {
     // Takes the snapshot id to revert to.
     // This deletes the snapshot and all snapshots taken after the given snapshot id.
     function revertTo(uint256) external returns(bool);
+
     // Creates a new fork with the given endpoint and block and returns the identifier of the fork
     function createFork(string calldata,uint256) external returns(uint256);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
@@ -164,10 +180,24 @@ interface Vm {
     function rollFork(uint256) external;
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
-    /// Returns the RPC url for the given alias
+
+    // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
+    // Meaning, changes made to the state of this account will be kept when switching forks
+    function makePersistent(address) external;
+    function makePersistent(address, address) external;
+    function makePersistent(address, address, address) external;
+    function makePersistent(address[] calldata) external;
+    // Revokes persistent status from the address, previously added via `makePersistent`
+    function revokePersistent(address) external;
+    function revokePersistent(address[] calldata) external;
+    // Returns true if the account is marked as persistent
+    function isPersistent(address) external returns (bool);
+
+    // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external returns(string memory);
-    /// Returns all rpc urls and their aliases `[alias, url][]`
+    // Returns all rpc urls and their aliases `[alias, url][]`
     function rpcUrls() external returns(string[2][] memory);
+
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata, uint32) external returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
