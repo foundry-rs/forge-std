@@ -2,12 +2,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../Test.sol";
-import "../Json.sol";
+import "../StdJson.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
 
-    using stdJson for string;
+    using StdJson for string;
 
     function setUp() public {
         test = new Bar();

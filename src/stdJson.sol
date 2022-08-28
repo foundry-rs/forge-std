@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.9.0;
 import "Vm.sol";
 
 // Helpers for parsing keys into types.
-library JsonParser {
+library StdJson {
 
     address constant private VM_ADDRESS =
         address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
@@ -18,7 +18,7 @@ library JsonParser {
         return vm.parseJson(json, key);
     }
 
-    function readUint256(string memory json, string memory key)
+    function readUint(string memory json, string memory key)
         internal
         returns (uint256)
     {
