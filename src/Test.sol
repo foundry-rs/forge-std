@@ -716,7 +716,6 @@ abstract contract Test is DSTest, Script {
 
 
     // Analogous to readTransactions, but for receipts.
-    // It requires --via-ir to avoid `stack too deep errors`
     function readReceipts(string memory path)
         internal
         returns (Receipt[] memory)

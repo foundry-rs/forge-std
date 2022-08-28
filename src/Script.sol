@@ -9,6 +9,8 @@ abstract contract Script {
     address constant private VM_ADDRESS =
         address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
 
+    using JsonParser for string;
+
     Vm public constant vm = Vm(VM_ADDRESS);
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce

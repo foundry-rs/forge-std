@@ -2,9 +2,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../Test.sol";
+import "../Json.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
+
+    using JsonParser for string;
 
     function setUp() public {
         test = new Bar();
@@ -190,9 +193,8 @@ contract StdCheatsTest is Test {
     function testParseJsonTxDetail() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
-        JsonParser parser = new JsonParser(path);
-        parser.readJson();
-        bytes memory transactionDetails = parser.parseRaw(".transactions[0].tx");
+        string memory json = vm.readFile(path);
+        bytes memory transactionDetails = json.parseRaw(".transactions[0].tx");
         RawTx1559Detail memory rawTxDetail = abi.decode(transactionDetails, (RawTx1559Detail));
         Tx1559Detail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
         assertEq(txDetail.from, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
