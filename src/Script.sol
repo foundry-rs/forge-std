@@ -2,7 +2,8 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./console.sol";
-import "./StdJson.sol";
+import "./console2.sol";
+import "./Vm.sol";
 
 abstract contract Script {
     bool public IS_SCRIPT = true;
