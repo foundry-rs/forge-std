@@ -180,6 +180,12 @@ contract StdCheatsTest is Test {
         }
     }
 
+    function testBytesToUint() public {
+        assertEq(3, bytesToUint(hex'03'));
+        assertEq(2, bytesToUint(hex'02'));
+        assertEq(255, bytesToUint(hex'ff'));
+        assertEq(29625, bytesToUint(hex'73b9'));
+    }
 
     function testParseJsonTxDetail() public {
         string memory root = vm.projectRoot();

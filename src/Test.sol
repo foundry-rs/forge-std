@@ -2,7 +2,6 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Script.sol";
-import "./Vm.sol";
 import "ds-test/test.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
@@ -462,9 +461,9 @@ abstract contract Test is DSTest, Script {
         string functionName;
         bytes32 hash;
         // json value name = tx
-        RawEIP1559TransactionDetail detail;
+        RawEIP1559TransactionDetail txDetail;
         // json value name = type
-        string contractType;
+        string opcode;
     }
 
     struct RawEIP1559TransactionDetail {
@@ -484,8 +483,8 @@ abstract contract Test is DSTest, Script {
         string contractName;
         string functionName;
         bytes32 hash;
+        EIP1559TransactionDetail txDetail;
         string opcode;
-        EIP1559TransactionDetail detail;
     }
 
     struct EIP1559TransactionDetail {
@@ -592,6 +591,7 @@ abstract contract Test is DSTest, Script {
         bool removed;
     }
 
+    //
     struct TransactionReturn {
         string internalType;
         string value;
@@ -635,13 +635,12 @@ abstract contract Test is DSTest, Script {
         return artifact;
     }
 
-    // break into two functions
     function rawToConvertedEIP1559Txs(RawEIP1559Transaction[] memory rawTxs)
         internal
         returns (EIP1559Transaction[] memory)
     {
         EIP1559Transaction[] memory txs = new EIP1559Transaction[](rawTxs.length);
-        for(uint i;i<rawTxs.length;i++){
+        for (uint i; i < rawTxs.length; i++) {
             txs[i] = rawToConvertedEIP1559Tx(rawTxs[i]);
         }
         return txs;
@@ -651,31 +650,31 @@ abstract contract Test is DSTest, Script {
         internal
         returns (EIP1559Transaction memory)
     {
-            EIP1559Transaction memory transaction;
-            transaction.arguments = rawTx.arguments;
-            transaction.contractName = rawTx.contractName;
-            transaction.functionName = rawTx.functionName;
-            transaction.hash= rawTx.hash;
-            transaction.detail = rawToConvertedEIP1559Detail(rawTx.detail);
+        EIP1559Transaction memory transaction;
+        transaction.arguments = rawTx.arguments;
+        transaction.contractName = rawTx.contractName;
+        transaction.functionName = rawTx.functionName;
+        transaction.hash= rawTx.hash;
+        transaction.txDetail = rawToConvertedEIP1559Detail(rawTx.txDetail);
+        transaction.opcode= rawTx.opcode;
     }
 
     function rawToConvertedEIP1559Detail(RawEIP1559TransactionDetail memory rawDetail)
         internal
         returns (EIP1559TransactionDetail memory)
     {
-        EIP1559TransactionDetail memory detail;
-        detail.data = rawDetail.data;
-        detail.from = rawDetail.from;
-        detail.to = rawDetail.to;
-        detail.nonce = bytesToUint(rawDetail.nonce);
-        detail.txType = bytesToUint(rawDetail.txType);
-        detail.value = bytesToUint(rawDetail.value);
-        detail.gas = bytesToUint(rawDetail.gas);
-        detail.accessList = rawDetail.accessList;
-        return detail;
+        EIP1559TransactionDetail memory txDetail;
+        txDetail.data = rawDetail.data;
+        txDetail.from = rawDetail.from;
+        txDetail.to = rawDetail.to;
+        txDetail.nonce = bytesToUint(rawDetail.nonce);
+        txDetail.txType = bytesToUint(rawDetail.txType);
+        txDetail.value = bytesToUint(rawDetail.value);
+        txDetail.gas = bytesToUint(rawDetail.gas);
+        txDetail.accessList = rawDetail.accessList;
+        return txDetail;
 
     }
-
 
     // Read in all EIP1559 deployments transactions.
     function readEIP1559Transactions(string memory path)
@@ -731,7 +730,7 @@ abstract contract Test is DSTest, Script {
         returns(Receipt[] memory)
     {
         Receipt[] memory receipts = new Receipt[](rawReceipts.length);
-        for(uint i;i<rawReceipts.length;i++){
+        for (uint i; i < rawReceipts.length; i++) {
             receipts[i] = rawToConvertedReceipt(rawReceipts[i]);
         }
         return receipts;
@@ -763,7 +762,7 @@ abstract contract Test is DSTest, Script {
         returns (ReceiptLog[] memory)
     {
         ReceiptLog[] memory logs = new ReceiptLog[](rawLogs.length);
-        for(uint i; i<rawLogs.length;i++){
+        for (uint i; i < rawLogs.length; i++) {
             logs[i].logAddress = rawLogs[i].logAddress;
             logs[i].blockHash = rawLogs[i].blockHash;
             logs[i].blockNumber = bytesToUint(rawLogs[i].blockNumber);
@@ -780,7 +779,7 @@ abstract contract Test is DSTest, Script {
 
     function bytesToUint(bytes memory b) internal pure returns (uint256){
             uint256 number;
-            for(uint i=0;i<b.length;i++){
+            for (uint i=0; i < b.length; i++) {
                 number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
             }
         return number;
@@ -788,132 +787,6 @@ abstract contract Test is DSTest, Script {
 
 }
 
-// Helpers for parsing keys into types. We'd include these for all value types
-contract JsonParser is Test {
-    string path;
-    string json;
-
-    constructor(string memory _path){
-        path = _path;
-        console2.log("Created JSON parser for json at", path);
-    }
-
-    function readJson()
-        public
-    {
-        json = vm.readFile(path);
-    }
-
-    function parseRaw(string memory key) public returns(bytes memory){
-        return vm.parseJson(json, key);
-    }
-    function printRaw()
-        view
-        public
-    {
-        console2.log(json);
-    }
-
-    function readUint256(string memory key)
-        public
-        returns (uint256)
-    {
-        return abi.decode(vm.parseJson(json, key), (uint256));
-    }
-
-    function readUintArray(string memory key)
-        public
-        returns (uint256[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (uint256[]));
-    }
-
-    function readInt(string memory key)
-        public
-        returns (int256)
-    {
-        return abi.decode(vm.parseJson(json, key), (int256));
-    }
-
-    function readIntArray(string memory key)
-        public
-        returns (int256[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (int256[]));
-    }
-
-    function readBytes32(string memory key)
-        public
-        returns (bytes32)
-    {
-        return abi.decode(vm.parseJson(json, key), (bytes32));
-    }
-
-    function readBytes32Array(string memory key)
-        public
-        returns (bytes32[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (bytes32[]));
-    }
-
-    function readString(string memory key)
-        public
-        returns (string memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (string));
-    }
-
-    function readStringArray(string memory key)
-        public
-        returns (string[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (string[]));
-    }
-
-    function readAddress(string memory key)
-        public
-        returns (address)
-    {
-        return abi.decode(vm.parseJson(json, key), (address));
-    }
-
-    function readAddressArray(string memory key)
-        public
-        returns (address[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (address[]));
-    }
-
-    function readBool(string memory key)
-        public
-        returns (bool)
-    {
-        return abi.decode(vm.parseJson(json, key), (bool));
-    }
-
-    function readBoolArray(string memory key)
-        public
-        returns (bool[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (bool[]));
-    }
-
-    function readBytes(string memory key)
-        public
-        returns (bytes memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (bytes));
-    }
-
-    function readBytesArray(string memory key)
-        public
-        returns (bytes[] memory)
-    {
-        return abi.decode(vm.parseJson(json, key), (bytes[]));
-    }
-
-
-}
 /*//////////////////////////////////////////////////////////////////////////
                                 STD-ERRORS
 //////////////////////////////////////////////////////////////////////////*/
