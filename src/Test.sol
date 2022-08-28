@@ -462,7 +462,7 @@ abstract contract Test is DSTest, Script {
         address contractAddress;
         string contractName;
         // json value name = function
-        string functionName;
+        string functionSig;
         bytes32 hash;
         // json value name = tx
         RawTx1559Detail txDetail;
@@ -485,7 +485,7 @@ abstract contract Test is DSTest, Script {
         string[] arguments;
         address contractAddress;
         string contractName;
-        string functionName;
+        string functionSig;
         bytes32 hash;
         Tx1559Detail txDetail;
         string opcode;
@@ -510,7 +510,7 @@ abstract contract Test is DSTest, Script {
         string[] arguments;
         address contractAddress;
         string contractName;
-        string functionName;
+        string functionSig;
         string hash;
         string opcode;
         TxDetailLegacy transaction;
@@ -667,7 +667,7 @@ abstract contract Test is DSTest, Script {
         Tx1559 memory transaction;
         transaction.arguments = rawTx.arguments;
         transaction.contractName = rawTx.contractName;
-        transaction.functionName = rawTx.functionName;
+        transaction.functionSig = rawTx.functionSig;
         transaction.hash= rawTx.hash;
         transaction.txDetail = rawToConvertedEIP1559Detail(rawTx.txDetail);
         transaction.opcode= rawTx.opcode;
