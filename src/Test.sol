@@ -453,7 +453,11 @@ abstract contract Test is DSTest, Script {
                               JSON PARSING
     //////////////////////////////////////////////////////////////*/
 
-   struct RawEIP1559Transaction {
+   // Data structures to parse Transaction objects from the broadcast artifact
+   // that conform to EIP1559. The Raw structs is what is parsed from the JSON
+   // and then converted to the one that is used by the user for better UX.
+
+   struct RawTx1559 {
         string[] arguments;
         address contractAddress;
         string contractName;
@@ -461,12 +465,12 @@ abstract contract Test is DSTest, Script {
         string functionName;
         bytes32 hash;
         // json value name = tx
-        RawEIP1559TransactionDetail txDetail;
+        RawTx1559Detail txDetail;
         // json value name = type
         string opcode;
     }
 
-    struct RawEIP1559TransactionDetail {
+    struct RawTx1559Detail {
         AccessList[] accessList;
         bytes data;
         address from;
@@ -477,17 +481,17 @@ abstract contract Test is DSTest, Script {
         bytes value;
     }
 
-    struct EIP1559Transaction {
+    struct Tx1559 {
         string[] arguments;
         address contractAddress;
         string contractName;
         string functionName;
         bytes32 hash;
-        EIP1559TransactionDetail txDetail;
+        Tx1559Detail txDetail;
         string opcode;
     }
 
-    struct EIP1559TransactionDetail {
+    struct Tx1559Detail {
         AccessList[] accessList;
         bytes data;
         address from;
@@ -498,18 +502,21 @@ abstract contract Test is DSTest, Script {
         uint256 value;
     }
 
+   // Data structures to parse Transaction objects from the broadcast artifact
+   // that DO NOT conform to EIP1559. The Raw structs is what is parsed from the JSON
+   // and then converted to the one that is used by the user for better UX.
 
-    struct LegacyTransaction {
+    struct TxLegacy{
         string[] arguments;
         address contractAddress;
         string contractName;
         string functionName;
         string hash;
         string opcode;
-        LegacyTransactionDetail transaction;
+        TxDetailLegacy transaction;
     }
 
-    struct LegacyTransactionDetail {
+    struct TxDetailLegacy{
         AccessList[] accessList;
         uint256 chainId;
         bytes data;
@@ -531,6 +538,10 @@ abstract contract Test is DSTest, Script {
         address accessAddress;
         bytes32[] storageKeys;
     }
+
+    // Data structures to parse Receipt objects from the broadcast artifact.
+    // The Raw structs is what is parsed from the JSON
+    // and then converted to the one that is used by the user for better UX.
 
     struct RawReceipt {
         bytes32 blockHash;
@@ -564,6 +575,29 @@ abstract contract Test is DSTest, Script {
         uint256 transactionIndex;
     }
 
+    // Data structures to parse the entire broadcast artifact, assuming the
+    // transactions conform to EIP1559.
+
+    struct EIP1559ScriptArtifact {
+        string[] libraries;
+        string path;
+        string[] pending;
+        Receipt[] receipts;
+        uint256 timestamp;
+        Tx1559[] transactions;
+        TxReturn[] txReturns;
+    }
+
+    struct RawEIP1559ScriptArtifact {
+        string[] libraries;
+        string path;
+        string[] pending;
+        RawReceipt[] receipts;
+        TxReturn[] txReturns;
+        uint256 timestamp;
+        RawTx1559[] transactions;
+    }
+
     struct RawReceiptLog {
         // json value = address
         address logAddress;
@@ -591,31 +625,11 @@ abstract contract Test is DSTest, Script {
         bool removed;
     }
 
-    //
-    struct TransactionReturn {
+    struct TxReturn {
         string internalType;
         string value;
     }
 
-    struct EIP1559ScriptArtifact {
-        string[] libraries;
-        string path;
-        string[] pending;
-        Receipt[] receipts;
-        uint256 timestamp;
-        EIP1559Transaction[] transactions;
-        TransactionReturn[] transactionReturns;
-    }
-
-    struct RawEIP1559ScriptArtifact {
-        string[] libraries;
-        string path;
-        string[] pending;
-        RawReceipt[] receipts;
-        TransactionReturn[] transactionReturns;
-        uint256 timestamp;
-        RawEIP1559Transaction[] transactions;
-    }
 
     function readEIP1559ScriptArtifact(string memory path)
         internal
@@ -629,28 +643,28 @@ abstract contract Test is DSTest, Script {
         artifact.path = rawArtifact.path;
         artifact.timestamp = rawArtifact.timestamp;
         artifact.pending = rawArtifact.pending;
-        artifact.transactionReturns = rawArtifact.transactionReturns;
+        artifact.txReturns = rawArtifact.txReturns;
         artifact.receipts = rawToConvertedReceipts(rawArtifact.receipts);
-        artifact.transactions = rawToConvertedEIP1559Txs(rawArtifact.transactions);
+        artifact.transactions = rawToConvertedEIPTx1559s(rawArtifact.transactions);
         return artifact;
     }
 
-    function rawToConvertedEIP1559Txs(RawEIP1559Transaction[] memory rawTxs)
+    function rawToConvertedEIPTx1559s(RawTx1559[] memory rawTxs)
         internal
-        returns (EIP1559Transaction[] memory)
+        returns (Tx1559[] memory)
     {
-        EIP1559Transaction[] memory txs = new EIP1559Transaction[](rawTxs.length);
+        Tx1559[] memory txs = new Tx1559[](rawTxs.length);
         for (uint i; i < rawTxs.length; i++) {
-            txs[i] = rawToConvertedEIP1559Tx(rawTxs[i]);
+            txs[i] = rawToConvertedEIPTx1559(rawTxs[i]);
         }
         return txs;
     }
 
-    function rawToConvertedEIP1559Tx(RawEIP1559Transaction memory rawTx)
+    function rawToConvertedEIPTx1559(RawTx1559 memory rawTx)
         internal
-        returns (EIP1559Transaction memory)
+        returns (Tx1559 memory)
     {
-        EIP1559Transaction memory transaction;
+        Tx1559 memory transaction;
         transaction.arguments = rawTx.arguments;
         transaction.contractName = rawTx.contractName;
         transaction.functionName = rawTx.functionName;
@@ -659,11 +673,11 @@ abstract contract Test is DSTest, Script {
         transaction.opcode= rawTx.opcode;
     }
 
-    function rawToConvertedEIP1559Detail(RawEIP1559TransactionDetail memory rawDetail)
+    function rawToConvertedEIP1559Detail(RawTx1559Detail memory rawDetail)
         internal
-        returns (EIP1559TransactionDetail memory)
+        returns (Tx1559Detail memory)
     {
-        EIP1559TransactionDetail memory txDetail;
+        Tx1559Detail memory txDetail;
         txDetail.data = rawDetail.data;
         txDetail.from = rawDetail.from;
         txDetail.to = rawDetail.to;
@@ -676,29 +690,28 @@ abstract contract Test is DSTest, Script {
 
     }
 
-    // Read in all EIP1559 deployments transactions.
-    function readEIP1559Transactions(string memory path)
+    function readTx1559s(string memory path)
         internal
-        returns (EIP1559Transaction[] memory)
+        returns (Tx1559[] memory)
     {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData =
             vm.parseJson(deployData, ".transactions");
-        RawEIP1559Transaction[] memory rawTxs = abi.decode(parsedDeployData, (RawEIP1559Transaction[]));
-        return rawToConvertedEIP1559Txs(rawTxs);
+        RawTx1559[] memory rawTxs = abi.decode(parsedDeployData, (RawTx1559[]));
+        return rawToConvertedEIPTx1559s(rawTxs);
     }
 
 
-    function readEIP1559Transaction(string memory path, uint256 index)
+    function readTx1559(string memory path, uint256 index)
         internal
-        returns (EIP1559Transaction memory)
+        returns (Tx1559 memory)
     {
         string memory deployData = vm.readFile(path);
         string memory key = string(abi.encodePacked(".transactions[",vm.toString(index), "]"));
         bytes memory parsedDeployData =
             vm.parseJson(deployData, key);
-        RawEIP1559Transaction memory rawTx = abi.decode(parsedDeployData, (RawEIP1559Transaction));
-        return rawToConvertedEIP1559Tx(rawTx);
+        RawTx1559 memory rawTx = abi.decode(parsedDeployData, (RawTx1559));
+        return rawToConvertedEIPTx1559(rawTx);
     }
 
 

@@ -193,8 +193,8 @@ contract StdCheatsTest is Test {
         JsonParser parser = new JsonParser(path);
         parser.readJson();
         bytes memory transactionDetails = parser.parseRaw(".transactions[0].tx");
-        RawEIP1559TransactionDetail memory rawTxDetail = abi.decode(transactionDetails, (RawEIP1559TransactionDetail));
-        EIP1559TransactionDetail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
+        RawTx1559Detail memory rawTxDetail = abi.decode(transactionDetails, (RawTx1559Detail));
+        Tx1559Detail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
         assertEq(txDetail.from, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
         assertEq(txDetail.to, 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
         assertEq(txDetail.data, hex'23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004');
@@ -208,13 +208,13 @@ contract StdCheatsTest is Test {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
         uint256 index = 0;
-        EIP1559Transaction memory transaction = readEIP1559Transaction(path, index);
+        Tx1559 memory transaction = readTx1559(path, index);
     }
 
     function testReadEIP1559Transactions() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
-        EIP1559Transaction[] memory transactions = readEIP1559Transactions(path);
+        Tx1559[] memory transactions = readTx1559s(path);
     }
 
     function testReadReceipt() public {
