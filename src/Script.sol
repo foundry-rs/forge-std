@@ -9,7 +9,7 @@ abstract contract Script {
     address constant private VM_ADDRESS =
         address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
 
-    using JsonParser for string;
+    using stdJson for string;
 
     Vm public constant vm = Vm(VM_ADDRESS);
 

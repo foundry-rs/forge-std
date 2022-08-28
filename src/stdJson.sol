@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.9.0;
 import "Vm.sol";
 
 // Helpers for parsing keys into types.
-library stdJson {
+library JsonParser {
 
     address constant private VM_ADDRESS =
         address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
