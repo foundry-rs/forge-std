@@ -4,12 +4,9 @@ pragma solidity >=0.6.0 <0.9.0;
 import "./Vm.sol";
 
 // Helpers for parsing keys into types.
-library StdJson {
+library stdJson {
 
-    address constant private VM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
-
-    Vm internal constant vm = Vm(VM_ADDRESS);
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function parseRaw(string memory json, string memory key)
         internal

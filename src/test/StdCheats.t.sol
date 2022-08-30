@@ -7,7 +7,7 @@ import "../StdJson.sol";
 contract StdCheatsTest is Test {
     Bar test;
 
-    using StdJson for string;
+    using stdJson for string;
 
     function setUp() public {
         test = new Bar();
