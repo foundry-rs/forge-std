@@ -144,8 +144,8 @@ interface Vm {
     // Convert values from a string, (string) => (parsed value)
     function parseBytes(string calldata) external returns (bytes memory);
     function parseAddress(string calldata) external returns (address);
-    function parseUint256(string calldata) external returns (uint256);
-    function parseInt256(string calldata) external returns (int256);
+    function parseUint(string calldata) external returns (uint256);
+    function parseInt(string calldata) external returns (int256);
     function parseBytes32(string calldata) external returns (bytes32);
     function parseBool(string calldata) external returns (bool);
 
