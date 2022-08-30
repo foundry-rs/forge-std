@@ -202,4 +202,30 @@ interface Vm {
     function deriveKey(string calldata, uint32) external returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
     function deriveKey(string calldata, string calldata, uint32) external returns (uint256);
+    // parseJson
+
+    // Given a string of JSON, return the ABI-encoded value of provided key
+    // (stringified json, key) => (ABI-encoded data)
+    // Read the note below!
+    function parseJson(string calldata, string calldata) external returns(bytes memory);
+
+    // Given a string of JSON, return it as ABI-encoded, (stringified json, key) => (ABI-encoded data)
+    // Read the note below!
+    function parseJson(string calldata) external returns(bytes memory);
+
+    // Note:
+    // ----
+    // In case the returned value is a JSON object, it's encoded as a ABI-encoded tuple. As JSON objects
+    // don't have the notion of ordered, but tuples do, they JSON object is encoded with it's fields ordered in
+    // ALPHABETICAL ordser. That means that in order to succesfully decode the tuple, we need to define a tuple that
+    // encodes the fields in the same order, which is alphabetical. In the case of Solidity structs, they are encoded
+    // as tuples, with the attributes in the order in which they are defined.
+    // For example: json = { 'a': 1, 'b': 0xa4tb......3xs}
+    // a: uint256
+    // b: address
+    // To decode that json, we need to define a struct or a tuple as follows:
+    // struct json = { uint256 a; address b; }
+    // If we defined a json struct with the opposite order, meaning placing the address b first, it would try to
+    // decode the tuple in that order, and thus fail.
+
 }
