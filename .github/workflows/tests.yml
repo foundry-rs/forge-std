@@ -22,5 +22,6 @@ jobs:
       - name: Build Test with older solc versions
         run: |
           forge build --contracts src/Test.sol --use solc:0.8.0
+          forge build --contracts src/Test.sol --use solc:0.7.6
           forge build --contracts src/Test.sol --use solc:0.7.0
           forge build --contracts src/Test.sol --use solc:0.6.0
