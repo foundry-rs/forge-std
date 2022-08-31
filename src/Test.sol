@@ -663,7 +663,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function rawToConvertedEIPTx1559s(RawTx1559[] memory rawTxs)
-        internal
+        internal pure
         returns (Tx1559[] memory)
     {
         Tx1559[] memory txs = new Tx1559[](rawTxs.length);
@@ -674,7 +674,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function rawToConvertedEIPTx1559(RawTx1559 memory rawTx)
-        internal
+        internal pure
         returns (Tx1559 memory)
     {
         Tx1559 memory transaction;
@@ -684,10 +684,11 @@ abstract contract Test is DSTest, Script {
         transaction.hash= rawTx.hash;
         transaction.txDetail = rawToConvertedEIP1559Detail(rawTx.txDetail);
         transaction.opcode= rawTx.opcode;
+        return transaction;
     }
 
     function rawToConvertedEIP1559Detail(RawTx1559Detail memory rawDetail)
-        internal
+        internal pure
         returns (Tx1559Detail memory)
     {
         Tx1559Detail memory txDetail;
@@ -751,7 +752,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function rawToConvertedReceipts(RawReceipt[] memory rawReceipts)
-        internal
+        internal pure
         returns(Receipt[] memory)
     {
         Receipt[] memory receipts = new Receipt[](rawReceipts.length);
@@ -762,7 +763,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function rawToConvertedReceipt(RawReceipt memory rawReceipt)
-        internal
+        internal pure
         returns(Receipt memory)
     {
         Receipt memory receipt;
@@ -783,7 +784,7 @@ abstract contract Test is DSTest, Script {
     }
 
     function rawToConvertedReceiptLogs(RawReceiptLog[] memory rawLogs)
-        internal
+        internal pure
         returns (ReceiptLog[] memory)
     {
         ReceiptLog[] memory logs = new ReceiptLog[](rawLogs.length);
