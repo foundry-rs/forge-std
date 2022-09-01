@@ -247,6 +247,13 @@ contract StdCheatsTest is Test {
         Receipt[] memory receipts = readReceipts(path);
     }
 
+    function testAssertions() public {
+        assertUint32Eq(uint32(1), uint32(1));
+        assertUint64Eq(uint64(1), uint64(1));
+        assertUint96Eq(uint96(1), uint96(1));
+        assertUint128Eq(uint128(1), uint128(1));
+    }
+
 }
 
 contract Bar {
