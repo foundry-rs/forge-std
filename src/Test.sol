@@ -330,19 +330,7 @@ abstract contract Test is DSTest, Script {
         }
     }
 
-    function assertUint128Eq(uint128 a, uint128 b) internal {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint64Eq(uint64 a, uint64 b) internal {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint96Eq(uint96 a, uint96 b) internal {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint32Eq(uint32 a, uint32 b) internal {
+    function assertEqUint(uint256 a, uint256 b) internal {
         assertEq(uint256(a), uint256(b));
     }
 
