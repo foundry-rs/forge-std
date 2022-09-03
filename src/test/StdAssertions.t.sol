@@ -13,6 +13,17 @@ contract StdAssertionsTest is Test
     TestTest t = new TestTest();
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    ASSERT_EQ(UINT)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertions() public {
+        assertEqUint(uint32(1), uint32(1));
+        assertEqUint(uint64(1), uint64(1));
+        assertEqUint(uint96(1), uint96(1));
+        assertEqUint(uint128(1), uint128(1));
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                     FAIL(STRING)
     //////////////////////////////////////////////////////////////////////////*/
 
