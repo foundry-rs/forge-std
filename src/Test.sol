@@ -330,6 +330,10 @@ abstract contract Test is DSTest, Script {
         }
     }
 
+    function assertEqUint(uint256 a, uint256 b) internal {
+        assertEq(uint256(a), uint256(b));
+    }
+
     function assertApproxEqAbs(
         uint256 a,
         uint256 b,
