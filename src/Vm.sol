@@ -202,6 +202,9 @@ interface Vm {
     function deriveKey(string calldata, uint32) external returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
     function deriveKey(string calldata, string calldata, uint32) external returns (uint256);
+    // Adds a private key to the local forge wallet and returns the address
+    function rememberKey(uint256) external returns (address);
+
     // parseJson
 
     // Given a string of JSON, return the ABI-encoded value of provided key
