@@ -104,10 +104,14 @@ interface Vm {
     function broadcast() external;
     // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
     function broadcast(address) external;
+    // Has the next call (at this call depth only) create a transaction with the private key provided as the sender that can later be signed and sent onchain
+    function broadcast(uint256) external;
     // Using the address that calls the test contract, has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
     function startBroadcast() external;
-    // Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
+    // Has all subsequent calls (at this call depth only) create transactions with the address provided that can later be signed and sent onchain
     function startBroadcast(address) external;
+    // Has all subsequent calls (at this call depth only) create transactions with the private key provided that can later be signed and sent onchain
+    function startBroadcast(uint256) external;
     // Stops collecting onchain transactions
     function stopBroadcast() external;
 
