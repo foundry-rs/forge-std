@@ -212,12 +212,6 @@ library stdStorage {
         return stdStorageSafe.sigs(sigStr);
     }
 
-    /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
-    // slot complexity:
-    //  if flat, will be bytes32(uint256(uint));
-    //  if map, will be keccak256(abi.encode(key, uint(slot)));
-    //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
-    //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
     function find(
         StdStorage storage self
     )

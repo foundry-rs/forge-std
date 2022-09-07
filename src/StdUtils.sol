@@ -3,7 +3,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 import "./console2.sol";
 
-abstract contract Utils {
+abstract contract StdUtils {
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 

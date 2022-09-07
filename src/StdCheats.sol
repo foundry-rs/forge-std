@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./Storage.sol";
+import "./StdStorage.sol";
 import "./Vm.sol";
 
-abstract contract CheatsSafe {
+abstract contract StdCheatsSafe {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     // Deploy a contract by fetching the contract bytecode from
@@ -76,8 +76,8 @@ abstract contract CheatsSafe {
     }
 }
 
-// Wrappers around Cheats to avoid footguns
-abstract contract Cheats is CheatsSafe {
+// Wrappers around cheatcodes to avoid footguns
+abstract contract StdCheats is StdCheatsSafe {
     using stdStorage for StdStorage;
 
     StdStorage private stdstore;

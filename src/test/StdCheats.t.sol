@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../Cheats.sol";
+import "../StdCheats.sol";
 import "../Test.sol";
 
 contract StdCheatsTest is Test {

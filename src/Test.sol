@@ -11,4 +11,4 @@ abstract contract TestBase {
     Vm internal constant vm = Vm(VM_ADDRESS);
 }
 
-abstract contract Test is TestBase, DSTest, Assertions, Cheats, Utils {}
+abstract contract Test is TestBase, DSTest, StdAssertions, StdCheats, StdUtils {}
