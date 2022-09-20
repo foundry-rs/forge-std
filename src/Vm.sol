@@ -172,8 +172,12 @@ interface Vm {
     function createFork(string calldata,uint256) external returns(uint256);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
     function createFork(string calldata) external returns(uint256);
+    // Creates a new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
+    function createFork(string calldata, bytes32) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and block and returns the identifier of the fork
     function createSelectFork(string calldata,uint256) external returns(uint256);
+    // Creates _and_ also selects new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
+    function createSelectFork(string calldata, bytes32) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and the latest block and returns the identifier of the fork
     function createSelectFork(string calldata) external returns(uint256);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
@@ -184,8 +188,13 @@ interface Vm {
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256) external;
+    // Updates the currently active fork to given transaction
+    // this will `rollFork` with the number of the block the transaction was mined it and replays all transaction mined before it in the block
+    function rollFork(bytes32) external;
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
+    // Updates the given fork to block number of the given transaction and replays all transaction mined before it in the block
+    function rollFork(uint256 forkId, bytes32 transaction) external;
 
     // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
     // Meaning, changes made to the state of this account will be kept when switching forks
