@@ -25,3 +25,19 @@ jobs:
           forge build --contracts src/Test.sol --use solc:0.7.6
           forge build --contracts src/Test.sol --use solc:0.7.0
           forge build --contracts src/Test.sol --use solc:0.6.0
+
+  fmt:
+    name: forge fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: forge fmt
+        run: forge fmt --check
