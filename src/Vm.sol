@@ -208,6 +208,9 @@ interface Vm {
     // Returns true if the account is marked as persistent
     function isPersistent(address) external returns (bool);
 
+    // In forking mode, explicitly grant the given address cheatcode access
+    function allowCheatcodes(address) external;
+
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external returns(string memory);
     // Returns all rpc urls and their aliases `[alias, url][]`
