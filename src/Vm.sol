@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.9.0;
+
 pragma experimental ABIEncoderV2;
 
 interface Vm {
@@ -19,11 +20,11 @@ interface Vm {
     // Sets block.chainid
     function chainId(uint256) external;
     // Loads a storage slot from an address (who, slot)
-    function load(address,bytes32) external returns (bytes32);
+    function load(address, bytes32) external returns (bytes32);
     // Stores a value to an address' storage slot, (who, slot, value)
-    function store(address,bytes32,bytes32) external;
+    function store(address, bytes32, bytes32) external;
     // Signs data, (privateKey, digest) => (v, r, s)
-    function sign(uint256,bytes32) external returns (uint8,bytes32,bytes32);
+    function sign(uint256, bytes32) external returns (uint8, bytes32, bytes32);
     // Gets the address for a given private key, (privateKey) => (address)
     function addr(uint256) external returns (address);
     // Gets the nonce of an account
@@ -55,9 +56,9 @@ interface Vm {
     // Sets all subsequent calls' msg.sender to be the input address until `stopPrank` is called
     function startPrank(address) external;
     // Sets the *next* call's msg.sender to be the input address, and the tx.origin to be the second input
-    function prank(address,address) external;
+    function prank(address, address) external;
     // Sets all subsequent calls' msg.sender to be the input address until `stopPrank` is called, and the tx.origin to be the second input
-    function startPrank(address,address) external;
+    function startPrank(address, address) external;
     // Resets subsequent calls' msg.sender to be `address(this)`
     function stopPrank() external;
     // Sets an address' balance, (who, newBalance)
@@ -75,23 +76,23 @@ interface Vm {
     // Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
     // Call this function, then emit an event, then call a function. Internally after the call, we check if
     // logs were emitted in the expected order with the expected topics and data (as specified by the booleans)
-    function expectEmit(bool,bool,bool,bool) external;
-    function expectEmit(bool,bool,bool,bool,address) external;
+    function expectEmit(bool, bool, bool, bool) external;
+    function expectEmit(bool, bool, bool, bool, address) external;
     // Mocks a call to an address, returning specified data.
     // Calldata can either be strict or a partial match, e.g. if you only
     // pass a Solidity selector to the expected calldata, then the entire Solidity
     // function will be mocked.
-    function mockCall(address,bytes calldata,bytes calldata) external;
+    function mockCall(address, bytes calldata, bytes calldata) external;
     // Mocks a call to an address with a specific msg.value, returning specified data.
     // Calldata match takes precedence over msg.value in case of ambiguity.
-    function mockCall(address,uint256,bytes calldata,bytes calldata) external;
+    function mockCall(address, uint256, bytes calldata, bytes calldata) external;
     // Clears all mocked calls
     function clearMockedCalls() external;
     // Expects a call to an address with the specified calldata.
     // Calldata can either be a strict or a partial match
-    function expectCall(address,bytes calldata) external;
+    function expectCall(address, bytes calldata) external;
     // Expects a call to an address with the specified msg.value and calldata
-    function expectCall(address,uint256,bytes calldata) external;
+    function expectCall(address, uint256, bytes calldata) external;
     // Gets the _creation_ bytecode from an artifact file. Takes in the relative path to the json file
     function getCode(string calldata) external returns (bytes memory);
     // Gets the _deployed_ bytecode from an artifact file. Takes in the relative path to the json file
@@ -140,12 +141,12 @@ interface Vm {
     function removeFile(string calldata) external;
 
     // Convert values to a string, (value) => (stringified value)
-    function toString(address) external returns(string memory);
-    function toString(bytes calldata) external returns(string memory);
-    function toString(bytes32) external returns(string memory);
-    function toString(bool) external returns(string memory);
-    function toString(uint256) external returns(string memory);
-    function toString(int256) external returns(string memory);
+    function toString(address) external returns (string memory);
+    function toString(bytes calldata) external returns (string memory);
+    function toString(bytes32) external returns (string memory);
+    function toString(bool) external returns (string memory);
+    function toString(uint256) external returns (string memory);
+    function toString(int256) external returns (string memory);
 
     // Convert values from a string, (string) => (parsed value)
     function parseBytes(string calldata) external returns (bytes memory);
@@ -162,29 +163,29 @@ interface Vm {
     // Snapshot the current state of the evm.
     // Returns the id of the snapshot that was created.
     // To revert a snapshot use `revertTo`
-    function snapshot() external returns(uint256);
+    function snapshot() external returns (uint256);
     // Revert the state of the evm to a previous snapshot
     // Takes the snapshot id to revert to.
     // This deletes the snapshot and all snapshots taken after the given snapshot id.
-    function revertTo(uint256) external returns(bool);
+    function revertTo(uint256) external returns (bool);
 
     // Creates a new fork with the given endpoint and block and returns the identifier of the fork
-    function createFork(string calldata,uint256) external returns(uint256);
+    function createFork(string calldata, uint256) external returns (uint256);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
-    function createFork(string calldata) external returns(uint256);
+    function createFork(string calldata) external returns (uint256);
     // Creates a new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
     function createFork(string calldata, bytes32) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and block and returns the identifier of the fork
-    function createSelectFork(string calldata,uint256) external returns(uint256);
+    function createSelectFork(string calldata, uint256) external returns (uint256);
     // Creates _and_ also selects new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
     function createSelectFork(string calldata, bytes32) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and the latest block and returns the identifier of the fork
-    function createSelectFork(string calldata) external returns(uint256);
+    function createSelectFork(string calldata) external returns (uint256);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256) external;
     /// Returns the currently active fork
     /// Reverts if no fork is currently active
-    function activeFork() external returns(uint256);
+    function activeFork() external returns (uint256);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256) external;
@@ -209,9 +210,9 @@ interface Vm {
     function isPersistent(address) external returns (bool);
 
     // Returns the RPC url for the given alias
-    function rpcUrl(string calldata) external returns(string memory);
+    function rpcUrl(string calldata) external returns (string memory);
     // Returns all rpc urls and their aliases `[alias, url][]`
-    function rpcUrls() external returns(string[2][] memory);
+    function rpcUrls() external returns (string[2][] memory);
 
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata, uint32) external returns (uint256);
@@ -225,11 +226,11 @@ interface Vm {
     // Given a string of JSON, return the ABI-encoded value of provided key
     // (stringified json, key) => (ABI-encoded data)
     // Read the note below!
-    function parseJson(string calldata, string calldata) external returns(bytes memory);
+    function parseJson(string calldata, string calldata) external returns (bytes memory);
 
     // Given a string of JSON, return it as ABI-encoded, (stringified json, key) => (ABI-encoded data)
     // Read the note below!
-    function parseJson(string calldata) external returns(bytes memory);
+    function parseJson(string calldata) external returns (bytes memory);
 
     // Note:
     // ----
@@ -245,5 +246,4 @@ interface Vm {
     // struct json = { uint256 a; address b; }
     // If we defined a json struct with the opposite order, meaning placing the address b first, it would try to
     // decode the tuple in that order, and thus fail.
-
 }

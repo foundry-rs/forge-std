@@ -67,7 +67,7 @@ contract StdCheatsTest is Test {
     }
 
     function testMakeAddrEquivalence() public {
-        (address addr, ) = makeAddrAndKey("1337");
+        (address addr,) = makeAddrAndKey("1337");
         assertEq(makeAddr("1337"), addr);
     }
 
@@ -116,11 +116,7 @@ contract StdCheatsTest is Test {
         bound(5, 100, 10);
     }
 
-    function testBound(
-        uint256 num,
-        uint256 min,
-        uint256 max
-    ) public {
+    function testBound(uint256 num, uint256 min, uint256 max) public {
         if (min > max) (min, max) = (max, min);
 
         uint256 bounded = bound(num, min, max);
@@ -134,11 +130,7 @@ contract StdCheatsTest is Test {
         assertEq(bound(1, type(uint256).max - 1, type(uint256).max), type(uint256).max);
     }
 
-    function testCannotBoundMaxLessThanMin(
-        uint256 num,
-        uint256 min,
-        uint256 max
-    ) public {
+    function testCannotBoundMaxLessThanMin(uint256 num, uint256 min, uint256 max) public {
         vm.assume(min > max);
         vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);
@@ -160,13 +152,13 @@ contract StdCheatsTest is Test {
     function testDeployCodeVal() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, 1 ether);
+        assertEq(deployed.balance, 1 ether);
     }
 
     function testDeployCodeValNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, 1 ether);
+        assertEq(deployed.balance, 1 ether);
     }
 
     // We need this so we can call "this.deployCode" rather than "deployCode" directly
@@ -197,10 +189,10 @@ contract StdCheatsTest is Test {
     }
 
     function testBytesToUint() public {
-        assertEq(3, bytesToUint(hex'03'));
-        assertEq(2, bytesToUint(hex'02'));
-        assertEq(255, bytesToUint(hex'ff'));
-        assertEq(29625, bytesToUint(hex'73b9'));
+        assertEq(3, bytesToUint(hex"03"));
+        assertEq(2, bytesToUint(hex"02"));
+        assertEq(255, bytesToUint(hex"ff"));
+        assertEq(29625, bytesToUint(hex"73b9"));
     }
 
     function testParseJsonTxDetail() public {
@@ -212,7 +204,10 @@ contract StdCheatsTest is Test {
         Tx1559Detail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
         assertEq(txDetail.from, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
         assertEq(txDetail.to, 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-        assertEq(txDetail.data, hex'23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004');
+        assertEq(
+            txDetail.data,
+            hex"23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004"
+        );
         assertEq(txDetail.nonce, 3);
         assertEq(txDetail.txType, 2);
         assertEq(txDetail.gas, 29625);
@@ -235,10 +230,12 @@ contract StdCheatsTest is Test {
     function testReadReceipt() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
-        uint index = 5;
+        uint256 index = 5;
         Receipt memory receipt = readReceipt(path, index);
-        assertEq(receipt.logsBloom,
-                 hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100");
+        assertEq(
+            receipt.logsBloom,
+            hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100"
+        );
     }
 
     function testReadReceipts() public {
@@ -246,7 +243,6 @@ contract StdCheatsTest is Test {
         string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
     }
-
 }
 
 contract Bar {
@@ -260,17 +256,19 @@ contract Bar {
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
+
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedSender, "!prank");
     }
+
     function origin(address expectedSender, address expectedOrigin) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
     }
 
     /// `DEAL` STDCHEAT
-    mapping (address => uint256) public balanceOf;
+    mapping(address => uint256) public balanceOf;
     uint256 public totalSupply;
 }
 
@@ -279,4 +277,3 @@ contract RevertingContract {
         revert();
     }
 }
-
