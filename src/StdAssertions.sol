@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity >=0.6.2 <0.9.0;
 
 import "ds-test/test.sol";
 import "./StdMath.sol";
@@ -98,6 +98,11 @@ abstract contract StdAssertions is DSTest {
         }
     }
 
+    // Legacy helper
+    function assertEqUint(uint256 a, uint256 b) internal virtual {
+        assertEq(uint256(a), uint256(b));
+    }
+
     function assertApproxEqAbs(
         uint256 a,
         uint256 b,
@@ -185,7 +190,7 @@ abstract contract StdAssertions is DSTest {
         uint256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
         string memory err
     ) internal virtual {
-        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b, err); // If the expected is 0, actual must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
@@ -220,7 +225,7 @@ abstract contract StdAssertions is DSTest {
         uint256 maxPercentDelta,
         string memory err
     ) internal virtual {
-        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b, err); // If the expected is 0, actual must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity >=0.6.2 <0.9.0;
 
 import "./Vm.sol";
 
@@ -174,7 +174,7 @@ library stdStorageSafe {
         return abi.decode(read(self), (int256));
     }
 
-    function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
+    function bytesToBytes32(bytes memory b, uint offset) private pure returns (bytes32) {
         bytes32 out;
 
         uint256 max = b.length > 32 ? 32 : b.length;
@@ -317,8 +317,15 @@ library stdStorage {
         return stdStorageSafe.read_int(self);
     }
 
-    function bytesToBytes32(bytes memory b, uint offset) public pure returns (bytes32) {
-        return stdStorageSafe.bytesToBytes32(b, offset);
+    // Private function so needs to be copied over
+    function bytesToBytes32(bytes memory b, uint offset) private pure returns (bytes32) {
+        bytes32 out;
+
+        uint256 max = b.length > 32 ? 32 : b.length;
+        for (uint i = 0; i < max; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+        return out;
     }
 
     // Private function so needs to be copied over

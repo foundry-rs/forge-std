@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity >=0.6.2 <0.9.0;
 
 import {StdCheatsSafe, console, console2, stdMath, stdStorageSafe, StdStorage, StdUtils, VmSafe} from "./Components.sol";
 

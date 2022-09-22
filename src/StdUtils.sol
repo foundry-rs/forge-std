@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity >=0.6.2 <0.9.0;
 
 import "./console2.sol";
 
@@ -46,11 +46,11 @@ abstract contract StdUtils {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xda), bytes1(0x94), deployer, bytes1(0x84), uint32(nonce))));
     }
 
-    function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer) internal pure returns (address) {
+    function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer) internal pure virtual returns (address) {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
     }
 
-    function addressFromLast20Bytes(bytes32 bytesValue) internal pure virtual returns (address) {
+    function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
         return address(uint160(uint256(bytesValue)));
     }
 }
