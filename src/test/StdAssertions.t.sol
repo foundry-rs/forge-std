@@ -300,7 +300,7 @@ contract StdAssertionsTest is Test {
                                     ASSERT_EQ(UINT)
     //////////////////////////////////////////////////////////////////////////*/
 
-    function testAssertions() public {
+    function testAssertEqUint() public {
         assertEqUint(uint8(1), uint128(1));
         assertEqUint(uint64(2), uint64(2));
     }
