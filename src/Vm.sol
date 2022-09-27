@@ -233,6 +233,10 @@ interface Vm is VmSafe {
     function isPersistent(address) external returns (bool);
     // In forking mode, explicitly grant the given address cheatcode access
     function allowCheatcodes(address) external;
+    // Fetches the given transaction from the active fork and executes it on the current state
+    function transact(bytes32 txHash) external;
+    // Fetches the given transaction from the given fork and executes it on the current state
+    function transact(uint256 forkId, bytes32 txHash) external;
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external returns(string memory);
     // Returns all rpc urls and their aliases `[alias, url][]`
