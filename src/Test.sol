@@ -329,6 +329,20 @@ abstract contract Test is DSTest, Script {
             assertEq(a, b);
         }
     }
+    
+    function assertEq(uint a, int b) internal {
+        emit log                ("Error: variables have different types [type]");
+        emit log_named_string   ("  Expected int");
+        emit log_named_string   ("    Actual uint");
+        fail();
+    }    
+    
+    function assertEq(int a, uint b) internal {
+        emit log                ("Error: variables have different types [type]");
+        emit log_named_string   ("  Expected uint");
+        emit log_named_string   ("    Actual int");
+        fail();
+    }
 
     function assertEqUint(uint256 a, uint256 b) internal {
         assertEq(uint256(a), uint256(b));
