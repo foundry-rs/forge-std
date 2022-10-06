@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../StdCheats.sol";
-import "../Test.sol";
-import "../StdJson.sol";
+import "src/StdCheats.sol";
+import "src/Test.sol";
+import "src/StdJson.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -169,7 +169,7 @@ contract StdCheatsTest is Test {
 
     function testParseJsonTxDetail() public {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         string memory json = vm.readFile(path);
         bytes memory transactionDetails = json.parseRaw(".transactions[0].tx");
         RawTx1559Detail memory rawTxDetail = abi.decode(transactionDetails, (RawTx1559Detail));
@@ -185,20 +185,20 @@ contract StdCheatsTest is Test {
 
     function testReadEIP1559Transaction() public {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint256 index = 0;
         Tx1559 memory transaction = readTx1559(path, index);
     }
 
     function testReadEIP1559Transactions() public {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Tx1559[] memory transactions = readTx1559s(path);
     }
 
     function testReadReceipt() public {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint index = 5;
         Receipt memory receipt = readReceipt(path, index);
         assertEq(receipt.logsBloom,
@@ -207,7 +207,7 @@ contract StdCheatsTest is Test {
 
     function testReadReceipts() public {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/src/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
     }
 

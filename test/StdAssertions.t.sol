@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../Test.sol";
+import "src/Test.sol";
 
 contract StdAssertionsTest is Test {
     string constant CUSTOM_ERROR = "guh!";
