@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "src/StdMath.sol";
-import "src/Test.sol";
+import "../StdMath.sol";
+import "../Test.sol";
 
 contract StdMathTest is Test {
     function testGetAbs() external {
