@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../StdStorage.sol";
-import "../Test.sol";
+import "src/StdStorage.sol";
+import "src/Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
@@ -213,7 +213,7 @@ contract StdStorageTest is Test {
     function testFailStorageNativePack() public {
         stdstore.target(address(test)).sig(test.tA.selector).find();
         stdstore.target(address(test)).sig(test.tB.selector).find();
-        
+
         // these both would fail
         stdstore.target(address(test)).sig(test.tC.selector).find();
         stdstore.target(address(test)).sig(test.tD.selector).find();
@@ -274,7 +274,7 @@ contract StorageTest {
 
 
     bool public tC = false;
-    uint248 public tD = 1;    
+    uint248 public tD = 1;
 
 
     struct UnpackedStruct {
