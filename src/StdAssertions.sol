@@ -124,6 +124,31 @@ abstract contract StdAssertions is DSTest {
         }
     }
 
+    function assertApproxEqAbsDecimal(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals) internal virtual {
+        uint256 delta = stdMath.delta(a, b);
+
+        if (delta > maxDelta) {
+            emit log("Error: a ~= b not satisfied [uint]");
+            emit log_named_decimal_uint("  Expected", b, decimals);
+            emit log_named_decimal_uint("    Actual", a, decimals);
+            emit log_named_decimal_uint(" Max Delta", maxDelta, decimals);
+            emit log_named_decimal_uint("     Delta", delta, decimals);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbsDecimal(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals, string memory err)
+        internal
+        virtual
+    {
+        uint256 delta = stdMath.delta(a, b);
+
+        if (delta > maxDelta) {
+            emit log_named_string("Error", err);
+            assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
+        }
+    }
+
     function assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta) internal virtual {
         uint256 delta = stdMath.delta(a, b);
 
@@ -143,6 +168,31 @@ abstract contract StdAssertions is DSTest {
         if (delta > maxDelta) {
             emit log_named_string("Error", err);
             assertApproxEqAbs(a, b, maxDelta);
+        }
+    }
+
+    function assertApproxEqAbsDecimal(int256 a, int256 b, uint256 maxDelta, uint256 decimals) internal virtual {
+        uint256 delta = stdMath.delta(a, b);
+
+        if (delta > maxDelta) {
+            emit log("Error: a ~= b not satisfied [int]");
+            emit log_named_decimal_int("  Expected", b, decimals);
+            emit log_named_decimal_int("    Actual", a, decimals);
+            emit log_named_decimal_uint(" Max Delta", maxDelta, decimals);
+            emit log_named_decimal_uint("     Delta", delta, decimals);
+            fail();
+        }
+    }
+
+    function assertApproxEqAbsDecimal(int256 a, int256 b, uint256 maxDelta, uint256 decimals, string memory err)
+        internal
+        virtual
+    {
+        uint256 delta = stdMath.delta(a, b);
+
+        if (delta > maxDelta) {
+            emit log_named_string("Error", err);
+            assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
         }
     }
 

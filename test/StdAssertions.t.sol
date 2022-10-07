@@ -341,6 +341,46 @@ contract StdAssertionsTest is Test {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    APPROX_EQ_ABS_DECIMAL(UINT)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertApproxEqAbsDecimal_Uint_Pass(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) <= maxDelta);
+
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
+    }
+
+    function testAssertApproxEqAbsDecimal_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) > maxDelta);
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a ~= b not satisfied [uint]");
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_FAIL);
+    }
+
+    function testAssertApproxEqAbsDecimal_UintErr_Pass(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) <= maxDelta);
+
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
+    }
+
+    function testAssertApproxEqAbsDecimal_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) > maxDelta);
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                     APPROX_EQ_ABS(INT)
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -370,6 +410,42 @@ contract StdAssertionsTest is Test {
         vm.expectEmit(false, false, false, true);
         emit log_named_string("Error", CUSTOM_ERROR);
         t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    APPROX_EQ_ABS_DECIMAL(INT)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertApproxEqAbsDecimal_Int_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
+        vm.assume(stdMath.delta(a, b) <= maxDelta);
+
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
+    }
+
+    function testAssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
+        vm.assume(stdMath.delta(a, b) > maxDelta);
+
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a ~= b not satisfied [int]");
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_FAIL);
+    }
+
+    function testAssertApproxEqAbsDecimal_IntErr_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) <= maxDelta);
+
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
+    }
+
+    function testAssertApproxEqAbsDecimal_IntErr_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
+        vm.assume(stdMath.delta(a, b) > maxDelta);
+
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -543,6 +619,24 @@ contract TestTest is Test {
         assertApproxEqAbs(a, b, maxDelta, err);
     }
 
+    function _assertApproxEqAbsDecimal(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
+        assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
+    }
+
+    function _assertApproxEqAbsDecimal(
+        uint256 a,
+        uint256 b,
+        uint256 maxDelta,
+        uint256 decimals,
+        string memory err,
+        bool expectFail
+    ) external expectFailure(expectFail) {
+        assertApproxEqAbsDecimal(a, b, maxDelta, decimals, err);
+    }
+
     function _assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, bool expectFail)
         external
         expectFailure(expectFail)
@@ -555,6 +649,24 @@ contract TestTest is Test {
         expectFailure(expectFail)
     {
         assertApproxEqAbs(a, b, maxDelta, err);
+    }
+
+    function _assertApproxEqAbsDecimal(int256 a, int256 b, uint256 maxDelta, uint256 decimals, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
+        assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
+    }
+
+    function _assertApproxEqAbsDecimal(
+        int256 a,
+        int256 b,
+        uint256 maxDelta,
+        uint256 decimals,
+        string memory err,
+        bool expectFail
+    ) external expectFailure(expectFail) {
+        assertApproxEqAbsDecimal(a, b, maxDelta, decimals, err);
     }
 
     function _assertApproxEqRel(uint256 a, uint256 b, uint256 maxPercentDelta, bool expectFail)
