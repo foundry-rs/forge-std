@@ -27,9 +27,9 @@ abstract contract StdAssertions is DSTest {
 
     function assertEq(bool a, bool b) internal virtual {
         if (a != b) {
-            emit log                ("Error: a == b not satisfied [bool]");
-            emit log_named_string   ("  Expected", b ? "true" : "false");
-            emit log_named_string   ("    Actual", a ? "true" : "false");
+            emit log("Error: a == b not satisfied [bool]");
+            emit log_named_string("  Expected", b ? "true" : "false");
+            emit log_named_string("    Actual", a ? "true" : "false");
             fail();
         }
     }
@@ -90,7 +90,6 @@ abstract contract StdAssertions is DSTest {
         }
     }
 
-
     function assertEq(address[] memory a, address[] memory b, string memory err) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log_named_string("Error", err);
@@ -103,64 +102,46 @@ abstract contract StdAssertions is DSTest {
         assertEq(uint256(a), uint256(b));
     }
 
-    function assertApproxEqAbs(
-        uint256 a,
-        uint256 b,
-        uint256 maxDelta
-    ) internal virtual {
+    function assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta) internal virtual {
         uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
-            emit log            ("Error: a ~= b not satisfied [uint]");
-            emit log_named_uint ("  Expected", b);
-            emit log_named_uint ("    Actual", a);
-            emit log_named_uint (" Max Delta", maxDelta);
-            emit log_named_uint ("     Delta", delta);
+            emit log("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint("  Expected", b);
+            emit log_named_uint("    Actual", a);
+            emit log_named_uint(" Max Delta", maxDelta);
+            emit log_named_uint("     Delta", delta);
             fail();
         }
     }
 
-    function assertApproxEqAbs(
-        uint256 a,
-        uint256 b,
-        uint256 maxDelta,
-        string memory err
-    ) internal virtual {
+    function assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, string memory err) internal virtual {
         uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
-            emit log_named_string   ("Error", err);
+            emit log_named_string("Error", err);
             assertApproxEqAbs(a, b, maxDelta);
         }
     }
 
-    function assertApproxEqAbs(
-        int256 a,
-        int256 b,
-        uint256 maxDelta
-    ) internal virtual {
+    function assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta) internal virtual {
         uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
-            emit log            ("Error: a ~= b not satisfied [int]");
-            emit log_named_int  ("  Expected", b);
-            emit log_named_int  ("    Actual", a);
-            emit log_named_uint (" Max Delta", maxDelta);
-            emit log_named_uint ("     Delta", delta);
+            emit log("Error: a ~= b not satisfied [int]");
+            emit log_named_int("  Expected", b);
+            emit log_named_int("    Actual", a);
+            emit log_named_uint(" Max Delta", maxDelta);
+            emit log_named_uint("     Delta", delta);
             fail();
         }
     }
 
-    function assertApproxEqAbs(
-        int256 a,
-        int256 b,
-        uint256 maxDelta,
-        string memory err
-    ) internal virtual {
+    function assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, string memory err) internal virtual {
         uint256 delta = stdMath.delta(a, b);
 
         if (delta > maxDelta) {
-            emit log_named_string   ("Error", err);
+            emit log_named_string("Error", err);
             assertApproxEqAbs(a, b, maxDelta);
         }
     }
@@ -175,11 +156,11 @@ abstract contract StdAssertions is DSTest {
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
-            emit log                    ("Error: a ~= b not satisfied [uint]");
-            emit log_named_uint         ("    Expected", b);
-            emit log_named_uint         ("      Actual", a);
-            emit log_named_decimal_uint (" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint ("     % Delta", percentDelta, 18);
+            emit log("Error: a ~= b not satisfied [uint]");
+            emit log_named_uint("    Expected", b);
+            emit log_named_uint("      Actual", a);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
             fail();
         }
     }
@@ -195,42 +176,33 @@ abstract contract StdAssertions is DSTest {
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
-            emit log_named_string       ("Error", err);
+            emit log_named_string("Error", err);
             assertApproxEqRel(a, b, maxPercentDelta);
         }
     }
 
-    function assertApproxEqRel(
-        int256 a,
-        int256 b,
-        uint256 maxPercentDelta
-    ) internal virtual {
+    function assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta) internal virtual {
         if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
-            emit log                   ("Error: a ~= b not satisfied [int]");
-            emit log_named_int         ("    Expected", b);
-            emit log_named_int         ("      Actual", a);
+            emit log("Error: a ~= b not satisfied [int]");
+            emit log_named_int("    Expected", b);
+            emit log_named_int("      Actual", a);
             emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
             emit log_named_decimal_uint("     % Delta", percentDelta, 18);
             fail();
         }
     }
 
-    function assertApproxEqRel(
-        int256 a,
-        int256 b,
-        uint256 maxPercentDelta,
-        string memory err
-    ) internal virtual {
+    function assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, string memory err) internal virtual {
         if (b == 0) return assertEq(a, b, err); // If the expected is 0, actual must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
-            emit log_named_string      ("Error", err);
+            emit log_named_string("Error", err);
             assertApproxEqRel(a, b, maxPercentDelta);
         }
     }

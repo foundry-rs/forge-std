@@ -166,7 +166,6 @@ contract StdAssertionsTest is Test {
         t._assertEq(a, b, EXPECT_FAIL);
     }
 
-
     function testAssertEq_AddressArr_FailEl(address e1) public {
         vm.assume(e1 != address(0));
         address[] memory a = new address[](3);
@@ -203,7 +202,6 @@ contract StdAssertionsTest is Test {
         emit log("Error: a == b not satisfied [int[]]");
         t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
     }
-
 
     function testAssertEq_AddressArrErr_FailEl(address e1) public {
         vm.assume(e1 != address(0));
@@ -447,7 +445,6 @@ contract StdAssertionsTest is Test {
     }
 }
 
-
 contract TestTest is Test {
     modifier expectFailure(bool expectFail) {
         bool preState = vm.load(HEVM_ADDRESS, bytes32("failed")) != bytes32(0x00);
@@ -492,11 +489,10 @@ contract TestTest is Test {
         assertEq(a, b);
     }
 
-    function _assertEq(bytes memory a,
-        bytes memory b,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertEq(bytes memory a, bytes memory b, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertEq(a, b, err);
     }
 
@@ -512,92 +508,80 @@ contract TestTest is Test {
         assertEq(a, b);
     }
 
-    function _assertEq(uint256[] memory a, uint256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+    function _assertEq(uint256[] memory a, uint256[] memory b, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertEq(a, b, err);
     }
 
-    function _assertEq(int256[] memory a, int256[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+    function _assertEq(int256[] memory a, int256[] memory b, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertEq(a, b, err);
     }
 
-    function _assertEq(address[] memory a, address[] memory b, string memory err, bool expectFail) external expectFailure(expectFail) {
+    function _assertEq(address[] memory a, address[] memory b, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertEq(a, b, err);
     }
 
-
-    function _assertApproxEqAbs(
-        uint256 a,
-        uint256 b,
-        uint256 maxDelta,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqAbs(a, b, maxDelta);
     }
 
-    function _assertApproxEqAbs(
-        uint256 a,
-        uint256 b,
-        uint256 maxDelta,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqAbs(a, b, maxDelta, err);
     }
 
-    function _assertApproxEqAbs(
-        int256 a,
-        int256 b,
-        uint256 maxDelta,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqAbs(a, b, maxDelta);
     }
 
-    function _assertApproxEqAbs(
-        int256 a,
-        int256 b,
-        uint256 maxDelta,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqAbs(a, b, maxDelta, err);
     }
 
-    function _assertApproxEqRel(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqRel(uint256 a, uint256 b, uint256 maxPercentDelta, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqRel(a, b, maxPercentDelta);
     }
 
-    function _assertApproxEqRel(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqRel(uint256 a, uint256 b, uint256 maxPercentDelta, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqRel(a, b, maxPercentDelta, err);
     }
 
-    function _assertApproxEqRel(
-        int256 a,
-        int256 b,
-        uint256 maxPercentDelta,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqRel(a, b, maxPercentDelta);
     }
 
-    function _assertApproxEqRel(
-        int256 a,
-        int256 b,
-        uint256 maxPercentDelta,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+    function _assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
         assertApproxEqRel(a, b, maxPercentDelta, err);
     }
 }

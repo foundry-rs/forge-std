@@ -68,7 +68,7 @@ contract StdCheatsTest is Test {
     }
 
     function testMakeAddrEquivalence() public {
-        (address addr, ) = makeAddrAndKey("1337");
+        (address addr,) = makeAddrAndKey("1337");
         assertEq(makeAddr("1337"), addr);
     }
 
@@ -161,10 +161,10 @@ contract StdCheatsTest is Test {
     }
 
     function testBytesToUint() public {
-        assertEq(3, bytesToUint_test(hex'03'));
-        assertEq(2, bytesToUint_test(hex'02'));
-        assertEq(255, bytesToUint_test(hex'ff'));
-        assertEq(29625, bytesToUint_test(hex'73b9'));
+        assertEq(3, bytesToUint_test(hex"03"));
+        assertEq(2, bytesToUint_test(hex"02"));
+        assertEq(255, bytesToUint_test(hex"ff"));
+        assertEq(29625, bytesToUint_test(hex"73b9"));
     }
 
     function testParseJsonTxDetail() public {
@@ -176,7 +176,10 @@ contract StdCheatsTest is Test {
         Tx1559Detail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
         assertEq(txDetail.from, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
         assertEq(txDetail.to, 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-        assertEq(txDetail.data, hex'23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004');
+        assertEq(
+            txDetail.data,
+            hex"23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004"
+        );
         assertEq(txDetail.nonce, 3);
         assertEq(txDetail.txType, 2);
         assertEq(txDetail.gas, 29625);
@@ -199,10 +202,12 @@ contract StdCheatsTest is Test {
     function testReadReceipt() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
-        uint index = 5;
+        uint256 index = 5;
         Receipt memory receipt = readReceipt(path, index);
-        assertEq(receipt.logsBloom,
-                 hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100");
+        assertEq(
+            receipt.logsBloom,
+            hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100"
+        );
     }
 
     function testReadReceipts() public {
@@ -213,8 +218,8 @@ contract StdCheatsTest is Test {
 
     function bytesToUint_test(bytes memory b) private pure returns (uint256) {
         uint256 number;
-        for (uint i=0; i < b.length; i++) {
-            number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
+        for (uint256 i = 0; i < b.length; i++) {
+            number = number + uint256(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
         }
         return number;
     }
@@ -231,17 +236,19 @@ contract Bar {
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
+
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedSender, "!prank");
     }
+
     function origin(address expectedSender, address expectedOrigin) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
     }
 
     /// `DEAL` STDCHEAT
-    mapping (address => uint256) public balanceOf;
+    mapping(address => uint256) public balanceOf;
     uint256 public totalSupply;
 }
 
@@ -250,4 +257,3 @@ contract RevertingContract {
         revert();
     }
 }
-

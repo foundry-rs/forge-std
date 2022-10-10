@@ -13,11 +13,7 @@ contract StdUtilsTest is Test {
         assertEq(bound(9999, 1337, 6666), 6006);
     }
 
-    function testBound(
-        uint256 num,
-        uint256 min,
-        uint256 max
-    ) public {
+    function testBound(uint256 num, uint256 min, uint256 max) public {
         if (min > max) (min, max) = (max, min);
 
         uint256 bounded = bound(num, min, max);
@@ -31,17 +27,12 @@ contract StdUtilsTest is Test {
         assertEq(bound(1, type(uint256).max - 1, type(uint256).max), type(uint256).max);
     }
 
-
     function testCannotBoundMaxLessThanMin() public {
         vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
         bound(5, 100, 10);
     }
 
-    function testCannotBoundMaxLessThanMin(
-        uint256 num,
-        uint256 min,
-        uint256 max
-    ) public {
+    function testCannotBoundMaxLessThanMin(uint256 num, uint256 min, uint256 max) public {
         vm.assume(min > max);
         vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
+
 pragma experimental ABIEncoderV2;
 
 import "./StdStorage.sol";
@@ -8,11 +9,11 @@ import "./Vm.sol";
 abstract contract StdCheatsSafe {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-   // Data structures to parse Transaction objects from the broadcast artifact
-   // that conform to EIP1559. The Raw structs is what is parsed from the JSON
-   // and then converted to the one that is used by the user for better UX.
+    // Data structures to parse Transaction objects from the broadcast artifact
+    // that conform to EIP1559. The Raw structs is what is parsed from the JSON
+    // and then converted to the one that is used by the user for better UX.
 
-   struct RawTx1559 {
+    struct RawTx1559 {
         string[] arguments;
         address contractAddress;
         string contractName;
@@ -57,11 +58,11 @@ abstract contract StdCheatsSafe {
         uint256 value;
     }
 
-   // Data structures to parse Transaction objects from the broadcast artifact
-   // that DO NOT conform to EIP1559. The Raw structs is what is parsed from the JSON
-   // and then converted to the one that is used by the user for better UX.
+    // Data structures to parse Transaction objects from the broadcast artifact
+    // that DO NOT conform to EIP1559. The Raw structs is what is parsed from the JSON
+    // and then converted to the one that is used by the user for better UX.
 
-    struct TxLegacy{
+    struct TxLegacy {
         string[] arguments;
         address contractAddress;
         string contractName;
@@ -71,7 +72,7 @@ abstract contract StdCheatsSafe {
         TxDetailLegacy transaction;
     }
 
-    struct TxDetailLegacy{
+    struct TxDetailLegacy {
         AccessList[] accessList;
         uint256 chainId;
         bytes data;
@@ -89,7 +90,7 @@ abstract contract StdCheatsSafe {
         uint256 value;
     }
 
-    struct AccessList{
+    struct AccessList {
         address accessAddress;
         bytes32[] storageKeys;
     }
@@ -185,10 +186,7 @@ abstract contract StdCheatsSafe {
         string value;
     }
 
-    function readEIP1559ScriptArtifact(string memory path)
-        internal virtual
-        returns(EIP1559ScriptArtifact memory)
-    {
+    function readEIP1559ScriptArtifact(string memory path) internal virtual returns (EIP1559ScriptArtifact memory) {
         string memory data = vm.readFile(path);
         bytes memory parsedData = vm.parseJson(data);
         RawEIP1559ScriptArtifact memory rawArtifact = abi.decode(parsedData, (RawEIP1559ScriptArtifact));
@@ -203,33 +201,29 @@ abstract contract StdCheatsSafe {
         return artifact;
     }
 
-    function rawToConvertedEIPTx1559s(RawTx1559[] memory rawTxs)
-        internal virtual pure
-        returns (Tx1559[] memory)
-    {
+    function rawToConvertedEIPTx1559s(RawTx1559[] memory rawTxs) internal pure virtual returns (Tx1559[] memory) {
         Tx1559[] memory txs = new Tx1559[](rawTxs.length);
-        for (uint i; i < rawTxs.length; i++) {
+        for (uint256 i; i < rawTxs.length; i++) {
             txs[i] = rawToConvertedEIPTx1559(rawTxs[i]);
         }
         return txs;
     }
 
-    function rawToConvertedEIPTx1559(RawTx1559 memory rawTx)
-        internal virtual pure
-        returns (Tx1559 memory)
-    {
+    function rawToConvertedEIPTx1559(RawTx1559 memory rawTx) internal pure virtual returns (Tx1559 memory) {
         Tx1559 memory transaction;
         transaction.arguments = rawTx.arguments;
         transaction.contractName = rawTx.contractName;
         transaction.functionSig = rawTx.functionSig;
-        transaction.hash= rawTx.hash;
+        transaction.hash = rawTx.hash;
         transaction.txDetail = rawToConvertedEIP1559Detail(rawTx.txDetail);
-        transaction.opcode= rawTx.opcode;
+        transaction.opcode = rawTx.opcode;
         return transaction;
     }
 
     function rawToConvertedEIP1559Detail(RawTx1559Detail memory rawDetail)
-        internal virtual pure
+        internal
+        pure
+        virtual
         returns (Tx1559Detail memory)
     {
         Tx1559Detail memory txDetail;
@@ -242,78 +236,55 @@ abstract contract StdCheatsSafe {
         txDetail.gas = bytesToUint(rawDetail.gas);
         txDetail.accessList = rawDetail.accessList;
         return txDetail;
-
     }
 
-    function readTx1559s(string memory path)
-        internal virtual
-        returns (Tx1559[] memory)
-    {
+    function readTx1559s(string memory path) internal virtual returns (Tx1559[] memory) {
         string memory deployData = vm.readFile(path);
-        bytes memory parsedDeployData =
-            vm.parseJson(deployData, ".transactions");
+        bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions");
         RawTx1559[] memory rawTxs = abi.decode(parsedDeployData, (RawTx1559[]));
         return rawToConvertedEIPTx1559s(rawTxs);
     }
 
-
-    function readTx1559(string memory path, uint256 index)
-        internal virtual
-        returns (Tx1559 memory)
-    {
+    function readTx1559(string memory path, uint256 index) internal virtual returns (Tx1559 memory) {
         string memory deployData = vm.readFile(path);
-        string memory key = string(abi.encodePacked(".transactions[",vm.toString(index), "]"));
-        bytes memory parsedDeployData =
-            vm.parseJson(deployData, key);
+        string memory key = string(abi.encodePacked(".transactions[", vm.toString(index), "]"));
+        bytes memory parsedDeployData = vm.parseJson(deployData, key);
         RawTx1559 memory rawTx = abi.decode(parsedDeployData, (RawTx1559));
         return rawToConvertedEIPTx1559(rawTx);
     }
 
-
     // Analogous to readTransactions, but for receipts.
-    function readReceipts(string memory path)
-        internal virtual
-        returns (Receipt[] memory)
-    {
+    function readReceipts(string memory path) internal virtual returns (Receipt[] memory) {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts");
         RawReceipt[] memory rawReceipts = abi.decode(parsedDeployData, (RawReceipt[]));
         return rawToConvertedReceipts(rawReceipts);
     }
 
-    function readReceipt(string memory path, uint index)
-        internal virtual
-        returns (Receipt memory)
-    {
+    function readReceipt(string memory path, uint256 index) internal virtual returns (Receipt memory) {
         string memory deployData = vm.readFile(path);
-        string memory key = string(abi.encodePacked(".receipts[",vm.toString(index), "]"));
+        string memory key = string(abi.encodePacked(".receipts[", vm.toString(index), "]"));
         bytes memory parsedDeployData = vm.parseJson(deployData, key);
         RawReceipt memory rawReceipt = abi.decode(parsedDeployData, (RawReceipt));
         return rawToConvertedReceipt(rawReceipt);
     }
 
-    function rawToConvertedReceipts(RawReceipt[] memory rawReceipts)
-        internal virtual pure
-        returns(Receipt[] memory)
-    {
+    function rawToConvertedReceipts(RawReceipt[] memory rawReceipts) internal pure virtual returns (Receipt[] memory) {
         Receipt[] memory receipts = new Receipt[](rawReceipts.length);
-        for (uint i; i < rawReceipts.length; i++) {
+        for (uint256 i; i < rawReceipts.length; i++) {
             receipts[i] = rawToConvertedReceipt(rawReceipts[i]);
         }
         return receipts;
     }
 
-    function rawToConvertedReceipt(RawReceipt memory rawReceipt)
-        internal virtual pure
-        returns(Receipt memory)
-    {
+    function rawToConvertedReceipt(RawReceipt memory rawReceipt) internal pure virtual returns (Receipt memory) {
         Receipt memory receipt;
         receipt.blockHash = rawReceipt.blockHash;
         receipt.to = rawReceipt.to;
         receipt.from = rawReceipt.from;
         receipt.contractAddress = rawReceipt.contractAddress;
         receipt.effectiveGasPrice = bytesToUint(rawReceipt.effectiveGasPrice);
-        receipt.cumulativeGasUsed= bytesToUint(rawReceipt.cumulativeGasUsed);
+        receipt.cumulativeGasUsed = bytesToUint(rawReceipt.cumulativeGasUsed);
         receipt.gasUsed = bytesToUint(rawReceipt.gasUsed);
         receipt.status = bytesToUint(rawReceipt.status);
         receipt.transactionIndex = bytesToUint(rawReceipt.transactionIndex);
@@ -325,11 +296,13 @@ abstract contract StdCheatsSafe {
     }
 
     function rawToConvertedReceiptLogs(RawReceiptLog[] memory rawLogs)
-        internal virtual pure
+        internal
+        pure
+        virtual
         returns (ReceiptLog[] memory)
     {
         ReceiptLog[] memory logs = new ReceiptLog[](rawLogs.length);
-        for (uint i; i < rawLogs.length; i++) {
+        for (uint256 i; i < rawLogs.length; i++) {
             logs[i].logAddress = rawLogs[i].logAddress;
             logs[i].blockHash = rawLogs[i].blockHash;
             logs[i].blockNumber = bytesToUint(rawLogs[i].blockNumber);
@@ -341,99 +314,78 @@ abstract contract StdCheatsSafe {
             logs[i].removed = rawLogs[i].removed;
         }
         return logs;
-
     }
 
     // Deploy a contract by fetching the contract bytecode from
     // the artifacts directory
     // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
-    function deployCode(string memory what, bytes memory args)
-        internal virtual
-        returns (address addr)
-    {
+    function deployCode(string memory what, bytes memory args) internal virtual returns (address addr) {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(
-            addr != address(0),
-            "Test deployCode(string,bytes): Deployment failed."
-        );
+        require(addr != address(0), "Test deployCode(string,bytes): Deployment failed.");
     }
 
-    function deployCode(string memory what)
-        internal virtual
-        returns (address addr)
-    {
+    function deployCode(string memory what) internal virtual returns (address addr) {
         bytes memory bytecode = vm.getCode(what);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(
-            addr != address(0),
-            "Test deployCode(string): Deployment failed."
-        );
+        require(addr != address(0), "Test deployCode(string): Deployment failed.");
     }
 
     /// @dev deploy contract with value on construction
-    function deployCode(string memory what, bytes memory args, uint256 val)
-        internal virtual
-        returns (address addr)
-    {
+    function deployCode(string memory what, bytes memory args, uint256 val) internal virtual returns (address addr) {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(
-            addr != address(0),
-            "Test deployCode(string,bytes,uint256): Deployment failed."
-        );
+        require(addr != address(0), "Test deployCode(string,bytes,uint256): Deployment failed.");
     }
 
-    function deployCode(string memory what, uint256 val)
-        internal virtual
-        returns (address addr)
-    {
+    function deployCode(string memory what, uint256 val) internal virtual returns (address addr) {
         bytes memory bytecode = vm.getCode(what);
         /// @solidity memory-safe-assembly
         assembly {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(
-            addr != address(0),
-            "Test deployCode(string,uint256): Deployment failed."
-        );
+        require(addr != address(0), "Test deployCode(string,uint256): Deployment failed.");
     }
 
     // creates a labeled address and the corresponding private key
-    function makeAddrAndKey(string memory name) internal virtual returns(address addr, uint256 privateKey) {
+    function makeAddrAndKey(string memory name) internal virtual returns (address addr, uint256 privateKey) {
         privateKey = uint256(keccak256(abi.encodePacked(name)));
         addr = vm.addr(privateKey);
         vm.label(addr, name);
     }
 
     // creates a labeled address
-    function makeAddr(string memory name) internal virtual returns(address addr) {
+    function makeAddr(string memory name) internal virtual returns (address addr) {
         (addr,) = makeAddrAndKey(name);
     }
 
-    function deriveRememberKey(string memory mnemonic, uint32 index) internal virtual returns (address who, uint256 privateKey) {
+    function deriveRememberKey(string memory mnemonic, uint32 index)
+        internal
+        virtual
+        returns (address who, uint256 privateKey)
+    {
         privateKey = vm.deriveKey(mnemonic, index);
         who = vm.rememberKey(privateKey);
     }
 
-    function bytesToUint(bytes memory b) private pure returns (uint256){
-            uint256 number;
-            for (uint i=0; i < b.length; i++) {
-                number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
-            }
+    function bytesToUint(bytes memory b) private pure returns (uint256) {
+        uint256 number;
+        for (uint256 i = 0; i < b.length; i++) {
+            number = number + uint256(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
+        }
         return number;
     }
 }
@@ -444,7 +396,6 @@ abstract contract StdCheats is StdCheatsSafe {
 
     StdStorage private stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
@@ -522,11 +473,7 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        stdstore
-            .target(token)
-            .sig(0x70a08231)
-            .with_key(to)
-            .checked_write(give);
+        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
 
         // update total supply
         if (adjust) {
@@ -537,10 +484,7 @@ abstract contract StdCheats is StdCheatsSafe {
             } else {
                 totSup += (give - prevBal);
             }
-            stdstore
-                .target(token)
-                .sig(0x18160ddd)
-                .checked_write(totSup);
+            stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
         }
     }
 }

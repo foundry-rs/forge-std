@@ -63,9 +63,7 @@ contract StdErrorsTest is Test {
 }
 
 contract ErrorsTest {
-    enum T {
-        T1
-    }
+    enum T {T1}
 
     uint256[] public someArr;
     bytes someBytes;
@@ -108,7 +106,7 @@ contract ErrorsTest {
     }
 
     function mem() public pure {
-        uint256 l = 2**256 / 32;
+        uint256 l = 2 ** 256 / 32;
         new uint256[](l);
     }
 
