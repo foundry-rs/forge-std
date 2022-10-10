@@ -1,15 +1,15 @@
 name: CI
+
 on:
   workflow_dispatch:
   pull_request:
   push:
     branches:
-      - main
+      - master
 
 
 jobs:
   build:
-    name: Foundry project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,6 @@ jobs:
           forge build --skip test --use solc:0.6.2
 
   test:
-    name: Foundry project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +46,6 @@ jobs:
         run: forge test -vvv
 
   fmt:
-    name: forge fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
