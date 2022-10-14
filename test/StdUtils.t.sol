@@ -51,13 +51,13 @@ contract StdUtilsTest is Test {
     }
 
     function testCannotBoundMaxLessThanMin() public {
-        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
         bound(5, 100, 10);
     }
 
     function testCannotBoundMaxLessThanMin(uint256 num, uint256 min, uint256 max) public {
         vm.assume(min > max);
-        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);
     }
 
