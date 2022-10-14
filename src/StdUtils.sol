@@ -10,17 +10,29 @@ abstract contract StdUtils {
     function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
         require(min <= max, "Test bound(uint256,uint256,uint256): Max is less than min.");
 
-        uint256 size = max - min;
+        // If x is between min and max, return x directly. This is to ensure that dictionary values
+        // do not get shifted if the min is nonzero. More info: https://github.com/foundry-rs/forge-std/issues/188
+        if (x >= min && x <= max) return x;
 
-        if (size == 0) {
-            result = min;
-        } else if (size == UINT256_MAX) {
-            result = x;
-        } else {
-            ++size; // make `max` inclusive
-            uint256 mod = x % size;
-            result = min + mod;
-        }
+        // Handle degenerate cases.
+        uint256 size = max - min;
+        if (size == 0) return min;
+        if (size == UINT256_MAX) return x;
+
+        // If the value is 0,1,2 wrap that to min, min+1, min+2. Similarly, for the MAX_UINT side.
+        // This helps ensure coverage of the min/max values. It does introduce a small bias, however
+        // uint256 is so large that this is insignificant.
+        if (x == 0) return min;
+        if (x == 1 && size >= 1) return min + 1;
+        if (x == 2 && size >= 2) return min + 2;
+        if (x == UINT256_MAX) return max;
+        if (x == UINT256_MAX - 1 && size >= 1) return max - 1;
+        if (x == UINT256_MAX - 2 && size >= 2) return max - 2;
+
+        // Otherwise, wrap x into the range [min, max], i.e. the range is inclusive.
+        ++size; // make `max` inclusive
+        uint256 mod = x % size;
+        result = min + mod;
 
         console2.log("Bound Result", result);
     }
