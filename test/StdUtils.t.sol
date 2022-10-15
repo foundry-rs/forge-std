@@ -22,9 +22,11 @@ contract StdUtilsTest is Test {
         assertEq(bound(0, 50, 150), 50);
         assertEq(bound(1, 50, 150), 51);
         assertEq(bound(2, 50, 150), 52);
+        assertEq(bound(3, 50, 150), 53);
         assertEq(bound(type(uint256).max, 50, 150), 150);
         assertEq(bound(type(uint256).max - 1, 50, 150), 149);
         assertEq(bound(type(uint256).max - 2, 50, 150), 148);
+        assertEq(bound(type(uint256).max - 3, 50, 150), 147);
 
         assertEq(bound(0, 50, 51), 50);
         assertEq(bound(1, 50, 51), 51);

@@ -20,15 +20,17 @@ abstract contract StdUtils {
         if (size == 0) return min;
         ++size; // make `max` inclusive
 
-        // If the value is 0,1,2 wrap that to min, min+1, min+2. Similarly, for the MAX_UINT side.
+        // If the value is 0,1,2,3 wrap that to min, min+1, min+2, min+3. Similarly, for the MAX_UINT side.
         // This helps ensure coverage of the min/max values. It does introduce a small bias, however
         // uint256 is so large that this is insignificant.
         if (x == 0) return min;
         if (x == 1 && size > 1) return min + 1;
         if (x == 2 && size > 2) return min + 2;
+        if (x == 3 && size > 3) return min + 3;
         if (x == UINT256_MAX) return max;
         if (x == UINT256_MAX - 1 && size > 1) return max - 1;
         if (x == UINT256_MAX - 2 && size > 2) return max - 2;
+        if (x == UINT256_MAX - 3 && size > 3) return max - 3;
 
         // Otherwise, wrap x into the range [min, max], i.e. the range is inclusive.
         uint256 mod = x % size;
