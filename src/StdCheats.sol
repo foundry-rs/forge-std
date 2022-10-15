@@ -326,7 +326,7 @@ abstract contract StdCheatsSafe {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(addr != address(0), "Test deployCode(string,bytes): Deployment failed.");
+        require(addr != address(0), "StdCheats deployCode(string,bytes): Deployment failed.");
     }
 
     function deployCode(string memory what) internal virtual returns (address addr) {
@@ -336,7 +336,7 @@ abstract contract StdCheatsSafe {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(addr != address(0), "Test deployCode(string): Deployment failed.");
+        require(addr != address(0), "StdCheats deployCode(string): Deployment failed.");
     }
 
     /// @dev deploy contract with value on construction
@@ -347,7 +347,7 @@ abstract contract StdCheatsSafe {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(addr != address(0), "Test deployCode(string,bytes,uint256): Deployment failed.");
+        require(addr != address(0), "StdCheats deployCode(string,bytes,uint256): Deployment failed.");
     }
 
     function deployCode(string memory what, uint256 val) internal virtual returns (address addr) {
@@ -357,7 +357,7 @@ abstract contract StdCheatsSafe {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
-        require(addr != address(0), "Test deployCode(string,uint256): Deployment failed.");
+        require(addr != address(0), "StdCheats deployCode(string,uint256): Deployment failed.");
     }
 
     // creates a labeled address and the corresponding private key

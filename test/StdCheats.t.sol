@@ -131,7 +131,7 @@ contract StdCheatsTest is Test {
     }
 
     function testDeployCodeFail() public {
-        vm.expectRevert(bytes("Test deployCode(string): Deployment failed."));
+        vm.expectRevert(bytes("StdCheats deployCode(string): Deployment failed."));
         this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
     }
 
