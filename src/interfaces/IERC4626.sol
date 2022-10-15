@@ -1,6 +1,6 @@
 pragma solidity >=0.6.2;
 
-import "src/interfaces/ERC20.sol";
+import "src/interfaces/IERC20.sol";
 
 /// @dev Interface of the ERC4626 "Tokenized Vault Standard", as defined in
 /// https://eips.ethereum.org/EIPS/eip-4626[ERC-4626].
