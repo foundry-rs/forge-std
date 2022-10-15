@@ -54,7 +54,7 @@ interface IERC4626 is IERC20 {
     /// through a deposit call.
     /// @dev
     /// - MUST return a limited value if receiver is subject to some deposit limit.
-    /// - MUST return 2///* 256 - 1 if there is no limit on the maximum amount of assets that may be deposited.
+    /// - MUST return 2 ** 256 - 1 if there is no limit on the maximum amount of assets that may be deposited.
     /// - MUST NOT revert.
     function maxDeposit(address receiver) external view returns (uint256 maxAssets);
 
@@ -87,7 +87,7 @@ interface IERC4626 is IERC20 {
     /// @notice Returns the maximum amount of the Vault shares that can be minted for the receiver, through a mint call.
     /// @dev
     /// - MUST return a limited value if receiver is subject to some mint limit.
-    /// - MUST return 2///* 256 - 1 if there is no limit on the maximum amount of shares that may be minted.
+    /// - MUST return 2 ** 256 - 1 if there is no limit on the maximum amount of shares that may be minted.
     /// - MUST NOT revert.
     function maxMint(address receiver) external view returns (uint256 maxShares);
 
