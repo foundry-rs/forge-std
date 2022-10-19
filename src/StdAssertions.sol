@@ -2,7 +2,7 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import "ds-test/test.sol";
-import "./StdMath.sol";
+import "src/StdMath.sol";
 
 abstract contract StdAssertions is DSTest {
     event log_array(uint256[] val);
