@@ -1,6 +1,13 @@
 [profile.default]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
+[rpc_endpoints]
+# These are made up endpoints for testing.
+# We intentionally use both dashes and underscores to ensure both are supported.
+mainnet = "https://mainnet-rpc.com"
+optimism_goerli = "https://optimism_goerli-rpc.com"
+arbitrum-one-goerli = "https://arbitrum_one_goerli-rpc.com"
+
 [fmt]
 # These are all the `forge fmt` defaults.
 line_length = 120
