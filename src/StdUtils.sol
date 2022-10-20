@@ -2,8 +2,10 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import "src/console2.sol";
+import "src/StdChains.sol";
 
-abstract contract StdUtils {
+abstract contract StdUtils is StdChains {
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
@@ -79,5 +81,48 @@ abstract contract StdUtils {
 
     function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
         return address(uint160(uint256(bytesValue)));
+    }
+
+    function assumeNoPrecompiles(address addr) internal {
+        // Assembly required since `block.chainid` was introduced in 0.8.0; // TODO verify version
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        assumeNoPrecompiles(addr, chainId);
+    }
+
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal {
+        // forgefmt: disable-start
+        if (
+            chainId == stdChains.Anvil.chainId ||
+            chainId == stdChains.Hardhat.chainId ||
+            chainId == stdChains.Mainnet.chainId ||
+            chainId == stdChains.Ropsten.chainId ||
+            chainId == stdChains.Rinkeby.chainId ||
+            chainId == stdChains.Goerli.chainId ||
+            chainId == stdChains.Kovan.chainId ||
+            chainId == stdChains.Sepolia.chainId
+        ) {
+            vm.assume(addr < address(0x1) || addr > address(0x9));
+        } else if (
+            chainId == stdChains.Optimism.chainId ||
+            chainId == stdChains.OptimismGoerli.chainId ||
+            chainId == stdChains.OptimismKovan.chainId
+        ) {
+            vm.assume(true); // TODO
+        } else if (
+            chainId == stdChains.ArbitrumOne.chainId ||
+            chainId == stdChains.ArbitrumOneGoerli.chainId ||
+            chainId == stdChains.ArbitrumOneRinkeby.chainId
+        ) {
+            vm.assume(true); // TODO
+        } else if (
+            chainId == stdChains.Avalanche.chainId ||
+            chainId == stdChains.AvalancheFuji.chainId
+        ) {
+            vm.assume(true); // TODO
+        }
+        // forgefmt: disable-end
     }
 }
