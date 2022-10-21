@@ -7,7 +7,6 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: forge install
 
-      - name: Build Test with older solc versions
+      - name: Check backward compatibility
         run: |
           forge build --skip test --use solc:0.8.0
           forge build --skip test --use solc:0.7.6
