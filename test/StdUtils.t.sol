@@ -8,17 +8,19 @@ contract StdUtilsTest is Test {
         assertEq(bound(5, 0, 4), 0);
         assertEq(bound(0, 69, 69), 69);
         assertEq(bound(0, 68, 69), 68);
-        assertEq(bound(10, 150, 190), 160);
-        assertEq(bound(300, 2800, 3200), 3100);
-        assertEq(bound(9999, 1337, 6666), 6006);
+        assertEq(bound(10, 150, 190), 174);
+        assertEq(bound(300, 2800, 3200), 3107);
+        assertEq(bound(9999, 1337, 6666), 4669);
+    }
 
-        // Don't wrap values within range.
+    function testBound_WithinRange() public {
         assertEq(bound(51, 50, 150), 51);
         assertEq(bound(51, 50, 150), bound(bound(51, 50, 150), 50, 150));
         assertEq(bound(149, 50, 150), 149);
         assertEq(bound(149, 50, 150), bound(bound(149, 50, 150), 50, 150));
+    }
 
-        // 0, 1, 2 and MAX_UINT, MAX_UINT-1, and MAX_UINT-2 should map to min/max.
+    function testBound_EdgeCoverage() public {
         assertEq(bound(0, 50, 150), 50);
         assertEq(bound(1, 50, 150), 51);
         assertEq(bound(2, 50, 150), 52);
@@ -27,24 +29,17 @@ contract StdUtilsTest is Test {
         assertEq(bound(type(uint256).max - 1, 50, 150), 149);
         assertEq(bound(type(uint256).max - 2, 50, 150), 148);
         assertEq(bound(type(uint256).max - 3, 50, 150), 147);
-
-        assertEq(bound(0, 50, 51), 50);
-        assertEq(bound(1, 50, 51), 51);
-        assertEq(bound(2, 50, 51), 50);
-        assertEq(bound(type(uint256).max, 50, 51), 51);
-        assertEq(bound(type(uint256).max - 1, 50, 51), 50);
-        assertEq(bound(type(uint256).max - 2, 50, 51), 51);
     }
 
     function testBound(uint256 num, uint256 min, uint256 max) public {
         if (min > max) (min, max) = (max, min);
 
-        uint256 bounded = bound(num, min, max);
+        uint256 result = bound(num, min, max);
 
-        assertGe(bounded, min);
-        assertLe(bounded, max);
-        assertEq(bounded, bound(bounded, min, max));
-        if (num >= min && num <= max) assertEq(bounded, num);
+        assertGe(result, min);
+        assertLe(result, max);
+        assertEq(result, bound(result, min, max));
+        if (num >= min && num <= max) assertEq(result, num);
     }
 
     function testBoundUint256Max() public {
