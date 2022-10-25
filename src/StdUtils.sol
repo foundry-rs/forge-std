@@ -93,30 +93,24 @@ abstract contract StdUtils is StdChains {
     }
 
     function assumeNoPrecompiles(address addr, uint256 chainId) internal {
+        // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
+        // address), but the same rationale for excluding them applies so we include those too.
+
+        // These should be present on all EVM-compatible chains.
+        vm.assume(addr < address(0x1) || addr > address(0x9));
+
         // forgefmt: disable-start
-        if (
-            chainId == stdChains.Anvil.chainId ||
-            chainId == stdChains.Hardhat.chainId ||
-            chainId == stdChains.Mainnet.chainId ||
-            chainId == stdChains.Goerli.chainId ||
-            chainId == stdChains.Sepolia.chainId
-        ) {
-            vm.assume(addr < address(0x1) || addr > address(0x9));
-        } else if (
-            chainId == stdChains.Optimism.chainId ||
-            chainId == stdChains.OptimismGoerli.chainId
-        ) {
-            vm.assume(true); // TODO
-        } else if (
-            chainId == stdChains.ArbitrumOne.chainId ||
-            chainId == stdChains.ArbitrumOneGoerli.chainId
-        ) {
-            vm.assume(true); // TODO
-        } else if (
-            chainId == stdChains.Avalanche.chainId ||
-            chainId == stdChains.AvalancheFuji.chainId
-        ) {
-            vm.assume(true); // TODO
+        if (chainId == stdChains.Optimism.chainId || chainId == stdChains.OptimismGoerli.chainId) {
+            // https://github.com/ethereum-optimism/optimism/blob/eaa371a0184b56b7ca6d9eb9cb0a2b78b2ccd864/op-bindings/predeploys/addresses.go#L6-L21
+            vm.assume(addr < address(0x4200000000000000000000000000000000000000) || addr > address(0x4200000000000000000000000000000000000800));
+        } else if (chainId == stdChains.ArbitrumOne.chainId || chainId == stdChains.ArbitrumOneGoerli.chainId) {
+            // https://developer.arbitrum.io/useful-addresses#arbitrum-precompiles-l2-same-on-all-arb-chains
+            vm.assume(addr < address(0x0000000000000000000000000000000000000064) || addr > address(0x0000000000000000000000000000000000000068));
+        } else if (chainId == stdChains.Avalanche.chainId || chainId == stdChains.AvalancheFuji.chainId) {
+            // https://github.com/ava-labs/subnet-evm/blob/47c03fd007ecaa6de2c52ea081596e0a88401f58/precompile/params.go#L18-L59
+            vm.assume(addr < address(0x0100000000000000000000000000000000000000) || addr > address(0x01000000000000000000000000000000000000ff));
+            vm.assume(addr < address(0x0200000000000000000000000000000000000000) || addr > address(0x02000000000000000000000000000000000000FF));
+            vm.assume(addr < address(0x0300000000000000000000000000000000000000) || addr > address(0x03000000000000000000000000000000000000Ff));
         }
         // forgefmt: disable-end
     }
