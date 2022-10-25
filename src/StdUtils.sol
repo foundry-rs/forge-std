@@ -98,23 +98,18 @@ abstract contract StdUtils is StdChains {
             chainId == stdChains.Anvil.chainId ||
             chainId == stdChains.Hardhat.chainId ||
             chainId == stdChains.Mainnet.chainId ||
-            chainId == stdChains.Ropsten.chainId ||
-            chainId == stdChains.Rinkeby.chainId ||
             chainId == stdChains.Goerli.chainId ||
-            chainId == stdChains.Kovan.chainId ||
             chainId == stdChains.Sepolia.chainId
         ) {
             vm.assume(addr < address(0x1) || addr > address(0x9));
         } else if (
             chainId == stdChains.Optimism.chainId ||
-            chainId == stdChains.OptimismGoerli.chainId ||
-            chainId == stdChains.OptimismKovan.chainId
+            chainId == stdChains.OptimismGoerli.chainId
         ) {
             vm.assume(true); // TODO
         } else if (
             chainId == stdChains.ArbitrumOne.chainId ||
-            chainId == stdChains.ArbitrumOneGoerli.chainId ||
-            chainId == stdChains.ArbitrumOneRinkeby.chainId
+            chainId == stdChains.ArbitrumOneGoerli.chainId
         ) {
             vm.assume(true); // TODO
         } else if (

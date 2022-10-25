@@ -28,17 +28,13 @@ abstract contract StdChains {
         Chain Anvil;
         Chain Hardhat;
         Chain Mainnet;
-        Chain Ropsten;
-        Chain Rinkeby;
         Chain Goerli;
-        Chain Kovan;
         Chain Sepolia;
         Chain Optimism;
         Chain OptimismGoerli;
-        Chain OptimismKovan;
         Chain ArbitrumOne;
         Chain ArbitrumOneGoerli;
-        Chain ArbitrumOneRinkeby;
+        Chain ArbitrumNova;
         Chain Polygon;
         Chain PolygonMumbai;
         Chain Avalanche;
@@ -51,25 +47,21 @@ abstract contract StdChains {
     Chains stdChains = Chains({
         Anvil: Chain("Anvil", 31337, "http://127.0.0.1:8545"),
         Hardhat: Chain("Hardhat", 31337, "http://127.0.0.1:8545"),
-        Mainnet: Chain("Mainnet", 1, ""),
-        Ropsten: Chain("Ropsten", 3, ""),
-        Rinkeby: Chain("Rinkeby", 4, ""),
-        Goerli: Chain("Goerli", 5, ""),
-        Kovan: Chain("Kovan", 42, ""),
-        Sepolia: Chain("Sepolia", 0, ""),
-        Optimism: Chain("Optimism", 10, ""),
-        OptimismGoerli: Chain("OptimismGoerli", 69, ""),
-        OptimismKovan: Chain("OptimismKovan", 420, ""),
-        ArbitrumOne: Chain("ArbitrumOne", 42161, ""),
-        ArbitrumOneGoerli: Chain("ArbitrumOneGoerli", 0, ""),
-        ArbitrumOneRinkeby: Chain("ArbitrumOneRinkeby", 0, ""),
-        Polygon: Chain("Polygon", 137, ""),
-        PolygonMumbai: Chain("PolygonMumbai", 0, ""),
-        Avalanche: Chain("Avalanche", 0, ""),
-        AvalancheFuji: Chain("AvalancheFuji", 0, ""),
-        BnbSmartChain: Chain("BnbSmartChain", 0, ""),
-        BnbSmartChainTestnet: Chain("BnbSmartChainTestnet", 0, ""),
-        GnosisChain: Chain("GnosisChain", 0, "")
+        Mainnet: Chain("Mainnet", 1, "https://api.mycryptoapi.com/eth"),
+        Goerli: Chain("Goerli", 5, "https://goerli.infura.io/v3/84842078b09946638c03157f83405213"), // Default Infura key from ethers.js: https://github.com/ethers-io/ethers.js/blob/c80fcddf50a9023486e9f9acb1848aba4c19f7b6/packages/providers/src.ts/infura-provider.ts
+        Sepolia: Chain("Sepolia", 11155111, "https://rpc.sepolia.dev"),
+        Optimism: Chain("Optimism", 10, "https://mainnet.optimism.io"),
+        OptimismGoerli: Chain("OptimismGoerli", 420, "https://goerli.optimism.io"),
+        ArbitrumOne: Chain("ArbitrumOne", 42161, "https://arb1.arbitrum.io/rpc"),
+        ArbitrumOneGoerli: Chain("ArbitrumOneGoerli", 421613, "https://goerli-rollup.arbitrum.io/rpc"),
+        ArbitrumNova: Chain("ArbitrumNova", 42170, "https://nova.arbitrum.io/rpc"),
+        Polygon: Chain("Polygon", 137, "https://polygon-rpc.com"),
+        PolygonMumbai: Chain("PolygonMumbai", 80001, "https://rpc-mumbai.matic.today"),
+        Avalanche: Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"),
+        AvalancheFuji: Chain("AvalancheFuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc"),
+        BnbSmartChain: Chain("BnbSmartChain", 56, "https://bsc-dataseed1.binance.org"),
+        BnbSmartChainTestnet: Chain("BnbSmartChainTestnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"),
+        GnosisChain: Chain("GnosisChain", 100, "https://rpc.gnosischain.com")
     });
 
     // TODO how can we hide the compiler warnings by default? We can't remove the visibility since it's needed for ^0.6.2 compatibility.
@@ -82,17 +74,13 @@ abstract contract StdChains {
             if (isEqual(name, "anvil")) stdChains.Anvil.rpcUrl = rpcUrl;
             else if (isEqual(name, "hardhat")) stdChains.Hardhat.rpcUrl = rpcUrl;
             else if (isEqual(name, "mainnet")) stdChains.Mainnet.rpcUrl = rpcUrl;
-            else if (isEqual(name, "ropsten")) stdChains.Ropsten.rpcUrl = rpcUrl;
-            else if (isEqual(name, "rinkeby")) stdChains.Rinkeby.rpcUrl = rpcUrl;
             else if (isEqual(name, "goerli")) stdChains.Goerli.rpcUrl = rpcUrl;
-            else if (isEqual(name, "kovan")) stdChains.Kovan.rpcUrl = rpcUrl;
             else if (isEqual(name, "sepolia")) stdChains.Sepolia.rpcUrl = rpcUrl;
             else if (isEqual(name, "optimism")) stdChains.Optimism.rpcUrl = rpcUrl;
             else if (isEqual(name, "optimism_goerli", "optimism-goerli")) stdChains.OptimismGoerli.rpcUrl = rpcUrl;
-            else if (isEqual(name, "optimism_kovan", "optimism-kovan")) stdChains.OptimismKovan.rpcUrl = rpcUrl;
             else if (isEqual(name, "arbitrum_one", "arbitrum-one")) stdChains.ArbitrumOne.rpcUrl = rpcUrl;
             else if (isEqual(name, "arbitrum_one_goerli", "arbitrum-one-goerli")) stdChains.ArbitrumOneGoerli.rpcUrl = rpcUrl;
-            else if (isEqual(name, "arbitrum_one_rinkeby", "arbitrum-one-rinkeby")) stdChains.ArbitrumOneRinkeby.rpcUrl = rpcUrl;
+            else if (isEqual(name, "arbitrum_nova", "arbitrum-nova")) stdChains.ArbitrumNova.rpcUrl = rpcUrl;
             else if (isEqual(name, "polygon")) stdChains.Polygon.rpcUrl = rpcUrl;
             else if (isEqual(name, "polygon_mumbai", "polygon-mumbai")) stdChains.PolygonMumbai.rpcUrl = rpcUrl;
             else if (isEqual(name, "avalanche")) stdChains.Avalanche.rpcUrl = rpcUrl;
