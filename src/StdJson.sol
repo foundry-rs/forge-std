@@ -3,7 +3,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
-import "src/Vm.sol";
+import "./Vm.sol";
 
 // Helpers for parsing keys into types.
 library stdJson {

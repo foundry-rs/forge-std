@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import "src/console2.sol";
-import "src/StdChains.sol";
+import "./console2.sol";
+import "./StdChains.sol";
 
 abstract contract StdUtils is StdChains {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
