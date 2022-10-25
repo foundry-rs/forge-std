@@ -13,6 +13,7 @@ library console2 {
     function _sendLogPayload(bytes memory payload) private view {
         uint256 payloadLength = payload.length;
         address consoleAddress = CONSOLE_ADDRESS;
+        /// @solidity memory-safe-assembly
         assembly {
             let payloadStart := add(payload, 32)
             let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
