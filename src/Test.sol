@@ -3,7 +3,7 @@ pragma solidity >=0.6.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./Script.sol";
-import "ds-test/test.sol";
+import "../lib/ds-test/src/test.sol";
 
 // Wrappers around Cheatcodes to avoid footguns
 abstract contract Test is DSTest, Script {
