@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "src/StdCheats.sol";
-import "src/Test.sol";
-import "src/StdJson.sol";
+import "../src/StdCheats.sol";
+import "../src/Test.sol";
+import "../src/StdJson.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -222,6 +222,27 @@ contract StdCheatsTest is Test {
             number = number + uint256(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
         }
         return number;
+    }
+
+    function testChainRpcInitialization() public {
+        // RPCs specified in `foundry.toml` should be updated.
+        assertEq(stdChains.Mainnet.rpcUrl, "https://api.mycryptoapi.com/eth/");
+        assertEq(stdChains.OptimismGoerli.rpcUrl, "https://goerli.optimism.io/");
+        assertEq(stdChains.ArbitrumOneGoerli.rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
+
+        // Other RPCs should remain unchanged.
+        assertEq(stdChains.Anvil.rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains.Hardhat.rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains.Sepolia.rpcUrl, "https://rpc.sepolia.dev");
+    }
+
+    // Ensure we can connect to the default RPC URL for each chain.
+    function testRpcs() public {
+        (string[2][] memory rpcs) = vm.rpcUrls();
+        for (uint256 i = 0; i < rpcs.length; i++) {
+            ( /* string memory name */ , string memory rpcUrl) = (rpcs[i][0], rpcs[i][1]);
+            vm.createSelectFork(rpcUrl);
+        }
     }
 }
 

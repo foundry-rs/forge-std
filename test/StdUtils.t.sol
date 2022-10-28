@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "src/Test.sol";
+import "../src/Test.sol";
 
 contract StdUtilsTest is Test {
     function testBound() public {
@@ -87,5 +87,10 @@ contract StdUtilsTest is Test {
         address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
+    }
+
+    function testAssumeNoPrecompilesL1(address addr) external {
+        assumeNoPrecompiles(addr, stdChains.Mainnet.chainId);
+        assertTrue(addr < address(1) || addr > address(9));
     }
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "src/StdStorage.sol";
-import "src/Test.sol";
+import "../src/StdStorage.sol";
+import "../src/Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
