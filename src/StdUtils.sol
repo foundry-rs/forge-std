@@ -83,7 +83,7 @@ abstract contract StdUtils is StdChains {
         return address(uint160(uint256(bytesValue)));
     }
 
-    function assumeNoPrecompiles(address addr) internal {
+    function assumeNoPrecompiles(address addr) internal virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0; // TODO verify version
         uint256 chainId;
         assembly {
@@ -92,7 +92,7 @@ abstract contract StdUtils is StdChains {
         assumeNoPrecompiles(addr, chainId);
     }
 
-    function assumeNoPrecompiles(address addr, uint256 chainId) internal {
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal virtual {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
