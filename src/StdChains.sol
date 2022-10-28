@@ -12,6 +12,11 @@ import "./Vm.sol";
 abstract contract StdChains {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
+    /// syntaxes, we put the constructor in a private method and assign an unused return value to a variable. This
+    /// forces the method to run during construction, but without declaring an explicit constructor.
+    uint256 private CONSTRUCTOR = _constructor();
+
     struct Chain {
         // The chain name, using underscores as the separator to match `foundry.toml` conventions.
         string name;
@@ -64,8 +69,7 @@ abstract contract StdChains {
         GnosisChain: Chain("GnosisChain", 100, "https://rpc.gnosischain.com")
     });
 
-    // TODO how can we hide the compiler warnings by default? We can't remove the visibility since it's needed for ^0.6.2 compatibility.
-    constructor() internal {
+    function _constructor() private returns (uint256) {
         // Loop over RPC URLs in the config file to replace the default RPC URLs
         (string[2][] memory rpcs) = vm.rpcUrls();
         for (uint256 i = 0; i < rpcs.length; i++) {
@@ -90,6 +94,7 @@ abstract contract StdChains {
             else if (isEqual(name, "gnosis_chain", "gnosis-chain")) stdChains.GnosisChain.rpcUrl = rpcUrl;
             // forgefmt: disable-end
         }
+        return 0;
     }
 
     function isEqual(string memory a, string memory b) private pure returns (bool) {
