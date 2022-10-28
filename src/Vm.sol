@@ -132,6 +132,14 @@ interface VmSafe {
     // struct json = { uint256 a; address b; }
     // If we defined a json struct with the opposite order, meaning placing the address b first, it would try to
     // decode the tuple in that order, and thus fail.
+
+    // Returns the RPC url for the given alias
+    function rpcUrl(string calldata) external returns (string memory);
+    // Returns all rpc urls and their aliases `[alias, url][]`
+    function rpcUrls() external returns (string[2][] memory);
+
+    // If the condition is false, discard this run's fuzz inputs and generate new ones.
+    function assume(bool) external;
 }
 
 interface Vm is VmSafe {
@@ -187,8 +195,6 @@ interface Vm is VmSafe {
     function expectCall(address, bytes calldata) external;
     // Expects a call to an address with the specified msg.value and calldata
     function expectCall(address, uint256, bytes calldata) external;
-    // If the condition is false, discard this run's fuzz inputs and generate new ones
-    function assume(bool) external;
     // Sets block.coinbase (who)
     function coinbase(address) external;
     // Snapshot the current state of the evm.
@@ -243,8 +249,4 @@ interface Vm is VmSafe {
     function transact(bytes32 txHash) external;
     // Fetches the given transaction from the given fork and executes it on the current state
     function transact(uint256 forkId, bytes32 txHash) external;
-    // Returns the RPC url for the given alias
-    function rpcUrl(string calldata) external returns (string memory);
-    // Returns all rpc urls and their aliases `[alias, url][]`
-    function rpcUrls() external returns (string[2][] memory);
 }

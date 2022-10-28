@@ -9,6 +9,45 @@ import "./Vm.sol";
 abstract contract StdCheatsSafe {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
+    /// syntaxes, we put the constructor in a private method and assign an unused return value to a variable. This
+    /// forces the method to run during construction, but without declaring an explicit constructor.
+    uint256 private CONSTRUCTOR = _constructor();
+
+    struct Chain {
+        // The chain name, using underscores as the separator to match `foundry.toml` conventions.
+        string name;
+        // The chain's Chain ID.
+        uint256 chainId;
+        // A default RPC endpoint for this chain.
+        // NOTE: This default RPC URL is included for convenience to facilitate quick tests and
+        // experimentation. Do not use this RPC URL for production test suites, CI, or other heavy
+        // usage as you will be throttled and this is a disservice to others who need this endpoint.
+        string rpcUrl;
+    }
+
+    struct Chains {
+        Chain Anvil;
+        Chain Hardhat;
+        Chain Mainnet;
+        Chain Goerli;
+        Chain Sepolia;
+        Chain Optimism;
+        Chain OptimismGoerli;
+        Chain ArbitrumOne;
+        Chain ArbitrumOneGoerli;
+        Chain ArbitrumNova;
+        Chain Polygon;
+        Chain PolygonMumbai;
+        Chain Avalanche;
+        Chain AvalancheFuji;
+        Chain BnbSmartChain;
+        Chain BnbSmartChainTestnet;
+        Chain GnosisChain;
+    }
+
+    Chains stdChains;
+
     // Data structures to parse Transaction objects from the broadcast artifact
     // that conform to EIP1559. The Raw structs is what is parsed from the JSON
     // and then converted to the one that is used by the user for better UX.
@@ -184,6 +223,96 @@ abstract contract StdCheatsSafe {
     struct TxReturn {
         string internalType;
         string value;
+    }
+
+    function _constructor() private returns (uint256) {
+        // Initialize `stdChains` with the defaults.
+        stdChains = Chains({
+            Anvil: Chain("Anvil", 31337, "http://127.0.0.1:8545"),
+            Hardhat: Chain("Hardhat", 31337, "http://127.0.0.1:8545"),
+            Mainnet: Chain("Mainnet", 1, "https://api.mycryptoapi.com/eth"),
+            Goerli: Chain("Goerli", 5, "https://goerli.infura.io/v3/84842078b09946638c03157f83405213"), // Default Infura key from ethers.js: https://github.com/ethers-io/ethers.js/blob/c80fcddf50a9023486e9f9acb1848aba4c19f7b6/packages/providers/src.ts/infura-provider.ts
+            Sepolia: Chain("Sepolia", 11155111, "https://rpc.sepolia.dev"),
+            Optimism: Chain("Optimism", 10, "https://mainnet.optimism.io"),
+            OptimismGoerli: Chain("OptimismGoerli", 420, "https://goerli.optimism.io"),
+            ArbitrumOne: Chain("ArbitrumOne", 42161, "https://arb1.arbitrum.io/rpc"),
+            ArbitrumOneGoerli: Chain("ArbitrumOneGoerli", 421613, "https://goerli-rollup.arbitrum.io/rpc"),
+            ArbitrumNova: Chain("ArbitrumNova", 42170, "https://nova.arbitrum.io/rpc"),
+            Polygon: Chain("Polygon", 137, "https://polygon-rpc.com"),
+            PolygonMumbai: Chain("PolygonMumbai", 80001, "https://rpc-mumbai.matic.today"),
+            Avalanche: Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"),
+            AvalancheFuji: Chain("AvalancheFuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc"),
+            BnbSmartChain: Chain("BnbSmartChain", 56, "https://bsc-dataseed1.binance.org"),
+            BnbSmartChainTestnet: Chain("BnbSmartChainTestnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"),
+            GnosisChain: Chain("GnosisChain", 100, "https://rpc.gnosischain.com")
+        });
+
+        // Loop over RPC URLs in the config file to replace the default RPC URLs
+        (string[2][] memory rpcs) = vm.rpcUrls();
+        for (uint256 i = 0; i < rpcs.length; i++) {
+            (string memory name, string memory rpcUrl) = (rpcs[i][0], rpcs[i][1]);
+            // forgefmt: disable-start
+            if (isEqual(name, "anvil")) stdChains.Anvil.rpcUrl = rpcUrl;
+            else if (isEqual(name, "hardhat")) stdChains.Hardhat.rpcUrl = rpcUrl;
+            else if (isEqual(name, "mainnet")) stdChains.Mainnet.rpcUrl = rpcUrl;
+            else if (isEqual(name, "goerli")) stdChains.Goerli.rpcUrl = rpcUrl;
+            else if (isEqual(name, "sepolia")) stdChains.Sepolia.rpcUrl = rpcUrl;
+            else if (isEqual(name, "optimism")) stdChains.Optimism.rpcUrl = rpcUrl;
+            else if (isEqual(name, "optimism_goerli", "optimism-goerli")) stdChains.OptimismGoerli.rpcUrl = rpcUrl;
+            else if (isEqual(name, "arbitrum_one", "arbitrum-one")) stdChains.ArbitrumOne.rpcUrl = rpcUrl;
+            else if (isEqual(name, "arbitrum_one_goerli", "arbitrum-one-goerli")) stdChains.ArbitrumOneGoerli.rpcUrl = rpcUrl;
+            else if (isEqual(name, "arbitrum_nova", "arbitrum-nova")) stdChains.ArbitrumNova.rpcUrl = rpcUrl;
+            else if (isEqual(name, "polygon")) stdChains.Polygon.rpcUrl = rpcUrl;
+            else if (isEqual(name, "polygon_mumbai", "polygon-mumbai")) stdChains.PolygonMumbai.rpcUrl = rpcUrl;
+            else if (isEqual(name, "avalanche")) stdChains.Avalanche.rpcUrl = rpcUrl;
+            else if (isEqual(name, "avalanche_fuji", "avalanche-fuji")) stdChains.AvalancheFuji.rpcUrl = rpcUrl;
+            else if (isEqual(name, "bnb_smart_chain", "bnb-smart-chain")) stdChains.BnbSmartChain.rpcUrl = rpcUrl;
+            else if (isEqual(name, "bnb_smart_chain_testnet", "bnb-smart-chain-testnet")) stdChains.BnbSmartChainTestnet.rpcUrl = rpcUrl;
+            else if (isEqual(name, "gnosis_chain", "gnosis-chain")) stdChains.GnosisChain.rpcUrl = rpcUrl;
+            // forgefmt: disable-end
+        }
+        return 0;
+    }
+
+    function isEqual(string memory a, string memory b) private pure returns (bool) {
+        return keccak256(abi.encode(a)) == keccak256(abi.encode(b));
+    }
+
+    function isEqual(string memory a, string memory b, string memory c) private pure returns (bool) {
+        return keccak256(abi.encode(a)) == keccak256(abi.encode(b))
+            || keccak256(abi.encode(a)) == keccak256(abi.encode(c));
+    }
+
+    function assumeNoPrecompiles(address addr) internal virtual {
+        // Assembly required since `block.chainid` was introduced in 0.8.0.
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        assumeNoPrecompiles(addr, chainId);
+    }
+
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal virtual {
+        // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
+        // address), but the same rationale for excluding them applies so we include those too.
+
+        // These should be present on all EVM-compatible chains.
+        vm.assume(addr < address(0x1) || addr > address(0x9));
+
+        // forgefmt: disable-start
+        if (chainId == stdChains.Optimism.chainId || chainId == stdChains.OptimismGoerli.chainId) {
+            // https://github.com/ethereum-optimism/optimism/blob/eaa371a0184b56b7ca6d9eb9cb0a2b78b2ccd864/op-bindings/predeploys/addresses.go#L6-L21
+            vm.assume(addr < address(0x4200000000000000000000000000000000000000) || addr > address(0x4200000000000000000000000000000000000800));
+        } else if (chainId == stdChains.ArbitrumOne.chainId || chainId == stdChains.ArbitrumOneGoerli.chainId) {
+            // https://developer.arbitrum.io/useful-addresses#arbitrum-precompiles-l2-same-on-all-arb-chains
+            vm.assume(addr < address(0x0000000000000000000000000000000000000064) || addr > address(0x0000000000000000000000000000000000000068));
+        } else if (chainId == stdChains.Avalanche.chainId || chainId == stdChains.AvalancheFuji.chainId) {
+            // https://github.com/ava-labs/subnet-evm/blob/47c03fd007ecaa6de2c52ea081596e0a88401f58/precompile/params.go#L18-L59
+            vm.assume(addr < address(0x0100000000000000000000000000000000000000) || addr > address(0x01000000000000000000000000000000000000ff));
+            vm.assume(addr < address(0x0200000000000000000000000000000000000000) || addr > address(0x02000000000000000000000000000000000000FF));
+            vm.assume(addr < address(0x0300000000000000000000000000000000000000) || addr > address(0x03000000000000000000000000000000000000Ff));
+        }
+        // forgefmt: disable-end
     }
 
     function readEIP1559ScriptArtifact(string memory path) internal virtual returns (EIP1559ScriptArtifact memory) {
