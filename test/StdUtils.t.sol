@@ -31,6 +31,22 @@ contract StdUtilsTest is Test {
         assertEq(bound(type(uint256).max - 3, 50, 150), 147);
     }
 
+    function testBound_DistributionIsEven(uint256 min, uint256 size) public {
+        size = size % 100 + 1;
+        min = bound(min, UINT256_MAX / 2, UINT256_MAX / 2 + size);
+        uint256 max = min + size - 1;
+        uint256 result;
+
+        for (uint256 i = 1; i <= size * 4; ++i) {
+            // x > max
+            result = bound(max + i, min, max);
+            assertEq(result, min + (i - 1) % size);
+            // x < min
+            result = bound(min - i, min, max);
+            assertEq(result, max - (i - 1) % size);
+        }
+    }
+
     function testBound(uint256 num, uint256 min, uint256 max) public {
         if (min > max) (min, max) = (max, min);
 
