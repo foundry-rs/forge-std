@@ -191,12 +191,14 @@ contract StdCheatsTest is Test {
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint256 index = 0;
         Tx1559 memory transaction = readTx1559(path, index);
+        transaction;
     }
 
     function testReadEIP1559Transactions() public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Tx1559[] memory transactions = readTx1559s(path);
+        transactions;
     }
 
     function testReadReceipt() public {
@@ -214,6 +216,7 @@ contract StdCheatsTest is Test {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
+        receipts;
     }
 
     function bytesToUint_test(bytes memory b) private pure returns (uint256) {
