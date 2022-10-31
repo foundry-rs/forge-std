@@ -1,8 +1,8 @@
 # Forge Standard Library • [![tests](https://github.com/brockelmore/forge-std/actions/workflows/tests.yml/badge.svg)](https://github.com/brockelmore/forge-std/actions/workflows/tests.yml)
 
-Forge Standard Library is a collection of helpful contracts for use with [`forge` and `foundry`](https://github.com/foundry-rs/foundry). It leverages `forge`'s cheatcodes to make writing tests easier and faster, while improving the UX of cheatcodes.
+Forge Standard Library is a collection of helpful contracts and libraries for use with [Forge and Foundry](https://github.com/foundry-rs/foundry). It leverages Forge's cheatcodes to make writing tests easier and faster, while improving the UX of cheatcodes.
 
-**Learn how to use Forge Std with the [📖 Foundry Book (Forge Std Guide)](https://book.getfoundry.sh/forge/forge-std.html).**
+**Learn how to use Forge-Std with the [📖 Foundry Book (Forge-Std Guide)](https://book.getfoundry.sh/forge/forge-std.html).**
 
 ## Install
 
@@ -13,7 +13,7 @@ forge install foundry-rs/forge-std
 ## Contracts
 ### stdError
 
-This is a helper contract for errors and reverts. In `forge`, this contract is particularly helpful for the `expectRevert` cheatcode, as it provides all compiler builtin errors.
+This is a helper contract for errors and reverts. In Forge, this contract is particularly helpful for the `expectRevert` cheatcode, as it provides all compiler builtin errors.
 
 See the contract itself for all error codes.
 
@@ -244,3 +244,7 @@ import "forge-std/console.sol";
 ...
 console.log(someValue);
 ```
+
+## License
+
+Forge Standard Library is offered under either [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE) license.

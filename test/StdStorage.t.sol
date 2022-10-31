@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../Test.sol";
+import "../src/StdStorage.sol";
+import "../src/Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
 
-    StorageTest test;
+    StorageTest internal test;
 
     function setUp() public {
         test = new StorageTest();
@@ -31,112 +32,75 @@ contract StdStorageTest is Test {
     }
 
     function testStorageMapStructA() public {
-        uint256 slot = stdstore
-            .target(address(test))
-            .sig(test.map_struct.selector)
-            .with_key(address(this))
-            .depth(0)
-            .find();
+        uint256 slot =
+            stdstore.target(address(test)).sig(test.map_struct.selector).with_key(address(this)).depth(0).find();
         assertEq(uint256(keccak256(abi.encode(address(this), 4))), slot);
     }
 
     function testStorageMapStructB() public {
-        uint256 slot = stdstore
-            .target(address(test))
-            .sig(test.map_struct.selector)
-            .with_key(address(this))
-            .depth(1)
-            .find();
-       assertEq(uint256(keccak256(abi.encode(address(this), 4))) + 1, slot);
+        uint256 slot =
+            stdstore.target(address(test)).sig(test.map_struct.selector).with_key(address(this)).depth(1).find();
+        assertEq(uint256(keccak256(abi.encode(address(this), 4))) + 1, slot);
     }
 
     function testStorageDeepMap() public {
-        uint256 slot = stdstore
-            .target(address(test))
-            .sig(test.deep_map.selector)
-            .with_key(address(this))
-            .with_key(address(this))
-            .find();
-        assertEq(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(5)))))), slot);
+        uint256 slot = stdstore.target(address(test)).sig(test.deep_map.selector).with_key(address(this)).with_key(
+            address(this)
+        ).find();
+        assertEq(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint256(5)))))), slot);
     }
 
     function testStorageCheckedWriteDeepMap() public {
-        stdstore
-            .target(address(test))
-            .sig(test.deep_map.selector)
-            .with_key(address(this))
-            .with_key(address(this))
+        stdstore.target(address(test)).sig(test.deep_map.selector).with_key(address(this)).with_key(address(this))
             .checked_write(100);
         assertEq(100, test.deep_map(address(this), address(this)));
     }
 
     function testStorageDeepMapStructA() public {
-        uint256 slot = stdstore
-            .target(address(test))
-            .sig(test.deep_map_struct.selector)
-            .with_key(address(this))
-            .with_key(address(this))
-            .depth(0)
-            .find();
-        assertEq(bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 0), bytes32(slot));
+        uint256 slot = stdstore.target(address(test)).sig(test.deep_map_struct.selector).with_key(address(this))
+            .with_key(address(this)).depth(0).find();
+        assertEq(
+            bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint256(6)))))) + 0),
+            bytes32(slot)
+        );
     }
 
     function testStorageDeepMapStructB() public {
-        uint256 slot = stdstore
-            .target(address(test))
-            .sig(test.deep_map_struct.selector)
-            .with_key(address(this))
-            .with_key(address(this))
-            .depth(1)
-            .find();
-        assertEq(bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint(6)))))) + 1), bytes32(slot));
+        uint256 slot = stdstore.target(address(test)).sig(test.deep_map_struct.selector).with_key(address(this))
+            .with_key(address(this)).depth(1).find();
+        assertEq(
+            bytes32(uint256(keccak256(abi.encode(address(this), keccak256(abi.encode(address(this), uint256(6)))))) + 1),
+            bytes32(slot)
+        );
     }
 
     function testStorageCheckedWriteDeepMapStructA() public {
-        stdstore
-            .target(address(test))
-            .sig(test.deep_map_struct.selector)
-            .with_key(address(this))
-            .with_key(address(this))
-            .depth(0)
-            .checked_write(100);
+        stdstore.target(address(test)).sig(test.deep_map_struct.selector).with_key(address(this)).with_key(
+            address(this)
+        ).depth(0).checked_write(100);
         (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
         assertEq(100, a);
         assertEq(0, b);
     }
 
     function testStorageCheckedWriteDeepMapStructB() public {
-        stdstore
-            .target(address(test))
-            .sig(test.deep_map_struct.selector)
-            .with_key(address(this))
-            .with_key(address(this))
-            .depth(1)
-            .checked_write(100);
+        stdstore.target(address(test)).sig(test.deep_map_struct.selector).with_key(address(this)).with_key(
+            address(this)
+        ).depth(1).checked_write(100);
         (uint256 a, uint256 b) = test.deep_map_struct(address(this), address(this));
         assertEq(0, a);
         assertEq(100, b);
     }
 
     function testStorageCheckedWriteMapStructA() public {
-        stdstore
-            .target(address(test))
-            .sig(test.map_struct.selector)
-            .with_key(address(this))
-            .depth(0)
-            .checked_write(100);
+        stdstore.target(address(test)).sig(test.map_struct.selector).with_key(address(this)).depth(0).checked_write(100);
         (uint256 a, uint256 b) = test.map_struct(address(this));
         assertEq(a, 100);
         assertEq(b, 0);
     }
 
     function testStorageCheckedWriteMapStructB() public {
-        stdstore
-            .target(address(test))
-            .sig(test.map_struct.selector)
-            .with_key(address(this))
-            .depth(1)
-            .checked_write(100);
+        stdstore.target(address(test)).sig(test.map_struct.selector).with_key(address(this)).depth(1).checked_write(100);
         (uint256 a, uint256 b) = test.map_struct(address(this));
         assertEq(a, 0);
         assertEq(b, 100);
@@ -160,7 +124,7 @@ contract StdStorageTest is Test {
     }
 
     function testStorageCheckedWriteStructB() public {
-         stdstore.target(address(test)).sig(test.basic.selector).depth(1).checked_write(100);
+        stdstore.target(address(test)).sig(test.basic.selector).depth(1).checked_write(100);
         (uint256 a, uint256 b) = test.basic();
         assertEq(a, 1337);
         assertEq(b, 100);
@@ -168,12 +132,12 @@ contract StdStorageTest is Test {
 
     function testStorageMapAddrFound() public {
         uint256 slot = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).find();
-        assertEq(uint256(keccak256(abi.encode(address(this), uint(1)))), slot);
+        assertEq(uint256(keccak256(abi.encode(address(this), uint256(1)))), slot);
     }
 
     function testStorageMapUintFound() public {
         uint256 slot = stdstore.target(address(test)).sig(test.map_uint.selector).with_key(100).find();
-        assertEq(uint256(keccak256(abi.encode(100, uint(2)))), slot);
+        assertEq(uint256(keccak256(abi.encode(100, uint256(2)))), slot);
     }
 
     function testStorageCheckedWriteMapUint() public {
@@ -193,14 +157,17 @@ contract StdStorageTest is Test {
 
     function testFailStorageCheckedWriteMapPacked() public {
         // expect PackedSlot error but not external call so cant expectRevert
-        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(address(uint160(1337))).checked_write(100);
+        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(address(uint160(1337)))
+            .checked_write(100);
     }
 
     function testStorageCheckedWriteMapPackedSuccess() public {
         uint256 full = test.map_packed(address(1337));
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
-        stdstore.target(address(test)).sig(test.map_packed.selector).with_key(address(uint160(1337))).checked_write(full);
+        stdstore.target(address(test)).sig(test.map_packed.selector).with_key(address(uint160(1337))).checked_write(
+            full
+        );
         assertEq(1337, test.read_struct_lower(address(1337)));
     }
 
@@ -212,7 +179,7 @@ contract StdStorageTest is Test {
     function testFailStorageNativePack() public {
         stdstore.target(address(test)).sig(test.tA.selector).find();
         stdstore.target(address(test)).sig(test.tB.selector).find();
-        
+
         // these both would fail
         stdstore.target(address(test)).sig(test.tC.selector).find();
         stdstore.target(address(test)).sig(test.tD.selector).find();
@@ -271,10 +238,8 @@ contract StorageTest {
     uint248 public tA;
     bool public tB;
 
-
     bool public tC = false;
-    uint248 public tD = 1;    
-
+    uint248 public tD = 1;
 
     struct UnpackedStruct {
         uint256 a;
@@ -289,14 +254,11 @@ contract StorageTest {
     bool public tH = true;
 
     constructor() {
-        basic = UnpackedStruct({
-            a: 1337,
-            b: 1337
-        });
+        basic = UnpackedStruct({a: 1337, b: 1337});
 
-        uint256 two = (1<<128) | 1;
+        uint256 two = (1 << 128) | 1;
         map_packed[msg.sender] = two;
-        map_packed[address(bytes20(uint160(1337)))] = 1<<128;
+        map_packed[address(uint160(1337))] = 1 << 128;
     }
 
     function read_struct_upper(address who) public view returns (uint256) {
