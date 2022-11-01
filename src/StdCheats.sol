@@ -279,8 +279,8 @@ abstract contract StdCheatsSafe {
     }
 
     function isEqual(string memory a, string memory b, string memory c) private pure returns (bool) {
-        return keccak256(abi.encode(a)) == keccak256(abi.encode(b))
-            || keccak256(abi.encode(a)) == keccak256(abi.encode(c));
+        return
+            keccak256(abi.encode(a)) == keccak256(abi.encode(b)) || keccak256(abi.encode(a)) == keccak256(abi.encode(c));
     }
 
     function assumeNoPrecompiles(address addr) internal virtual {
