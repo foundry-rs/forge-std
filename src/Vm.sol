@@ -104,7 +104,7 @@ interface VmSafe {
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
-    function getRecordedLogs() external view returns (Log[] memory);
+    function getRecordedLogs() external returns (Log[] memory);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata, uint32) external pure returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
@@ -139,7 +139,7 @@ interface VmSafe {
     function rpcUrls() external view returns (string[2][] memory);
 
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
-    function assume(bool) external;
+    function assume(bool) pure external;
 }
 
 interface Vm is VmSafe {
