@@ -3,6 +3,12 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
+// Cheatcodes are marked as view/pure/none using the following rules:
+// 0. A call's observable behaviour includes its return value, logs, reverts and state writes.
+// 1. If you can influence a later call's observable behaviour, you're neither view nor pure (you are modifying some state be it the EVM, interpreter, filesystem, etc).
+// 2. otherwise if you can be influenced by an earlier call, you're `view`,
+// 3. otherwise you're `pure`.
+
 interface VmSafe {
     struct Log {
         bytes32[] topics;
@@ -63,7 +69,7 @@ interface VmSafe {
     function stopBroadcast() external;
     // Reads the entire content of file to string, (path) => (data)
     function readFile(string calldata) external view returns (string memory);
-    // Reads the entire content of file as binary. Path is relative to the project root. (path) => (data)
+    // Reads the entire content of file as ggbinary. Path is relative to the project root. (path) => (data)
     function readFileBinary(string calldata) external view returns (bytes memory);
     // Get the path of the current project root
     function projectRoot() external view returns (string memory);
