@@ -6,8 +6,8 @@ pragma experimental ABIEncoderV2;
 // Cheatcodes are marked as view/pure/none using the following rules:
 // 0. A call's observable behaviour includes its return value, logs, reverts and state writes.
 // 1. If you can influence a later call's observable behaviour, you're neither view nor pure (you are modifying some state be it the EVM, interpreter, filesystem, etc),
-// 2. otherwise if you can be influenced by an earlier call, you're `view`,
-// 3. otherwise you're `pure`.
+// 2. Otherwise if you can be influenced by an earlier call, you're `view`,
+// 3. Otherwise you're `pure`.
 
 interface VmSafe {
     struct Log {
