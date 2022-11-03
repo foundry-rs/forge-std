@@ -229,14 +229,14 @@ contract StdCheatsTest is Test {
 
     function testChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
-        assertEq(stdChains.Mainnet.rpcUrl, "https://api.mycryptoapi.com/eth/");
-        assertEq(stdChains.OptimismGoerli.rpcUrl, "https://goerli.optimism.io/");
-        assertEq(stdChains.ArbitrumOneGoerli.rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
+        assertEq(stdChains().Mainnet.rpcUrl, "https://api.mycryptoapi.com/eth/");
+        assertEq(stdChains().OptimismGoerli.rpcUrl, "https://goerli.optimism.io/");
+        assertEq(stdChains().ArbitrumOneGoerli.rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
         // Other RPCs should remain unchanged.
-        assertEq(stdChains.Anvil.rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains.Hardhat.rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains.Sepolia.rpcUrl, "https://rpc.sepolia.dev");
+        assertEq(stdChains().Anvil.rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains().Hardhat.rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains().Sepolia.rpcUrl, "https://rpc.sepolia.dev");
     }
 
     // Ensure we can connect to the default RPC URL for each chain.

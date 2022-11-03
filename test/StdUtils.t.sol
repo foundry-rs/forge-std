@@ -90,7 +90,7 @@ contract StdUtilsTest is Test {
     }
 
     function testAssumeNoPrecompilesL1(address addr) external {
-        assumeNoPrecompiles(addr, stdChains.Mainnet.chainId);
+        assumeNoPrecompiles(addr, stdChains().Mainnet.chainId);
         assertTrue(addr < address(1) || addr > address(9));
     }
 }
