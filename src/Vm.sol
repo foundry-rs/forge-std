@@ -69,7 +69,7 @@ interface VmSafe {
     function stopBroadcast() external;
     // Reads the entire content of file to string, (path) => (data)
     function readFile(string calldata) external view returns (string memory);
-    // Reads the entire content of file as ggbinary. Path is relative to the project root. (path) => (data)
+    // Reads the entire content of file as binary. Path is relative to the project root. (path) => (data)
     function readFileBinary(string calldata) external view returns (bytes memory);
     // Get the path of the current project root
     function projectRoot() external view returns (string memory);
