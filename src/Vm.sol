@@ -227,7 +227,7 @@ interface Vm is VmSafe {
     function selectFork(uint256) external;
     /// Returns the currently active fork
     /// Reverts if no fork is currently active
-    function activeFork() external returns (uint256);
+    function activeFork() external view returns (uint256);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256) external;
@@ -248,7 +248,7 @@ interface Vm is VmSafe {
     function revokePersistent(address) external;
     function revokePersistent(address[] calldata) external;
     // Returns true if the account is marked as persistent
-    function isPersistent(address) external returns (bool);
+    function isPersistent(address) external view returns (bool);
     // In forking mode, explicitly grant the given address cheatcode access
     function allowCheatcodes(address) external;
     // Fetches the given transaction from the active fork and executes it on the current state
