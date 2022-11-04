@@ -145,7 +145,7 @@ interface VmSafe {
     function rpcUrls() external view returns (string[2][] memory);
 
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
-    function assume(bool) pure external;
+    function assume(bool) external pure;
 }
 
 interface Vm is VmSafe {
