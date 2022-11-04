@@ -3,6 +3,12 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
+// Cheatcodes are marked as view/pure/none using the following rules:
+// 0. A call's observable behaviour includes its return value, logs, reverts and state writes.
+// 1. If you can influence a later call's observable behaviour, you're neither `view` nor `pure` (you are modifying some state be it the EVM, interpreter, filesystem, etc),
+// 2. Otherwise if you can be influenced by an earlier call, or if reading some state, you're `view`,
+// 3. Otherwise you're `pure`.
+
 interface VmSafe {
     struct Log {
         bytes32[] topics;
@@ -10,41 +16,41 @@ interface VmSafe {
     }
 
     // Loads a storage slot from an address (who, slot)
-    function load(address, bytes32) external returns (bytes32);
+    function load(address, bytes32) external view returns (bytes32);
     // Signs data, (privateKey, digest) => (v, r, s)
-    function sign(uint256, bytes32) external returns (uint8, bytes32, bytes32);
+    function sign(uint256, bytes32) external pure returns (uint8, bytes32, bytes32);
     // Gets the address for a given private key, (privateKey) => (address)
-    function addr(uint256) external returns (address);
+    function addr(uint256) external pure returns (address);
     // Gets the nonce of an account
-    function getNonce(address) external returns (uint64);
+    function getNonce(address) external view returns (uint64);
     // Performs a foreign function call via the terminal, (stringInputs) => (result)
     function ffi(string[] calldata) external returns (bytes memory);
     // Sets environment variables, (name, value)
     function setEnv(string calldata, string calldata) external;
     // Reads environment variables, (name) => (value)
-    function envBool(string calldata) external returns (bool);
-    function envUint(string calldata) external returns (uint256);
-    function envInt(string calldata) external returns (int256);
-    function envAddress(string calldata) external returns (address);
-    function envBytes32(string calldata) external returns (bytes32);
-    function envString(string calldata) external returns (string memory);
-    function envBytes(string calldata) external returns (bytes memory);
+    function envBool(string calldata) external view returns (bool);
+    function envUint(string calldata) external view returns (uint256);
+    function envInt(string calldata) external view returns (int256);
+    function envAddress(string calldata) external view returns (address);
+    function envBytes32(string calldata) external view returns (bytes32);
+    function envString(string calldata) external view returns (string memory);
+    function envBytes(string calldata) external view returns (bytes memory);
     // Reads environment variables as arrays, (name, delim) => (value[])
-    function envBool(string calldata, string calldata) external returns (bool[] memory);
-    function envUint(string calldata, string calldata) external returns (uint256[] memory);
-    function envInt(string calldata, string calldata) external returns (int256[] memory);
-    function envAddress(string calldata, string calldata) external returns (address[] memory);
-    function envBytes32(string calldata, string calldata) external returns (bytes32[] memory);
-    function envString(string calldata, string calldata) external returns (string[] memory);
-    function envBytes(string calldata, string calldata) external returns (bytes[] memory);
+    function envBool(string calldata, string calldata) external view returns (bool[] memory);
+    function envUint(string calldata, string calldata) external view returns (uint256[] memory);
+    function envInt(string calldata, string calldata) external view returns (int256[] memory);
+    function envAddress(string calldata, string calldata) external view returns (address[] memory);
+    function envBytes32(string calldata, string calldata) external view returns (bytes32[] memory);
+    function envString(string calldata, string calldata) external view returns (string[] memory);
+    function envBytes(string calldata, string calldata) external view returns (bytes[] memory);
     // Records all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
     function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
     // Gets the _creation_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getCode(string calldata) external returns (bytes memory);
+    function getCode(string calldata) external view returns (bytes memory);
     // Gets the _deployed_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getDeployedCode(string calldata) external returns (bytes memory);
+    function getDeployedCode(string calldata) external view returns (bytes memory);
     // Labels an address in call traces
     function label(address, string calldata) external;
     // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
@@ -62,13 +68,13 @@ interface VmSafe {
     // Stops collecting onchain transactions
     function stopBroadcast() external;
     // Reads the entire content of file to string, (path) => (data)
-    function readFile(string calldata) external returns (string memory);
+    function readFile(string calldata) external view returns (string memory);
     // Reads the entire content of file as binary. Path is relative to the project root. (path) => (data)
-    function readFileBinary(string calldata) external returns (bytes memory);
+    function readFileBinary(string calldata) external view returns (bytes memory);
     // Get the path of the current project root
-    function projectRoot() external returns (string memory);
+    function projectRoot() external view returns (string memory);
     // Reads next line of file to string, (path) => (line)
-    function readLine(string calldata) external returns (string memory);
+    function readLine(string calldata) external view returns (string memory);
     // Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
     // (path, data) => ()
     function writeFile(string calldata, string calldata) external;
@@ -88,36 +94,36 @@ interface VmSafe {
     // (path) => ()
     function removeFile(string calldata) external;
     // Convert values to a string, (value) => (stringified value)
-    function toString(address) external returns (string memory);
-    function toString(bytes calldata) external returns (string memory);
-    function toString(bytes32) external returns (string memory);
-    function toString(bool) external returns (string memory);
-    function toString(uint256) external returns (string memory);
-    function toString(int256) external returns (string memory);
+    function toString(address) external pure returns (string memory);
+    function toString(bytes calldata) external pure returns (string memory);
+    function toString(bytes32) external pure returns (string memory);
+    function toString(bool) external pure returns (string memory);
+    function toString(uint256) external pure returns (string memory);
+    function toString(int256) external pure returns (string memory);
     // Convert values from a string, (string) => (parsed value)
-    function parseBytes(string calldata) external returns (bytes memory);
-    function parseAddress(string calldata) external returns (address);
-    function parseUint(string calldata) external returns (uint256);
-    function parseInt(string calldata) external returns (int256);
-    function parseBytes32(string calldata) external returns (bytes32);
-    function parseBool(string calldata) external returns (bool);
+    function parseBytes(string calldata) external pure returns (bytes memory);
+    function parseAddress(string calldata) external pure returns (address);
+    function parseUint(string calldata) external pure returns (uint256);
+    function parseInt(string calldata) external pure returns (int256);
+    function parseBytes32(string calldata) external pure returns (bytes32);
+    function parseBool(string calldata) external pure returns (bool);
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
     function getRecordedLogs() external returns (Log[] memory);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
-    function deriveKey(string calldata, uint32) external returns (uint256);
+    function deriveKey(string calldata, uint32) external pure returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
-    function deriveKey(string calldata, string calldata, uint32) external returns (uint256);
+    function deriveKey(string calldata, string calldata, uint32) external pure returns (uint256);
     // Adds a private key to the local forge wallet and returns the address
     function rememberKey(uint256) external returns (address);
     // Given a string of JSON, return the ABI-encoded value of provided key
     // (stringified json, key) => (ABI-encoded data)
     // Read the note below!
-    function parseJson(string calldata, string calldata) external returns (bytes memory);
+    function parseJson(string calldata, string calldata) external pure returns (bytes memory);
     // Given a string of JSON, return it as ABI-encoded, (stringified json, key) => (ABI-encoded data)
     // Read the note below!
-    function parseJson(string calldata) external returns (bytes memory);
+    function parseJson(string calldata) external pure returns (bytes memory);
     // Note:
     // ----
     // In case the returned value is a JSON object, it's encoded as a ABI-encoded tuple. As JSON objects
@@ -134,12 +140,12 @@ interface VmSafe {
     // decode the tuple in that order, and thus fail.
 
     // Returns the RPC url for the given alias
-    function rpcUrl(string calldata) external returns (string memory);
+    function rpcUrl(string calldata) external view returns (string memory);
     // Returns all rpc urls and their aliases `[alias, url][]`
-    function rpcUrls() external returns (string[2][] memory);
+    function rpcUrls() external view returns (string[2][] memory);
 
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
-    function assume(bool) external;
+    function assume(bool) external pure;
 }
 
 interface Vm is VmSafe {
@@ -221,7 +227,7 @@ interface Vm is VmSafe {
     function selectFork(uint256) external;
     /// Returns the currently active fork
     /// Reverts if no fork is currently active
-    function activeFork() external returns (uint256);
+    function activeFork() external view returns (uint256);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256) external;
@@ -242,7 +248,7 @@ interface Vm is VmSafe {
     function revokePersistent(address) external;
     function revokePersistent(address[] calldata) external;
     // Returns true if the account is marked as persistent
-    function isPersistent(address) external returns (bool);
+    function isPersistent(address) external view returns (bool);
     // In forking mode, explicitly grant the given address cheatcode access
     function allowCheatcodes(address) external;
     // Fetches the given transaction from the active fork and executes it on the current state
