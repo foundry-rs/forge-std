@@ -68,80 +68,80 @@ library stdJson {
     function readBytesArray(string memory json, string memory key) internal pure returns (bytes[] memory) {
         return abi.decode(vm.parseJson(json, key), (bytes[]));
     }
-    function serialize(string memory jsonKey, string memory key, bool value) external returns (string memory) {
+    function serialize(string memory jsonKey, string memory key, bool value) internal returns (string memory) {
         return vm.serializeBool(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, bool[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeBool(jsonKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, uint256 value) external returns (string memory) {
+    function serialize(string memory jsonKey, string memory key, uint256 value) internal returns (string memory) {
         return vm.serializeUint(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, uint256[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeUint(jsonKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, int256 value) external returns (string memory) {
+    function serialize(string memory jsonKey, string memory key, int256 value) internal returns (string memory) {
         return vm.serializeInt(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, int256[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeInt(jsonKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, address value) external returns (string memory) {
+    function serialize(string memory jsonKey, string memory key, address value) internal returns (string memory) {
         return vm.serializeAddress(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, address[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeAddress(jsonKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bytes32 value) external returns (string memory) {
+    function serialize(string memory jsonKey, string memory key, bytes32 value) internal returns (string memory) {
         return vm.serializeBytes32(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, bytes32[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeBytes32(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, string memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeString(jsonKey, key, value);
     }
 
     function serialize(string memory jsonKey, string memory key, string[] memory value)
-        external
+        internal
         returns (string memory)
     {
         return vm.serializeString(jsonKey, key, value);
     }
 
-    function write(string memory jsonKey, string memory path) external {
+    function write(string memory jsonKey, string memory path) internal {
         vm.writeJson(jsonKey, path);
     }
 
-    function write(string memory jsonKey, string memory path, string memory valueKey) external {
+    function write(string memory jsonKey, string memory path, string memory valueKey) internal {
         vm.writeJson(jsonKey, path, valueKey);
     }
 }
