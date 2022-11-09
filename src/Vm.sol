@@ -13,6 +13,7 @@ interface VmSafe {
     struct Log {
         bytes32[] topics;
         bytes data;
+        address emitter;
     }
 
     // Loads a storage slot from an address (who, slot)
