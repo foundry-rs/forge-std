@@ -5,7 +5,27 @@ pragma experimental ABIEncoderV2;
 
 import "./Vm.sol";
 
-// Helpers for parsing keys into types.
+// Helpers for parsing and writing JSON files
+// To parse:
+// ```
+// using stdJson for string;
+// string memory json = vm.readFile("some_peth");
+// json.parseUint("<json_path>");
+// ```
+// To write:
+// ```
+// using stdJson for string;
+// string memory json = "deploymentArtifact";
+// Contract contract = new Contract();
+// json.serialize("contractAddress", address(contract));
+// json = json.serialize("deploymentTimes", uint(1));
+// // store the stringified JSON to the 'json' variable we have been using as a key
+// // as we won't need it any longer
+// string memory json2 = "finalArtifact";
+// json2.serialize("depArtifact", json);
+// json2.write("<some_path>");
+// ```
+
 library stdJson {
     VmSafe private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
