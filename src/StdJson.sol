@@ -5,7 +5,27 @@ pragma experimental ABIEncoderV2;
 
 import "./Vm.sol";
 
-// Helpers for parsing keys into types.
+// Helpers for parsing and writing JSON files
+// To parse:
+// ```
+// using stdJson for string;
+// string memory json = vm.readFile("some_peth");
+// json.parseUint("<json_path>");
+// ```
+// To write:
+// ```
+// using stdJson for string;
+// string memory json = "deploymentArtifact";
+// Contract contract = new Contract();
+// json.serialize("contractAddress", address(contract));
+// json = json.serialize("deploymentTimes", uint(1));
+// // store the stringified JSON to the 'json' variable we have been using as a key
+// // as we won't need it any longer
+// string memory json2 = "finalArtifact";
+// string memory final = json2.serialize("depArtifact", json);
+// final.write("<some_path>");
+// ```
+
 library stdJson {
     VmSafe private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
@@ -67,5 +87,82 @@ library stdJson {
 
     function readBytesArray(string memory json, string memory key) internal pure returns (bytes[] memory) {
         return abi.decode(vm.parseJson(json, key), (bytes[]));
+    }
+
+    function serialize(string memory jsonKey, string memory key, bool value) internal returns (string memory) {
+        return vm.serializeBool(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, bool[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeBool(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, uint256 value) internal returns (string memory) {
+        return vm.serializeUint(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, uint256[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeUint(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, int256 value) internal returns (string memory) {
+        return vm.serializeInt(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, int256[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeInt(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, address value) internal returns (string memory) {
+        return vm.serializeAddress(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, address[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeAddress(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, bytes32 value) internal returns (string memory) {
+        return vm.serializeBytes32(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, bytes32[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeBytes32(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, string memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeString(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, string[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeString(jsonKey, key, value);
+    }
+
+    function write(string memory jsonKey, string memory path) internal {
+        vm.writeJson(jsonKey, path);
+    }
+
+    function write(string memory jsonKey, string memory path, string memory valueKey) internal {
+        vm.writeJson(jsonKey, path, valueKey);
     }
 }

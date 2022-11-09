@@ -13,7 +13,6 @@ interface VmSafe {
     struct Log {
         bytes32[] topics;
         bytes data;
-        address emitter;
     }
 
     // Loads a storage slot from an address (who, slot)
@@ -152,8 +151,8 @@ interface VmSafe {
     //  vm.serializeBool(json1, "number", uint256(342));
     //  json2 = "some other key";
     //  string memory output = vm.serializeString(json2, "title", "finally json serialization");
-    //  string memory finalJson = vm.serialize(json1, "object", output);
-    //  vm.writeJson(finalJson, "./output/example.json");
+    //  vm.serialize(json1, "object", output);
+    //  vm.writeJson(json1, "./output/example.json");
     // ```
     //  The critical insight is that every invocation of serialization will return the stringified version of the JSON
     // up to that point. That means we can construct arbitrary JSON objects and then use the return stringified version
@@ -161,10 +160,6 @@ interface VmSafe {
     //
     //  json1 and json2 are simply keys used by the backend to keep track of the objects. So vm.serializeJson(json1,..)
     //  will find the object in-memory that is keyed by "some key".   // writeJson
-    // ----
-    // Serialize a key and value to a JSON object stored in-memory that can be latery written to a file
-    // It returns the stringified version of the specific JSON file up to that moment.
-    // (object_key, value_key, value) => (stringified JSON)
     function serializeBool(string calldata, string calldata, bool) external returns (string memory);
     function serializeUint(string calldata, string calldata, uint256) external returns (string memory);
     function serializeInt(string calldata, string calldata, int256) external returns (string memory);
@@ -180,12 +175,7 @@ interface VmSafe {
     function serializeBytes32(string calldata, string calldata, bytes32[] calldata) external returns (string memory);
     function serializeString(string calldata, string calldata, string[] calldata) external returns (string memory);
     function serializeBytes(string calldata, string calldata, bytes[] calldata) external returns (string memory);
-    // Write a serialized JSON object to a file. If the file exists, it will be overwritten.
-    // (stringified_json, path)
     function writeJson(string calldata, string calldata) external;
-    // Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key>
-    // This is useful to replace a specific value of a JSON file, without having to parse the entire thing
-    // (stringified_json, path, value_key)
     function writeJson(string calldata, string calldata, string calldata) external;
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external view returns (string memory);
