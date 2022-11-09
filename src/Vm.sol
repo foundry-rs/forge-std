@@ -293,7 +293,4 @@ interface Vm is VmSafe {
     function transact(bytes32 txHash) external;
     // Fetches the given transaction from the given fork and executes it on the current state
     function transact(uint256 forkId, bytes32 txHash) external;
-
-
-
 }

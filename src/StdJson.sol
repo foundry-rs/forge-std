@@ -68,6 +68,7 @@ library stdJson {
     function readBytesArray(string memory json, string memory key) internal pure returns (bytes[] memory) {
         return abi.decode(vm.parseJson(json, key), (bytes[]));
     }
+
     function serialize(string memory jsonKey, string memory key, bool value) internal returns (string memory) {
         return vm.serializeBool(jsonKey, key, value);
     }
