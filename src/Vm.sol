@@ -151,8 +151,8 @@ interface VmSafe {
     //  vm.serializeBool(json1, "number", uint256(342));
     //  json2 = "some other key";
     //  string memory output = vm.serializeString(json2, "title", "finally json serialization");
-    //  vm.serialize(json1, "object", output);
-    //  vm.writeJson(json1, "./output/example.json");
+    //  string memory finalJson = vm.serialize(json1, "object", output);
+    //  vm.writeJson(finalJson, "./output/example.json");
     // ```
     //  The critical insight is that every invocation of serialization will return the stringified version of the JSON
     // up to that point. That means we can construct arbitrary JSON objects and then use the return stringified version
@@ -180,11 +180,11 @@ interface VmSafe {
     function serializeString(string calldata, string calldata, string[] calldata) external returns (string memory);
     function serializeBytes(string calldata, string calldata, bytes[] calldata) external returns (string memory);
     // Write a serialized JSON object to a file. If the file exists, it will be overwritten.
-    // (object_key, path)
+    // (stringified_json, path)
     function writeJson(string calldata, string calldata) external;
     // Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key>
     // This is useful to replace a specific value of a JSON file, without having to parse the entire thing
-    // (object_key, path, value_key)
+    // (stringified_json, path, value_key)
     function writeJson(string calldata, string calldata, string calldata) external;
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata) external view returns (string memory);

@@ -22,8 +22,8 @@ import "./Vm.sol";
 // // store the stringified JSON to the 'json' variable we have been using as a key
 // // as we won't need it any longer
 // string memory json2 = "finalArtifact";
-// json2.serialize("depArtifact", json);
-// json2.write("<some_path>");
+// string memory final = json2.serialize("depArtifact", json);
+// final.write("<some_path>");
 // ```
 
 library stdJson {
