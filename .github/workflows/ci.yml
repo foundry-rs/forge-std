@@ -23,6 +23,7 @@ jobs:
 
       - name: Check backward compatibility
         run: |
+          forge build --skip test --use solc:0.8.17 --via-ir
           forge build --skip test --use solc:0.8.0
           forge build --skip test --use solc:0.7.6
           forge build --skip test --use solc:0.7.0
