@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
+pragma experimental ABIEncoderV2;
+
 import "../Test.sol";
 
 // Even though this contract is in the `src/` directory, it is a test contract. It simply inherits
