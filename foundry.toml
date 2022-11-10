@@ -2,11 +2,10 @@
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 [rpc_endpoints]
-# We intentionally use both dashes and underscores in the key names to ensure both are supported.
 # The RPC URLs below match the StdChains URLs but append a trailing slash for testing.
 mainnet = "https://api.mycryptoapi.com/eth/"
 optimism_goerli = "https://goerli.optimism.io/"
-arbitrum-one-goerli = "https://goerli-rollup.arbitrum.io/rpc/"
+arbitrum_one_goerli = "https://goerli-rollup.arbitrum.io/rpc/"
 
 [fmt]
 # These are all the `forge fmt` defaults.
