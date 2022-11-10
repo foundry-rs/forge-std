@@ -227,9 +227,11 @@ abstract contract StdCheatsSafe {
         stdChains["gnosis_chain"] = Chain("GnosisChain", 100, "https://rpc.gnosischain.com");
 
         // Loop over RPC URLs in the config file to replace the default RPC URLs
-        (string[2][] memory rpcs) = vm.rpcUrls();
+        Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
         for (uint256 i = 0; i < rpcs.length; i++) {
-            (string memory name, string memory rpcUrl) = (rpcs[i][0], rpcs[i][1]);
+            string memory name = rpcs[i].name;
+            string memory rpcUrl = rpcs[i].url;
+
             if (isEqual(name, "anvil")) stdChains["anvil"].rpcUrl = rpcUrl;
             else if (isEqual(name, "hardhat")) stdChains["hardhat"].rpcUrl = rpcUrl;
             else if (isEqual(name, "mainnet")) stdChains["mainnet"].rpcUrl = rpcUrl;
