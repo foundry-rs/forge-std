@@ -144,6 +144,17 @@ library stdJson {
         return vm.serializeBytes32(jsonKey, key, value);
     }
 
+    function serialize(string memory jsonKey, string memory key, bytes memory value) internal returns (string memory) {
+        return vm.serializeBytes(jsonKey, key, value);
+    }
+
+    function serialize(string memory jsonKey, string memory key, bytes[] memory value)
+        internal
+        returns (string memory)
+    {
+        return vm.serializeBytes(jsonKey, key, value);
+    }
+
     function serialize(string memory jsonKey, string memory key, string memory value)
         internal
         returns (string memory)
