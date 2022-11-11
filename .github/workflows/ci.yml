@@ -21,6 +21,28 @@ jobs:
       - name: Install dependencies
         run: forge install
 
+      # Backwards compatibility checks.
+      - name: Check compatibility with 0.8.0
+        if: always()
+        run: forge build --skip test --use solc:0.8.0
+
+      - name: Check compatibility with 0.7.6
+        if: always()
+        run: forge build --skip test --use solc:0.7.6
+
+      - name: Check compatibility with 0.7.0
+        if: always()
+        run: forge build --skip test --use solc:0.7.0
+
+      - name: Check compatibility with 0.6.12
+        if: always()
+        run: forge build --skip test --use solc:0.6.12
+
+      - name: Check compatibility with 0.6.2
+        if: always()
+        run: forge build --skip test --use solc:0.6.2
+
+      # via-ir compilation time checks.
       - name: Measure compilation time of Test with 0.8.17 --via-ir
         if: always()
         run: forge build --skip test --contracts test/compilation/CompilationTest.sol --use solc:0.8.17 --via-ir
@@ -36,22 +58,6 @@ jobs:
       - name: Measure compilation time of ScriptBase with 0.8.17 --via-ir
         if: always()
         run: forge build --skip test --contracts test/compilation/CompilationScriptBase.sol --use solc:0.8.17 --via-ir
-
-      - name: Check compatibility with 0.8.0
-        if: always()
-        run: forge build --skip test --use solc:0.8.0
-
-      - name: Check compatibility with 0.7.6
-        if: always()
-        run: forge build --skip test --use solc:0.7.6
-
-      - name: Check compatibility with 0.7.0
-        if: always()
-        run: forge build --skip test --use solc:0.7.0
-
-      - name: Check compatibility with 0.6.2
-        if: always()
-        run: forge build --skip test --use solc:0.6.2
 
   test:
     runs-on: ubuntu-latest
