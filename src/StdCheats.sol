@@ -214,17 +214,17 @@ abstract contract StdCheatsSafe {
         stdChains["goerli"] = Chain("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
         stdChains["sepolia"] = Chain("Sepolia", 11155111, "https://rpc.sepolia.dev");
         stdChains["optimism"] = Chain("Optimism", 10, "https://mainnet.optimism.io");
-        stdChains["optimism_goerli"] = Chain("OptimismGoerli", 420, "https://goerli.optimism.io");
-        stdChains["arbitrum_one"] = Chain("ArbitrumOne", 42161, "https://arb1.arbitrum.io/rpc");
-        stdChains["arbitrum_one_goerli"] = Chain("ArbitrumOneGoerli", 421613, "https://goerli-rollup.arbitrum.io/rpc");
-        stdChains["arbitrum_nova"] = Chain("ArbitrumNova", 42170, "https://nova.arbitrum.io/rpc");
+        stdChains["optimism_goerli"] = Chain("Optimism Goerli", 420, "https://goerli.optimism.io");
+        stdChains["arbitrum_one"] = Chain("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc");
+        stdChains["arbitrum_one_goerli"] = Chain("Arbitrum One Goerli", 421613, "https://goerli-rollup.arbitrum.io/rpc");
+        stdChains["arbitrum_nova"] = Chain("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc");
         stdChains["polygon"] = Chain("Polygon", 137, "https://polygon-rpc.com");
-        stdChains["polygon_mumbai"] = Chain("PolygonMumbai", 80001, "https://rpc-mumbai.matic.today");
+        stdChains["polygon_mumbai"] = Chain("Polygon Mumbai", 80001, "https://rpc-mumbai.matic.today");
         stdChains["avalanche"] = Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc");
-        stdChains["avalanche_fuji"] = Chain("AvalancheFuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc");
-        stdChains["bnb_smart_chain"] = Chain("BnbSmartChain", 56, "https://bsc-dataseed1.binance.org");
-        stdChains["bnb_smart_chain_testnet"] = Chain("BnbSmartChainTestnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545");// forgefmt: disable-line
-        stdChains["gnosis_chain"] = Chain("GnosisChain", 100, "https://rpc.gnosischain.com");
+        stdChains["avalanche_fuji"] = Chain("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc");
+        stdChains["bnb_smart_chain"] = Chain("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org");
+        stdChains["bnb_smart_chain_testnet"] = Chain("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545");// forgefmt: disable-line
+        stdChains["gnosis_chain"] = Chain("Gnosis Chain", 100, "https://rpc.gnosischain.com");
 
         // Loop over RPC URLs in the config file to replace the default RPC URLs
         Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
