@@ -234,7 +234,7 @@ abstract contract StdCheatsSafe {
         return 0;
     }
 
-    function assumeNoPrecompiles(address addr) internal virtual {
+    function assumeNoPrecompiles(address addr) internal view virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         uint256 chainId;
         assembly {
@@ -243,7 +243,7 @@ abstract contract StdCheatsSafe {
         assumeNoPrecompiles(addr, chainId);
     }
 
-    function assumeNoPrecompiles(address addr, uint256 chainId) internal virtual {
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal view virtual {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
@@ -266,7 +266,12 @@ abstract contract StdCheatsSafe {
         // forgefmt: disable-end
     }
 
-    function readEIP1559ScriptArtifact(string memory path) internal virtual returns (EIP1559ScriptArtifact memory) {
+    function readEIP1559ScriptArtifact(string memory path)
+        internal
+        view
+        virtual
+        returns (EIP1559ScriptArtifact memory)
+    {
         string memory data = vm.readFile(path);
         bytes memory parsedData = vm.parseJson(data);
         RawEIP1559ScriptArtifact memory rawArtifact = abi.decode(parsedData, (RawEIP1559ScriptArtifact));
@@ -318,14 +323,14 @@ abstract contract StdCheatsSafe {
         return txDetail;
     }
 
-    function readTx1559s(string memory path) internal virtual returns (Tx1559[] memory) {
+    function readTx1559s(string memory path) internal view virtual returns (Tx1559[] memory) {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData = vm.parseJson(deployData, ".transactions");
         RawTx1559[] memory rawTxs = abi.decode(parsedDeployData, (RawTx1559[]));
         return rawToConvertedEIPTx1559s(rawTxs);
     }
 
-    function readTx1559(string memory path, uint256 index) internal virtual returns (Tx1559 memory) {
+    function readTx1559(string memory path, uint256 index) internal view virtual returns (Tx1559 memory) {
         string memory deployData = vm.readFile(path);
         string memory key = string(abi.encodePacked(".transactions[", vm.toString(index), "]"));
         bytes memory parsedDeployData = vm.parseJson(deployData, key);
@@ -334,14 +339,14 @@ abstract contract StdCheatsSafe {
     }
 
     // Analogous to readTransactions, but for receipts.
-    function readReceipts(string memory path) internal virtual returns (Receipt[] memory) {
+    function readReceipts(string memory path) internal view virtual returns (Receipt[] memory) {
         string memory deployData = vm.readFile(path);
         bytes memory parsedDeployData = vm.parseJson(deployData, ".receipts");
         RawReceipt[] memory rawReceipts = abi.decode(parsedDeployData, (RawReceipt[]));
         return rawToConvertedReceipts(rawReceipts);
     }
 
-    function readReceipt(string memory path, uint256 index) internal virtual returns (Receipt memory) {
+    function readReceipt(string memory path, uint256 index) internal view virtual returns (Receipt memory) {
         string memory deployData = vm.readFile(path);
         string memory key = string(abi.encodePacked(".receipts[", vm.toString(index), "]"));
         bytes memory parsedDeployData = vm.parseJson(deployData, key);

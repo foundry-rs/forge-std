@@ -186,7 +186,7 @@ contract StdCheatsTest is Test {
         assertEq(txDetail.value, 0);
     }
 
-    function testReadEIP1559Transaction() public {
+    function testReadEIP1559Transaction() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint256 index = 0;
@@ -194,7 +194,7 @@ contract StdCheatsTest is Test {
         transaction;
     }
 
-    function testReadEIP1559Transactions() public {
+    function testReadEIP1559Transactions() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Tx1559[] memory transactions = readTx1559s(path);
@@ -212,7 +212,7 @@ contract StdCheatsTest is Test {
         );
     }
 
-    function testReadReceipts() public {
+    function testReadReceipts() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
