@@ -21,9 +21,21 @@ jobs:
       - name: Install dependencies
         run: forge install
 
-      - name: Measure compilation time with 0.8.17 --via-ir
+      - name: Measure compilation time of Test with 0.8.17 --via-ir
         if: always()
-        run: forge build --skip test --use solc:0.8.17 --via-ir
+        run: forge build --skip test --contracts test/compilation/CompilationTest.sol --use solc:0.8.17 --via-ir
+
+      - name: Measure compilation time of TestBase with 0.8.17 --via-ir
+        if: always()
+        run: forge build --skip test --contracts test/compilation/CompilationTestBase.sol --use solc:0.8.17 --via-ir
+
+      - name: Measure compilation time of Script with 0.8.17 --via-ir
+        if: always()
+        run: forge build --skip test --contracts test/compilation/CompilationScript.sol --use solc:0.8.17 --via-ir
+
+      - name: Measure compilation time of ScriptBase with 0.8.17 --via-ir
+        if: always()
+        run: forge build --skip test --contracts test/compilation/CompilationScriptBase.sol --use solc:0.8.17 --via-ir
 
       - name: Check compatibility with 0.8.0
         if: always()
