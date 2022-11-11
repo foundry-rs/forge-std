@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: forge install
 
-      - name: Check compatibility with 0.8.17 --via-ir
+      - name: Measure compilation time with 0.8.17 --via-ir
         if: always()
         run: forge build --skip test --use solc:0.8.17 --via-ir
 

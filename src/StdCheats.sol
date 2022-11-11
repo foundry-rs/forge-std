@@ -229,32 +229,9 @@ abstract contract StdCheatsSafe {
         // Loop over RPC URLs in the config file to replace the default RPC URLs
         Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
         for (uint256 i = 0; i < rpcs.length; i++) {
-            string memory name = rpcs[i].name;
-            string memory rpcUrl = rpcs[i].url;
-
-            if (isEqual(name, "anvil")) stdChains["anvil"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "hardhat")) stdChains["hardhat"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "mainnet")) stdChains["mainnet"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "goerli")) stdChains["goerli"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "sepolia")) stdChains["sepolia"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "optimism")) stdChains["optimism"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "optimism_goerli")) stdChains["optimism_goerli"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "arbitrum_one")) stdChains["arbitrum_one"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "arbitrum_one_goerli")) stdChains["arbitrum_one_goerli"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "arbitrum_nova")) stdChains["arbitrum_nova"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "polygon")) stdChains["polygon"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "polygon_mumbai")) stdChains["polygon_mumbai"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "avalanche")) stdChains["avalanche"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "avalanche_fuji")) stdChains["avalanche_fuji"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "bnb_smart_chain")) stdChains["bnb_smart_chain"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "bnb_smart_chain_testnet")) stdChains["bnb_smart_chain_testnet"].rpcUrl = rpcUrl;
-            else if (isEqual(name, "gnosis_chain")) stdChains["gnosis_chain"].rpcUrl = rpcUrl;
+            stdChains[rpcs[i].name].rpcUrl = rpcs[i].url;
         }
         return 0;
-    }
-
-    function isEqual(string memory a, string memory b) private pure returns (bool) {
-        return keccak256(abi.encode(a)) == keccak256(abi.encode(b));
     }
 
     function assumeNoPrecompiles(address addr) internal virtual {
@@ -274,13 +251,13 @@ abstract contract StdCheatsSafe {
         vm.assume(addr < address(0x1) || addr > address(0x9));
 
         // forgefmt: disable-start
-        if (chainId == stdChains["optimism"].chainId || chainId == stdChains["optimism-goerli"].chainId) {
+        if (chainId == stdChains["optimism"].chainId || chainId == stdChains["optimism_goerli"].chainId) {
             // https://github.com/ethereum-optimism/optimism/blob/eaa371a0184b56b7ca6d9eb9cb0a2b78b2ccd864/op-bindings/predeploys/addresses.go#L6-L21
             vm.assume(addr < address(0x4200000000000000000000000000000000000000) || addr > address(0x4200000000000000000000000000000000000800));
-        } else if (chainId == stdChains["arbitrum-one"].chainId || chainId == stdChains["arbitrum-one-goerli"].chainId) {
+        } else if (chainId == stdChains["arbitrum_one"].chainId || chainId == stdChains["arbitrum_one_goerli"].chainId) {
             // https://developer.arbitrum.io/useful-addresses#arbitrum-precompiles-l2-same-on-all-arb-chains
             vm.assume(addr < address(0x0000000000000000000000000000000000000064) || addr > address(0x0000000000000000000000000000000000000068));
-        } else if (chainId == stdChains["avalanche"].chainId || chainId == stdChains["avalanche-fuji"].chainId) {
+        } else if (chainId == stdChains["avalanche"].chainId || chainId == stdChains["avalanche_fuji"].chainId) {
             // https://github.com/ava-labs/subnet-evm/blob/47c03fd007ecaa6de2c52ea081596e0a88401f58/precompile/params.go#L18-L59
             vm.assume(addr < address(0x0100000000000000000000000000000000000000) || addr > address(0x01000000000000000000000000000000000000ff));
             vm.assume(addr < address(0x0200000000000000000000000000000000000000) || addr > address(0x02000000000000000000000000000000000000FF));

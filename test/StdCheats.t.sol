@@ -247,6 +247,14 @@ contract StdCheatsTest is Test {
             vm.createSelectFork(rpcUrl);
         }
     }
+
+    function testAssumeNoPrecompilesL1(address addr) external {
+        assumeNoPrecompiles(addr, stdChains["optimism_goerli"].chainId);
+        assertTrue(
+            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
+                || addr > address(0x4200000000000000000000000000000000000800)
+        );
+    }
 }
 
 contract Bar {
