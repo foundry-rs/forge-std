@@ -88,9 +88,4 @@ contract StdUtilsTest is Test {
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
-
-    function testAssumeNoPrecompilesL1(address addr) external {
-        assumeNoPrecompiles(addr, stdChains.Mainnet.chainId);
-        assertTrue(addr < address(1) || addr > address(9));
-    }
 }

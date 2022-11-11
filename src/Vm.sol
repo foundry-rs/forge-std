@@ -16,6 +16,11 @@ interface VmSafe {
         address emitter;
     }
 
+    struct Rpc {
+        string name;
+        string url;
+    }
+
     // Loads a storage slot from an address (who, slot)
     function load(address, bytes32) external view returns (bytes32);
     // Signs data, (privateKey, digest) => (v, r, s)
@@ -191,6 +196,8 @@ interface VmSafe {
     function rpcUrl(string calldata) external view returns (string memory);
     // Returns all rpc urls and their aliases `[alias, url][]`
     function rpcUrls() external view returns (string[2][] memory);
+    // Returns all rpc urls and their aliases as structs.
+    function rpcUrlStructs() external view returns (Rpc[] memory);
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool) external pure;
 }

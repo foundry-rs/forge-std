@@ -186,7 +186,7 @@ contract StdCheatsTest is Test {
         assertEq(txDetail.value, 0);
     }
 
-    function testReadEIP1559Transaction() public {
+    function testReadEIP1559Transaction() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint256 index = 0;
@@ -194,7 +194,7 @@ contract StdCheatsTest is Test {
         transaction;
     }
 
-    function testReadEIP1559Transactions() public {
+    function testReadEIP1559Transactions() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Tx1559[] memory transactions = readTx1559s(path);
@@ -212,7 +212,7 @@ contract StdCheatsTest is Test {
         );
     }
 
-    function testReadReceipts() public {
+    function testReadReceipts() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         Receipt[] memory receipts = readReceipts(path);
@@ -229,14 +229,14 @@ contract StdCheatsTest is Test {
 
     function testChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
-        assertEq(stdChains.Mainnet.rpcUrl, "https://api.mycryptoapi.com/eth/");
-        assertEq(stdChains.OptimismGoerli.rpcUrl, "https://goerli.optimism.io/");
-        assertEq(stdChains.ArbitrumOneGoerli.rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
+        assertEq(stdChains["mainnet"].rpcUrl, "https://api.mycryptoapi.com/eth/");
+        assertEq(stdChains["optimism_goerli"].rpcUrl, "https://goerli.optimism.io/");
+        assertEq(stdChains["arbitrum_one_goerli"].rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
         // Other RPCs should remain unchanged.
-        assertEq(stdChains.Anvil.rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains.Hardhat.rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains.Sepolia.rpcUrl, "https://rpc.sepolia.dev");
+        assertEq(stdChains["anvil"].rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains["hardhat"].rpcUrl, "http://127.0.0.1:8545");
+        assertEq(stdChains["sepolia"].rpcUrl, "https://rpc.sepolia.dev");
     }
 
     // Ensure we can connect to the default RPC URL for each chain.
@@ -246,6 +246,14 @@ contract StdCheatsTest is Test {
             ( /* string memory name */ , string memory rpcUrl) = (rpcs[i][0], rpcs[i][1]);
             vm.createSelectFork(rpcUrl);
         }
+    }
+
+    function testAssumeNoPrecompiles(address addr) external {
+        assumeNoPrecompiles(addr, stdChains["optimism_goerli"].chainId);
+        assertTrue(
+            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
+                || addr > address(0x4200000000000000000000000000000000000800)
+        );
     }
 }
 
