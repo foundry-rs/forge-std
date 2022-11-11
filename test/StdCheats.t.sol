@@ -248,7 +248,7 @@ contract StdCheatsTest is Test {
         }
     }
 
-    function testAssumeNoPrecompilesL1(address addr) external {
+    function testAssumeNoPrecompiles(address addr) external {
         assumeNoPrecompiles(addr, stdChains["optimism_goerli"].chainId);
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
