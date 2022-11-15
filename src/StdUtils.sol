@@ -27,7 +27,7 @@ abstract contract StdUtils {
             uint256 rem = diff % size;
             if (rem == 0) return max;
             result = min + rem - 1;
-        } else if (x < max) {
+        } else if (x < min) {
             uint256 diff = min - x;
             uint256 rem = diff % size;
             if (rem == 0) return min;
