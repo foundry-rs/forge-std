@@ -3,6 +3,16 @@ pragma solidity >=0.6.2 <0.9.0;
 
 import "./console2.sol";
 
+library SharedUtils {
+    function bytesToUint(bytes memory b) internal pure returns (uint256) {
+        uint256 number;
+        for (uint256 i = 0; i < b.length; i++) {
+            number = number + uint256(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
+        }
+        return number;
+    }
+}
+
 abstract contract StdUtils {
     uint256 private constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
@@ -72,6 +82,10 @@ abstract contract StdUtils {
         returns (address)
     {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
+    }
+
+    function bytesToUint(bytes memory b) internal pure returns (uint256) {
+        return SharedUtils.bytesToUint(b);
     }
 
     function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
