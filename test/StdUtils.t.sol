@@ -98,4 +98,10 @@ contract StdUtilsTest is Test {
         assertEq(bytesToUint(two), 2);
         assertEq(bytesToUint(millionEther), 1_000_000 ether);
     }
+
+    function testCannotConvertGT32Bytes() external {
+        bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
+        bytesToUint(thirty3Bytes);
+    }   
 }

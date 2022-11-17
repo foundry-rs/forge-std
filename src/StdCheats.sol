@@ -3,7 +3,6 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
-import { SharedUtils } from "./StdUtils.sol";
 import "./StdStorage.sol";
 import "./Vm.sol";
 
@@ -316,10 +315,10 @@ abstract contract StdCheatsSafe {
         txDetail.data = rawDetail.data;
         txDetail.from = rawDetail.from;
         txDetail.to = rawDetail.to;
-        txDetail.nonce = SharedUtils.bytesToUint(rawDetail.nonce);
-        txDetail.txType = SharedUtils.bytesToUint(rawDetail.txType);
-        txDetail.value = SharedUtils.bytesToUint(rawDetail.value);
-        txDetail.gas = SharedUtils.bytesToUint(rawDetail.gas);
+        txDetail.nonce = _bytesToUint(rawDetail.nonce);
+        txDetail.txType = _bytesToUint(rawDetail.txType);
+        txDetail.value = _bytesToUint(rawDetail.value);
+        txDetail.gas = _bytesToUint(rawDetail.gas);
         txDetail.accessList = rawDetail.accessList;
         return txDetail;
     }
@@ -369,12 +368,12 @@ abstract contract StdCheatsSafe {
         receipt.to = rawReceipt.to;
         receipt.from = rawReceipt.from;
         receipt.contractAddress = rawReceipt.contractAddress;
-        receipt.effectiveGasPrice = SharedUtils.bytesToUint(rawReceipt.effectiveGasPrice);
-        receipt.cumulativeGasUsed = SharedUtils.bytesToUint(rawReceipt.cumulativeGasUsed);
-        receipt.gasUsed = SharedUtils.bytesToUint(rawReceipt.gasUsed);
-        receipt.status = SharedUtils.bytesToUint(rawReceipt.status);
-        receipt.transactionIndex = SharedUtils.bytesToUint(rawReceipt.transactionIndex);
-        receipt.blockNumber = SharedUtils.bytesToUint(rawReceipt.blockNumber);
+        receipt.effectiveGasPrice = _bytesToUint(rawReceipt.effectiveGasPrice);
+        receipt.cumulativeGasUsed = _bytesToUint(rawReceipt.cumulativeGasUsed);
+        receipt.gasUsed = _bytesToUint(rawReceipt.gasUsed);
+        receipt.status = _bytesToUint(rawReceipt.status);
+        receipt.transactionIndex = _bytesToUint(rawReceipt.transactionIndex);
+        receipt.blockNumber = _bytesToUint(rawReceipt.blockNumber);
         receipt.logs = rawToConvertedReceiptLogs(rawReceipt.logs);
         receipt.logsBloom = rawReceipt.logsBloom;
         receipt.transactionHash = rawReceipt.transactionHash;
@@ -391,12 +390,12 @@ abstract contract StdCheatsSafe {
         for (uint256 i; i < rawLogs.length; i++) {
             logs[i].logAddress = rawLogs[i].logAddress;
             logs[i].blockHash = rawLogs[i].blockHash;
-            logs[i].blockNumber = SharedUtils.bytesToUint(rawLogs[i].blockNumber);
+            logs[i].blockNumber = _bytesToUint(rawLogs[i].blockNumber);
             logs[i].data = rawLogs[i].data;
-            logs[i].logIndex = SharedUtils.bytesToUint(rawLogs[i].logIndex);
+            logs[i].logIndex = _bytesToUint(rawLogs[i].logIndex);
             logs[i].topics = rawLogs[i].topics;
-            logs[i].transactionIndex = SharedUtils.bytesToUint(rawLogs[i].transactionIndex);
-            logs[i].transactionLogIndex = SharedUtils.bytesToUint(rawLogs[i].transactionLogIndex);
+            logs[i].transactionIndex = _bytesToUint(rawLogs[i].transactionIndex);
+            logs[i].transactionLogIndex = _bytesToUint(rawLogs[i].transactionLogIndex);
             logs[i].removed = rawLogs[i].removed;
         }
         return logs;
@@ -465,6 +464,11 @@ abstract contract StdCheatsSafe {
     {
         privateKey = vm.deriveKey(mnemonic, index);
         who = vm.rememberKey(privateKey);
+    }
+
+     function _bytesToUint(bytes memory b) private pure returns (uint256) {
+        require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
+        return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 }
 
