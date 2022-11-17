@@ -103,5 +103,5 @@ contract StdUtilsTest is Test {
         bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
         bytesToUint(thirty3Bytes);
-    }   
+    }
 }

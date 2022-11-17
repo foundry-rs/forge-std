@@ -466,7 +466,7 @@ abstract contract StdCheatsSafe {
         who = vm.rememberKey(privateKey);
     }
 
-     function _bytesToUint(bytes memory b) private pure returns (uint256) {
+    function _bytesToUint(bytes memory b) private pure returns (uint256) {
         require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
