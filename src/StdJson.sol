@@ -33,6 +33,10 @@ library stdJson {
         return vm.parseJson(json, key);
     }
 
+    function keyExists(string memory json, string memory key) internal pure returns (bool) {
+        return vm.parseJson(json, key).length > 0;
+    }
+
     function readUint(string memory json, string memory key) internal pure returns (uint256) {
         return abi.decode(vm.parseJson(json, key), (uint256));
     }
