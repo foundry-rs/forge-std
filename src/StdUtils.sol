@@ -74,7 +74,7 @@ abstract contract StdUtils {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
     }
 
-    function bytesToUint(bytes memory b) internal pure returns (uint256) {
+    function bytesToUint(bytes memory b) internal pure virtual returns (uint256) {
         require(b.length <= 32, "StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
