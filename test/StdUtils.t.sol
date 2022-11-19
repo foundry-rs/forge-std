@@ -88,4 +88,20 @@ contract StdUtilsTest is Test {
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
+
+    function testBytesToUint() external {
+        bytes memory maxUint = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        bytes memory two = hex"02";
+        bytes memory millionEther = hex"d3c21bcecceda1000000";
+
+        assertEq(bytesToUint(maxUint), type(uint256).max);
+        assertEq(bytesToUint(two), 2);
+        assertEq(bytesToUint(millionEther), 1_000_000 ether);
+    }
+
+    function testCannotConvertGT32Bytes() external {
+        bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
+        bytesToUint(thirty3Bytes);
+    }
 }

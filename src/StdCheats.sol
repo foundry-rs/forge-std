@@ -315,10 +315,10 @@ abstract contract StdCheatsSafe {
         txDetail.data = rawDetail.data;
         txDetail.from = rawDetail.from;
         txDetail.to = rawDetail.to;
-        txDetail.nonce = bytesToUint(rawDetail.nonce);
-        txDetail.txType = bytesToUint(rawDetail.txType);
-        txDetail.value = bytesToUint(rawDetail.value);
-        txDetail.gas = bytesToUint(rawDetail.gas);
+        txDetail.nonce = _bytesToUint(rawDetail.nonce);
+        txDetail.txType = _bytesToUint(rawDetail.txType);
+        txDetail.value = _bytesToUint(rawDetail.value);
+        txDetail.gas = _bytesToUint(rawDetail.gas);
         txDetail.accessList = rawDetail.accessList;
         return txDetail;
     }
@@ -368,12 +368,12 @@ abstract contract StdCheatsSafe {
         receipt.to = rawReceipt.to;
         receipt.from = rawReceipt.from;
         receipt.contractAddress = rawReceipt.contractAddress;
-        receipt.effectiveGasPrice = bytesToUint(rawReceipt.effectiveGasPrice);
-        receipt.cumulativeGasUsed = bytesToUint(rawReceipt.cumulativeGasUsed);
-        receipt.gasUsed = bytesToUint(rawReceipt.gasUsed);
-        receipt.status = bytesToUint(rawReceipt.status);
-        receipt.transactionIndex = bytesToUint(rawReceipt.transactionIndex);
-        receipt.blockNumber = bytesToUint(rawReceipt.blockNumber);
+        receipt.effectiveGasPrice = _bytesToUint(rawReceipt.effectiveGasPrice);
+        receipt.cumulativeGasUsed = _bytesToUint(rawReceipt.cumulativeGasUsed);
+        receipt.gasUsed = _bytesToUint(rawReceipt.gasUsed);
+        receipt.status = _bytesToUint(rawReceipt.status);
+        receipt.transactionIndex = _bytesToUint(rawReceipt.transactionIndex);
+        receipt.blockNumber = _bytesToUint(rawReceipt.blockNumber);
         receipt.logs = rawToConvertedReceiptLogs(rawReceipt.logs);
         receipt.logsBloom = rawReceipt.logsBloom;
         receipt.transactionHash = rawReceipt.transactionHash;
@@ -390,12 +390,12 @@ abstract contract StdCheatsSafe {
         for (uint256 i; i < rawLogs.length; i++) {
             logs[i].logAddress = rawLogs[i].logAddress;
             logs[i].blockHash = rawLogs[i].blockHash;
-            logs[i].blockNumber = bytesToUint(rawLogs[i].blockNumber);
+            logs[i].blockNumber = _bytesToUint(rawLogs[i].blockNumber);
             logs[i].data = rawLogs[i].data;
-            logs[i].logIndex = bytesToUint(rawLogs[i].logIndex);
+            logs[i].logIndex = _bytesToUint(rawLogs[i].logIndex);
             logs[i].topics = rawLogs[i].topics;
-            logs[i].transactionIndex = bytesToUint(rawLogs[i].transactionIndex);
-            logs[i].transactionLogIndex = bytesToUint(rawLogs[i].transactionLogIndex);
+            logs[i].transactionIndex = _bytesToUint(rawLogs[i].transactionIndex);
+            logs[i].transactionLogIndex = _bytesToUint(rawLogs[i].transactionLogIndex);
             logs[i].removed = rawLogs[i].removed;
         }
         return logs;
@@ -466,12 +466,9 @@ abstract contract StdCheatsSafe {
         who = vm.rememberKey(privateKey);
     }
 
-    function bytesToUint(bytes memory b) private pure returns (uint256) {
-        uint256 number;
-        for (uint256 i = 0; i < b.length; i++) {
-            number = number + uint256(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
-        }
-        return number;
+    function _bytesToUint(bytes memory b) private pure returns (uint256) {
+        require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
+        return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 }
 
