@@ -229,7 +229,7 @@ contract StdCheatsTest is Test {
 
     function testChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
-        assertEq(stdChains["mainnet"].rpcUrl, "https://api.mycryptoapi.com/eth/");
+        assertEq(stdChains["mainnet"].rpcUrl, "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70");
         assertEq(stdChains["optimism_goerli"].rpcUrl, "https://goerli.optimism.io/");
         assertEq(stdChains["arbitrum_one_goerli"].rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
