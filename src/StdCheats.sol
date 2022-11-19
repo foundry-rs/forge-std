@@ -210,7 +210,7 @@ abstract contract StdCheatsSafe {
         // Initialize `stdChains` with the defaults.
         stdChains["anvil"] = Chain("Anvil", 31337, "http://127.0.0.1:8545");
         stdChains["hardhat"] = Chain("Hardhat", 31337, "http://127.0.0.1:8545");
-        stdChains["mainnet"] = Chain("Mainnet", 1, "https://api.mycryptoapi.com/eth");
+        stdChains["mainnet"] = Chain("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
         stdChains["goerli"] = Chain("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
         stdChains["sepolia"] = Chain("Sepolia", 11155111, "https://rpc.sepolia.dev");
         stdChains["optimism"] = Chain("Optimism", 10, "https://mainnet.optimism.io");
