@@ -73,6 +73,11 @@ contract StdJsonTest is Test {
         assert(keyExists == true);
     }
 
+    function testJsonKeyExists_BoolFalse() public view {
+        bool keyExists = json.keyExists(".receipts[5].logs[0].removed");
+        assert(keyExists == true);
+    }
+
     // Empty object is parsed as 0x
     function testJsonKeyExists_EmptyObject() public view {
         console.logBytes(json.parseRaw(".returns"));
