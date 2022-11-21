@@ -43,28 +43,13 @@ contract StdJsonTest is Test {
         assert(keyExists == true);
     }
 
-    // "0x0" in hex is parsed as 0x bytes
-    // Parsing "0x0" as uint/bytes/bytes32 fails
     function testJsonKeyExists_ZeroHex() public view {
-        console.logBytes(json.parseRaw(".transactions[0].value"));
-        bool keyExists = json.keyExists(".transactions[0].value");
+        bool keyExists = json.keyExists(".transactions[0].tx.value");
         assert(keyExists == true);
     }
 
     function testJsonKeyExists_Bytes() public view {
         bool keyExists = json.keyExists(".transactions[0].tx.data");
-        assert(keyExists == true);
-    }
-
-    function testJsonKeyExists_EmptyArray() public view {
-        bool keyExists = json.keyExists(".transactions[0].tx.accessList");
-        assert(keyExists == true);
-    }
-
-    // Null is parsed as an empty string
-    function testJsonKeyExists_Null() public view {
-        console.logBytes(json.parseRaw(".receipts[0].logs"));
-        bool keyExists = json.keyExists(".receipts[0].logs");
         assert(keyExists == true);
     }
 
@@ -75,13 +60,6 @@ contract StdJsonTest is Test {
 
     function testJsonKeyExists_BoolFalse() public view {
         bool keyExists = json.keyExists(".receipts[5].logs[0].removed");
-        assert(keyExists == true);
-    }
-
-    // Empty object is parsed as 0x
-    function testJsonKeyExists_EmptyObject() public view {
-        console.logBytes(json.parseRaw(".returns"));
-        bool keyExists = json.keyExists(".returns");
         assert(keyExists == true);
     }
 
@@ -97,5 +75,28 @@ contract StdJsonTest is Test {
     function testJsonKeyDoesNotExist() public view {
         bool keyExists = json.keyExists(".nonExistingKey");
         assert(keyExists == false);
+    }
+
+    // Special cases
+
+    // Empty object is parsed as 0x and reverts as it can't be converted to any solidity type
+    function testJsonKeyExists_ButItsEmptyObject() public view {
+        console.logBytes(json.parseRaw(".returns"));
+        bool keyExists = json.keyExists(".returns");
+        assert(keyExists == false);
+    }
+
+    // TODO: Empty array is parsed as an empty string (probably should revert instead?)
+    function testJsonKeyExists_EmptyArray() public view {
+        console.logBytes(json.parseRaw(".pending"));
+        bool keyExists = json.keyExists(".pending");
+        assert(keyExists == true); // Should be false?
+    }
+
+    // TODO: Null is parsed as an empty string (probably should revert instead?)
+    function testJsonKeyExists_Null() public view {
+        console.logBytes(json.parseRaw(".receipts[0].logs"));
+        bool keyExists = json.keyExists(".receipts[0].logs");
+        assert(keyExists == true); // Should be false?
     }
 }
