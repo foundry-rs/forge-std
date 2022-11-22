@@ -14,7 +14,7 @@ abstract contract CommonBase {
     address internal constant DEFAULT_SENDER = address(uint160(uint256(keccak256("foundry default caller"))));
 
     // Address of the test contract, deployed by the DEFAULT_SENDER.
-    address internal constant TEST_CONTRACT = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
+    address internal constant DEFAULT_TEST_CONTRACT = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
 
     // Create2 factory used by scripts when deploying with create2, https://github.com/Arachnid/deterministic-deployment-proxy.
     address internal constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
