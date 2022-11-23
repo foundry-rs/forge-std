@@ -576,13 +576,13 @@ abstract contract StdCheats is StdCheatsSafe {
         } catch (bytes memory) {}
     }
 
-    modifier skipForking() {
+    modifier skipWhenForking() {
         if (!isFork()) {
             _;
         }
     }
 
-    modifier skipNonForking() {
+    modifier skipWhenNotForking() {
         if (isFork()) {
             _;
         }
