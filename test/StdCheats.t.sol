@@ -135,6 +135,112 @@ contract StdCheatsTest is Test {
         this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
     }
 
+    function testGetEnvBool() public {
+        assertFalse(getEnvBool(".invalid.name", false));
+        assertTrue(getEnvBool(".invalid.name", true));
+    }
+
+    function testGetEnvUint() public {
+        assertEq(getEnvUint(".invalid.name", 1337), 1337);
+    }
+
+    function testGetEnvInt() public {
+        assertEq(getEnvInt(".invalid.name", -1337), -1337);
+    }
+
+    function testGetEnvAddress() public {
+        assertEq(getEnvAddress(".invalid.name", address(1337)), address(1337));
+    }
+
+    function testGetEnvBytes32() public {
+        assertEq(getEnvBytes32(".invalid.name", bytes32(bytes2(0x1337))), bytes32(bytes2(0x1337)));
+    }
+
+    function testGetEnvString() public {
+        assertEq(getEnvString(".invalid.name", "1337"), "1337");
+    }
+
+    function testGetEnvBytes() public {
+        assertEq(getEnvBytes(".invalid.name", "1337"), "1337");
+    }
+
+    function testGetEnvBoolArray() public {
+        bool[] memory expected = new bool[](2);
+        expected[0] = true;
+        expected[1] = false;
+        bool[] memory result = getEnvBool(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvUintArray() public {
+        uint256[] memory expected = new uint[](2);
+        expected[0] = 1;
+        expected[1] = 2;
+        uint256[] memory result = getEnvUint(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvIntArray() public {
+        int256[] memory expected = new int[](2);
+        expected[0] = 1;
+        expected[1] = -2;
+        int256[] memory result = getEnvInt(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvAddressArray() public {
+        address[] memory expected = new address[](2);
+        expected[0] = address(1);
+        expected[1] = address(2);
+        address[] memory result = getEnvAddress(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvBytes32Array() public {
+        bytes32[] memory expected = new bytes32[](2);
+        expected[0] = bytes32(bytes2(0x1337));
+        expected[1] = bytes32(bytes2(0x1338));
+        bytes32[] memory result = getEnvBytes32(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvStringArray() public {
+        string[] memory expected = new string[](2);
+        expected[0] = "1337";
+        expected[1] = "1338";
+        string[] memory result = getEnvString(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
+    function testGetEnvBytesArray() public {
+        bytes[] memory expected = new bytes[](2);
+        expected[0] = "1337";
+        expected[1] = "1338";
+        bytes[] memory result = getEnvBytes(".invalid.name", ",", expected);
+        assertEq(result.length, 2);
+        for (uint256 i = 0; i < result.length; i++) {
+            assertEq(result[i], expected[i]);
+        }
+    }
+
     function getCode(address who) internal view returns (bytes memory o_code) {
         /// @solidity memory-safe-assembly
         assembly {

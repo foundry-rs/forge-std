@@ -466,6 +466,146 @@ abstract contract StdCheatsSafe {
         who = vm.rememberKey(privateKey);
     }
 
+    function getEnvBool(string memory name, bool _default) internal virtual returns (bool) {
+        try vm.envBool(name) returns (bool _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvUint(string memory name, uint256 _default) internal virtual returns (uint256) {
+        try vm.envUint(name) returns (uint256 _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvInt(string memory name, int256 _default) internal virtual returns (int256) {
+        try vm.envInt(name) returns (int256 _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvAddress(string memory name, address _default) internal virtual returns (address) {
+        try vm.envAddress(name) returns (address _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvBytes32(string memory name, bytes32 _default) internal virtual returns (bytes32) {
+        try vm.envBytes32(name) returns (bytes32 _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvString(string memory name, string memory _default) internal virtual returns (string memory) {
+        try vm.envString(name) returns (string memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvBytes(string memory name, bytes memory _default) internal virtual returns (bytes memory) {
+        try vm.envBytes(name) returns (bytes memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvBool(string memory name, string memory delim, bool[] memory _default)
+        internal
+        virtual
+        returns (bool[] memory)
+    {
+        try vm.envBool(name, delim) returns (bool[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvUint(string memory name, string memory delim, uint256[] memory _default)
+        internal
+        virtual
+        returns (uint256[] memory)
+    {
+        try vm.envUint(name, delim) returns (uint256[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvInt(string memory name, string memory delim, int256[] memory _default)
+        internal
+        virtual
+        returns (int256[] memory)
+    {
+        try vm.envInt(name, delim) returns (int256[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvAddress(string memory name, string memory delim, address[] memory _default)
+        internal
+        virtual
+        returns (address[] memory)
+    {
+        try vm.envAddress(name, delim) returns (address[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvBytes32(string memory name, string memory delim, bytes32[] memory _default)
+        internal
+        virtual
+        returns (bytes32[] memory)
+    {
+        try vm.envBytes32(name, delim) returns (bytes32[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvString(string memory name, string memory delim, string[] memory _default)
+        internal
+        virtual
+        returns (string[] memory)
+    {
+        try vm.envString(name, delim) returns (string[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
+    function getEnvBytes(string memory name, string memory delim, bytes[] memory _default)
+        internal
+        virtual
+        returns (bytes[] memory)
+    {
+        try vm.envBytes(name, delim) returns (bytes[] memory _returned) {
+            return _returned;
+        } catch (bytes memory) {
+            return _default;
+        }
+    }
+
     function _bytesToUint(bytes memory b) private pure returns (uint256) {
         require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
