@@ -9,7 +9,7 @@ abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     struct Chain {
-        // The chain name, using underscores as the separator to match `foundry.toml` conventions.
+        // The chain name.
         string name;
         // The chain's Chain ID.
         uint256 chainId;
@@ -22,14 +22,21 @@ abstract contract StdChains {
 
     // Maps from a chain's name (matching what's in the `foundry.toml` file) to chain data.
     mapping(string => Chain) private chains;
+    mapping(uint256 => string) private idToKey;
 
     function getChain(string memory name) internal virtual returns (Chain memory) {
         initialize();
         return chains[name];
     }
 
-    function setChain(string memory name, uint256 chainId, string memory rpcUrl) internal virtual {
-        chains[name] = Chain(name, chainId, rpcUrl);
+    function getChain(uint256 chainId) internal virtual returns (Chain memory) {
+        initialize();
+        return chains[idToKey[chainId]];
+    }
+
+    function setChain(string memory key, string memory name, uint256 chainId, string memory rpcUrl) internal virtual {
+        chains[key] = Chain(name, chainId, rpcUrl);
+        idToKey[chainId] = key;
     }
 
     bool private initialized;
@@ -37,23 +44,23 @@ abstract contract StdChains {
     function initialize() private {
         if (initialized) return;
 
-        chains["anvil"] = Chain("Anvil", 31337, "http://127.0.0.1:8545");
-        chains["hardhat"] = Chain("Hardhat", 31337, "http://127.0.0.1:8545");
-        chains["mainnet"] = Chain("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
-        chains["goerli"] = Chain("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
-        chains["sepolia"] = Chain("Sepolia", 11155111, "https://rpc.sepolia.dev");
-        chains["optimism"] = Chain("Optimism", 10, "https://mainnet.optimism.io");
-        chains["optimism_goerli"] = Chain("Optimism Goerli", 420, "https://goerli.optimism.io");
-        chains["arbitrum_one"] = Chain("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc");
-        chains["arbitrum_one_goerli"] = Chain("Arbitrum One Goerli", 421613, "https://goerli-rollup.arbitrum.io/rpc");
-        chains["arbitrum_nova"] = Chain("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc");
-        chains["polygon"] = Chain("Polygon", 137, "https://polygon-rpc.com");
-        chains["polygon_mumbai"] = Chain("Polygon Mumbai", 80001, "https://rpc-mumbai.matic.today");
-        chains["avalanche"] = Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc");
-        chains["avalanche_fuji"] = Chain("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc");
-        chains["bnb_smart_chain"] = Chain("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org");
-        chains["bnb_smart_chain_testnet"] = Chain("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545");// forgefmt: disable-line
-        chains["gnosis_chain"] = Chain("Gnosis Chain", 100, "https://rpc.gnosischain.com");
+        setChain("anvil", "Localhost", 31337, "http://127.0.0.1:8545");
+        setChain("hardhat", "Localhost", 31337, "http://127.0.0.1:8545");
+        setChain("mainnet", "Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
+        setChain("goerli", "Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
+        setChain("sepolia", "Sepolia", 11155111, "https://rpc.sepolia.dev");
+        setChain("optimism", "Optimism", 10, "https://mainnet.optimism.io");
+        setChain("optimism_goerli", "Optimism Goerli", 420, "https://goerli.optimism.io");
+        setChain("arbitrum_one", "Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc");
+        setChain("arbitrum_one_goerli", "Arbitrum One Goerli", 421613, "https://goerli-rollup.arbitrum.io/rpc");
+        setChain("arbitrum_nova", "Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc");
+        setChain("polygon", "Polygon", 137, "https://polygon-rpc.com");
+        setChain("polygon_mumbai", "Polygon Mumbai", 80001, "https://rpc-mumbai.matic.today");
+        setChain("avalanche", "Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc");
+        setChain("avalanche_fuji", "Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc");
+        setChain("bnb_smart_chain", "BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org");
+        setChain("bnb_smart_chain_testnet", "BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545");// forgefmt: disable-line
+        setChain("gnosis_chain", "Gnosis Chain", 100, "https://rpc.gnosischain.com");
 
         // Loop over RPC URLs in the config file to replace the default RPC URLs
         Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
