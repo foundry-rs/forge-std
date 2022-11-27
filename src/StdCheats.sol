@@ -476,7 +476,7 @@ abstract contract StdCheatsSafe {
 abstract contract StdCheats is StdCheatsSafe {
     using stdStorage for StdStorage;
 
-    StdStorage private stdstore;
+    StdStorage internal stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     // Skip forward or rewind time by the specified number of seconds
