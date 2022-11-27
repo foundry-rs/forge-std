@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {StdStorage, Vm} from "./Components.sol";
+import {Vm} from "./Components.sol";
 
 abstract contract CommonBase {
     // Cheat code address, 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D.
@@ -23,6 +23,4 @@ abstract contract CommonBase {
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     Vm internal constant vm = Vm(VM_ADDRESS);
-
-    StdStorage internal stdstore;
 }
