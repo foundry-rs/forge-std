@@ -569,4 +569,22 @@ abstract contract StdCheats is StdCheatsSafe {
             stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
         }
     }
+
+    function isFork() internal virtual returns (bool status) {
+        try vm.activeFork() {
+            status = true;
+        } catch (bytes memory) {}
+    }
+
+    modifier skipWhenForking() {
+        if (!isFork()) {
+            _;
+        }
+    }
+
+    modifier skipWhenNotForking() {
+        if (isFork()) {
+            _;
+        }
+    }
 }
