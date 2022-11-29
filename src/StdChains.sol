@@ -20,13 +20,16 @@ abstract contract StdChains {
         string rpcUrl;
     }
 
-    // Maps from a chain's name (matching what's in the `foundry.toml` file) to chain data.
+    bool private initialized;
+
+    // Maps from a chain's key (matching the alias in the `foundry.toml` file) to chain data.
     mapping(string => Chain) private chains;
+    // Maps from a chain ID to that chain's key name
     mapping(uint256 => string) private idToKey;
 
-    function getChain(string memory name) internal virtual returns (Chain memory) {
+    function getChain(string memory key) internal virtual returns (Chain memory) {
         initialize();
-        return chains[name];
+        return chains[key];
     }
 
     function getChain(uint256 chainId) internal virtual returns (Chain memory) {
@@ -38,8 +41,6 @@ abstract contract StdChains {
         chains[key] = Chain(name, chainId, rpcUrl);
         idToKey[chainId] = key;
     }
-
-    bool private initialized;
 
     function initialize() private {
         if (initialized) return;
@@ -65,7 +66,7 @@ abstract contract StdChains {
         // Loop over RPC URLs in the config file to replace the default RPC URLs
         Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
         for (uint256 i = 0; i < rpcs.length; i++) {
-            chains[rpcs[i].name].rpcUrl = rpcs[i].url;
+            chains[rpcs[i].key].rpcUrl = rpcs[i].url;
         }
 
         initialized = true;

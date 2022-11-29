@@ -17,7 +17,7 @@ interface VmSafe {
     }
 
     struct Rpc {
-        string name;
+        string key;
         string url;
     }
 
