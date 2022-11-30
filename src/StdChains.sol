@@ -47,7 +47,7 @@ abstract contract StdChains {
                     vm.toString(chainId),
                     " already used by \"",
                     idToKey[chainId],
-                    "\""
+                    "\"."
                 )
             )
         );

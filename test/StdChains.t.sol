@@ -28,7 +28,7 @@ contract StdChainsTest is Test {
         setChain({key: "custom_chain", name: "Custom Chain", chainId: 123456789, rpcUrl: "https://custom.chain/"});
 
         vm.expectRevert(
-            'StdChains setChain(string,string,uint256,string): Chain ID 123456789 already used by "custom_chain"'
+            'StdChains setChain(string,string,uint256,string): Chain ID 123456789 already used by "custom_chain".'
         );
 
         setChain({key: "another_custom_chain", name: "", chainId: 123456789, rpcUrl: ""});
