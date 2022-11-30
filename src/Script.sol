@@ -9,6 +9,6 @@ abstract contract ScriptBase is CommonBase {
     VmSafe internal constant vmSafe = VmSafe(VM_ADDRESS);
 }
 
-abstract contract Script is ScriptBase, StdCheatsSafe, StdUtils {
+abstract contract Script is StdCheatsSafe, StdUtils, ScriptBase {
     bool public IS_SCRIPT = true;
 }
