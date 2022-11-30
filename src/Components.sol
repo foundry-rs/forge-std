@@ -4,6 +4,7 @@ pragma solidity >=0.6.2 <0.9.0;
 import "./console.sol";
 import "./console2.sol";
 import "./StdAssertions.sol";
+import "./StdChains.sol";
 import "./StdCheats.sol";
 import "./StdError.sol";
 import "./StdJson.sol";

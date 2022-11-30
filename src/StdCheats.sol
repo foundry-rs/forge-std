@@ -3,31 +3,12 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
+import "./StdChains.sol";
 import "./StdStorage.sol";
 import "./Vm.sol";
 
-abstract contract StdCheatsSafe {
+abstract contract StdCheatsSafe is StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
-
-    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
-    /// syntaxes, we put the constructor in a private method and assign an unused return value to a variable. This
-    /// forces the method to run during construction, but without declaring an explicit constructor.
-    uint256 private CONSTRUCTOR = _constructor();
-
-    struct Chain {
-        // The chain name, using underscores as the separator to match `foundry.toml` conventions.
-        string name;
-        // The chain's Chain ID.
-        uint256 chainId;
-        // A default RPC endpoint for this chain.
-        // NOTE: This default RPC URL is included for convenience to facilitate quick tests and
-        // experimentation. Do not use this RPC URL for production test suites, CI, or other heavy
-        // usage as you will be throttled and this is a disservice to others who need this endpoint.
-        string rpcUrl;
-    }
-
-    // Maps from a chain's name (matching what's in the `foundry.toml` file) to chain data.
-    mapping(string => Chain) internal stdChains;
 
     // Data structures to parse Transaction objects from the broadcast artifact
     // that conform to EIP1559. The Raw structs is what is parsed from the JSON
@@ -206,35 +187,7 @@ abstract contract StdCheatsSafe {
         string value;
     }
 
-    function _constructor() private returns (uint256) {
-        // Initialize `stdChains` with the defaults.
-        stdChains["anvil"] = Chain("Anvil", 31337, "http://127.0.0.1:8545");
-        stdChains["hardhat"] = Chain("Hardhat", 31337, "http://127.0.0.1:8545");
-        stdChains["mainnet"] = Chain("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
-        stdChains["goerli"] = Chain("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
-        stdChains["sepolia"] = Chain("Sepolia", 11155111, "https://rpc.sepolia.dev");
-        stdChains["optimism"] = Chain("Optimism", 10, "https://mainnet.optimism.io");
-        stdChains["optimism_goerli"] = Chain("Optimism Goerli", 420, "https://goerli.optimism.io");
-        stdChains["arbitrum_one"] = Chain("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc");
-        stdChains["arbitrum_one_goerli"] = Chain("Arbitrum One Goerli", 421613, "https://goerli-rollup.arbitrum.io/rpc");
-        stdChains["arbitrum_nova"] = Chain("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc");
-        stdChains["polygon"] = Chain("Polygon", 137, "https://polygon-rpc.com");
-        stdChains["polygon_mumbai"] = Chain("Polygon Mumbai", 80001, "https://rpc-mumbai.matic.today");
-        stdChains["avalanche"] = Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc");
-        stdChains["avalanche_fuji"] = Chain("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc");
-        stdChains["bnb_smart_chain"] = Chain("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org");
-        stdChains["bnb_smart_chain_testnet"] = Chain("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545");// forgefmt: disable-line
-        stdChains["gnosis_chain"] = Chain("Gnosis Chain", 100, "https://rpc.gnosischain.com");
-
-        // Loop over RPC URLs in the config file to replace the default RPC URLs
-        Vm.Rpc[] memory rpcs = vm.rpcUrlStructs();
-        for (uint256 i = 0; i < rpcs.length; i++) {
-            stdChains[rpcs[i].name].rpcUrl = rpcs[i].url;
-        }
-        return 0;
-    }
-
-    function assumeNoPrecompiles(address addr) internal view virtual {
+    function assumeNoPrecompiles(address addr) internal virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         uint256 chainId;
         assembly {
@@ -243,7 +196,7 @@ abstract contract StdCheatsSafe {
         assumeNoPrecompiles(addr, chainId);
     }
 
-    function assumeNoPrecompiles(address addr, uint256 chainId) internal view virtual {
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal virtual {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
@@ -251,13 +204,13 @@ abstract contract StdCheatsSafe {
         vm.assume(addr < address(0x1) || addr > address(0x9));
 
         // forgefmt: disable-start
-        if (chainId == stdChains["optimism"].chainId || chainId == stdChains["optimism_goerli"].chainId) {
+        if (chainId == getChain("optimism").chainId || chainId == getChain("optimism_goerli").chainId) {
             // https://github.com/ethereum-optimism/optimism/blob/eaa371a0184b56b7ca6d9eb9cb0a2b78b2ccd864/op-bindings/predeploys/addresses.go#L6-L21
             vm.assume(addr < address(0x4200000000000000000000000000000000000000) || addr > address(0x4200000000000000000000000000000000000800));
-        } else if (chainId == stdChains["arbitrum_one"].chainId || chainId == stdChains["arbitrum_one_goerli"].chainId) {
+        } else if (chainId == getChain("arbitrum_one").chainId || chainId == getChain("arbitrum_one_goerli").chainId) {
             // https://developer.arbitrum.io/useful-addresses#arbitrum-precompiles-l2-same-on-all-arb-chains
             vm.assume(addr < address(0x0000000000000000000000000000000000000064) || addr > address(0x0000000000000000000000000000000000000068));
-        } else if (chainId == stdChains["avalanche"].chainId || chainId == stdChains["avalanche_fuji"].chainId) {
+        } else if (chainId == getChain("avalanche").chainId || chainId == getChain("avalanche_fuji").chainId) {
             // https://github.com/ava-labs/subnet-evm/blob/47c03fd007ecaa6de2c52ea081596e0a88401f58/precompile/params.go#L18-L59
             vm.assume(addr < address(0x0100000000000000000000000000000000000000) || addr > address(0x01000000000000000000000000000000000000ff));
             vm.assume(addr < address(0x0200000000000000000000000000000000000000) || addr > address(0x02000000000000000000000000000000000000FF));

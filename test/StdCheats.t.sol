@@ -227,29 +227,8 @@ contract StdCheatsTest is Test {
         return number;
     }
 
-    function testChainRpcInitialization() public {
-        // RPCs specified in `foundry.toml` should be updated.
-        assertEq(stdChains["mainnet"].rpcUrl, "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70");
-        assertEq(stdChains["optimism_goerli"].rpcUrl, "https://goerli.optimism.io/");
-        assertEq(stdChains["arbitrum_one_goerli"].rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
-
-        // Other RPCs should remain unchanged.
-        assertEq(stdChains["anvil"].rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains["hardhat"].rpcUrl, "http://127.0.0.1:8545");
-        assertEq(stdChains["sepolia"].rpcUrl, "https://rpc.sepolia.dev");
-    }
-
-    // Ensure we can connect to the default RPC URL for each chain.
-    function testRpcs() public {
-        (string[2][] memory rpcs) = vm.rpcUrls();
-        for (uint256 i = 0; i < rpcs.length; i++) {
-            ( /* string memory name */ , string memory rpcUrl) = (rpcs[i][0], rpcs[i][1]);
-            vm.createSelectFork(rpcUrl);
-        }
-    }
-
     function testAssumeNoPrecompiles(address addr) external {
-        assumeNoPrecompiles(addr, stdChains["optimism_goerli"].chainId);
+        assumeNoPrecompiles(addr, getChain("optimism_goerli").chainId);
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
                 || addr > address(0x4200000000000000000000000000000000000800)

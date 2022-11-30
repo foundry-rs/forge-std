@@ -4,8 +4,8 @@ pragma solidity >=0.6.2 <0.9.0;
 import {CommonBase} from "./Common.sol";
 import "ds-test/test.sol";
 // forgefmt: disable-next-line
-import {console, console2, StdAssertions, StdCheats, stdError, stdJson, stdMath, StdStorage, stdStorage, StdUtils, Vm} from "./Components.sol";
+import {console, console2, StdAssertions, StdChains, StdCheats, stdError, stdJson, stdMath, StdStorage, stdStorage, StdUtils, Vm} from "./Components.sol";
 
 abstract contract TestBase is CommonBase {}
 
-abstract contract Test is DSTest, StdAssertions, StdCheats, StdUtils, TestBase {}
+abstract contract Test is DSTest, StdAssertions, StdChains, StdCheats, StdUtils, TestBase {}
