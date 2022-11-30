@@ -12,7 +12,6 @@ contract StdChainsTest is Test {
 
         // Other RPCs should remain unchanged.
         assertEq(getChain(31337).rpcUrl, "http://127.0.0.1:8545");
-        assertEq(getChain("hardhat").rpcUrl, "http://127.0.0.1:8545");
         assertEq(getChain("sepolia").rpcUrl, "https://rpc.sepolia.dev");
     }
 
@@ -25,6 +24,16 @@ contract StdChainsTest is Test {
         }
     }
 
+    function testCannotSetChain_ChainIdExists() public {
+        setChain({key: "custom_chain", name: "Custom Chain", chainId: 123456789, rpcUrl: "https://custom.chain/"});
+
+        vm.expectRevert(
+            'StdChains setChain(string,string,uint256,string): Chain ID 123456789 already used by "custom_chain"'
+        );
+
+        setChain({key: "another_custom_chain", name: "", chainId: 123456789, rpcUrl: ""});
+    }
+
     function testSetChain() public {
         setChain({key: "custom_chain", name: "Custom Chain", chainId: 123456789, rpcUrl: "https://custom.chain/"});
         Chain memory customChain = getChain("custom_chain");
@@ -35,5 +44,18 @@ contract StdChainsTest is Test {
         assertEq(chainById.name, customChain.name);
         assertEq(chainById.chainId, customChain.chainId);
         assertEq(chainById.rpcUrl, customChain.rpcUrl);
+    }
+
+    function testSetChain_ExistingOne() public {
+        setChain({key: "custom_chain", name: "Custom Chain", chainId: 123456789, rpcUrl: "https://custom.chain/"});
+        assertEq(getChain(123456789).chainId, 123456789);
+
+        setChain({key: "custom_chain", name: "Modified Chain", chainId: 999999999, rpcUrl: "https://modified.chain/"});
+        assertEq(getChain(123456789).chainId, 0);
+
+        Chain memory modifiedChain = getChain(999999999);
+        assertEq(modifiedChain.name, "Modified Chain");
+        assertEq(modifiedChain.chainId, 999999999);
+        assertEq(modifiedChain.rpcUrl, "https://modified.chain/");
     }
 }

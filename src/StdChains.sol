@@ -38,6 +38,23 @@ abstract contract StdChains {
     }
 
     function setChain(string memory key, string memory name, uint256 chainId, string memory rpcUrl) internal virtual {
+        require(
+            keccak256(bytes(idToKey[chainId])) == keccak256(bytes(""))
+                || keccak256(bytes(idToKey[chainId])) == keccak256(bytes(key)),
+            string(
+                abi.encodePacked(
+                    "StdChains setChain(string,string,uint256,string): Chain ID ",
+                    vm.toString(chainId),
+                    " already used by \"",
+                    idToKey[chainId],
+                    "\""
+                )
+            )
+        );
+
+        uint256 oldChainId = chains[key].chainId;
+        delete idToKey[oldChainId];
+
         chains[key] = Chain(name, chainId, rpcUrl);
         idToKey[chainId] = key;
     }
@@ -45,8 +62,7 @@ abstract contract StdChains {
     function initialize() private {
         if (initialized) return;
 
-        setChain("anvil", "Localhost", 31337, "http://127.0.0.1:8545");
-        setChain("hardhat", "Localhost", 31337, "http://127.0.0.1:8545");
+        setChain("anvil", "Anvil", 31337, "http://127.0.0.1:8545");
         setChain("mainnet", "Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
         setChain("goerli", "Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
         setChain("sepolia", "Sepolia", 11155111, "https://rpc.sepolia.dev");
