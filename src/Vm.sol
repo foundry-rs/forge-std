@@ -148,7 +148,10 @@ interface VmSafe {
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata mnemonic, uint32 index) external pure returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
-    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index) external pure returns (uint256);
+    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index)
+        external
+        pure
+        returns (uint256);
     // Adds a private key to the local forge wallet and returns the address
     function rememberKey(uint256 privateKey) external returns (address);
     //
@@ -198,21 +201,49 @@ interface VmSafe {
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
     // (objectKey, valueKey, value) => (stringified JSON)
-    function serializeBool(string calldata objectKey, string calldata valueKey, bool value) external returns (string memory);
-    function serializeUint(string calldata objectKey, string calldata valueKey, uint256 value) external returns (string memory);
-    function serializeInt(string calldata objectKey, string calldata valueKey, int256 value) external returns (string memory);
-    function serializeAddress(string calldata objectKey, string calldata valueKey, address value) external returns (string memory);
-    function serializeBytes32(string calldata objectKey, string calldata valueKey, bytes32 value) external returns (string memory);
-    function serializeString(string calldata objectKey, string calldata valueKey, string calldata value) external returns (string memory);
-    function serializeBytes(string calldata objectKey, string calldata valueKey, bytes calldata value) external returns (string memory);
+    function serializeBool(string calldata objectKey, string calldata valueKey, bool value)
+        external
+        returns (string memory);
+    function serializeUint(string calldata objectKey, string calldata valueKey, uint256 value)
+        external
+        returns (string memory);
+    function serializeInt(string calldata objectKey, string calldata valueKey, int256 value)
+        external
+        returns (string memory);
+    function serializeAddress(string calldata objectKey, string calldata valueKey, address value)
+        external
+        returns (string memory);
+    function serializeBytes32(string calldata objectKey, string calldata valueKey, bytes32 value)
+        external
+        returns (string memory);
+    function serializeString(string calldata objectKey, string calldata valueKey, string calldata value)
+        external
+        returns (string memory);
+    function serializeBytes(string calldata objectKey, string calldata valueKey, bytes calldata value)
+        external
+        returns (string memory);
 
-    function serializeBool(string calldata objectKey, string calldata valueKey, bool[] calldata values) external returns (string memory);
-    function serializeUint(string calldata objectKey, string calldata valueKey, uint256[] calldata values) external returns (string memory);
-    function serializeInt(string calldata objectKey, string calldata valueKey, int256[] calldata values) external returns (string memory);
-    function serializeAddress(string calldata objectKey, string calldata valueKey, address[] calldata values)  external returns (string memory);
-    function serializeBytes32(string calldata objectKey, string calldata valueKey, bytes32[] calldata values) external returns (string memory);
-    function serializeString(string calldata objectKey, string calldata valueKey, string[] calldata values) external returns (string memory);
-    function serializeBytes(string calldata objectKey, string calldata valueKey, bytes[] calldata values) external returns (string memory);
+    function serializeBool(string calldata objectKey, string calldata valueKey, bool[] calldata values)
+        external
+        returns (string memory);
+    function serializeUint(string calldata objectKey, string calldata valueKey, uint256[] calldata values)
+        external
+        returns (string memory);
+    function serializeInt(string calldata objectKey, string calldata valueKey, int256[] calldata values)
+        external
+        returns (string memory);
+    function serializeAddress(string calldata objectKey, string calldata valueKey, address[] calldata values)
+        external
+        returns (string memory);
+    function serializeBytes32(string calldata objectKey, string calldata valueKey, bytes32[] calldata values)
+        external
+        returns (string memory);
+    function serializeString(string calldata objectKey, string calldata valueKey, string[] calldata values)
+        external
+        returns (string memory);
+    function serializeBytes(string calldata objectKey, string calldata valueKey, bytes[] calldata values)
+        external
+        returns (string memory);
     // Write a serialized JSON object to a file. If the file exists, it will be overwritten.
     // (stringified_json, path)
     function writeJson(string calldata json, string calldata path) external;
@@ -271,7 +302,8 @@ interface Vm is VmSafe {
     // Call this function, then emit an event, then call a function. Internally after the call, we check if
     // logs were emitted in the expected order with the expected topics and data (as specified by the booleans)
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData) external;
-    function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, address emitter) external;
+    function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, address emitter)
+        external;
     // Mocks a call to an address, returning specified data.
     // Calldata can either be strict or a partial match, e.g. if you only
     // pass a Solidity selector to the expected calldata, then the entire Solidity
@@ -279,7 +311,8 @@ interface Vm is VmSafe {
     function mockCall(address callee, bytes calldata passedData, bytes calldata returnedData) external;
     // Mocks a call to an address with a specific msg.value, returning specified data.
     // Calldata match takes precedence over msg.value in case of ambiguity.
-    function mockCall(address callee, uint256 passedMsgValue, bytes calldata passedData, bytes calldata returnedData) external;
+    function mockCall(address callee, uint256 passedMsgValue, bytes calldata passedData, bytes calldata returnedData)
+        external;
     // Clears all mocked calls
     function clearMockedCalls() external;
     // Expects a call to an address with the specified calldata.
@@ -302,11 +335,11 @@ interface Vm is VmSafe {
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
     function createFork(string calldata endpoint) external returns (uint256);
     // Creates a new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
-    function createFork(string calldata endpoint, bytes32 txid) external returns (uint256);
+    function createFork(string calldata endpoint, bytes32 txHash) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and block and returns the identifier of the fork
     function createSelectFork(string calldata endpoint, uint256 blockNumber) external returns (uint256);
     // Creates _and_ also selects new fork with the given endpoint and at the block the given transaction was mined in, and replays all transaction mined in the block before the transaction
-    function createSelectFork(string calldata endpoint, bytes32 txid) external returns (uint256);
+    function createSelectFork(string calldata endpoint, bytes32 txHash) external returns (uint256);
     // Creates _and_ also selects a new fork with the given endpoint and the latest block and returns the identifier of the fork
     function createSelectFork(string calldata endpoint) external returns (uint256);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
@@ -319,7 +352,7 @@ interface Vm is VmSafe {
     function rollFork(uint256 blockNumber) external;
     // Updates the currently active fork to given transaction
     // this will `rollFork` with the number of the block the transaction was mined in and replays all transaction mined before it in the block
-    function rollFork(bytes32 txid) external;
+    function rollFork(bytes32 txHash) external;
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
     // Updates the given fork to block number of the given transaction and replays all transaction mined before it in the block
@@ -338,7 +371,7 @@ interface Vm is VmSafe {
     // In forking mode, explicitly grant the given address cheatcode access
     function allowCheatcodes(address account) external;
     // Fetches the given transaction from the active fork and executes it on the current state
-    function transact(bytes32 txid) external;
+    function transact(bytes32 txHash) external;
     // Fetches the given transaction from the given fork and executes it on the current state
-    function transact(uint256 forkId, bytes32 txid) external;
+    function transact(uint256 forkId, bytes32 txHash) external;
 }
