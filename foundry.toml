@@ -6,6 +6,7 @@ fs_permissions = [{ access = "read-write", path = "./"}]
 mainnet = "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70" # Different API key.
 optimism_goerli = "https://goerli.optimism.io/" # Adds a trailing slash.
 arbitrum_one_goerli = "https://goerli-rollup.arbitrum.io/rpc/" # Adds a trailing slash.
+needs_undefined_env_var = "${UNDEFINED_RPC_URL_PLACEHOLDER}"
 
 [fmt]
 # These are all the `forge fmt` defaults.
