@@ -80,17 +80,17 @@ interface VmSafe {
     // Gets all accessed reads and write slot from a recording session, for a given address
     function accesses(address who) external returns (bytes32[] memory reads, bytes32[] memory writes);
     // Gets the _creation_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getCode(string calldata path) external view returns (bytes memory bytecode);
+    function getCode(string calldata artifactPath) external view returns (bytes memory bytecode);
     // Gets the _deployed_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getDeployedCode(string calldata path) external view returns (bytes memory bytecode);
+    function getDeployedCode(string calldata artifactPath) external view returns (bytes memory bytecode);
     // Labels an address in call traces
-    function label(address, string calldata) external;
+    function label(address who, string calldata newLabel) external;
     // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
     function broadcast() external;
     // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
-    function broadcast(address) external;
+    function broadcast(address broadcaster) external;
     // Has the next call (at this call depth only) create a transaction with the private key provided as the sender that can later be signed and sent onchain
-    function broadcast(uint256) external;
+    function broadcast(uint256 privateKey) external;
     // Using the address that calls the test contract, has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
     function startBroadcast() external;
     // Has all subsequent calls (at this call depth only) create transactions with the address provided that can later be signed and sent onchain
@@ -110,22 +110,18 @@ interface VmSafe {
     // Reads next line of file to string
     function readLine(string calldata path) external view returns (string memory line);
     // Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
-    // (path, data) => ()
     function writeFile(string calldata path, string calldata data) external;
     // Writes binary data to a file, creating a file if it does not exist, and entirely replacing its contents if it does.
-    // Path is relative to the project root. (path, data) => ()
+    // Path is relative to the project root.
     function writeFileBinary(string calldata path, bytes calldata data) external;
     // Writes line to file, creating a file if it does not exist.
-    // (path, data) => ()
     function writeLine(string calldata path, string calldata data) external;
     // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
-    // (path) => ()
     function closeFile(string calldata path) external;
     // Removes file. This cheatcode will revert in the following situations, but is not limited to just these cases:
     // - Path points to a directory.
     // - The file doesn't exist.
     // - The user lacks permissions to remove the file.
-    // (path) => ()
     function removeFile(string calldata path) external;
     // Convert values to a string
     function toString(address value) external pure returns (string memory stringValue);
@@ -174,30 +170,7 @@ interface VmSafe {
     // Given a string of JSON, return it as ABI-encoded
     function parseJson(string calldata json, string calldata key) external pure returns (bytes memory abiEncodedData);
     function parseJson(string calldata json) external pure returns (bytes memory abiEncodedData);
-    //
-    // writeJson
-    //
-    // ----
-    // Let's assume we want to write the following JSON to a file:
-    //
-    // { "boolean": true, "number": 342, "object": { "title": "finally json serialization" } }
-    //
-    // ```
-    //  string memory json1 = "some key";
-    //  vm.serializeBool(json1, "boolean", true);
-    //  vm.serializeBool(json1, "number", uint256(342));
-    //  json2 = "some other key";
-    //  string memory output = vm.serializeString(json2, "title", "finally json serialization");
-    //  string memory finalJson = vm.serialize(json1, "object", output);
-    //  vm.writeJson(finalJson, "./output/example.json");
-    // ```
-    //  The critical insight is that every invocation of serialization will return the stringified version of the JSON
-    // up to that point. That means we can construct arbitrary JSON objects and then use the return stringified version
-    // to serialize them as values to another JSON object.
-    //
-    //  json1 and json2 are simply keys used by the backend to keep track of the objects. So vm.serializeJson(json1,..)
-    //  will find the object in-memory that is keyed by "some key".   // writeJson
-    // ----
+
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
     function serializeBool(string calldata objectKey, string calldata valueKey, bool value)
@@ -243,7 +216,31 @@ interface VmSafe {
     function serializeBytes(string calldata objectKey, string calldata valueKey, bytes[] calldata values)
         external
         returns (string memory json);
+
+    //
+    // writeJson
+    //
+    // ----
     // Write a serialized JSON object to a file. If the file exists, it will be overwritten.
+    // Let's assume we want to write the following JSON to a file:
+    //
+    // { "boolean": true, "number": 342, "object": { "title": "finally json serialization" } }
+    //
+    // ```
+    //  string memory json1 = "some key";
+    //  vm.serializeBool(json1, "boolean", true);
+    //  vm.serializeBool(json1, "number", uint256(342));
+    //  json2 = "some other key";
+    //  string memory output = vm.serializeString(json2, "title", "finally json serialization");
+    //  string memory finalJson = vm.serialize(json1, "object", output);
+    //  vm.writeJson(finalJson, "./output/example.json");
+    // ```
+    // The critical insight is that every invocation of serialization will return the stringified version of the JSON
+    // up to that point. That means we can construct arbitrary JSON objects and then use the return stringified version
+    // to serialize them as values to another JSON object.
+    //
+    // json1 and json2 are simply keys used by the backend to keep track of the objects. So vm.serializeJson(json1,..)
+    // will find the object in-memory that is keyed by "some key".
     function writeJson(string calldata json, string calldata path) external;
     // Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key>
     // This is useful to replace a specific value of a JSON file, without having to parse the entire thing
@@ -263,37 +260,37 @@ interface VmSafe {
 }
 
 interface Vm is VmSafe {
-    // Sets block.timestamp (newTimestamp)
+    // Sets block.timestamp
     function warp(uint256 newTimestamp) external;
-    // Sets block.height (newHeight)
+    // Sets block.height
     function roll(uint256 newHeight) external;
-    // Sets block.basefee (newBasefee)
+    // Sets block.basefee
     function fee(uint256 newBasefee) external;
-    // Sets block.difficulty (newDifficulty)
+    // Sets block.difficulty
     function difficulty(uint256 newDifficulty) external;
     // Sets block.chainid
     function chainId(uint256 newChainId) external;
-    // Stores a value to an address' storage slot, (who, slot, value)
+    // Stores a value to an address' storage slot.
     function store(address who, bytes32 slot, bytes32 value) external;
     // Sets the nonce of an account; must be higher than the current nonce of the account
     function setNonce(address account, uint64 newNonce) external;
     // Sets the *next* call's msg.sender to be the input address
-    function prank(address newCaller) external;
+    function prank(address msgSender) external;
     // Sets all subsequent calls' msg.sender to be the input address until `stopPrank` is called
-    function startPrank(address newCaller) external;
+    function startPrank(address msgSender) external;
     // Sets the *next* call's msg.sender to be the input address, and the tx.origin to be the second input
-    function prank(address newCaller, address newTxOrigin) external;
+    function prank(address msgSender, address txOrigin) external;
     // Sets all subsequent calls' msg.sender to be the input address until `stopPrank` is called, and the tx.origin to be the second input
-    function startPrank(address newCaller, address newTxOrigin) external;
+    function startPrank(address msgSender, address txOrigin) external;
     // Resets subsequent calls' msg.sender to be `address(this)`
     function stopPrank() external;
-    // Sets an address' balance, (who, newBalance)
+    // Sets an address' balance
     function deal(address who, uint256 newBalance) external;
-    // Sets an address' code, (who, newCode)
+    // Sets an address' code
     function etch(address who, bytes calldata newCode) external;
     // Expects an error on next call
-    function expectRevert(bytes calldata revertdata) external;
-    function expectRevert(bytes4 revertdata) external;
+    function expectRevert(bytes calldata revertData) external;
+    function expectRevert(bytes4 revertData) external;
     function expectRevert() external;
     // Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
     // Call this function, then emit an event, then call a function. Internally after the call, we check if
@@ -305,20 +302,19 @@ interface Vm is VmSafe {
     // Calldata can either be strict or a partial match, e.g. if you only
     // pass a Solidity selector to the expected calldata, then the entire Solidity
     // function will be mocked.
-    function mockCall(address callee, bytes calldata passedData, bytes calldata returnedData) external;
+    function mockCall(address callee, bytes calldata data, bytes calldata returnData) external;
     // Mocks a call to an address with a specific msg.value, returning specified data.
     // Calldata match takes precedence over msg.value in case of ambiguity.
-    function mockCall(address callee, uint256 passedMsgValue, bytes calldata passedData, bytes calldata returnedData)
-        external;
+    function mockCall(address callee, uint256 msgValue, bytes calldata data, bytes calldata returnData) external;
     // Clears all mocked calls
     function clearMockedCalls() external;
     // Expects a call to an address with the specified calldata.
     // Calldata can either be a strict or a partial match
-    function expectCall(address callee, bytes calldata expectedCalldata) external;
+    function expectCall(address callee, bytes calldata data) external;
     // Expects a call to an address with the specified msg.value and calldata
-    function expectCall(address callee, uint256 expectedMsgValue, bytes calldata expectedCalldata) external;
-    // Sets block.coinbase (who)
-    function coinbase(address who) external;
+    function expectCall(address callee, uint256 msgValue, bytes calldata data) external;
+    // Sets block.coinbase
+    function coinbase(address newCoinbase) external;
     // Snapshot the current state of the evm.
     // Returns the id of the snapshot that was created.
     // To revert a snapshot use `revertTo`
@@ -343,8 +339,7 @@ interface Vm is VmSafe {
     function createSelectFork(string calldata endpoint) external returns (uint256 forkId);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256 forkId) external;
-    /// Returns the currently active fork
-    /// Reverts if no fork is currently active
+    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
     function activeFork() external view returns (uint256 forkId);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
@@ -355,7 +350,7 @@ interface Vm is VmSafe {
     // Updates the given fork to given block number
     function rollFork(uint256 forkId, uint256 blockNumber) external;
     // Updates the given fork to block number of the given transaction and replays all transaction mined before it in the block
-    function rollFork(uint256 forkId, bytes32 transaction) external;
+    function rollFork(uint256 forkId, bytes32 txHash) external;
     // Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
     // Meaning, changes made to the state of this account will be kept when switching forks
     function makePersistent(address account) external;
@@ -366,7 +361,7 @@ interface Vm is VmSafe {
     function revokePersistent(address account) external;
     function revokePersistent(address[] calldata accounts) external;
     // Returns true if the account is marked as persistent
-    function isPersistent(address) external view returns (bool persistent);
+    function isPersistent(address account) external view returns (bool persistent);
     // In forking mode, explicitly grant the given address cheatcode access
     function allowCheatcodes(address account) external;
     // Fetches the given transaction from the active fork and executes it on the current state
