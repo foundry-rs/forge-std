@@ -219,6 +219,41 @@ contract StdCheatsTest is Test {
         receipts;
     }
 
+    function testGasMeteringModifier() public {
+        uint256 gas_start_normal = gasleft();
+        addInLoop();
+        uint256 gas_used_normal = gas_start_normal - gasleft();
+
+        uint256 gas_start_single = gasleft();
+        addInLoopNoGas();
+        uint256 gas_used_single = gas_start_single - gasleft();
+
+        uint256 gas_start_double = gasleft();
+        addInLoopNoGasNoGas();
+        uint256 gas_used_double = gas_start_double - gasleft();
+
+        emit log_named_uint("Normal gas", gas_used_normal);
+        emit log_named_uint("Single modifier gas", gas_used_single);
+        emit log_named_uint("Double modifier  gas", gas_used_double);
+        assertTrue(gas_used_double + gas_used_single < gas_used_normal);
+    }
+
+    function addInLoop() internal returns (uint256) {
+        uint256 b;
+        for (uint256 i; i < 10000; i++) {
+            b += i;
+        }
+        return b;
+    }
+
+    function addInLoopNoGas() internal noGasMetering returns (uint256) {
+        return addInLoop();
+    }
+
+    function addInLoopNoGasNoGas() internal noGasMetering returns (uint256) {
+        return addInLoopNoGas();
+    }
+
     function bytesToUint_test(bytes memory b) private pure returns (uint256) {
         uint256 number;
         for (uint256 i = 0; i < b.length; i++) {
