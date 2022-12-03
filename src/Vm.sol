@@ -52,7 +52,7 @@ interface VmSafe {
     // Records all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
-    function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
+    function accesses(address) external view returns (bytes32[] memory reads, bytes32[] memory writes);
     // Gets the _creation_ bytecode from an artifact file. Takes in the relative path to the json file
     function getCode(string calldata) external view returns (bytes memory);
     // Gets the _deployed_ bytecode from an artifact file. Takes in the relative path to the json file
@@ -116,7 +116,7 @@ interface VmSafe {
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs, () => (logs)
-    function getRecordedLogs() external returns (Log[] memory);
+    function getRecordedLogs() external view returns (Log[] memory);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path m/44'/60'/0'/0/{index}
     function deriveKey(string calldata, uint32) external pure returns (uint256);
     // Derive a private key from a provided mnenomic string (or mnenomic file path) at the derivation path {path}{index}
