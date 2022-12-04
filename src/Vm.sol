@@ -21,6 +21,16 @@ interface VmSafe {
         string url;
     }
 
+    struct FsMetadata {
+        bool isDir;
+        bool isSymlink;
+        uint256 length;
+        bool readOnly;
+        uint256 modified;
+        uint256 accessed;
+        uint256 created;
+    }
+
     // Loads a storage slot from an address (who, slot)
     function load(address, bytes32) external view returns (bytes32);
     // Signs data, (privateKey, digest) => (v, r, s)
@@ -95,6 +105,8 @@ interface VmSafe {
     function readFileBinary(string calldata) external view returns (bytes memory);
     // Get the path of the current project root
     function projectRoot() external view returns (string memory);
+    // Get the metadata for a file/directory
+    function fsMetadata(string calldata fileOrDir) external returns (FsMetadata memory metadata);
     // Reads next line of file to string, (path) => (line)
     function readLine(string calldata) external view returns (string memory);
     // Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
