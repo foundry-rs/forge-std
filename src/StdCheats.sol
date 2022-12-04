@@ -431,6 +431,8 @@ abstract contract StdCheats is StdCheatsSafe {
     StdStorage private stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    bool private gasMeteringOff;
+
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
         vm.warp(block.timestamp + time);
@@ -526,6 +528,27 @@ abstract contract StdCheats is StdCheatsSafe {
         try vm.activeFork() {
             status = true;
         } catch (bytes memory) {}
+    }
+
+    modifier noGasMetering() {
+        vm.pauseGasMetering();
+        // To prevent turning gas monitoring back on with nested functions that use this modifier,
+        // we check if gasMetering started in the off position. If it did, we don't want to turn
+        // it back on until we exit the top level function that used the modifier
+        //
+        // i.e. funcA() noGasMetering { funcB() }, where funcB has noGasMetering as well.
+        // funcA will have `gasStartedOff` as false, funcB will have it as true,
+        // so we only turn metering back on at the end of the funcA
+        bool gasStartedOff = gasMeteringOff;
+        gasMeteringOff = true;
+
+        _;
+
+        // if gas metering was on when this modifier was called, turn it back on at the end
+        if (!gasStartedOff) {
+            gasMeteringOff = false;
+            vm.resumeGasMetering();
+        }
     }
 
     modifier skipWhenForking() {

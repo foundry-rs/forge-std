@@ -200,6 +200,11 @@ interface VmSafe {
     function rpcUrlStructs() external view returns (Rpc[] memory);
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool) external pure;
+
+    // Pauses gas metering (i.e. gas usage is not counted). Noop if already paused.
+    function pauseGasMetering() external;
+    // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
+    function resumeGasMetering() external;
 }
 
 interface Vm is VmSafe {
