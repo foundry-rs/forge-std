@@ -8,10 +8,7 @@ import "./Vm.sol";
 abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
-    /// syntaxes, we put the constructor in a private method and assign an unused return value to a variable. This
-    /// forces the method to run during construction, but without declaring an explicit constructor.
-    uint256 private CONSTRUCTOR = _constructor();
+    bool private initialized;
 
     struct Chain {
         // The chain name.
@@ -31,7 +28,8 @@ abstract contract StdChains {
     mapping(uint256 => string) private idToAlias;
 
     // The RPC URL will be fetched from config or defaultRpcUrls if possible.
-    function getChain(string memory chainAlias) public view returns (Chain memory chain) {
+    function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
+        initialize();
         chain = chains[chainAlias];
         require(
             chain.chainId != 0,
@@ -42,6 +40,7 @@ abstract contract StdChains {
     }
 
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
+        initialize();
         string memory chainAlias = idToAlias[chainId];
 
         require(
@@ -121,7 +120,9 @@ abstract contract StdChains {
         idToAlias[chain.chainId] = chainAlias;
     }
 
-    function _constructor() private returns (uint256) {
+    function initialize() private {
+        if (initialized) return;
+
         setChainWithDefaultRpcUrl("anvil", Chain("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
             "mainnet", Chain("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
@@ -147,6 +148,6 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", Chain("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
         setChainWithDefaultRpcUrl("gnosis_chain", Chain("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
 
-        return 0;
+        initialized = true;
     }
 }
