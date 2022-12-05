@@ -68,13 +68,27 @@ interface VmSafe {
     function envOr(string calldata name, string calldata defaultValue) external returns (string memory value);
     function envOr(string calldata name, bytes calldata defaultValue) external returns (bytes memory value);
     // Read environment variables as arrays with default value, (name, value[]) => (value[])
-    function envOr(string calldata name, string calldata, bool[] calldata defaultValue) external returns (bool[] memory value);
-    function envOr(string calldata name, string calldata, uint256[] calldata defaultValue) external returns (uint256[] memory value);
-    function envOr(string calldata name, string calldata, int256[] calldata defaultValue) external returns (int256[] memory value);
-    function envOr(string calldata name, string calldata, address[] calldata defaultValue) external returns (address[] memory value);
-    function envOr(string calldata name, string calldata, bytes32[] calldata defaultValue) external returns (bytes32[] memory value);
-    function envOr(string calldata name, string calldata, string[] calldata defaultValue) external returns (string[] memory value);
-    function envOr(string calldata name, string calldata, bytes[] calldata defaultValue) external returns (bytes[] memory value);
+    function envOr(string calldata name, string calldata, bool[] calldata defaultValue)
+        external
+        returns (bool[] memory value);
+    function envOr(string calldata name, string calldata, uint256[] calldata defaultValue)
+        external
+        returns (uint256[] memory value);
+    function envOr(string calldata name, string calldata, int256[] calldata defaultValue)
+        external
+        returns (int256[] memory value);
+    function envOr(string calldata name, string calldata, address[] calldata defaultValue)
+        external
+        returns (address[] memory value);
+    function envOr(string calldata name, string calldata, bytes32[] calldata defaultValue)
+        external
+        returns (bytes32[] memory value);
+    function envOr(string calldata name, string calldata, string[] calldata defaultValue)
+        external
+        returns (string[] memory value);
+    function envOr(string calldata name, string calldata, bytes[] calldata defaultValue)
+        external
+        returns (bytes[] memory value);
     // Records all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
@@ -322,7 +336,7 @@ interface Vm is VmSafe {
     // Revert the state of the EVM to a previous snapshot
     // Takes the snapshot id to revert to.
     // This deletes the snapshot and all snapshots taken after the given snapshot id.
-    function revertTo(uint256 snapshotId) external returns (bool result);
+    function revertTo(uint256 snapshotId) external returns (bool success);
     // Creates a new fork with the given endpoint and block and returns the identifier of the fork
     function createFork(string calldata endpoint, uint256 blockNumber) external returns (uint256 forkId);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
