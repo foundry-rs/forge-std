@@ -44,21 +44,21 @@ interface VmSafe {
     // Sets environment variables
     function setEnv(string calldata name, string calldata value) external;
     // Reads environment variables, (name) => (value)
-    function envBool(string calldata name) external view returns (bool);
-    function envUint(string calldata name) external view returns (uint256);
-    function envInt(string calldata name) external view returns (int256);
-    function envAddress(string calldata name) external view returns (address);
-    function envBytes32(string calldata name) external view returns (bytes32);
-    function envString(string calldata name) external view returns (string memory);
-    function envBytes(string calldata name) external view returns (bytes memory);
+    function envBool(string calldata name) external view returns (bool value);
+    function envUint(string calldata name) external view returns (uint256 value);
+    function envInt(string calldata name) external view returns (int256 value);
+    function envAddress(string calldata name) external view returns (address value);
+    function envBytes32(string calldata name) external view returns (bytes32 value);
+    function envString(string calldata name) external view returns (string memory value);
+    function envBytes(string calldata name) external view returns (bytes memory value);
     // Reads environment variables as arrays
-    function envBool(string calldata name, string calldata delim) external view returns (bool[] memory);
-    function envUint(string calldata name, string calldata delim) external view returns (uint256[] memory);
-    function envInt(string calldata name, string calldata delim) external view returns (int256[] memory);
-    function envAddress(string calldata name, string calldata delim) external view returns (address[] memory);
-    function envBytes32(string calldata name, string calldata delim) external view returns (bytes32[] memory);
-    function envString(string calldata name, string calldata delim) external view returns (string[] memory);
-    function envBytes(string calldata name, string calldata delim) external view returns (bytes[] memory);
+    function envBool(string calldata name, string calldata delim) external view returns (bool[] memory value);
+    function envUint(string calldata name, string calldata delim) external view returns (uint256[] memory value);
+    function envInt(string calldata name, string calldata delim) external view returns (int256[] memory value);
+    function envAddress(string calldata name, string calldata delim) external view returns (address[] memory value);
+    function envBytes32(string calldata name, string calldata delim) external view returns (bytes32[] memory value);
+    function envString(string calldata name, string calldata delim) external view returns (string[] memory value);
+    function envBytes(string calldata name, string calldata delim) external view returns (bytes[] memory value);
     // Read environment variables with default value
     function envOr(string calldata name, bool defaultValue) external returns (bool value);
     function envOr(string calldata name, uint256 defaultValue) external returns (uint256 value);
