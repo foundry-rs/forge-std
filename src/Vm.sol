@@ -67,7 +67,7 @@ interface VmSafe {
     function envOr(string calldata name, bytes32 defaultValue) external returns (bytes32 value);
     function envOr(string calldata name, string calldata defaultValue) external returns (string memory value);
     function envOr(string calldata name, bytes calldata defaultValue) external returns (bytes memory value);
-    // Read environment variables as arrays with default value, (name, value[]) => (value[])
+    // Read environment variables as arrays with default value
     function envOr(string calldata name, string calldata, bool[] calldata defaultValue)
         external
         returns (bool[] memory value);
