@@ -32,7 +32,7 @@ interface VmSafe {
     }
 
     // Loads a storage slot from an address
-    function load(address who, bytes32 slot) external view returns (bytes32 data);
+    function load(address target, bytes32 slot) external view returns (bytes32 data);
     // Signs data
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
     // Gets the address for a given private key
@@ -40,7 +40,7 @@ interface VmSafe {
     // Gets the nonce of an account
     function getNonce(address account) external view returns (uint64 nonce);
     // Performs a foreign function call via the terminal
-    function ffi(string[] calldata stringInputs) external returns (bytes memory result);
+    function ffi(string[] calldata commandInput) external returns (bytes memory result);
     // Sets environment variables
     function setEnv(string calldata name, string calldata value) external;
     // Reads environment variables, (name) => (value)
@@ -68,47 +68,47 @@ interface VmSafe {
     function envOr(string calldata name, string calldata defaultValue) external returns (string memory value);
     function envOr(string calldata name, bytes calldata defaultValue) external returns (bytes memory value);
     // Read environment variables as arrays with default value
-    function envOr(string calldata name, string calldata, bool[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, bool[] calldata defaultValue)
         external
         returns (bool[] memory value);
-    function envOr(string calldata name, string calldata, uint256[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, uint256[] calldata defaultValue)
         external
         returns (uint256[] memory value);
-    function envOr(string calldata name, string calldata, int256[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, int256[] calldata defaultValue)
         external
         returns (int256[] memory value);
-    function envOr(string calldata name, string calldata, address[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, address[] calldata defaultValue)
         external
         returns (address[] memory value);
-    function envOr(string calldata name, string calldata, bytes32[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, bytes32[] calldata defaultValue)
         external
         returns (bytes32[] memory value);
-    function envOr(string calldata name, string calldata, string[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, string[] calldata defaultValue)
         external
         returns (string[] memory value);
-    function envOr(string calldata name, string calldata, bytes[] calldata defaultValue)
+    function envOr(string calldata name, string calldata delim, bytes[] calldata defaultValue)
         external
         returns (bytes[] memory value);
     // Records all storage reads and writes
     function record() external;
     // Gets all accessed reads and write slot from a recording session, for a given address
-    function accesses(address who) external returns (bytes32[] memory reads, bytes32[] memory writes);
+    function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
     // Gets the _creation_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getCode(string calldata artifactPath) external view returns (bytes memory bytecode);
+    function getCode(string calldata artifactPath) external view returns (bytes memory creationBytecode);
     // Gets the _deployed_ bytecode from an artifact file. Takes in the relative path to the json file
-    function getDeployedCode(string calldata artifactPath) external view returns (bytes memory bytecode);
+    function getDeployedCode(string calldata artifactPath) external view returns (bytes memory runtimeBytecode);
     // Labels an address in call traces
-    function label(address who, string calldata newLabel) external;
+    function label(address account, string calldata newLabel) external;
     // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
     function broadcast() external;
     // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
-    function broadcast(address broadcaster) external;
+    function broadcast(address signer) external;
     // Has the next call (at this call depth only) create a transaction with the private key provided as the sender that can later be signed and sent onchain
     function broadcast(uint256 privateKey) external;
     // Using the address that calls the test contract, has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain
     function startBroadcast() external;
     // Has all subsequent calls (at this call depth only) create transactions with the address provided that can later be signed and sent onchain
-    function startBroadcast(address broadcaster) external;
+    function startBroadcast(address signer) external;
     // Has all subsequent calls (at this call depth only) create transactions with the private key provided that can later be signed and sent onchain
     function startBroadcast(uint256 privateKey) external;
     // Stops collecting onchain transactions
@@ -118,7 +118,7 @@ interface VmSafe {
     // Reads the entire content of file as binary. Path is relative to the project root.
     function readFileBinary(string calldata path) external view returns (bytes memory data);
     // Get the path of the current project root
-    function projectRoot() external view returns (string memory rootPath);
+    function projectRoot() external view returns (string memory path);
     // Get the metadata for a file/directory
     function fsMetadata(string calldata fileOrDir) external returns (FsMetadata memory metadata);
     // Reads next line of file to string
@@ -138,19 +138,19 @@ interface VmSafe {
     // - The user lacks permissions to remove the file.
     function removeFile(string calldata path) external;
     // Convert values to a string
-    function toString(address value) external pure returns (string memory stringValue);
-    function toString(bytes calldata value) external pure returns (string memory stringValue);
-    function toString(bytes32 value) external pure returns (string memory stringValue);
-    function toString(bool value) external pure returns (string memory stringValue);
-    function toString(uint256 value) external pure returns (string memory stringValue);
-    function toString(int256 value) external pure returns (string memory stringValue);
+    function toString(address value) external pure returns (string memory stringifiedValue);
+    function toString(bytes calldata value) external pure returns (string memory stringifiedValue);
+    function toString(bytes32 value) external pure returns (string memory stringifiedValue);
+    function toString(bool value) external pure returns (string memory stringifiedValue);
+    function toString(uint256 value) external pure returns (string memory stringifiedValue);
+    function toString(int256 value) external pure returns (string memory stringifiedValue);
     // Convert values from a string
-    function parseBytes(string calldata value) external pure returns (bytes memory parsedValue);
-    function parseAddress(string calldata value) external pure returns (address parsedValue);
-    function parseUint(string calldata value) external pure returns (uint256 parsedValue);
-    function parseInt(string calldata value) external pure returns (int256 parsedValue);
-    function parseBytes32(string calldata value) external pure returns (bytes32 parsedValue);
-    function parseBool(string calldata value) external pure returns (bool parsedValue);
+    function parseBytes(string calldata stringifiedValue) external pure returns (bytes memory parsedValue);
+    function parseAddress(string calldata stringifiedValue) external pure returns (address parsedValue);
+    function parseUint(string calldata stringifiedValue) external pure returns (uint256 parsedValue);
+    function parseInt(string calldata stringifiedValue) external pure returns (int256 parsedValue);
+    function parseBytes32(string calldata stringifiedValue) external pure returns (bytes32 parsedValue);
+    function parseBool(string calldata stringifiedValue) external pure returns (bool parsedValue);
     // Record all the transaction logs
     function recordLogs() external;
     // Gets all the recorded logs
@@ -285,7 +285,7 @@ interface Vm is VmSafe {
     // Sets block.chainid
     function chainId(uint256 newChainId) external;
     // Stores a value to an address' storage slot.
-    function store(address who, bytes32 slot, bytes32 value) external;
+    function store(address target, bytes32 slot, bytes32 value) external;
     // Sets the nonce of an account; must be higher than the current nonce of the account
     function setNonce(address account, uint64 newNonce) external;
     // Sets the *next* call's msg.sender to be the input address
@@ -299,9 +299,9 @@ interface Vm is VmSafe {
     // Resets subsequent calls' msg.sender to be `address(this)`
     function stopPrank() external;
     // Sets an address' balance
-    function deal(address who, uint256 newBalance) external;
+    function deal(address account, uint256 newBalance) external;
     // Sets an address' code
-    function etch(address who, bytes calldata newCode) external;
+    function etch(address target, bytes calldata newRuntimeBytecode) external;
     // Expects an error on next call
     function expectRevert(bytes calldata revertData) external;
     function expectRevert(bytes4 revertData) external;
@@ -338,19 +338,19 @@ interface Vm is VmSafe {
     // This deletes the snapshot and all snapshots taken after the given snapshot id.
     function revertTo(uint256 snapshotId) external returns (bool success);
     // Creates a new fork with the given endpoint and block and returns the identifier of the fork
-    function createFork(string calldata endpoint, uint256 blockNumber) external returns (uint256 forkId);
+    function createFork(string calldata urlOrAlias, uint256 blockNumber) external returns (uint256 forkId);
     // Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork
-    function createFork(string calldata endpoint) external returns (uint256 forkId);
+    function createFork(string calldata urlOrAlias) external returns (uint256 forkId);
     // Creates a new fork with the given endpoint and at the block the given transaction was mined in, replays all transaction mined in the block before the transaction,
     // and returns the identifier of the fork
-    function createFork(string calldata endpoint, bytes32 txHash) external returns (uint256 forkId);
+    function createFork(string calldata urlOrAlias, bytes32 txHash) external returns (uint256 forkId);
     // Creates _and_ also selects a new fork with the given endpoint and block and returns the identifier of the fork
-    function createSelectFork(string calldata endpoint, uint256 blockNumber) external returns (uint256 forkId);
+    function createSelectFork(string calldata urlOrAlias, uint256 blockNumber) external returns (uint256 forkId);
     // Creates _and_ also selects new fork with the given endpoint and at the block the given transaction was mined in, replays all transaction mined in the block before
     // the transaction, returns the identifier of the fork
-    function createSelectFork(string calldata endpoint, bytes32 txHash) external returns (uint256 forkId);
+    function createSelectFork(string calldata urlOrAlias, bytes32 txHash) external returns (uint256 forkId);
     // Creates _and_ also selects a new fork with the given endpoint and the latest block and returns the identifier of the fork
-    function createSelectFork(string calldata endpoint) external returns (uint256 forkId);
+    function createSelectFork(string calldata urlOrAlias) external returns (uint256 forkId);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256 forkId) external;
     /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
