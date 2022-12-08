@@ -93,7 +93,7 @@ abstract contract StdChains {
     // set chain info, with priority to argument's rpcUrl field.
     function setChain(string memory chainAlias, Chain memory chain) internal virtual {
         require(
-            bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): chainAlias cannot be the empty string."
+            bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): Alias cannot be the empty string."
         );
 
         require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
