@@ -33,7 +33,7 @@ abstract contract StdChains {
         chain = chains[chainAlias];
         require(
             chain.chainId != 0,
-            string(abi.encodePacked("StdChains getChain(string): Chain alias \"", chainAlias, "\" not found."))
+            string(abi.encodePacked("StdChains getChain(string): Chain with alias \"", chainAlias, "\" not found."))
         );
 
         withRpcUrl(chainAlias, chain);
