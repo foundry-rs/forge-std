@@ -47,7 +47,7 @@ abstract contract StdChains {
 
         require(
             chain.chainId != 0,
-            string(abi.encodePacked("StdChains getChain(uint): Chain ID ", vm.toString(chainId), " not found."))
+            string(abi.encodePacked("StdChains getChain(uint): Chain with chain ID ", vm.toString(chainId), " not found."))
         );
 
         withRpcUrl(chainAlias, chain);
