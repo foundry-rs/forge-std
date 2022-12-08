@@ -96,7 +96,7 @@ abstract contract StdChains {
             bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): chainAlias cannot be the empty string."
         );
 
-        require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID 0 cannot be used.");
+        require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
 
         string memory foundAlias = idToAlias[chain.chainId];
 
