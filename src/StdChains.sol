@@ -29,6 +29,8 @@ abstract contract StdChains {
 
     // The RPC URL will be fetched from config or defaultRpcUrls if possible.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
+        require(bytes(chainAlias).length != 0, "StdChains getChain(string): Alias cannot be the empty string.");
+
         initialize();
         chain = chains[chainAlias];
         require(
@@ -40,6 +42,7 @@ abstract contract StdChains {
     }
 
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
+        require(chainId != 0, "StdChains getChain(uint): Chain ID cannot be 0.");
         initialize();
         string memory chainAlias = idToAlias[chainId];
 
@@ -47,7 +50,7 @@ abstract contract StdChains {
 
         require(
             chain.chainId != 0,
-            string(abi.encodePacked("StdChains getChain(uint): Chain with chain ID ", vm.toString(chainId), " not found."))
+            string(abi.encodePacked("StdChains getChain(uint): Chain with ID ", vm.toString(chainId), " not found."))
         );
 
         withRpcUrl(chainAlias, chain);
@@ -85,9 +88,7 @@ abstract contract StdChains {
 
     // set chain info, with priority to argument's rpcUrl field.
     function setChain(string memory chainAlias, Chain memory chain) internal virtual {
-        require(
-            bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): Alias cannot be the empty string."
-        );
+        require(bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): Alias cannot be the empty string.");
 
         require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
 

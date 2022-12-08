@@ -27,7 +27,7 @@ contract StdChainsTest is Test {
     }
 
     function testChainNoDefault() public {
-        vm.expectRevert("StdChains getChain(string): Chain alias \"does_not_exist\" not found.");
+        vm.expectRevert("StdChains getChain(string): Chain with alias \"does_not_exist\" not found.");
         getChain("does_not_exist");
     }
 
@@ -59,23 +59,33 @@ contract StdChainsTest is Test {
         assertEq(chainById.rpcUrl, customChain.rpcUrl);
     }
 
-    function testNoChainId0() public {
-        vm.expectRevert("StdChains setChain(string,Chain): chainAlias cannot be the empty string.");
+    function testSetNoEmptyAlias() public {
+        vm.expectRevert("StdChains setChain(string,Chain): Alias cannot be the empty string.");
         setChain("", Chain("", 123456789, ""));
     }
 
-    function testNoEmptyAlias() public {
-        vm.expectRevert("StdChains setChain(string,Chain): Chain ID 0 cannot be used.");
+    function testSetNoChainId0() public {
+        vm.expectRevert("StdChains setChain(string,Chain): Chain ID cannot be 0.");
         setChain("alias", Chain("", 0, ""));
     }
 
+    function testGetNoChainId0() public {
+        vm.expectRevert("StdChains getChain(uint): Chain ID cannot be 0.");
+        getChain(0);
+    }
+
+    function testGetNoEmptyAlias() public {
+        vm.expectRevert("StdChains getChain(string): Alias cannot be the empty string.");
+        getChain("");
+    }
+
     function testChainIdNotFound() public {
-        vm.expectRevert("StdChains getChain(string): Chain alias \"no_such_alias\" not found.");
+        vm.expectRevert("StdChains getChain(string): Chain with alias \"no_such_alias\" not found.");
         getChain("no_such_alias");
     }
 
     function testChainAliasNotFound() public {
-        vm.expectRevert("StdChains getChain(uint): No alias found for chain ID 321.");
+        vm.expectRevert("StdChains getChain(uint): Chain with ID 321 not found.");
         getChain(321);
     }
 
@@ -84,7 +94,7 @@ contract StdChainsTest is Test {
         assertEq(getChain(123456789).chainId, 123456789);
 
         setChain("custom_chain", Chain("Modified Chain", 999999999, "https://modified.chain/"));
-        vm.expectRevert("StdChains getChain(uint): No alias found for chain ID 123456789.");
+        vm.expectRevert("StdChains getChain(uint): Chain with ID 123456789 not found.");
         getChain(123456789);
 
         Chain memory modifiedChain = getChain(999999999);
