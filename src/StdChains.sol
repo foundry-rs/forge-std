@@ -43,13 +43,6 @@ abstract contract StdChains {
         initialize();
         string memory chainAlias = idToAlias[chainId];
 
-        require(
-            bytes(idToAlias[chainId]).length != 0,
-            string(
-                abi.encodePacked("StdChains getChain(uint): No alias found for chain ID ", vm.toString(chainId), ".")
-            )
-        );
-
         chain = chains[chainAlias];
 
         require(
