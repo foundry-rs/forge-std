@@ -4,12 +4,12 @@ pragma solidity >=0.6.2 <0.9.0;
 import "./console2.sol";
 
 abstract contract StdUtils {
+    uint256 private constant INT256_MIN_ABS =
+        57896044618658097711785492504343953926634992332820282019728792003956564819968;
     uint256 private constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     function _bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
-        require(min <= max, "StdUtils bound(uint256,uint256,uint256): Max is less than min.");
-
         // If x is between min and max, return x directly. This is to ensure that dictionary values
         // do not get shifted if the min is nonzero. More info: https://github.com/foundry-rs/forge-std/issues/188
         if (x >= min && x <= max) return x;
@@ -36,8 +36,22 @@ abstract contract StdUtils {
     }
 
     function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
+        require(min <= max, "StdUtils bound(uint256,uint256,uint256): Max is less than min.");
         result = _bound(x, min, max);
         console2.log("Bound Result", result);
+    }
+
+    function boundInt(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
+        require(min <= max, "StdUtils boundInt(int256,int256,int256): Max is less than min.");
+
+        uint256 _x = x < 0 ? (INT256_MIN_ABS - ~uint256(x) - 1) : (uint256(x) + INT256_MIN_ABS);
+        uint256 _min = min < 0 ? (INT256_MIN_ABS - ~uint256(min) - 1) : (uint256(min) + INT256_MIN_ABS);
+        uint256 _max = max < 0 ? (INT256_MIN_ABS - ~uint256(max) - 1) : (uint256(max) + INT256_MIN_ABS);
+
+        uint256 y = _bound(_x, _min, _max);
+        result = y > INT256_MIN_ABS ? int256(y - INT256_MIN_ABS) : -int256(INT256_MIN_ABS - y);
+        // TODO: change after log(string,int256) is made
+        console2.log("Bound Result", uint256(result));
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
