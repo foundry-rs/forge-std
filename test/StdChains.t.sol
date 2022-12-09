@@ -33,7 +33,7 @@ contract StdChainsTest is Test {
 
     function testSetChainFirstFails() public {
         vm.expectRevert("StdChains setChain(string,Chain): Chain ID 31337 already used by \"anvil\".");
-        setChain("anvil2",Chain("Anvil",31337,"URL"));
+        setChain("anvil2", Chain("Anvil", 31337, "URL"));
     }
 
     function testChainBubbleUp() public {
