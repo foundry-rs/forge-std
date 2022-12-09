@@ -74,6 +74,76 @@ contract StdUtilsTest is Test {
         bound(num, min, max);
     }
 
+    function testBoundInt_DD() public {
+        assertEq(boundInt(-3, 0, 4), 2);
+        assertEq(boundInt(0, -69, -69), -69);
+        assertEq(boundInt(0, -69, -68), -68);
+        assertEq(boundInt(-10, 150, 190), 154);
+        assertEq(boundInt(-300, 2800, 3200), 2908);
+        assertEq(boundInt(9999, -1337, 6666), 1995);
+    }
+
+    function testBoundInt_WithinRange() public {
+        assertEq(boundInt(51, -50, 150), 51);
+        assertEq(boundInt(51, -50, 150), boundInt(boundInt(51, -50, 150), -50, 150));
+        assertEq(boundInt(149, -50, 150), 149);
+        assertEq(boundInt(149, -50, 150), boundInt(boundInt(149, -50, 150), -50, 150));
+    }
+
+    function testBoundInt_EdgeCoverage() public {
+        assertEq(boundInt(type(int256).min, -50, 150), -50);
+        assertEq(boundInt(type(int256).min + 1, -50, 150), -49);
+        assertEq(boundInt(type(int256).min + 2, -50, 150), -48);
+        assertEq(boundInt(type(int256).min + 3, -50, 150), -47);
+        assertEq(boundInt(type(int256).max, -50, 150), 150);
+        assertEq(boundInt(type(int256).max - 1, -50, 150), 149);
+        assertEq(boundInt(type(int256).max - 2, -50, 150), 148);
+        assertEq(boundInt(type(int256).max - 3, -50, 150), 147);
+    }
+
+    function testBoundInt_DistributionIsEven(int256 min, uint256 size) public {
+        size = size % 100 + 1;
+        min = boundInt(min, -int256(size / 2), int256(size - size / 2));
+        int256 max = min + int256(size) - 1;
+        int256 result;
+
+        for (uint256 i = 1; i <= size * 4; ++i) {
+            // x > max
+            result = boundInt(max + int256(i), min, max);
+            assertEq(result, min + int256((i - 1) % size));
+            // x < min
+            result = boundInt(min - int256(i), min, max);
+            assertEq(result, max - int256((i - 1) % size));
+        }
+    }
+
+    function testBoundInt(int256 num, int256 min, int256 max) public {
+        if (min > max) (min, max) = (max, min);
+
+        int256 result = boundInt(num, min, max);
+
+        assertGe(result, min);
+        assertLe(result, max);
+        assertEq(result, boundInt(result, min, max));
+        if (num >= min && num <= max) assertEq(result, num);
+    }
+
+    function testBoundIntInt256Max() public {
+        assertEq(boundInt(0, type(int256).max - 1, type(int256).max), type(int256).max - 1);
+        assertEq(boundInt(1, type(int256).max - 1, type(int256).max), type(int256).max);
+    }
+
+    function testCannotBoundIntMaxLessThanMin() public {
+        vm.expectRevert(bytes("StdUtils boundInt(int256,int256,int256): Max is less than min."));
+        boundInt(-5, 100, 10);
+    }
+
+    function testCannotBoundIntMaxLessThanMin(int256 num, int256 min, int256 max) public {
+        vm.assume(min > max);
+        vm.expectRevert(bytes("StdUtils boundInt(int256,int256,int256): Max is less than min."));
+        boundInt(num, min, max);
+    }
+
     function testGenerateCreateAddress() external {
         address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
         uint256 nonce = 14;
