@@ -31,6 +31,11 @@ contract StdChainsTest is Test {
         getChain("does_not_exist");
     }
 
+    function testSetChainFirstFails() public {
+        vm.expectRevert("StdChains setChain(string,Chain): Chain ID 31337 already used by \"anvil\".");
+        setChain("anvil2",Chain("Anvil",31337,"URL"));
+    }
+
     function testChainBubbleUp() public {
         setChain("needs_undefined_env_var", Chain("", 123456789, ""));
         vm.expectRevert(
@@ -70,7 +75,7 @@ contract StdChainsTest is Test {
     }
 
     function testGetNoChainId0() public {
-        vm.expectRevert("StdChains getChain(uint): Chain ID cannot be 0.");
+        vm.expectRevert("StdChains getChain(uint256): Chain ID cannot be 0.");
         getChain(0);
     }
 
@@ -85,7 +90,7 @@ contract StdChainsTest is Test {
     }
 
     function testChainAliasNotFound() public {
-        vm.expectRevert("StdChains getChain(uint): Chain with ID 321 not found.");
+        vm.expectRevert("StdChains getChain(uint256): Chain with ID 321 not found.");
         getChain(321);
     }
 
@@ -94,7 +99,7 @@ contract StdChainsTest is Test {
         assertEq(getChain(123456789).chainId, 123456789);
 
         setChain("custom_chain", Chain("Modified Chain", 999999999, "https://modified.chain/"));
-        vm.expectRevert("StdChains getChain(uint): Chain with ID 123456789 not found.");
+        vm.expectRevert("StdChains getChain(uint256): Chain with ID 123456789 not found.");
         getChain(123456789);
 
         Chain memory modifiedChain = getChain(999999999);

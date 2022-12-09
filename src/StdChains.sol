@@ -23,16 +23,16 @@ abstract contract StdChains {
     }
 
     // chain alias -> chain data
-    mapping(string => Chain) internal chains;
-    mapping(string => string) internal defaultRpcUrls;
-    mapping(uint256 => string) private idToAlias;
+    mapping(string => Chain) internal _chains;
+    mapping(string => string) internal _defaultRpcUrls;
+    mapping(uint256 => string) internal _idToAlias;
 
     // The RPC URL will be fetched from config or defaultRpcUrls if possible.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
         require(bytes(chainAlias).length != 0, "StdChains getChain(string): Alias cannot be the empty string.");
 
         initialize();
-        chain = chains[chainAlias];
+        chain = _chains[chainAlias];
         require(
             chain.chainId != 0,
             string(abi.encodePacked("StdChains getChain(string): Chain with alias \"", chainAlias, "\" not found."))
@@ -42,15 +42,15 @@ abstract contract StdChains {
     }
 
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
-        require(chainId != 0, "StdChains getChain(uint): Chain ID cannot be 0.");
+        require(chainId != 0, "StdChains getChain(uint256): Chain ID cannot be 0.");
         initialize();
-        string memory chainAlias = idToAlias[chainId];
+        string memory chainAlias = _idToAlias[chainId];
 
-        chain = chains[chainAlias];
+        chain = _chains[chainAlias];
 
         require(
             chain.chainId != 0,
-            string(abi.encodePacked("StdChains getChain(uint): Chain with ID ", vm.toString(chainId), " not found."))
+            string(abi.encodePacked("StdChains getChain(uint256): Chain with ID ", vm.toString(chainId), " not found."))
         );
 
         withRpcUrl(chainAlias, chain);
@@ -63,7 +63,7 @@ abstract contract StdChains {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
-                chain.rpcUrl = defaultRpcUrls[chainAlias];
+                chain.rpcUrl = _defaultRpcUrls[chainAlias];
                 // distinguish 'not found' from 'cannot read'
                 bytes memory notFoundError =
                     abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
@@ -80,7 +80,7 @@ abstract contract StdChains {
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
     function setChainWithDefaultRpcUrl(string memory chainAlias, Chain memory chain) internal {
         string memory rpcUrl = chain.rpcUrl;
-        defaultRpcUrls[chainAlias] = rpcUrl;
+        _defaultRpcUrls[chainAlias] = rpcUrl;
         chain.rpcUrl = "";
         setChain(chainAlias, chain);
         chain.rpcUrl = rpcUrl; // restore argument
@@ -92,7 +92,8 @@ abstract contract StdChains {
 
         require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
 
-        string memory foundAlias = idToAlias[chain.chainId];
+        initialize();
+        string memory foundAlias = _idToAlias[chain.chainId];
 
         require(
             bytes(foundAlias).length == 0 || keccak256(bytes(foundAlias)) == keccak256(bytes(chainAlias)),
@@ -107,15 +108,16 @@ abstract contract StdChains {
             )
         );
 
-        uint256 oldChainId = chains[chainAlias].chainId;
-        delete idToAlias[oldChainId];
+        uint256 oldChainId = _chains[chainAlias].chainId;
+        delete _idToAlias[oldChainId];
 
-        chains[chainAlias] = chain;
-        idToAlias[chain.chainId] = chainAlias;
+        _chains[chainAlias] = chain;
+        _idToAlias[chain.chainId] = chainAlias;
     }
 
     function initialize() private {
         if (initialized) return;
+        initialized = true;
 
         setChainWithDefaultRpcUrl("anvil", Chain("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
@@ -141,7 +143,5 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl("bnb_smart_chain", Chain("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org"));
         setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", Chain("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
         setChainWithDefaultRpcUrl("gnosis_chain", Chain("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
-
-        initialized = true;
     }
 }
