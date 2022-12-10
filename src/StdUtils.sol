@@ -59,8 +59,7 @@ abstract contract StdUtils {
 
         // To move it back to int256 value, subtract INT256_MIN_ABS at here.
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1): int256(y - INT256_MIN_ABS);
-        // TODO: change after log(string,int256) is made
-        console2.log("Bound Result", uint256(result));
+        console2.log("Bound Result", result);
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce

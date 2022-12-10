@@ -92,21 +92,21 @@ contract StdUtilsTest is Test {
 
     function testBoundInt_EdgeCoverage() public {
         assertEq(bound(type(int256).min, -50, 150), -50);
-        assertEq(bound(type(int256).min, 10, 150), 10);
         assertEq(bound(type(int256).min + 1, -50, 150), -49);
-        assertEq(bound(type(int256).min + 1, 10, 150), 11);
         assertEq(bound(type(int256).min + 2, -50, 150), -48);
-        assertEq(bound(type(int256).min + 2, 10, 150), 12);
         assertEq(bound(type(int256).min + 3, -50, 150), -47);
+        assertEq(bound(type(int256).min, 10, 150), 10);
+        assertEq(bound(type(int256).min + 1, 10, 150), 11);
+        assertEq(bound(type(int256).min + 2, 10, 150), 12);
         assertEq(bound(type(int256).min + 3, 10, 150), 13);
 
         assertEq(bound(type(int256).max, -50, 150), 150);
-        assertEq(bound(type(int256).max, -50, -10), -10);
         assertEq(bound(type(int256).max - 1, -50, 150), 149);
-        assertEq(bound(type(int256).max - 1, -50, -10), -11);
         assertEq(bound(type(int256).max - 2, -50, 150), 148);
-        assertEq(bound(type(int256).max - 2, -50, -10), -12);
         assertEq(bound(type(int256).max - 3, -50, 150), 147);
+        assertEq(bound(type(int256).max, -50, -10), -10);
+        assertEq(bound(type(int256).max - 1, -50, -10), -11);
+        assertEq(bound(type(int256).max - 2, -50, -10), -12);
         assertEq(bound(type(int256).max - 3, -50, -10), -13);
     }
 
