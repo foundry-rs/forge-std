@@ -74,7 +74,7 @@ contract StdUtilsTest is Test {
         bound(num, min, max);
     }
 
-    function testBoundInt_DD() public {
+    function testBoundInt() public {
         assertEq(boundInt(-3, 0, 4), 2);
         assertEq(boundInt(0, -69, -69), -69);
         assertEq(boundInt(0, -69, -68), -68);
@@ -92,13 +92,22 @@ contract StdUtilsTest is Test {
 
     function testBoundInt_EdgeCoverage() public {
         assertEq(boundInt(type(int256).min, -50, 150), -50);
+        assertEq(boundInt(type(int256).min, 10, 150), 10);
         assertEq(boundInt(type(int256).min + 1, -50, 150), -49);
+        assertEq(boundInt(type(int256).min + 1, 10, 150), 11);
         assertEq(boundInt(type(int256).min + 2, -50, 150), -48);
+        assertEq(boundInt(type(int256).min + 2, 10, 150), 12);
         assertEq(boundInt(type(int256).min + 3, -50, 150), -47);
+        assertEq(boundInt(type(int256).min + 3, 10, 150), 13);
+
         assertEq(boundInt(type(int256).max, -50, 150), 150);
+        assertEq(boundInt(type(int256).max, -50, -10), -10);
         assertEq(boundInt(type(int256).max - 1, -50, 150), 149);
+        assertEq(boundInt(type(int256).max - 1, -50, -10), -11);
         assertEq(boundInt(type(int256).max - 2, -50, 150), 148);
+        assertEq(boundInt(type(int256).max - 2, -50, -10), -12);
         assertEq(boundInt(type(int256).max - 3, -50, 150), 147);
+        assertEq(boundInt(type(int256).max - 3, -50, -10), -13);
     }
 
     function testBoundInt_DistributionIsEven(int256 min, uint256 size) public {
@@ -131,6 +140,11 @@ contract StdUtilsTest is Test {
     function testBoundIntInt256Max() public {
         assertEq(boundInt(0, type(int256).max - 1, type(int256).max), type(int256).max - 1);
         assertEq(boundInt(1, type(int256).max - 1, type(int256).max), type(int256).max);
+    }
+
+    function testBoundIntInt256Min() public {
+        assertEq(boundInt(0, type(int256).min, type(int256).min + 1), type(int256).min);
+        assertEq(boundInt(1, type(int256).min, type(int256).min + 1), type(int256).min + 1);
     }
 
     function testCannotBoundIntMaxLessThanMin() public {

@@ -58,7 +58,7 @@ abstract contract StdUtils {
         uint256 y = _bound(_x, _min, _max);
 
         // To move it back to int256 value, subtract INT256_MIN_ABS at here.
-        result = y > INT256_MIN_ABS ? int256(y - INT256_MIN_ABS) : -int256(INT256_MIN_ABS - y);
+        result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1): int256(y - INT256_MIN_ABS);
         // TODO: change after log(string,int256) is made
         console2.log("Bound Result", uint256(result));
     }
