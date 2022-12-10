@@ -44,11 +44,20 @@ abstract contract StdUtils {
     function boundInt(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
         require(min <= max, "StdUtils boundInt(int256,int256,int256): Max is less than min.");
 
+        // Shifting all int256 values to uint256 to use _bound function. The range of two types are:
+        // int256 : -(2**255) ~ (2**255 - 1)
+        // uint256:     0     ~ (2**256 - 1)
+        // So, add 2**255, INT256_MIN_ABS to the integer values.
+        //
+        // If the given integer value is -2**255, we cannot use `-uint256(-x)` because of the overflow.
+        // So, use `~uint256(x) + 1` instead.
         uint256 _x = x < 0 ? (INT256_MIN_ABS - ~uint256(x) - 1) : (uint256(x) + INT256_MIN_ABS);
         uint256 _min = min < 0 ? (INT256_MIN_ABS - ~uint256(min) - 1) : (uint256(min) + INT256_MIN_ABS);
         uint256 _max = max < 0 ? (INT256_MIN_ABS - ~uint256(max) - 1) : (uint256(max) + INT256_MIN_ABS);
 
         uint256 y = _bound(_x, _min, _max);
+
+        // To move it back to int256 value, subtract INT256_MIN_ABS at here.
         result = y > INT256_MIN_ABS ? int256(y - INT256_MIN_ABS) : -int256(INT256_MIN_ABS - y);
         // TODO: change after log(string,int256) is made
         console2.log("Bound Result", uint256(result));
