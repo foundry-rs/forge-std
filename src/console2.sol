@@ -179,6 +179,10 @@ library console2 {
         _sendLogPayload(abi.encodeWithSignature("log(uint256)", p0));
     }
 
+    function log(int256 p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(int256)", p0));
+    }
+
     function log(string memory p0) internal view {
         _sendLogPayload(abi.encodeWithSignature("log(string)", p0));
     }
