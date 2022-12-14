@@ -63,7 +63,7 @@ abstract contract StdUtils {
 
         // To move it back to int256 value, subtract INT256_MIN_ABS at here.
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
-        console2_log(string(abi.encodePacked("Bound result: ", vm.toString(result))));
+        console2_log("Bound result", vm.toString(result));
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
@@ -114,8 +114,8 @@ abstract contract StdUtils {
         status;
     }
 
-    function console2_log(string memory p0) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
+    function console2_log(string memory p0, string memory p1) private view {
+        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,string)", p0, p1));
         status;
     }
 }
