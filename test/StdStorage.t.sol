@@ -223,6 +223,69 @@ contract StdStorageTest is Test {
         int256 val = stdstore.target(address(test)).sig(test.tG.selector).read_int();
         assertEq(val, type(int256).min);
     }
+
+    function isStoreCleared(StdStorage storage self) private view returns(bool) {
+        bool isSlotsCleared = self.slots[address(test)][test.arr_uint.selector][keccak256(abi.encode(self._keys, self._depth))] == uint256(0);
+        bool isFindsCleared = self.finds[address(test)][test.arr_uint.selector][keccak256(abi.encode(self._keys, self._depth))] == false;
+        bool existKeys;
+        for (uint256 i; i < self._keys.length; ++i) {
+            existKeys = self._keys[i] != bytes32(0);
+        }
+        bool isKeysCleared = !existKeys;
+        bool isSigCleared = self._sig == bytes4(0);
+        bool isDepthCleared = self._depth == uint256(0);
+        bool isTargetCleared = self._target == address(0);
+        bool isSetCleared = self._set == bytes32(0);
+
+        return (
+            isSlotsCleared && isFindsCleared && isKeysCleared && isSigCleared && isDepthCleared && isTargetCleared && isSetCleared
+        );
+    }
+
+    function testStorageArrayUintReset() public {
+        assertTrue(isStoreCleared(stdstore), "Initial");
+
+        uint256 slot0_0 = stdstore.target(address(test)).sig(test.arr_uint.selector).with_key(uint256(0)).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 1st find");
+
+        uint256 slot0_1 = stdstore.target(address(test)).sig(test.arr_uint.selector).with_key(uint256(0)).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 2nd find");
+
+        uint256 slot1_0 = stdstore.target(address(test)).sig(test.arr_uint.selector).with_key(uint256(1)).find();
+
+        assertTrue(slot0_0 == slot0_1, "Assert slot0 1st attemption == slot0 2nd attemption");
+        assertTrue(slot0_1 + 1 == slot1_0, "Assert slot1 is next to slot0");
+    }
+
+    function testStorageMapAddressReset() public {
+        assertTrue(isStoreCleared(stdstore), "Initial");
+
+        uint256 slot0_0 = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 1st find");
+
+        uint256 slot0_1 = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 2nd find");
+
+        assertTrue(slot0_0 == slot0_1, "Assert slot0 1st attemption == slot0 2nd attemption");
+    }
+
+    function testStorageBoolReset() public {
+        assertTrue(isStoreCleared(stdstore), "Initial");
+
+        uint256 slot0_0 = stdstore.target(address(test)).sig(test.tB.selector).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 1st find");
+
+        uint256 slot0_1 = stdstore.target(address(test)).sig(test.tB.selector).find();
+
+        assertTrue(isStoreCleared(stdstore), "After 2nd find");
+
+        assertTrue(slot0_0 == slot0_1, "Assert slot0 1st attemption == slot0 2nd attemption");
+    }
 }
 
 contract StorageTest {
@@ -253,12 +316,18 @@ contract StorageTest {
     int256 public tG = type(int256).min;
     bool public tH = true;
 
+    uint256[] public arr_uint;
+
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});
 
         uint256 two = (1 << 128) | 1;
         map_packed[msg.sender] = two;
         map_packed[address(uint160(1337))] = 1 << 128;
+
+        for (uint256 i; i < 5; ++i) {
+            arr_uint.push(i);
+        }
     }
 
     function read_struct_upper(address who) public view returns (uint256) {
