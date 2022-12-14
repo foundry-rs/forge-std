@@ -65,7 +65,7 @@ contract StdChainsTest is Test {
     }
 
     function testSetNoEmptyAlias() public {
-        vm.expectRevert("StdChains setChain(string,Chain): Alias cannot be the empty string.");
+        vm.expectRevert("StdChains setChain(string,Chain): Chain alias cannot be the empty string.");
         setChain("", Chain("", 123456789, ""));
     }
 
@@ -80,7 +80,7 @@ contract StdChainsTest is Test {
     }
 
     function testGetNoEmptyAlias() public {
-        vm.expectRevert("StdChains getChain(string): Alias cannot be the empty string.");
+        vm.expectRevert("StdChains getChain(string): Chain alias cannot be the empty string.");
         getChain("");
     }
 
