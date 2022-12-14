@@ -100,6 +100,7 @@ library stdStorageSafe {
         delete self._sig;
         delete self._keys;
         delete self._depth;
+        delete self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
 
         return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
