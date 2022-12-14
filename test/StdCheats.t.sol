@@ -238,7 +238,7 @@ contract StdCheatsTest is Test {
         assertTrue(gas_used_double + gas_used_single < gas_used_normal);
     }
 
-    function addInLoop() internal returns (uint256) {
+    function addInLoop() internal pure returns (uint256) {
         uint256 b;
         for (uint256 i; i < 10000; i++) {
             b += i;
