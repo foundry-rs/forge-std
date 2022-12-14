@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import "./console2.sol";
+// TODO Remove import.
+import {Vm} from "./Vm.sol";
 
 abstract contract StdUtils {
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
+
     uint256 private constant INT256_MIN_ABS =
         57896044618658097711785492504343953926634992332820282019728792003956564819968;
     uint256 private constant UINT256_MAX =
@@ -38,7 +42,7 @@ abstract contract StdUtils {
 
     function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
         result = _bound(x, min, max);
-        console2.log("Bound Result", result);
+        console2_log("Bound Result", result);
     }
 
     function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
@@ -59,7 +63,7 @@ abstract contract StdUtils {
 
         // To move it back to int256 value, subtract INT256_MIN_ABS at here.
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
-        console2.log("Bound Result", result);
+        console2_log(string(abi.encodePacked("Bound result: ", vm.toString(result))));
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
@@ -103,5 +107,15 @@ abstract contract StdUtils {
 
     function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
         return address(uint160(uint256(bytesValue)));
+    }
+
+    function console2_log(string memory p0, uint256 p1) private view {
+        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
+        status;
+    }
+
+    function console2_log(string memory p0) private view {
+        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
+        status;
     }
 }
