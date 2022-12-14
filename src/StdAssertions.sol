@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import "ds-test/test.sol";
-import "./StdMath.sol";
+import {DSTest} from "ds-test/test.sol";
+import {stdMath} from "./StdMath.sol";
 
 abstract contract StdAssertions is DSTest {
     event log_array(uint256[] val);
