@@ -144,6 +144,7 @@ abstract contract StdChains {
 
         initialized = true;
 
+        // If adding an RPC here, make sure to test the default RPC URL in `testRpcs`
         setChainWithDefaultRpcUrl("anvil", Chain("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
             "mainnet", Chain("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
@@ -151,7 +152,9 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "goerli", Chain("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
         );
-        setChainWithDefaultRpcUrl("sepolia", Chain("Sepolia", 11155111, "https://rpc.sepolia.dev"));
+        setChainWithDefaultRpcUrl(
+            "sepolia", Chain("Sepolia", 11155111, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+        );
         setChainWithDefaultRpcUrl("optimism", Chain("Optimism", 10, "https://mainnet.optimism.io"));
         setChainWithDefaultRpcUrl("optimism_goerli", Chain("Optimism Goerli", 420, "https://goerli.optimism.io"));
         setChainWithDefaultRpcUrl("arbitrum_one", Chain("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
@@ -160,7 +163,7 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl("arbitrum_nova", Chain("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc"));
         setChainWithDefaultRpcUrl("polygon", Chain("Polygon", 137, "https://polygon-rpc.com"));
-        setChainWithDefaultRpcUrl("polygon_mumbai", Chain("Polygon Mumbai", 80001, "https://rpc-mumbai.matic.today"));
+        setChainWithDefaultRpcUrl("polygon_mumbai", Chain("Polygon Mumbai", 80001, "https://rpc-mumbai.maticvigil.com"));
         setChainWithDefaultRpcUrl("avalanche", Chain("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
         setChainWithDefaultRpcUrl(
             "avalanche_fuji", Chain("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc")
