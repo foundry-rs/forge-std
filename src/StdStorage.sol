@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import "./Vm.sol";
+import {Vm} from "./Vm.sol";
 
 struct StdStorage {
     mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;

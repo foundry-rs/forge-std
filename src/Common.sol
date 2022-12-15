@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {StdStorage, Vm} from "./Components.sol";
+import {StdStorage} from "./StdStorage.sol";
+import {Vm} from "./Vm.sol";
 
 abstract contract CommonBase {
     // Cheat code address, 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D.
@@ -15,9 +16,6 @@ abstract contract CommonBase {
 
     // Address of the test contract, deployed by the DEFAULT_SENDER.
     address internal constant DEFAULT_TEST_CONTRACT = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
-
-    // Create2 factory used by scripts when deploying with create2, https://github.com/Arachnid/deterministic-deployment-proxy.
-    address internal constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;

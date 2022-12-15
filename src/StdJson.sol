@@ -3,7 +3,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
-import "./Vm.sol";
+import {VmSafe} from "./Vm.sol";
 
 // Helpers for parsing and writing JSON files
 // To parse:
@@ -27,7 +27,7 @@ import "./Vm.sol";
 // ```
 
 library stdJson {
-    VmSafe private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function parseRaw(string memory json, string memory key) internal pure returns (bytes memory) {
         return vm.parseJson(json, key);
