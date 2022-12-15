@@ -120,7 +120,11 @@ abstract contract StdChains {
 
     // lookup rpcUrl, in descending order of priority:
     // current -> config (foundry.toml) -> default
-    function getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain) private view returns (Chain memory) {
+    function getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
+        private
+        view
+        returns (Chain memory)
+    {
         if (bytes(chain.rpcUrl).length == 0) {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
