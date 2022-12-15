@@ -23,8 +23,8 @@ import {VmSafe} from "./Vm.sol";
  *
  * The `setChain` function is straightforward, and it simply saves off the given chain data.
  *
- * The `getChain` methods use `withRpcUrl` to return a chain. For example, let's say we want to
- * retrieve `mainnet`'s RPC URL:
+ * The `getChain` methods use `getChainWithUpdatedRpcUrl` to return a chain. For example, let's say
+ * we want to retrieve `mainnet`'s RPC URL:
  *   - If you haven't set any mainnet chain info with `setChain` and you haven't specified that
  *     chain in `foundry.toml`, the default data and RPC URL will be returned.
  *   - If you have set a mainnet RPC URL in `foundry.toml` it will return that, if valid (e.g. if
@@ -69,7 +69,7 @@ abstract contract StdChains {
             string(abi.encodePacked("StdChains getChain(string): Chain with alias \"", chainAlias, "\" not found."))
         );
 
-        withRpcUrl(chainAlias, chain);
+        chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
@@ -84,7 +84,7 @@ abstract contract StdChains {
             string(abi.encodePacked("StdChains getChain(uint256): Chain with ID ", vm.toString(chainId), " not found."))
         );
 
-        withRpcUrl(chainAlias, chain);
+        chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
     // set chain info, with priority to argument's rpcUrl field.
@@ -120,7 +120,7 @@ abstract contract StdChains {
 
     // lookup rpcUrl, in descending order of priority:
     // current -> config (foundry.toml) -> default
-    function withRpcUrl(string memory chainAlias, Chain memory chain) private view {
+    function getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain) private view returns (Chain memory) {
         if (bytes(chain.rpcUrl).length == 0) {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
@@ -137,6 +137,7 @@ abstract contract StdChains {
                 }
             }
         }
+        return chain;
     }
 
     function initialize() private {
