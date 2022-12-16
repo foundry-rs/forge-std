@@ -2,7 +2,7 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import {StdStorage} from "./StdStorage.sol";
-import {Vm} from "./Vm.sol";
+import {Vm, VmSafe} from "./Vm.sol";
 
 abstract contract CommonBase {
     // Cheat code address, 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D.
@@ -19,4 +19,13 @@ abstract contract CommonBase {
 
     Vm internal constant vm = Vm(VM_ADDRESS);
     StdStorage internal stdstore;
+}
+
+abstract contract TestBase is CommonBase {}
+
+abstract contract ScriptBase is CommonBase {
+    // Used when deploying with create2, https://github.com/Arachnid/deterministic-deployment-proxy.
+    address internal constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+
+    VmSafe internal constant vmSafe = VmSafe(VM_ADDRESS);
 }
