@@ -4,10 +4,12 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
-import {Vm, VmSafe} from "./Vm.sol";
+import {Vm} from "./Vm.sol";
 
 abstract contract StdCheatsSafe {
-    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    bool private gasMeteringOff;
 
     // Data structures to parse Transaction objects from the broadcast artifact
     // that conform to EIP1559. The Raw structs is what is parsed from the JSON
@@ -422,6 +424,45 @@ abstract contract StdCheatsSafe {
         require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
+
+    function isFork() internal virtual returns (bool status) {
+        try vm.activeFork() {
+            status = true;
+        } catch (bytes memory) {}
+    }
+
+    modifier skipWhenForking() {
+        if (!isFork()) {
+            _;
+        }
+    }
+
+    modifier skipWhenNotForking() {
+        if (isFork()) {
+            _;
+        }
+    }
+
+    modifier noGasMetering() {
+        vm.pauseGasMetering();
+        // To prevent turning gas monitoring back on with nested functions that use this modifier,
+        // we check if gasMetering started in the off position. If it did, we don't want to turn
+        // it back on until we exit the top level function that used the modifier
+        //
+        // i.e. funcA() noGasMetering { funcB() }, where funcB has noGasMetering as well.
+        // funcA will have `gasStartedOff` as false, funcB will have it as true,
+        // so we only turn metering back on at the end of the funcA
+        bool gasStartedOff = gasMeteringOff;
+        gasMeteringOff = true;
+
+        _;
+
+        // if gas metering was on when this modifier was called, turn it back on at the end
+        if (!gasStartedOff) {
+            gasMeteringOff = false;
+            vm.resumeGasMetering();
+        }
+    }
 }
 
 // Wrappers around cheatcodes to avoid footguns
@@ -430,8 +471,6 @@ abstract contract StdCheats is StdCheatsSafe {
 
     StdStorage private stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-
-    bool private gasMeteringOff;
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
@@ -521,45 +560,6 @@ abstract contract StdCheats is StdCheatsSafe {
                 totSup += (give - prevBal);
             }
             stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
-        }
-    }
-
-    function isFork() internal virtual returns (bool status) {
-        try vm.activeFork() {
-            status = true;
-        } catch (bytes memory) {}
-    }
-
-    modifier noGasMetering() {
-        vm.pauseGasMetering();
-        // To prevent turning gas monitoring back on with nested functions that use this modifier,
-        // we check if gasMetering started in the off position. If it did, we don't want to turn
-        // it back on until we exit the top level function that used the modifier
-        //
-        // i.e. funcA() noGasMetering { funcB() }, where funcB has noGasMetering as well.
-        // funcA will have `gasStartedOff` as false, funcB will have it as true,
-        // so we only turn metering back on at the end of the funcA
-        bool gasStartedOff = gasMeteringOff;
-        gasMeteringOff = true;
-
-        _;
-
-        // if gas metering was on when this modifier was called, turn it back on at the end
-        if (!gasStartedOff) {
-            gasMeteringOff = false;
-            vm.resumeGasMetering();
-        }
-    }
-
-    modifier skipWhenForking() {
-        if (!isFork()) {
-            _;
-        }
-    }
-
-    modifier skipWhenNotForking() {
-        if (isFork()) {
-            _;
         }
     }
 }

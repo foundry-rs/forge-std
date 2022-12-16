@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {CommonBase} from "./Common.sol";
-import {DSTest} from "ds-test/test.sol";
+// 💬 ABOUT
+// Standard Library's default Test
+
+// 🧩 MODULES
 import {console} from "./console.sol";
 import {console2} from "./console2.sol";
 import {StdAssertions} from "./StdAssertions.sol";
@@ -15,6 +17,12 @@ import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {StdUtils} from "./StdUtils.sol";
 import {Vm} from "./Vm.sol";
 
-abstract contract TestBase is CommonBase {}
+// 📦 BOILERPLATE
+import {TestBase} from "./Base.sol";
+import {DSTest} from "ds-test/test.sol";
 
-abstract contract Test is DSTest, StdAssertions, StdChains, StdCheats, StdUtils, TestBase {}
+// ⭐️ TEST
+abstract contract Test is DSTest, StdAssertions, StdChains, StdCheats, StdUtils, TestBase {
+// Note: IS_TEST() must return true.
+// Note: Must have failure system, https://github.com/dapphub/ds-test/blob/cd98eff28324bfac652e63a239a60632a761790b/src/test.sol#L39-L76.
+}

@@ -2,10 +2,10 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 // TODO Remove import.
-import {Vm} from "./Vm.sol";
+import {VmSafe} from "./Vm.sol";
 
 abstract contract StdUtils {
-    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
     address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
 
     uint256 private constant INT256_MIN_ABS =
@@ -108,6 +108,8 @@ abstract contract StdUtils {
     function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
         return address(uint160(uint256(bytesValue)));
     }
+
+    // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
 
     function console2_log(string memory p0, uint256 p1) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
