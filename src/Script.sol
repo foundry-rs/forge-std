@@ -2,16 +2,7 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 // 💬 ABOUT
-/**
- *  Standard Library's default Script DX.
- *
- *  You can customize it to suit the needs of your project by creating a similar file:
- *
- *      - import the standard modules you need
- *      - customize the standard modules by overriding and extending functionality
- *      - make your own modules
- *      - install community modules
- */
+// Standard Library's default Script.
 
 // 🧩 MODULES
 import {ScriptBase} from "./Base.sol";
@@ -25,7 +16,10 @@ import {StdStorage, stdStorageSafe} from "./StdStorage.sol";
 import {StdUtils} from "./StdUtils.sol";
 import {VmSafe} from "./Vm.sol";
 
-// ✨ SCRIPT DX
+// 📦 BOILERPLATE
+import {ScriptBase} from "./Base.sol";
+
+// ⭐️ SCRIPT
 abstract contract Script is StdChains, StdCheatsSafe, StdUtils, ScriptBase {
     // Note: IS_SCRIPT() must return true.
     bool public IS_SCRIPT = true;
