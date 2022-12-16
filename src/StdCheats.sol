@@ -422,6 +422,24 @@ abstract contract StdCheatsSafe {
         require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
+
+    function isFork() internal virtual returns (bool status) {
+        try vm.activeFork() {
+            status = true;
+        } catch (bytes memory) {}
+    }
+
+    modifier skipWhenForking() {
+        if (!isFork()) {
+            _;
+        }
+    }
+
+    modifier skipWhenNotForking() {
+        if (isFork()) {
+            _;
+        }
+    }
 }
 
 // Wrappers around cheatcodes to avoid footguns
@@ -524,12 +542,6 @@ abstract contract StdCheats is StdCheatsSafe {
         }
     }
 
-    function isFork() internal virtual returns (bool status) {
-        try vm.activeFork() {
-            status = true;
-        } catch (bytes memory) {}
-    }
-
     modifier noGasMetering() {
         vm.pauseGasMetering();
         // To prevent turning gas monitoring back on with nested functions that use this modifier,
@@ -548,18 +560,6 @@ abstract contract StdCheats is StdCheatsSafe {
         if (!gasStartedOff) {
             gasMeteringOff = false;
             vm.resumeGasMetering();
-        }
-    }
-
-    modifier skipWhenForking() {
-        if (!isFork()) {
-            _;
-        }
-    }
-
-    modifier skipWhenNotForking() {
-        if (isFork()) {
-            _;
         }
     }
 }

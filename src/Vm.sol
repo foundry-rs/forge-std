@@ -267,10 +267,8 @@ interface VmSafe {
     function rpcUrlStructs() external view returns (Rpc[] memory urls);
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool condition) external pure;
-    // Pauses gas metering (i.e. gas usage is not counted). Noop if already paused.
-    function pauseGasMetering() external;
-    // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
-    function resumeGasMetering() external;
+    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
+    function activeFork() external view returns (uint256 forkId);
 }
 
 interface Vm is VmSafe {
@@ -353,8 +351,6 @@ interface Vm is VmSafe {
     function createSelectFork(string calldata urlOrAlias) external returns (uint256 forkId);
     // Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256 forkId) external;
-    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
-    function activeFork() external view returns (uint256 forkId);
     // Updates the currently active fork to given block number
     // This is similar to `roll` but for the currently active fork
     function rollFork(uint256 blockNumber) external;
@@ -382,4 +378,8 @@ interface Vm is VmSafe {
     function transact(bytes32 txHash) external;
     // Fetches the given transaction from the given fork and executes it on the current state
     function transact(uint256 forkId, bytes32 txHash) external;
+    // Pauses gas metering (i.e. gas usage is not counted). Noop if already paused.
+    function pauseGasMetering() external;
+    // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
+    function resumeGasMetering() external;
 }
