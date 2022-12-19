@@ -537,9 +537,9 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     // Set the balance of an account for any ERC20 token
-    // Use the alternative signature to update `totalSupply`
+    // Use the alternative signature to not update `totalSupply`
     function deal(address token, address to, uint256 give) internal virtual {
-        deal(token, to, give, false);
+        deal(token, to, give, true);
     }
 
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
