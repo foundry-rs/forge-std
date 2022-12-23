@@ -2,7 +2,6 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import {Vm} from "./Vm.sol";
-import "./console2.sol";
 
 struct StdStorage {
     mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) dynamic_slots;
@@ -111,7 +110,6 @@ library stdStorageSafe {
     }
 
     function find_dynamic(StdStorage storage self) internal returns (uint256) {
-        console2.log("finding dynamic");
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
@@ -460,7 +458,6 @@ library stdStorage {
     }
 
     function checked_write(StdStorage storage self, bytes memory a) internal {
-        console2.logBytes(a);
         checked_write_dynamic(self, a);
     }
 
