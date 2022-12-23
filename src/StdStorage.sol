@@ -25,13 +25,7 @@ library stdStorageSafe {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
-    /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
-    // slot complexity:
-    //  if flat, will be bytes32(uint256(uint));
-    //  if map, will be keccak256(abi.encode(key, uint(slot)));
-    //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
-    //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
-    function find(StdStorage storage self) internal returns (bool, uint256) {
+    function find_either(StdStorage storage self) private returns (bool, uint256) {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
@@ -107,6 +101,17 @@ library stdStorageSafe {
 
             return (false, self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]);
         }
+    }
+
+    /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
+    // slot complexity:
+    //  if flat, will be bytes32(uint256(uint));
+    //  if map, will be keccak256(abi.encode(key, uint(slot)));
+    //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
+    //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
+    function find(StdStorage storage self) internal returns (uint256) {
+        (, uint256 ret) = find_either(self);
+        return ret;
     }
 
     function find_dynamic(StdStorage storage self) internal returns (uint256) {
@@ -304,7 +309,7 @@ library stdStorageSafe {
 
     function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
-        (bool is_dynamic, uint256 s) = find(self);
+        (bool is_dynamic, uint256 s) = find_either(self);
         if (is_dynamic) {
             return read_dynamic(t, s);
         } else {
@@ -420,7 +425,7 @@ library stdStorage {
     }
 
     function find(StdStorage storage self) internal returns (uint256 slot) {
-        (, slot) = stdStorageSafe.find(self);
+        slot = stdStorageSafe.find(self);
     }
 
     function find_dynamic(StdStorage storage self) internal returns (uint256) {
