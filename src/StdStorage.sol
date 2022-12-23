@@ -141,7 +141,6 @@ library stdStorageSafe {
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
 
-            uint256[] memory slots = new uint256[](0);
             self.dynamic_slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
             self.dynamic_finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
         } else if (reads.length > 1) {
@@ -171,7 +170,7 @@ library stdStorageSafe {
         return self.dynamic_slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
 
-    function reads_to_dedup_uint(bytes32[] memory reads) internal returns (uint256[] memory) {
+    function reads_to_dedup_uint(bytes32[] memory reads) internal pure returns (uint256[] memory) {
         uint256 uniques;
         uint256[] memory slots = new uint256[](reads.length);
         for (uint256 i = 0; i < reads.length; i++) {
@@ -195,12 +194,16 @@ library stdStorageSafe {
         return slots;
     }
 
-    function slot_to_data_slot(uint256 slot) internal returns (uint256) {
+    function slot_to_data_slot(uint256 slot) internal pure returns (uint256) {
         return uint256(keccak256(abi.encode(slot)));
     }
 
     // takes a selection of reads, and finds corresponding slots for strings and bytes storage types
-    function matching_reads(address who, uint256[] memory reads) internal returns (uint256[] memory, bytes[] memory) {
+    function matching_reads(address who, uint256[] memory reads)
+        internal
+        view
+        returns (uint256[] memory, bytes[] memory)
+    {
         uint256 matches;
         uint256[] memory slots = new uint256[](reads.length);
         bytes[] memory potential_matches = new bytes[](reads.length);
@@ -216,6 +219,7 @@ library stdStorageSafe {
                 matches += 1;
             } else {
                 bytes memory data = unpack_single_slot_dynamic(uint256(vm.load(who, bytes32(slot))));
+                potential_matches[matches] = data;
                 slots[matches] = slot;
                 matches += 1;
             }
@@ -225,6 +229,7 @@ library stdStorageSafe {
 
     function check_for_data(uint256 slot, uint256[] memory reads)
         internal
+        pure
         returns (uint256 filled, uint256[] memory data_slots)
     {
         uint256 target_data_slot = slot_to_data_slot(slot);
@@ -242,6 +247,7 @@ library stdStorageSafe {
 
     function load_data_slots(address who, uint256 filled, uint256 slot, uint256[] memory data_slots)
         internal
+        view
         returns (bytes memory data)
     {
         // we found a matching data slot
@@ -306,8 +312,8 @@ library stdStorageSafe {
         }
     }
 
-    function read_dynamic(address target, uint256 slot) internal returns (bytes memory) {
-        uint256 base_slot = uint256(vm.load(target, bytes32(slot)));
+    function read_dynamic(address t, uint256 slot) internal view returns (bytes memory) {
+        uint256 base_slot = uint256(vm.load(t, bytes32(slot)));
         // if the smallest bit is set, we know its a multislot
         // if its not, we know its a single slot
         if (base_slot & 1 == 1) {
@@ -317,7 +323,7 @@ library stdStorageSafe {
             uint256 start_slot = slot_to_data_slot(slot);
             bytes32[] memory vals = new bytes32[](num_slots);
             for (uint256 i; i < num_slots; i++) {
-                vals[i] = vm.load(target, bytes32(start_slot + i));
+                vals[i] = vm.load(t, bytes32(start_slot + i));
             }
 
             bytes memory data = flatten(vals);
@@ -331,7 +337,7 @@ library stdStorageSafe {
         }
     }
 
-    function unpack_single_slot_dynamic(uint256 slot_val) private returns (bytes memory) {
+    function unpack_single_slot_dynamic(uint256 slot_val) private pure returns (bytes memory) {
         uint256 true_len = (slot_val & 0xff) / 2;
         uint256 removed_len_slot = slot_val >> 8 << 8;
         bytes memory data;
