@@ -223,6 +223,50 @@ contract StdStorageTest is Test {
         int256 val = stdstore.target(address(test)).sig(test.tG.selector).read_int();
         assertEq(val, type(int256).min);
     }
+
+    function testStorageReadLongString() public {
+        string memory a = stdstore.target(address(test)).sig(test.longStr.selector).read_string();
+        assertEq("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest", a);
+    }
+
+    function testStorageReadShortString() public {
+        string memory a = stdstore.target(address(test)).sig(test.shortStr.selector).read_string();
+        assertEq("test", a);
+    }
+
+    function testStorageReadLongBytes() public {
+        bytes memory a = stdstore.target(address(test)).sig(test.longBytes.selector).read_bytes();
+        assertEq(hex"6969696969696969696969696969696969696969696969696969696969696969", a);
+    }
+
+    function testStorageReadShortBytes() public {
+        bytes memory a = stdstore.target(address(test)).sig(test.shortBytes.selector).read_bytes();
+        assertEq(hex"6969", a);
+    }
+
+    function testStorageCheckedWriteShortStringToShort() public {
+        stdstore.target(address(test)).sig(test.shortStr.selector).checked_write(string("Test"));
+        string memory a = test.shortStr();
+        assertEq(a, "Test");
+    }
+
+    function testStorageCheckedWriteShortStringToLong() public {
+        stdstore.target(address(test)).sig(test.shortStr.selector).checked_write(string("TestTestTestTestTestTestTestTestTest"));
+        string memory a = test.shortStr();
+        assertEq(a, "TestTestTestTestTestTestTestTestTest");
+    }
+
+    function testStorageCheckedWriteLongStringToShort() public {
+        stdstore.target(address(test)).sig(test.longStr.selector).checked_write(string("Test"));
+        string memory a = test.longStr();
+        assertEq(a, "Test");
+    }
+
+    function testStorageCheckedWriteLongStringToLong() public {
+        stdstore.target(address(test)).sig(test.longStr.selector).checked_write(string("TestTestTestTestTestTestTestTestTest"));
+        string memory a = test.longStr();
+        assertEq(a, "TestTestTestTestTestTestTestTestTest");
+    }
 }
 
 contract StorageTest {
@@ -240,6 +284,11 @@ contract StorageTest {
 
     bool public tC = false;
     uint248 public tD = 1;
+
+    string public shortStr = "test";
+    string public longStr = "TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest";
+    bytes public shortBytes = hex"6969";
+    bytes public longBytes = hex"6969696969696969696969696969696969696969696969696969696969696969";
 
     struct UnpackedStruct {
         uint256 a;
