@@ -339,13 +339,13 @@ library stdStorageSafe {
 
     function unpack_single_slot_dynamic(uint256 slot_val) private pure returns (bytes memory) {
         uint256 true_len = (slot_val & 0xff) / 2;
-        uint256 removed_len_slot = slot_val >> 8 << 8;
         bytes memory data;
         /// @solidity memory-safe-assembly
         assembly {
+            let removed_len := shl(shr(slot_val, 8), 8)
             let free_mem := mload(0x40)
             mstore(free_mem, true_len)
-            mstore(add(0x20, free_mem), removed_len_slot)
+            mstore(add(0x20, free_mem), removed_len)
             data := free_mem
             mstore(0x40, add(0x40, free_mem))
         }
