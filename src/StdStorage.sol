@@ -131,7 +131,7 @@ library stdStorageSafe {
         (bytes32[] memory reads,) = vm.accesses(address(who));
         uint256[] memory slots = reads_to_dedup_uint(reads);
         if (slots.length == 1) {
-           bytes32 curr = vm.load(who, reads[0]);
+            bytes32 curr = vm.load(who, reads[0]);
             if (curr == bytes32(0)) {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
@@ -225,7 +225,10 @@ library stdStorageSafe {
         return (slots, potential_matches);
     }
 
-    function check_for_data(uint256 slot, uint256[] memory reads) internal returns (uint256 filled, uint256[] memory data_slots) {
+    function check_for_data(uint256 slot, uint256[] memory reads)
+        internal
+        returns (uint256 filled, uint256[] memory data_slots)
+    {
         uint256 target_data_slot = slot_to_data_slot(slot);
         data_slots = new uint256[](reads.length);
         for (uint256 j = 0; j < reads.length; j++) {
@@ -239,7 +242,10 @@ library stdStorageSafe {
         }
     }
 
-    function load_data_slots(address who, uint256 filled, uint256 slot, uint256[] memory data_slots) internal returns (bytes memory data) {
+    function load_data_slots(address who, uint256 filled, uint256 slot, uint256[] memory data_slots)
+        internal
+        returns (bytes memory data)
+    {
         // we found a matching data slot
         bytes32[] memory curr = new bytes32[](filled);
         for (uint256 i; i < filled; i++) {
@@ -534,7 +540,6 @@ library stdStorage {
         assembly {
             len := mload(set)
         }
-
 
         if (len > 31) {
             // split

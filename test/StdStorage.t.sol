@@ -251,7 +251,9 @@ contract StdStorageTest is Test {
     }
 
     function testStorageCheckedWriteShortStringToLong() public {
-        stdstore.target(address(test)).sig(test.shortStr.selector).checked_write(string("TestTestTestTestTestTestTestTestTest"));
+        stdstore.target(address(test)).sig(test.shortStr.selector).checked_write(
+            string("TestTestTestTestTestTestTestTestTest")
+        );
         string memory a = test.shortStr();
         assertEq(a, "TestTestTestTestTestTestTestTestTest");
     }
@@ -263,7 +265,9 @@ contract StdStorageTest is Test {
     }
 
     function testStorageCheckedWriteLongStringToLong() public {
-        stdstore.target(address(test)).sig(test.longStr.selector).checked_write(string("TestTestTestTestTestTestTestTestTest"));
+        stdstore.target(address(test)).sig(test.longStr.selector).checked_write(
+            string("TestTestTestTestTestTestTestTestTest")
+        );
         string memory a = test.longStr();
         assertEq(a, "TestTestTestTestTestTestTestTestTest");
     }
