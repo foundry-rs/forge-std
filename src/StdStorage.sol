@@ -342,7 +342,7 @@ library stdStorageSafe {
         bytes memory data;
         /// @solidity memory-safe-assembly
         assembly {
-            let removed_len := shl(shr(slot_val, 8), 8)
+            let removed_len := shl(8, shr(8, slot_val))
             let free_mem := mload(0x40)
             mstore(free_mem, true_len)
             mstore(add(0x20, free_mem), removed_len)
