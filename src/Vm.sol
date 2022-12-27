@@ -36,7 +36,7 @@ interface VmSafe {
     // Signs data
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
     // Gets the address for a given private key
-    function addr(uint256 privateKey) external pure returns (address addr);
+    function addr(uint256 privateKey) external pure returns (address keyAddr);
     // Gets the nonce of an account
     function getNonce(address account) external view returns (uint64 nonce);
     // Performs a foreign function call via the terminal
@@ -163,7 +163,7 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
     // Adds a private key to the local forge wallet and returns the address
-    function rememberKey(uint256 privateKey) external returns (address addr);
+    function rememberKey(uint256 privateKey) external returns (address keyAddr);
     //
     // parseJson
     //

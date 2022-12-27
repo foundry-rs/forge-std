@@ -197,7 +197,7 @@ abstract contract StdCheatsSafe {
         assumeNoPrecompiles(addr, chainId);
     }
 
-    function assumeNoPrecompiles(address addr, uint256 chainId) internal virtual {
+    function assumeNoPrecompiles(address addr, uint256 chainId) internal pure virtual {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
@@ -425,7 +425,7 @@ abstract contract StdCheatsSafe {
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 
-    function isFork() internal virtual returns (bool status) {
+    function isFork() internal view virtual returns (bool status) {
         try vm.activeFork() {
             status = true;
         } catch (bytes memory) {}
