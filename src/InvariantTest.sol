@@ -4,7 +4,6 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 contract InvariantTest {
-
     struct FuzzSelector {
         address addr;
         bytes4[] selectors;
@@ -92,5 +91,4 @@ contract InvariantTest {
         require(_targetedSenders.length != uint256(0), "NO_TARGETED_SENDERS");
         targetedSenders_ = _targetedSenders;
     }
-
 }
