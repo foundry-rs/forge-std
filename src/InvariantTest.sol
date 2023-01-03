@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {Test} from "./Test.sol";
+pragma experimental ABIEncoderV2;
 
-contract InvariantTest is Test {
-
+contract InvariantTest {
     struct FuzzSelector {
         address addr;
         bytes4[] selectors;
@@ -15,7 +14,20 @@ contract InvariantTest is Test {
     address[] private _targetedContracts;
     address[] private _targetedSenders;
 
+    string[] private _excludedArtifacts;
+    string[] private _targetedArtifacts;
+
+    FuzzSelector[] internal _targetedArtifactSelectors;
     FuzzSelector[] internal _targetedSelectors;
+
+    function excludeArtifact(string memory newExcludedArtifact_) internal {
+        _excludedArtifacts.push(newExcludedArtifact_);
+    }
+
+    function excludeArtifacts() public view returns (string[] memory excludedArtifacts_) {
+        require(_excludedArtifacts.length != uint256(0), "NO_EXCLUDED_ARTIFACTS");
+        excludedArtifacts_ = _excludedArtifacts;
+    }
 
     function excludeContract(address newExcludedContract_) internal {
         _excludedContracts.push(newExcludedContract_);
@@ -33,6 +45,24 @@ contract InvariantTest is Test {
     function excludeSenders() public view returns (address[] memory excludedSenders_) {
         require(_excludedSenders.length != uint256(0), "NO_EXCLUDED_SENDERS");
         excludedSenders_ = _excludedSenders;
+    }
+
+    function targetArtifact(string memory newTargetedArtifact_) internal {
+        _targetedArtifacts.push(newTargetedArtifact_);
+    }
+
+    function targetArtifacts() public view returns (string[] memory targetedArtifacts_) {
+        require(_targetedArtifacts.length != uint256(0), "NO_TARGETED_ARTIFACTS");
+        targetedArtifacts_ = _targetedArtifacts;
+    }
+
+    function targetArtifactSelector(FuzzSelector memory newTargetedArtifactSelector_) internal {
+        _targetedArtifactSelectors.push(newTargetedArtifactSelector_);
+    }
+
+    function targetArtifactSelectors() public view returns (FuzzSelector[] memory targetedArtifactSelectors_) {
+        require(targetedArtifactSelectors_.length != uint256(0), "NO_TARGETED_ARTIFACT_SELECTORS");
+        targetedArtifactSelectors_ = _targetedArtifactSelectors;
     }
 
     function targetContract(address newTargetedContract_) internal {
@@ -61,5 +91,4 @@ contract InvariantTest is Test {
         require(_targetedSenders.length != uint256(0), "NO_TARGETED_SENDERS");
         targetedSenders_ = _targetedSenders;
     }
-
 }
