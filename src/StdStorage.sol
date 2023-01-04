@@ -88,7 +88,7 @@ library stdStorageSafe {
                 vm.store(who, reads[i], prev);
             }
         } else {
-            require(false, "stdStorage find(StdStorage): No storage use detected for target.");
+            revert("stdStorage find(StdStorage): No storage use detected for target.");
         }
 
         require(
