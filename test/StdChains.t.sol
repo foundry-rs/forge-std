@@ -10,6 +10,16 @@ contract StdChainsTest is Test {
         assertEq(getChain("optimism_goerli").rpcUrl, "https://goerli.optimism.io/");
         assertEq(getChain("arbitrum_one_goerli").rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
+        // Environment variables should be the next fallback
+        assertEq(getChain("arbitrum_nova").rpcUrl, "https://nova.arbitrum.io/rpc");
+        vm.setEnv("RPC_URL_ARBITRUM_NOVA", "myoverride");
+        assertEq(getChain("arbitrum_nova").rpcUrl, "myoverride");
+        vm.setEnv("RPC_URL_ARBITRUM_NOVA", "https://nova.arbitrum.io/rpc");
+
+        // Cannot override RPCs defined in `foundry.toml`
+        vm.setEnv("RPC_URL_MAINNET", "myoverride2");
+        assertEq(getChain("mainnet").rpcUrl, "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70");
+
         // Other RPCs should remain unchanged.
         assertEq(getChain(31337).rpcUrl, "http://127.0.0.1:8545");
         assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f");

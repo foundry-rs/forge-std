@@ -121,18 +121,31 @@ abstract contract StdChains {
         idToAlias[chain.chainId] = chainAlias;
     }
 
+    function _toUpper(string memory str) private pure returns (string memory) {
+		bytes memory strb = bytes(str);
+		bytes memory copy = new bytes(strb.length);
+        for (uint256 i = 0; i < strb.length; i++) {
+            bytes1 b = strb[i];
+            if (b >= 0x61 && b <= 0x7A) {
+                copy[i] = bytes1(uint8(b) - 32);
+            } else {
+                copy[i] = b;
+            }
+        }
+        return string(copy);
+	}
+
     // lookup rpcUrl, in descending order of priority:
-    // current -> config (foundry.toml) -> default
+    // current -> config (foundry.toml) -> environment variable -> default
     function getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
         private
-        view
         returns (Chain memory)
     {
         if (bytes(chain.rpcUrl).length == 0) {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
-                chain.rpcUrl = defaultRpcUrls[chainAlias];
+                chain.rpcUrl = vm.envOr(string(abi.encodePacked("RPC_URL_", _toUpper(chainAlias))), defaultRpcUrls[chainAlias]);
                 // distinguish 'not found' from 'cannot read'
                 bytes memory notFoundError =
                     abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
