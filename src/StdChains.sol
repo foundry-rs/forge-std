@@ -190,7 +190,9 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "avalanche_fuji", Chain("Avalanche Fuji", 43113, "", "https://api.avax-test.network/ext/bc/C/rpc")
         );
-        setChainWithDefaultRpcUrl("bnb_smart_chain", Chain("BNB Smart Chain", 56, "", "https://bsc-dataseed1.binance.org"));
+        setChainWithDefaultRpcUrl(
+            "bnb_smart_chain", Chain("BNB Smart Chain", 56, "", "https://bsc-dataseed1.binance.org")
+        );
         setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", Chain("BNB Smart Chain Testnet", 97, "", "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
         setChainWithDefaultRpcUrl("gnosis_chain", Chain("Gnosis Chain", 100, "", "https://rpc.gnosischain.com"));
     }
