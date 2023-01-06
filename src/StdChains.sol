@@ -145,7 +145,8 @@ abstract contract StdChains {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
-                chain.rpcUrl = vm.envOr(string(abi.encodePacked("RPC_URL_", _toUpper(chainAlias))), defaultRpcUrls[chainAlias]);
+                chain.rpcUrl =
+                    vm.envOr(string(abi.encodePacked("RPC_URL_", _toUpper(chainAlias))), defaultRpcUrls[chainAlias]);
                 // distinguish 'not found' from 'cannot read'
                 bytes memory notFoundError =
                     abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
