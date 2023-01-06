@@ -473,6 +473,8 @@ abstract contract StdCheatsSafe {
         vm.assume(addr != 0x000000000000000000636F6e736F6c652e6c6f67);
         // Create2Deployer
         vm.assume(addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C);
+        // precompiles are also not payable
+        assumeNoPrecompiles(addr);
     }
 }
 
