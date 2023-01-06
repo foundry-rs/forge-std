@@ -122,8 +122,8 @@ abstract contract StdChains {
     }
 
     function _toUpper(string memory str) private pure returns (string memory) {
-		bytes memory strb = bytes(str);
-		bytes memory copy = new bytes(strb.length);
+        bytes memory strb = bytes(str);
+        bytes memory copy = new bytes(strb.length);
         for (uint256 i = 0; i < strb.length; i++) {
             bytes1 b = strb[i];
             if (b >= 0x61 && b <= 0x7A) {
