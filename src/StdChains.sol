@@ -185,7 +185,9 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl("arbitrum_nova", Chain("Arbitrum Nova", 42170, "", "https://nova.arbitrum.io/rpc"));
         setChainWithDefaultRpcUrl("polygon", Chain("Polygon", 137, "", "https://polygon-rpc.com"));
-        setChainWithDefaultRpcUrl("polygon_mumbai", Chain("Polygon Mumbai", 80001, "", "https://rpc-mumbai.maticvigil.com"));
+        setChainWithDefaultRpcUrl(
+            "polygon_mumbai", Chain("Polygon Mumbai", 80001, "", "https://rpc-mumbai.maticvigil.com")
+        );
         setChainWithDefaultRpcUrl("avalanche", Chain("Avalanche", 43114, "", "https://api.avax.network/ext/bc/C/rpc"));
         setChainWithDefaultRpcUrl(
             "avalanche_fuji", Chain("Avalanche Fuji", 43113, "", "https://api.avax-test.network/ext/bc/C/rpc")
