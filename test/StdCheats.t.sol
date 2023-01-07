@@ -269,6 +269,14 @@ contract StdCheatsTest is Test {
                 || addr > address(0x4200000000000000000000000000000000000800)
         );
     }
+
+    function testAssumePayable(address addr) external {
+        assumePayable(addr);
+        assertTrue(
+            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
+        );
+    }
 }
 
 contract Bar {

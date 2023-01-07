@@ -4,6 +4,7 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
+import {PanicAssertions} from "./StdAssertions.sol";
 import {Vm} from "./Vm.sol";
 
 abstract contract StdCheatsSafe {
@@ -467,14 +468,10 @@ abstract contract StdCheatsSafe {
     // a cheat for fuzzing addresses that are payable only
     // see https://github.com/foundry-rs/foundry/issues/3631
     function assumePayable(address addr) internal virtual {
-        // VM address
-        vm.assume(addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-        // Console address
-        vm.assume(addr != 0x000000000000000000636F6e736F6c652e6c6f67);
-        // Create2Deployer
-        vm.assume(addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C);
-        // precompiles are also not payable
-        assumeNoPrecompiles(addr);
+        try PanicAssertions.assertPayable(addr) {}
+        catch {
+            vm.assume(false);
+        }
     }
 }
 
