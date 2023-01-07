@@ -445,6 +445,29 @@ contract StdAssertionsTest is Test {
     }
 }
 
+contract TestPanicAssertions is Test {
+    function testPanicAssertPayable() external {
+        // all should revert since these addresses are not payable
+
+        // VM address
+        vm.expectRevert();
+        PanicAssertions.assertPayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
+        // Console address
+        vm.expectRevert();
+        PanicAssertions.assertPayable(0x000000000000000000636F6e736F6c652e6c6f67);
+
+        // Create2Deployer
+        vm.expectRevert();
+        PanicAssertions.assertPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+    }
+
+    function testPanicAssertPayable(address addr) external {
+        assumePayable(addr);
+        PanicAssertions.assertPayable(addr);
+    }
+}
+
 contract TestTest is Test {
     modifier expectFailure(bool expectFail) {
         bool preState = vm.load(HEVM_ADDRESS, bytes32("failed")) != bytes32(0x00);
