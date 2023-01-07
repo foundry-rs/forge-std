@@ -44,7 +44,7 @@ abstract contract StdChains {
         string name;
         // The chain's Chain ID.
         uint256 chainId;
-        // The chain's alias.
+        // The chain's alias. (i.e. what gets specified in `foundry.toml`).
         string chainAlias;
         // A default RPC endpoint for this chain.
         // NOTE: This default RPC URL is included for convenience to facilitate quick tests and
