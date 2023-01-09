@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
+pragma experimental ABIEncoderV2;
+
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 // TODO Remove import.
 import {VmSafe} from "./Vm.sol";
@@ -120,10 +122,7 @@ abstract contract StdUtils {
         uint256 length = addresses.length;
         IMulticall3.Call[] memory calls = new IMulticall3.Call[](length);
         for (uint256 i = 0; i < length; ++i) {
-            calls[i] = IMulticall3.Call({
-                target: token,
-                callData: abi.encodeWithSelector(0x70a08231, (addresses[i]))
-            });
+            calls[i] = IMulticall3.Call({target: token, callData: abi.encodeWithSelector(0x70a08231, (addresses[i]))});
         }
 
         // Make the aggregate call.
@@ -136,7 +135,7 @@ abstract contract StdUtils {
         }
     }
 
-        /*//////////////////////////////////////////////////////////////////////////
+    /*//////////////////////////////////////////////////////////////////////////
                                  PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
