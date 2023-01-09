@@ -39,6 +39,12 @@ abstract contract StdChains {
 
     bool private initialized;
 
+    struct ChainData {
+        string name;
+        uint256 chainId;
+        string rpcUrl;
+    }
+
     struct Chain {
         // The chain name.
         string name;
@@ -90,7 +96,7 @@ abstract contract StdChains {
     }
 
     // set chain info, with priority to argument's rpcUrl field.
-    function setChain(string memory chainAlias, Chain memory chain) internal virtual {
+    function setChain(string memory chainAlias, ChainData memory chain) internal virtual {
         require(
             bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): Chain alias cannot be the empty string."
         );
@@ -98,7 +104,6 @@ abstract contract StdChains {
         require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
 
         initialize();
-        chain.chainAlias = chainAlias;
         string memory foundAlias = idToAlias[chain.chainId];
 
         require(
@@ -117,7 +122,12 @@ abstract contract StdChains {
         uint256 oldChainId = chains[chainAlias].chainId;
         delete idToAlias[oldChainId];
 
-        chains[chainAlias] = chain;
+        chains[chainAlias] = Chain({
+            name: chain.name,
+            chainId: chain.chainId,
+            chainAlias: chainAlias,
+            rpcUrl: chain.rpcUrl
+        });
         idToAlias[chain.chainId] = chainAlias;
     }
 
@@ -164,40 +174,36 @@ abstract contract StdChains {
         initialized = true;
 
         // If adding an RPC here, make sure to test the default RPC URL in `testRpcs`
-        setChainWithDefaultRpcUrl("anvil", Chain("Anvil", 31337, "", "http://127.0.0.1:8545"));
+        setChainWithDefaultRpcUrl("anvil", ChainData("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
-            "mainnet", Chain("Mainnet", 1, "", "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "mainnet", ChainData("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
         );
         setChainWithDefaultRpcUrl(
-            "goerli", Chain("Goerli", 5, "", "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "goerli", ChainData("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
         );
         setChainWithDefaultRpcUrl(
-            "sepolia", Chain("Sepolia", 11155111, "", "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "sepolia", ChainData("Sepolia", 11155111, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
         );
-        setChainWithDefaultRpcUrl("optimism", Chain("Optimism", 10, "", "https://mainnet.optimism.io"));
-        setChainWithDefaultRpcUrl("optimism_goerli", Chain("Optimism Goerli", 420, "", "https://goerli.optimism.io"));
-        setChainWithDefaultRpcUrl("arbitrum_one", Chain("Arbitrum One", 42161, "", "https://arb1.arbitrum.io/rpc"));
+        setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
+        setChainWithDefaultRpcUrl("optimism_goerli", ChainData("Optimism Goerli", 420, "https://goerli.optimism.io"));
+        setChainWithDefaultRpcUrl("arbitrum_one", ChainData("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
         setChainWithDefaultRpcUrl(
-            "arbitrum_one_goerli", Chain("Arbitrum One Goerli", 421613, "", "https://goerli-rollup.arbitrum.io/rpc")
+            "arbitrum_one_goerli", ChainData("Arbitrum One Goerli", 421613, "https://goerli-rollup.arbitrum.io/rpc")
         );
-        setChainWithDefaultRpcUrl("arbitrum_nova", Chain("Arbitrum Nova", 42170, "", "https://nova.arbitrum.io/rpc"));
-        setChainWithDefaultRpcUrl("polygon", Chain("Polygon", 137, "", "https://polygon-rpc.com"));
+        setChainWithDefaultRpcUrl("arbitrum_nova", ChainData("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc"));
+        setChainWithDefaultRpcUrl("polygon", ChainData("Polygon", 137, "https://polygon-rpc.com"));
+        setChainWithDefaultRpcUrl("polygon_mumbai", ChainData("Polygon Mumbai", 80001, "https://rpc-mumbai.maticvigil.com"));
+        setChainWithDefaultRpcUrl("avalanche", ChainData("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
         setChainWithDefaultRpcUrl(
-            "polygon_mumbai", Chain("Polygon Mumbai", 80001, "", "https://rpc-mumbai.maticvigil.com")
+            "avalanche_fuji", ChainData("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc")
         );
-        setChainWithDefaultRpcUrl("avalanche", Chain("Avalanche", 43114, "", "https://api.avax.network/ext/bc/C/rpc"));
-        setChainWithDefaultRpcUrl(
-            "avalanche_fuji", Chain("Avalanche Fuji", 43113, "", "https://api.avax-test.network/ext/bc/C/rpc")
-        );
-        setChainWithDefaultRpcUrl(
-            "bnb_smart_chain", Chain("BNB Smart Chain", 56, "", "https://bsc-dataseed1.binance.org")
-        );
-        setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", Chain("BNB Smart Chain Testnet", 97, "", "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
-        setChainWithDefaultRpcUrl("gnosis_chain", Chain("Gnosis Chain", 100, "", "https://rpc.gnosischain.com"));
+        setChainWithDefaultRpcUrl("bnb_smart_chain", ChainData("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org"));
+        setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", ChainData("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
+        setChainWithDefaultRpcUrl("gnosis_chain", ChainData("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
-    function setChainWithDefaultRpcUrl(string memory chainAlias, Chain memory chain) private {
+    function setChainWithDefaultRpcUrl(string memory chainAlias, ChainData memory chain) private {
         string memory rpcUrl = chain.rpcUrl;
         defaultRpcUrls[chainAlias] = rpcUrl;
         chain.rpcUrl = "";
