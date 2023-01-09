@@ -122,12 +122,8 @@ abstract contract StdChains {
         uint256 oldChainId = chains[chainAlias].chainId;
         delete idToAlias[oldChainId];
 
-        chains[chainAlias] = Chain({
-            name: chain.name,
-            chainId: chain.chainId,
-            chainAlias: chainAlias,
-            rpcUrl: chain.rpcUrl
-        });
+        chains[chainAlias] =
+            Chain({name: chain.name, chainId: chain.chainId, chainAlias: chainAlias, rpcUrl: chain.rpcUrl});
         idToAlias[chain.chainId] = chainAlias;
     }
 
@@ -192,12 +188,16 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl("arbitrum_nova", ChainData("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc"));
         setChainWithDefaultRpcUrl("polygon", ChainData("Polygon", 137, "https://polygon-rpc.com"));
-        setChainWithDefaultRpcUrl("polygon_mumbai", ChainData("Polygon Mumbai", 80001, "https://rpc-mumbai.maticvigil.com"));
+        setChainWithDefaultRpcUrl(
+            "polygon_mumbai", ChainData("Polygon Mumbai", 80001, "https://rpc-mumbai.maticvigil.com")
+        );
         setChainWithDefaultRpcUrl("avalanche", ChainData("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
         setChainWithDefaultRpcUrl(
             "avalanche_fuji", ChainData("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc")
         );
-        setChainWithDefaultRpcUrl("bnb_smart_chain", ChainData("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org"));
+        setChainWithDefaultRpcUrl(
+            "bnb_smart_chain", ChainData("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org")
+        );
         setChainWithDefaultRpcUrl("bnb_smart_chain_testnet", ChainData("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545"));// forgefmt: disable-line
         setChainWithDefaultRpcUrl("gnosis_chain", ChainData("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
     }
