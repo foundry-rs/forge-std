@@ -4,6 +4,10 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/Test.sol";
 
 contract StdUtilsTest is Test {
+    /*//////////////////////////////////////////////////////////////////////////
+                                     BOUND UINT
+    //////////////////////////////////////////////////////////////////////////*/
+
     function testBound() public {
         assertEq(bound(uint256(5), 0, 4), 0);
         assertEq(bound(uint256(0), 69, 69), 69);
@@ -73,6 +77,10 @@ contract StdUtilsTest is Test {
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     BOUND INT
+    //////////////////////////////////////////////////////////////////////////*/
 
     function testBoundInt() public {
         assertEq(bound(-3, 0, 4), 2);
@@ -158,20 +166,9 @@ contract StdUtilsTest is Test {
         bound(num, min, max);
     }
 
-    function testGenerateCreateAddress() external {
-        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
-        uint256 nonce = 14;
-        address createAddress = computeCreateAddress(deployer, nonce);
-        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
-    }
-
-    function testGenerateCreate2Address() external {
-        bytes32 salt = bytes32(uint256(31415));
-        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
-        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
-        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
-        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
-    }
+    /*//////////////////////////////////////////////////////////////////////////
+                                   BYTES TO UINT
+    //////////////////////////////////////////////////////////////////////////*/
 
     function testBytesToUint() external {
         bytes memory maxUint = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -187,5 +184,28 @@ contract StdUtilsTest is Test {
         bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
         bytesToUint(thirty3Bytes);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                               COMPUTE CREATE ADDRESS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testComputeCreateAddress() external {
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        uint256 nonce = 14;
+        address createAddress = computeCreateAddress(deployer, nonce);
+        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              COMPUTE CREATE2 ADDRESS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testComputeCreate2Address() external {
+        bytes32 salt = bytes32(uint256(31415));
+        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
+        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
 }
