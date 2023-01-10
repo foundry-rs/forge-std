@@ -14,7 +14,8 @@ import {VmSafe} from "./Vm.sol";
  * `setChainWithDefaultRpcUrl` call in the `initialize` function.
  *
  * There are two main ways to use this contract:
- *   1. Set a chain with `setChain(string memory chainAlias, Chain memory chain)`
+ *   1. Set a chain with `setChain(string memory chainAlias, ChainData memory chain)` or 
+ *      `setChain(string memory chainAlias, Chain memory chain)`
  *   2. Get a chain with `getChain(string memory chainAlias)` or `getChain(uint256 chainId)`.
  *
  * The first time either of those are used, chains are initialized with the default set of RPC URLs.
@@ -25,14 +26,14 @@ import {VmSafe} from "./Vm.sol";
  *
  * The `getChain` methods use `getChainWithUpdatedRpcUrl` to return a chain. For example, let's say
  * we want to retrieve `mainnet`'s RPC URL:
- *   - If you haven't set any mainnet chain info with `setChain` and you haven't specified that
- *     chain in `foundry.toml`, the default data and RPC URL will be returned.
+ *   - If you haven't set any mainnet chain info with `setChain`, you haven't specified that
+ *     chain in `foundry.toml` and no env var is set, the default data and RPC URL will be returned.
  *   - If you have set a mainnet RPC URL in `foundry.toml` it will return that, if valid (e.g. if
  *     a URL is given or if an environment variable is given and that environment variable exists).
  *     Otherwise, the default data is returned.
  *   - If you specified data with `setChain` it will return that.
  *
- * Summarizing the above, the prioritization hierarchy is `setChain` -> `foundry.toml` -> defaults.
+ * Summarizing the above, the prioritization hierarchy is `setChain` -> `foundry.toml` -> environment variable -> defaults.
  */
 abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -98,10 +99,10 @@ abstract contract StdChains {
     // set chain info, with priority to argument's rpcUrl field.
     function setChain(string memory chainAlias, ChainData memory chain) internal virtual {
         require(
-            bytes(chainAlias).length != 0, "StdChains setChain(string,Chain): Chain alias cannot be the empty string."
+            bytes(chainAlias).length != 0, "StdChains setChain(string,ChainData): Chain alias cannot be the empty string."
         );
 
-        require(chain.chainId != 0, "StdChains setChain(string,Chain): Chain ID cannot be 0.");
+        require(chain.chainId != 0, "StdChains setChain(string,ChainData): Chain ID cannot be 0.");
 
         initialize();
         string memory foundAlias = idToAlias[chain.chainId];
@@ -110,7 +111,7 @@ abstract contract StdChains {
             bytes(foundAlias).length == 0 || keccak256(bytes(foundAlias)) == keccak256(bytes(chainAlias)),
             string(
                 abi.encodePacked(
-                    "StdChains setChain(string,Chain): Chain ID ",
+                    "StdChains setChain(string,ChainData): Chain ID ",
                     vm.toString(chain.chainId),
                     " already used by \"",
                     foundAlias,
@@ -125,6 +126,11 @@ abstract contract StdChains {
         chains[chainAlias] =
             Chain({name: chain.name, chainId: chain.chainId, chainAlias: chainAlias, rpcUrl: chain.rpcUrl});
         idToAlias[chain.chainId] = chainAlias;
+    }
+
+    // set chain info, with priority to argument's rpcUrl field.
+    function setChain(string memory chainAlias, Chain memory chain) internal virtual {
+        setChain(chainAlias, ChainData({name: chain.name, chainId: chain.chainId, rpcUrl: chain.rpcUrl}));
     }
 
     function _toUpper(string memory str) private pure returns (string memory) {

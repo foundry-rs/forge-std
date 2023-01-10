@@ -55,7 +55,7 @@ contract StdChainsTest is Test {
     }
 
     function testSetChainFirstFails() public {
-        vm.expectRevert("StdChains setChain(string,Chain): Chain ID 31337 already used by \"anvil\".");
+        vm.expectRevert("StdChains setChain(string,ChainData): Chain ID 31337 already used by \"anvil\".");
         setChain("anvil2", ChainData("Anvil", 31337, "URL"));
     }
 
@@ -70,7 +70,7 @@ contract StdChainsTest is Test {
     function testCannotSetChain_ChainIdExists() public {
         setChain("custom_chain", ChainData("Custom Chain", 123456789, "https://custom.chain/"));
 
-        vm.expectRevert('StdChains setChain(string,Chain): Chain ID 123456789 already used by "custom_chain".');
+        vm.expectRevert('StdChains setChain(string,ChainData): Chain ID 123456789 already used by "custom_chain".');
 
         setChain("another_custom_chain", ChainData("", 123456789, ""));
     }
@@ -87,15 +87,27 @@ contract StdChainsTest is Test {
         assertEq(chainById.chainId, customChain.chainId);
         assertEq(chainById.chainAlias, customChain.chainAlias);
         assertEq(chainById.rpcUrl, customChain.rpcUrl);
+        customChain.name = "Another Custom Chain";
+        customChain.chainId = 987654321;
+        setChain("another_custom_chain", customChain);
+        Chain memory anotherCustomChain = getChain("another_custom_chain");
+        assertEq(anotherCustomChain.name, "Another Custom Chain");
+        assertEq(anotherCustomChain.chainId, 987654321);
+        assertEq(anotherCustomChain.chainAlias, "another_custom_chain");
+        assertEq(anotherCustomChain.rpcUrl, "https://custom.chain/");
+        // Verify the first chain data was not overwritten
+        chainById = getChain(123456789);
+        assertEq(chainById.name, "Custom Chain");
+        assertEq(chainById.chainId, 123456789);
     }
 
     function testSetNoEmptyAlias() public {
-        vm.expectRevert("StdChains setChain(string,Chain): Chain alias cannot be the empty string.");
+        vm.expectRevert("StdChains setChain(string,ChainData): Chain alias cannot be the empty string.");
         setChain("", ChainData("", 123456789, ""));
     }
 
     function testSetNoChainId0() public {
-        vm.expectRevert("StdChains setChain(string,Chain): Chain ID cannot be 0.");
+        vm.expectRevert("StdChains setChain(string,ChainData): Chain ID cannot be 0.");
         setChain("alias", ChainData("", 0, ""));
     }
 
