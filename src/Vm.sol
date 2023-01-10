@@ -279,19 +279,19 @@ interface VmSafe {
 
     function parseJsonAddress(string calldata, string calldata) external returns (address);
 
-    function parseJsonAddress(string calldata, string calldata) external returns (address[] memory);
+    function parseJsonAddressArray(string calldata, string calldata) external returns (address[] memory);
 
     function parseJsonString(string calldata, string calldata) external returns (string memory);
 
-    function parseJsonString(string calldata, string calldata) external returns (string[] memory);
+    function parseJsonStringArray(string calldata, string calldata) external returns (string[] memory);
 
     function parseJsonBytes(string calldata, string calldata) external returns (bytes memory);
 
-    function parseJsonBytes(string calldata, string calldata) external returns (bytes[] memory);
+    function parseJsonBytesArray(string calldata, string calldata) external returns (bytes[] memory);
 
     function parseJsonBytes32(string calldata, string calldata) external returns (bytes32);
 
-    function parseJsonBytes32(string calldata, string calldata) external returns (bytes32[] memory);
+    function parseJsonBytes32Array(string calldata, string calldata) external returns (bytes32[] memory);
 
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
