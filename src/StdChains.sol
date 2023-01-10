@@ -14,7 +14,7 @@ import {VmSafe} from "./Vm.sol";
  * `setChainWithDefaultRpcUrl` call in the `initialize` function.
  *
  * There are two main ways to use this contract:
- *   1. Set a chain with `setChain(string memory chainAlias, ChainData memory chain)` or 
+ *   1. Set a chain with `setChain(string memory chainAlias, ChainData memory chain)` or
  *      `setChain(string memory chainAlias, Chain memory chain)`
  *   2. Get a chain with `getChain(string memory chainAlias)` or `getChain(uint256 chainId)`.
  *
@@ -99,7 +99,8 @@ abstract contract StdChains {
     // set chain info, with priority to argument's rpcUrl field.
     function setChain(string memory chainAlias, ChainData memory chain) internal virtual {
         require(
-            bytes(chainAlias).length != 0, "StdChains setChain(string,ChainData): Chain alias cannot be the empty string."
+            bytes(chainAlias).length != 0,
+            "StdChains setChain(string,ChainData): Chain alias cannot be the empty string."
         );
 
         require(chain.chainId != 0, "StdChains setChain(string,ChainData): Chain ID cannot be 0.");
