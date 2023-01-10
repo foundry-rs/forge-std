@@ -259,6 +259,12 @@ interface VmSafe {
 
     function parseJson(string calldata json) external pure returns (bytes memory abiEncodedData);
 
+    // The following parseJson cheatcodes will do type coercion, for the type that they indicate.
+    // For example, parseJsonUint will coerce all values to a uint256. That includes stringified numbers '12'
+    // and hex numbers '0xEF'.
+    // Type coercion works ONLY for discrete values or arrays. That means that the key must return a value or array, not
+    // a JSON object.
+
     function parseJsonUint(string calldata, string calldata) external returns (uint256);
 
     function parseJsonUintArray(string calldata, string calldata) external returns (uint256[] memory);
