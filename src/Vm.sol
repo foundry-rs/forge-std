@@ -185,6 +185,26 @@ interface VmSafe {
     function parseJson(string calldata json, string calldata key) external pure returns (bytes memory abiEncodedData);
     function parseJson(string calldata json) external pure returns (bytes memory abiEncodedData);
 
+    // The following parseJson cheatcodes will do type coercion, for the type that they indicate.
+    // For example, parseJsonUint will coerce all values to a uint256. That includes stringified numbers '12'
+    // and hex numbers '0xEF'.
+    // Type coercion works ONLY for discrete values or arrays. That means that the key must return a value or array, not
+    // a JSON object.
+    function parseJsonUint(string calldata, string calldata) external returns (uint256);
+    function parseJsonUintArray(string calldata, string calldata) external returns (uint256[] memory);
+    function parseJsonInt(string calldata, string calldata) external returns (int256);
+    function parseJsonIntArray(string calldata, string calldata) external returns (int256[] memory);
+    function parseJsonBool(string calldata, string calldata) external returns (bool);
+    function parseJsonBoolArray(string calldata, string calldata) external returns (bool[] memory);
+    function parseJsonAddress(string calldata, string calldata) external returns (address);
+    function parseJsonAddressArray(string calldata, string calldata) external returns (address[] memory);
+    function parseJsonString(string calldata, string calldata) external returns (string memory);
+    function parseJsonStringArray(string calldata, string calldata) external returns (string[] memory);
+    function parseJsonBytes(string calldata, string calldata) external returns (bytes memory);
+    function parseJsonBytesArray(string calldata, string calldata) external returns (bytes[] memory);
+    function parseJsonBytes32(string calldata, string calldata) external returns (bytes32);
+    function parseJsonBytes32Array(string calldata, string calldata) external returns (bytes32[] memory);
+
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
     function serializeBool(string calldata objectKey, string calldata valueKey, bool value)
