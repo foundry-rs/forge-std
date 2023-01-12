@@ -207,9 +207,3 @@ abstract contract StdAssertions is DSTest {
         }
     }
 }
-
-library PanicAssertions {
-    function assertPayable(address addr) public {
-        payable(address(addr)).transfer(0);
-    }
-}
