@@ -463,6 +463,13 @@ abstract contract StdCheatsSafe {
             vm.resumeGasMetering();
         }
     }
+
+    // a cheat for fuzzing addresses that are payable only
+    // see https://github.com/foundry-rs/foundry/issues/3631
+    function assumePayable(address addr) internal virtual {
+        (bool success,) = payable(addr).call{value: 0}("");
+        vm.assume(success);
+    }
 }
 
 // Wrappers around cheatcodes to avoid footguns
