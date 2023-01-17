@@ -117,7 +117,11 @@ abstract contract StdUtils {
     }
 
     // Performs a single call with Multicall3 to query the ERC-20 token balances of the given addresses.
-    function getTokenBalances(address token, address[] memory addresses) internal returns (uint256[] memory balances) {
+    function getTokenBalances(address token, address[] memory addresses)
+        internal
+        virtual
+        returns (uint256[] memory balances)
+    {
         // ABI encode the aggregate call to Multicall3.
         uint256 length = addresses.length;
         IMulticall3.Call[] memory calls = new IMulticall3.Call[](length);

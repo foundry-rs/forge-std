@@ -3,6 +3,16 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../src/Test.sol";
 
+contract StdUtilsMock is StdUtils {
+    // We deploy a mock version so we can properly test expected reverts.
+    function getTokenBalances_(address token, address[] memory addresses)
+        external
+        returns (uint256[] memory balances)
+    {
+        return getTokenBalances(token, addresses);
+    }
+}
+
 contract StdUtilsTest is Test {
     /*//////////////////////////////////////////////////////////////////////////
                                      BOUND UINT
@@ -207,5 +217,30 @@ contract StdUtilsTest is Test {
         address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  GET TOKEN BALANCES
+    //////////////////////////////////////////////////////////////////////////*/
+
+    address internal USDC_HOLDER = 0xDa9CE944a37d218c3302F6B82a094844C6ECEb17;
+
+    modifier forkMainnet() {
+        vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16376000});
+        _;
+    }
+
+    function testCannotGetTokenBalances_NonTokenContract() external forkMainnet {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
+        // The UniswapV2Factory contract has neither a `balanceOf` function nor a fallback function,
+        // so the `balanceOf` call should revert.
+        address token = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+        address[] memory addresses = new address[](1);
+        addresses[0] = USDC_HOLDER;
+
+        vm.expectRevert("Multicall3: call failed");
+        stdUtils.getTokenBalances_(token, addresses);
     }
 }
