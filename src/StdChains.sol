@@ -207,7 +207,7 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl(
             "bnb_smart_chain_testnet",
-            ChainData("BNB Smart Chain Testnet", 97, "https://data-seed-prebsc-1-s1.binance.org:8545")
+            ChainData("BNB Smart Chain Testnet", 97, "https://rpc.ankr.com/bsc_testnet_chapel")
         );
         setChainWithDefaultRpcUrl("gnosis_chain", ChainData("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
     }
