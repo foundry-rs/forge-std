@@ -116,13 +116,9 @@ abstract contract StdUtils {
         return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
     }
 
-    // Performs a single call with IMulticall3 to query the ERC-20 token balances of the given addresses.
-    function getTokenBalances(address token, address[] memory addresses)
-        internal
-        virtual
-        returns (uint256[] memory balances)
-    {
-        // ABI encode the aggregate call to IMulticall3.
+    // Performs a single call with Multicall3 to query the ERC-20 token balances of the given addresses.
+    function getTokenBalances(address token, address[] memory addresses) internal returns (uint256[] memory balances) {
+        // ABI encode the aggregate call to Multicall3.
         uint256 length = addresses.length;
         IMulticall3.Call[] memory calls = new IMulticall3.Call[](length);
         for (uint256 i = 0; i < length; ++i) {
