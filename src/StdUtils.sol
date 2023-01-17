@@ -3,6 +3,7 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
+import {console2} from "./console2.sol";
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 // TODO Remove import.
 import {VmSafe} from "./Vm.sol";
@@ -122,10 +123,13 @@ abstract contract StdUtils {
         virtual
         returns (uint256[] memory balances)
     {
+        require(token.code.length > 0, "StdUtils getTokenBalances)address,address[]): Token address is not a contract.");
+
         // ABI encode the aggregate call to Multicall3.
         uint256 length = addresses.length;
         IMulticall3.Call[] memory calls = new IMulticall3.Call[](length);
         for (uint256 i = 0; i < length; ++i) {
+            // 0x70a08231 = bytes4("balanceOf(address)"))
             calls[i] = IMulticall3.Call({target: token, callData: abi.encodeWithSelector(0x70a08231, (addresses[i]))});
         }
 

@@ -223,10 +223,17 @@ contract StdUtilsTest is Test {
                                   GET TOKEN BALANCES
     //////////////////////////////////////////////////////////////////////////*/
 
-    address internal USDC_HOLDER = 0xDa9CE944a37d218c3302F6B82a094844C6ECEb17;
+    address internal SHIB = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
+    address internal SHIB_HOLDER_0 = 0x855F5981e831D83e6A4b4EBFCAdAa68D92333170;
+    address internal SHIB_HOLDER_1 = 0x8F509A90c2e47779cA408Fe00d7A72e359229AdA;
+    address internal SHIB_HOLDER_2 = 0x0e3bbc0D04fF62211F71f3e4C45d82ad76224385;
+
+    address internal USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address internal USDC_HOLDER_0 = 0xDa9CE944a37d218c3302F6B82a094844C6ECEb17;
+    address internal USDC_HOLDER_1 = 0x3e67F4721E6d1c41a015f645eFa37BEd854fcf52;
 
     modifier forkMainnet() {
-        vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16376000});
+        vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
         _;
     }
 
@@ -238,9 +245,37 @@ contract StdUtilsTest is Test {
         // so the `balanceOf` call should revert.
         address token = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
         address[] memory addresses = new address[](1);
-        addresses[0] = USDC_HOLDER;
+        addresses[0] = USDC_HOLDER_0;
 
         vm.expectRevert("Multicall3: call failed");
         stdUtils.getTokenBalances_(token, addresses);
+    }
+
+    function testCannotGetTokenBalances_EOA() external forkMainnet {
+        address eoa = vm.addr({privateKey: 1});
+        address[] memory addresses = new address[](1);
+        addresses[0] = USDC_HOLDER_0;
+        vm.expectRevert("StdUtils getTokenBalances)address,address[]): Token address is not a contract.");
+        getTokenBalances(eoa, addresses);
+    }
+
+    function testGetTokenBalances_USDC() external forkMainnet {
+        address[] memory addresses = new address[](2);
+        addresses[0] = USDC_HOLDER_0;
+        addresses[1] = USDC_HOLDER_1;
+        uint256[] memory balances = getTokenBalances(USDC, addresses);
+        assertEq(balances[0], 159_000_000_000_000);
+        assertEq(balances[1], 131_350_000_000_000);
+    }
+
+    function testGetTokenBalances_SHIB() external forkMainnet {
+        address[] memory addresses = new address[](3);
+        addresses[0] = SHIB_HOLDER_0;
+        addresses[1] = SHIB_HOLDER_1;
+        addresses[2] = SHIB_HOLDER_2;
+        uint256[] memory balances = getTokenBalances(SHIB, addresses);
+        assertEq(balances[0], 3_323_256_285_484.42e18);
+        assertEq(balances[1], 1_271_702_771_149.99999928e18);
+        assertEq(balances[2], 606_357_106_247e18);
     }
 }
