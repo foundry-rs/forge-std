@@ -255,7 +255,7 @@ contract StdUtilsTest is Test {
         address eoa = vm.addr({privateKey: 1});
         address[] memory addresses = new address[](1);
         addresses[0] = USDC_HOLDER_0;
-        vm.expectRevert("StdUtils getTokenBalances)address,address[]): Token address is not a contract.");
+        vm.expectRevert("StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
         getTokenBalances(eoa, addresses);
     }
 
