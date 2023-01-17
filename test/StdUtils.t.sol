@@ -259,6 +259,12 @@ contract StdUtilsTest is Test {
         getTokenBalances(eoa, addresses);
     }
 
+    function testGetTokenBalances_Empty() external forkMainnet {
+        address[] memory addresses = new address[](0);
+        uint256[] memory balances = getTokenBalances(USDC, addresses);
+        assertEq(balances.length, 0);
+    }
+
     function testGetTokenBalances_USDC() external forkMainnet {
         address[] memory addresses = new address[](2);
         addresses[0] = USDC_HOLDER_0;

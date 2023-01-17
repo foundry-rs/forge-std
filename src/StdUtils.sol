@@ -3,7 +3,6 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
-import {console2} from "./console2.sol";
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 // TODO Remove import.
 import {VmSafe} from "./Vm.sol";
