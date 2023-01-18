@@ -218,7 +218,9 @@ contract StdUtilsTest is Test {
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
+}
 
+contract StdUtilsForkTest is Test {
     /*//////////////////////////////////////////////////////////////////////////
                                   GET TOKEN BALANCES
     //////////////////////////////////////////////////////////////////////////*/
@@ -232,12 +234,11 @@ contract StdUtilsTest is Test {
     address internal USDC_HOLDER_0 = 0xDa9CE944a37d218c3302F6B82a094844C6ECEb17;
     address internal USDC_HOLDER_1 = 0x3e67F4721E6d1c41a015f645eFa37BEd854fcf52;
 
-    modifier forkMainnet() {
+    function setUp() public {
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
-        _;
     }
 
-    function testCannotGetTokenBalances_NonTokenContract() external forkMainnet {
+    function testCannotGetTokenBalances_NonTokenContract() external {
         // We deploy a mock version so we can properly test the revert.
         StdUtilsMock stdUtils = new StdUtilsMock();
 
@@ -251,7 +252,7 @@ contract StdUtilsTest is Test {
         stdUtils.getTokenBalances_(token, addresses);
     }
 
-    function testCannotGetTokenBalances_EOA() external forkMainnet {
+    function testCannotGetTokenBalances_EOA() external {
         address eoa = vm.addr({privateKey: 1});
         address[] memory addresses = new address[](1);
         addresses[0] = USDC_HOLDER_0;
@@ -259,13 +260,13 @@ contract StdUtilsTest is Test {
         getTokenBalances(eoa, addresses);
     }
 
-    function testGetTokenBalances_Empty() external forkMainnet {
+    function testGetTokenBalances_Empty() external {
         address[] memory addresses = new address[](0);
         uint256[] memory balances = getTokenBalances(USDC, addresses);
         assertEq(balances.length, 0);
     }
 
-    function testGetTokenBalances_USDC() external forkMainnet {
+    function testGetTokenBalances_USDC() external {
         address[] memory addresses = new address[](2);
         addresses[0] = USDC_HOLDER_0;
         addresses[1] = USDC_HOLDER_1;
@@ -274,7 +275,7 @@ contract StdUtilsTest is Test {
         assertEq(balances[1], 131_350_000_000_000);
     }
 
-    function testGetTokenBalances_SHIB() external forkMainnet {
+    function testGetTokenBalances_SHIB() external {
         address[] memory addresses = new address[](3);
         addresses[0] = SHIB_HOLDER_0;
         addresses[1] = SHIB_HOLDER_1;
