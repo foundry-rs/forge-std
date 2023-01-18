@@ -124,7 +124,7 @@ abstract contract StdUtils {
     {
         uint256 tokenCodeSize;
         assembly {
-            tokenCodeSize := extcodesize(tokenCodeSize)
+            tokenCodeSize := extcodesize(token)
         }
         require(tokenCodeSize > 0, "StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
 
