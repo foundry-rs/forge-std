@@ -3,7 +3,21 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../src/Test.sol";
 
+contract StdUtilsMock is StdUtils {
+    // We deploy a mock version so we can properly test expected reverts.
+    function getTokenBalances_(address token, address[] memory addresses)
+        external
+        returns (uint256[] memory balances)
+    {
+        return getTokenBalances(token, addresses);
+    }
+}
+
 contract StdUtilsTest is Test {
+    /*//////////////////////////////////////////////////////////////////////////
+                                     BOUND UINT
+    //////////////////////////////////////////////////////////////////////////*/
+
     function testBound() public {
         assertEq(bound(uint256(5), 0, 4), 0);
         assertEq(bound(uint256(0), 69, 69), 69);
@@ -73,6 +87,10 @@ contract StdUtilsTest is Test {
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
         bound(num, min, max);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     BOUND INT
+    //////////////////////////////////////////////////////////////////////////*/
 
     function testBoundInt() public {
         assertEq(bound(-3, 0, 4), 2);
@@ -158,20 +176,9 @@ contract StdUtilsTest is Test {
         bound(num, min, max);
     }
 
-    function testGenerateCreateAddress() external {
-        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
-        uint256 nonce = 14;
-        address createAddress = computeCreateAddress(deployer, nonce);
-        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
-    }
-
-    function testGenerateCreate2Address() external {
-        bytes32 salt = bytes32(uint256(31415));
-        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
-        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
-        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
-        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
-    }
+    /*//////////////////////////////////////////////////////////////////////////
+                                   BYTES TO UINT
+    //////////////////////////////////////////////////////////////////////////*/
 
     function testBytesToUint() external {
         bytes memory maxUint = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -187,5 +194,96 @@ contract StdUtilsTest is Test {
         bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
         bytesToUint(thirty3Bytes);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                               COMPUTE CREATE ADDRESS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testComputeCreateAddress() external {
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        uint256 nonce = 14;
+        address createAddress = computeCreateAddress(deployer, nonce);
+        assertEq(createAddress, 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              COMPUTE CREATE2 ADDRESS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testComputeCreate2Address() external {
+        bytes32 salt = bytes32(uint256(31415));
+        bytes32 initcodeHash = keccak256(abi.encode(0x6080));
+        address deployer = 0x6C9FC64A53c1b71FB3f9Af64d1ae3A4931A5f4E9;
+        address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
+        assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
+    }
+}
+
+contract StdUtilsForkTest is Test {
+    /*//////////////////////////////////////////////////////////////////////////
+                                  GET TOKEN BALANCES
+    //////////////////////////////////////////////////////////////////////////*/
+
+    address internal SHIB = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
+    address internal SHIB_HOLDER_0 = 0x855F5981e831D83e6A4b4EBFCAdAa68D92333170;
+    address internal SHIB_HOLDER_1 = 0x8F509A90c2e47779cA408Fe00d7A72e359229AdA;
+    address internal SHIB_HOLDER_2 = 0x0e3bbc0D04fF62211F71f3e4C45d82ad76224385;
+
+    address internal USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address internal USDC_HOLDER_0 = 0xDa9CE944a37d218c3302F6B82a094844C6ECEb17;
+    address internal USDC_HOLDER_1 = 0x3e67F4721E6d1c41a015f645eFa37BEd854fcf52;
+
+    function setUp() public {
+        // All tests of the `getTokenBalances` method are fork tests using live contracts.
+        vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
+    }
+
+    function testCannotGetTokenBalances_NonTokenContract() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
+        // The UniswapV2Factory contract has neither a `balanceOf` function nor a fallback function,
+        // so the `balanceOf` call should revert.
+        address token = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+        address[] memory addresses = new address[](1);
+        addresses[0] = USDC_HOLDER_0;
+
+        vm.expectRevert("Multicall3: call failed");
+        stdUtils.getTokenBalances_(token, addresses);
+    }
+
+    function testCannotGetTokenBalances_EOA() external {
+        address eoa = vm.addr({privateKey: 1});
+        address[] memory addresses = new address[](1);
+        addresses[0] = USDC_HOLDER_0;
+        vm.expectRevert("StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
+        getTokenBalances(eoa, addresses);
+    }
+
+    function testGetTokenBalances_Empty() external {
+        address[] memory addresses = new address[](0);
+        uint256[] memory balances = getTokenBalances(USDC, addresses);
+        assertEq(balances.length, 0);
+    }
+
+    function testGetTokenBalances_USDC() external {
+        address[] memory addresses = new address[](2);
+        addresses[0] = USDC_HOLDER_0;
+        addresses[1] = USDC_HOLDER_1;
+        uint256[] memory balances = getTokenBalances(USDC, addresses);
+        assertEq(balances[0], 159_000_000_000_000);
+        assertEq(balances[1], 131_350_000_000_000);
+    }
+
+    function testGetTokenBalances_SHIB() external {
+        address[] memory addresses = new address[](3);
+        addresses[0] = SHIB_HOLDER_0;
+        addresses[1] = SHIB_HOLDER_1;
+        addresses[2] = SHIB_HOLDER_2;
+        uint256[] memory balances = getTokenBalances(SHIB, addresses);
+        assertEq(balances[0], 3_323_256_285_484.42e18);
+        assertEq(balances[1], 1_271_702_771_149.99999928e18);
+        assertEq(balances[2], 606_357_106_247e18);
     }
 }
