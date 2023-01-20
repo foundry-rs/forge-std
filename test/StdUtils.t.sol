@@ -218,6 +218,14 @@ contract StdUtilsTest is Test {
         address create2Address = computeCreate2Address(salt, initcodeHash, deployer);
         assertEq(create2Address, 0xB147a5d25748fda14b463EB04B111027C290f4d3);
     }
+
+    function testComputeCreate2AddressWithDefaultDeployer() external {
+        bytes32 salt = 0xc290c670fde54e5ef686f9132cbc8711e76a98f0333a438a92daa442c71403c0;
+        bytes32 initcodeHash = hashInitCode(hex"6080", "");
+        assertEq(initcodeHash, 0x1a578b7a4b0b5755db6d121b4118d4bc68fe170dca840c59bc922f14175a76b0);
+        address create2Address = computeCreate2Address(salt, initcodeHash);
+        assertEq(create2Address, 0xc0ffEe2198a06235aAbFffe5Db0CacF1717f5Ac6);
+    }
 }
 
 contract StdUtilsForkTest is Test {
