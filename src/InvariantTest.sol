@@ -31,6 +31,10 @@ contract InvariantTest {
         _excludedSenders.push(newExcludedSender_);
     }
 
+    function excludeArtifact(string memory newExcludedArtifact_) internal {
+        _excludedArtifacts.push(newExcludedArtifact_);
+    }
+
     function targetArtifact(string memory newTargetedArtifact_) internal {
         _targetedArtifacts.push(newTargetedArtifact_);
     }
@@ -53,10 +57,6 @@ contract InvariantTest {
 
     // Functions for forge:
     // These are called by forge to run invariant tests and don't need to be called in tests.
-
-    function excludeArtifact(string memory newExcludedArtifact_) internal {
-        _excludedArtifacts.push(newExcludedArtifact_);
-    }
 
     function excludeArtifacts() public view returns (string[] memory excludedArtifacts_) {
         excludedArtifacts_ = _excludedArtifacts;
