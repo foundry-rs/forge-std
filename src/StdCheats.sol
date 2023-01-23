@@ -489,52 +489,52 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     // Setup a prank from an address that has some ether
-    function hoax(address who) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.prank(who);
+    function hoax(address msgSender) internal virtual {
+        vm.deal(msgSender, 1 << 128);
+        vm.prank(msgSender);
     }
 
-    function hoax(address who, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.prank(who);
+    function hoax(address msgSender, uint256 give) internal virtual {
+        vm.deal(msgSender, give);
+        vm.prank(msgSender);
     }
 
-    function hoax(address who, address origin) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.prank(who, origin);
+    function hoax(address msgSender, address origin) internal virtual {
+        vm.deal(msgSender, 1 << 128);
+        vm.prank(msgSender, origin);
     }
 
-    function hoax(address who, address origin, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.prank(who, origin);
+    function hoax(address msgSender, address origin, uint256 give) internal virtual {
+        vm.deal(msgSender, give);
+        vm.prank(msgSender, origin);
     }
 
     // Start perpetual prank from an address that has some ether
-    function startHoax(address who) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.startPrank(who);
+    function startHoax(address msgSender) internal virtual {
+        vm.deal(msgSender, 1 << 128);
+        vm.startPrank(msgSender);
     }
 
-    function startHoax(address who, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.startPrank(who);
+    function startHoax(address msgSender, uint256 give) internal virtual {
+        vm.deal(msgSender, give);
+        vm.startPrank(msgSender);
     }
 
     // Start perpetual prank from an address that has some ether
     // tx.origin is set to the origin parameter
-    function startHoax(address who, address origin) internal virtual {
-        vm.deal(who, 1 << 128);
-        vm.startPrank(who, origin);
+    function startHoax(address msgSender, address origin) internal virtual {
+        vm.deal(msgSender, 1 << 128);
+        vm.startPrank(msgSender, origin);
     }
 
-    function startHoax(address who, address origin, uint256 give) internal virtual {
-        vm.deal(who, give);
-        vm.startPrank(who, origin);
+    function startHoax(address msgSender, address origin, uint256 give) internal virtual {
+        vm.deal(msgSender, give);
+        vm.startPrank(msgSender, origin);
     }
 
-    function changePrank(address who) internal virtual {
+    function changePrank(address msgSender) internal virtual {
         vm.stopPrank();
-        vm.startPrank(who);
+        vm.startPrank(msgSender);
     }
 
     // The same as Vm's `deal`
