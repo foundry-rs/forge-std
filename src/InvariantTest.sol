@@ -30,7 +30,7 @@ contract InvariantTest {
     function excludeSender(address newExcludedSender_) internal {
         _excludedSenders.push(newExcludedSender_);
     }
-    
+
     function excludeArtifact(string memory newExcludedArtifact_) internal {
         _excludedArtifacts.push(newExcludedArtifact_);
     }
