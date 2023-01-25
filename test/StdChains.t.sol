@@ -22,7 +22,7 @@ contract StdChainsTest is Test {
 
         // Other RPCs should remain unchanged.
         assertEq(getChain(31337).rpcUrl, "http://127.0.0.1:8545");
-        assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
+        assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/f4a0bdad42674adab5fc0ac077ffab2b");
     }
 
     function testRpc(string memory rpcAlias) internal {
