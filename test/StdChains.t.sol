@@ -6,7 +6,7 @@ import "../src/Test.sol";
 contract StdChainsTest is Test {
     function testChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
-        assertEq(getChain(1).rpcUrl, "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70");
+        assertEq(getChain(1).rpcUrl, "https://mainnet.infura.io/v3/16a8be88795540b9b3903d8de0f7baa5");
         assertEq(getChain("optimism_goerli").rpcUrl, "https://goerli.optimism.io/");
         assertEq(getChain("arbitrum_one_goerli").rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
@@ -18,11 +18,11 @@ contract StdChainsTest is Test {
 
         // Cannot override RPCs defined in `foundry.toml`
         vm.setEnv("MAINNET_RPC_URL", "myoverride2");
-        assertEq(getChain("mainnet").rpcUrl, "https://mainnet.infura.io/v3/7a8769b798b642f6933f2ed52042bd70");
+        assertEq(getChain("mainnet").rpcUrl, "https://mainnet.infura.io/v3/16a8be88795540b9b3903d8de0f7baa5");
 
         // Other RPCs should remain unchanged.
         assertEq(getChain(31337).rpcUrl, "http://127.0.0.1:8545");
-        assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f");
+        assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/f4a0bdad42674adab5fc0ac077ffab2b");
     }
 
     function testRpc(string memory rpcAlias) internal {

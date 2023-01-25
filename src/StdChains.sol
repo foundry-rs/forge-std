@@ -179,13 +179,13 @@ abstract contract StdChains {
         // If adding an RPC here, make sure to test the default RPC URL in `testRpcs`
         setChainWithDefaultRpcUrl("anvil", ChainData("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
-            "mainnet", ChainData("Mainnet", 1, "https://mainnet.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "mainnet", ChainData("Mainnet", 1, "https://mainnet.infura.io/v3/f4a0bdad42674adab5fc0ac077ffab2b")
         );
         setChainWithDefaultRpcUrl(
-            "goerli", ChainData("Goerli", 5, "https://goerli.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "goerli", ChainData("Goerli", 5, "https://goerli.infura.io/v3/f4a0bdad42674adab5fc0ac077ffab2b")
         );
         setChainWithDefaultRpcUrl(
-            "sepolia", ChainData("Sepolia", 11155111, "https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f")
+            "sepolia", ChainData("Sepolia", 11155111, "https://sepolia.infura.io/v3/f4a0bdad42674adab5fc0ac077ffab2b")
         );
         setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
         setChainWithDefaultRpcUrl("optimism_goerli", ChainData("Optimism Goerli", 420, "https://goerli.optimism.io"));
