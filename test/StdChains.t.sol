@@ -145,7 +145,7 @@ contract StdChainsTest is Test {
         assertEq(modifiedChain.rpcUrl, "https://modified.chain/");
     }
 
-    function testUseDefaultRpcUrl() public {
+    function testDontUseDefaultRpcUrl() public {
         // Should error if default RPCs flag is set to false.
         setUseDefaultRpcUrls(false);
         vm.expectRevert(
