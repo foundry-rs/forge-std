@@ -67,7 +67,7 @@ abstract contract StdChains {
     // Maps from a chain ID to it's alias.
     mapping(uint256 => string) private idToAlias;
 
-    bool private useDefaultRpcUrls = true;
+    bool private fallbackToDefaultRpcUrls = true;
 
     // The RPC URL will be fetched from config or defaultRpcUrls if possible.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
@@ -158,7 +158,7 @@ abstract contract StdChains {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
                 string memory envName = string(abi.encodePacked(_toUpper(chainAlias), "_RPC_URL"));
-                if (useDefaultRpcUrls) {
+                if (fallbackToDefaultRpcUrls) {
                     chain.rpcUrl = vm.envOr(envName, defaultRpcUrls[chainAlias]);
                 } else {
                     chain.rpcUrl = vm.envString(envName);
@@ -177,8 +177,8 @@ abstract contract StdChains {
         return chain;
     }
 
-    function setUseDefaultRpcUrls(bool useDefault) internal {
-        useDefaultRpcUrls = useDefault;
+    function setFallbackToDefaultRpcUrls(bool useDefault) internal {
+        fallbackToDefaultRpcUrls = useDefault;
     }
 
     function initialize() private {

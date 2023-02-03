@@ -147,7 +147,7 @@ contract StdChainsTest is Test {
 
     function testDontUseDefaultRpcUrl() public {
         // Should error if default RPCs flag is set to false.
-        setUseDefaultRpcUrls(false);
+        setFallbackToDefaultRpcUrls(false);
         vm.expectRevert(
             "Failed to get environment variable `ANVIL_RPC_URL` as type `string`: environment variable not found"
         );
