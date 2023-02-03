@@ -144,4 +144,13 @@ contract StdChainsTest is Test {
         assertEq(modifiedChain.chainId, 999999999);
         assertEq(modifiedChain.rpcUrl, "https://modified.chain/");
     }
+
+    function testUseDefaultRpcUrl() public {
+        // Should error if default RPCs flag is set to false.
+        setUseDefaultRpcUrls(false);
+        vm.expectRevert("Failed to get environment variable `ANVIL_RPC_URL` as type `string`: environment variable not found");
+        getChain(31337);
+        vm.expectRevert("Failed to get environment variable `SEPOLIA_RPC_URL` as type `string`: environment variable not found");
+        getChain("sepolia");
+    }
 }
