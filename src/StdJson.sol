@@ -69,23 +69,23 @@ library stdJson {
         return vm.parseJsonAddress(json, key);
     }
 
-    function readAddressArray(string memory json, string memory key) internal  returns (address[] memory) {
+    function readAddressArray(string memory json, string memory key) internal returns (address[] memory) {
         return vm.parseJsonAddressArray(json, key);
     }
 
-    function readBool(string memory json, string memory key) internal  returns (bool) {
+    function readBool(string memory json, string memory key) internal returns (bool) {
         return vm.parseJsonBool(json, key);
     }
 
-    function readBoolArray(string memory json, string memory key) internal  returns (bool[] memory) {
+    function readBoolArray(string memory json, string memory key) internal returns (bool[] memory) {
         return vm.parseJsonBoolArray(json, key);
     }
 
-    function readBytes(string memory json, string memory key) internal  returns (bytes memory) {
+    function readBytes(string memory json, string memory key) internal returns (bytes memory) {
         return vm.parseJsonBytes(json, key);
     }
 
-    function readBytesArray(string memory json, string memory key) internal  returns (bytes[] memory) {
+    function readBytesArray(string memory json, string memory key) internal returns (bytes[] memory) {
         return vm.parseJsonBytesArray(json, key);
     }
 
