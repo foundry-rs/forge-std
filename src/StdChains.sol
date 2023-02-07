@@ -67,6 +67,8 @@ abstract contract StdChains {
     // Maps from a chain ID to it's alias.
     mapping(uint256 => string) private idToAlias;
 
+    bool private fallbackToDefaultRpcUrls = true;
+
     // The RPC URL will be fetched from config or defaultRpcUrls if possible.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
         require(bytes(chainAlias).length != 0, "StdChains getChain(string): Chain alias cannot be the empty string.");
@@ -155,8 +157,12 @@ abstract contract StdChains {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
-                chain.rpcUrl =
-                    vm.envOr(string(abi.encodePacked(_toUpper(chainAlias), "_RPC_URL")), defaultRpcUrls[chainAlias]);
+                string memory envName = string(abi.encodePacked(_toUpper(chainAlias), "_RPC_URL"));
+                if (fallbackToDefaultRpcUrls) {
+                    chain.rpcUrl = vm.envOr(envName, defaultRpcUrls[chainAlias]);
+                } else {
+                    chain.rpcUrl = vm.envString(envName);
+                }
                 // distinguish 'not found' from 'cannot read'
                 bytes memory notFoundError =
                     abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
@@ -169,6 +175,10 @@ abstract contract StdChains {
             }
         }
         return chain;
+    }
+
+    function setFallbackToDefaultRpcUrls(bool useDefault) internal {
+        fallbackToDefaultRpcUrls = useDefault;
     }
 
     function initialize() private {
