@@ -8,7 +8,7 @@ pragma experimental ABIEncoderV2;
 
 // 🧩 MODULES
 import {console} from "./console.sol";
-import {console2} from "./console2.sol";
+import {Console, console2} from "./console2.sol";
 import {StdAssertions} from "./StdAssertions.sol";
 import {StdChains} from "./StdChains.sol";
 import {StdCheats} from "./StdCheats.sol";

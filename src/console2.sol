@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
+struct Console {
+    string _color;
+}
+
 /// @dev The original console.sol uses `int` and `uint` for computing function selectors, but it should
 /// use `int256` and `uint256`. This modified version fixes that. This version is recommended
 /// over `console.sol` if you don't need compatibility with Hardhat as the logs will show up in
@@ -8,6 +12,49 @@ pragma solidity >=0.4.22 <0.9.0;
 /// Reference: https://github.com/NomicFoundation/hardhat/issues/2178
 library console2 {
     address constant CONSOLE_ADDRESS = address(0x000000000000000000636F6e736F6c652e6c6f67);
+
+    string constant CRED = "\u001b[91m";
+    string constant CGREEN = "\u001b[92m";
+    string constant CYELLOW = "\u001b[93m";
+    string constant CBLUE = "\u001b[94m";
+    string constant CMAGENTA = "\u001b[95m";
+    string constant CCYAN = "\u001b[96m";
+    string constant CRESET = "\u001b[0m";
+
+    function red(Console storage self) internal returns (Console storage) {
+        self._color = CRED;
+        return self;
+    }
+    
+    function green(Console storage self) internal returns (Console storage) {
+        self._color = CGREEN;
+        return self;
+    }
+
+    function yellow(Console storage self) internal returns (Console storage) {
+        self._color = CYELLOW;
+        return self;
+    }
+
+    function blue(Console storage self) internal returns (Console storage) {
+        self._color = CBLUE;
+        return self;
+    }
+
+    function magenta(Console storage self) internal returns (Console storage) {
+        self._color = CMAGENTA;
+        return self;
+    }
+
+    function cyan(Console storage self) internal returns (Console storage) {
+        self._color = CCYAN;
+        return self;
+    }
+
+    function normal(Console storage self) internal returns (Console storage) {
+        self._color = CRESET;
+        return self;
+    }
 
     function _sendLogPayload(bytes memory payload) private view {
         uint256 payloadLength = payload.length;
@@ -1541,6 +1588,1375 @@ library console2 {
 
     function log(address p0, address p1, address p2, address p3) internal view {
         _sendLogPayload(abi.encodeWithSignature("log(address,address,address,address)", p0, p1, p2, p3));
+    }
+
+    // Log Functions with Color functionality.
+        function log(Console storage self, uint256 p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string)", self._color, p0, CRESET));
+    }
+
+    function log(Console storage self, int256 p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,int256,string)", self._color, p0, CRESET));
+    }
+
+    function log(Console storage self, string memory p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string)", self._color, p0, CRESET));
+    }
+
+    function log(Console storage self, bool p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string)", self._color, p0, CRESET));
+    }
+
+    function log(Console storage self, address p0) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string)", self._color, p0, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, int256 p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,int256,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string)", self._color, p0, p1, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, uint256 p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,uint256,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, string memory p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, bool p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,bool,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, address p2) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,address,string)", self._color, p0, p1, p2, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, uint256 p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,uint256,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, string memory p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, bool p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,bool,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, uint256 p0, address p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256,address,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, uint256 p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,uint256,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, string memory p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,string,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, bool p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,bool,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, string memory p0, address p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string,address,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, uint256 p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,uint256,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, string memory p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,string,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, bool p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,bool,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, bool p0, address p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,bool,address,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, uint256 p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,uint256,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, string memory p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,string,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, bool p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,bool,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, uint256 p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,uint256,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, uint256 p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,uint256,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, uint256 p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,uint256,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, uint256 p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,uint256,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, string memory p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, string memory p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, string memory p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, string memory p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,string,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, bool p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,bool,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, bool p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,bool,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, bool p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,bool,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, bool p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,bool,address,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, address p2, uint256 p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,address,uint256,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, address p2, string memory p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,address,string,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, address p2, bool p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,address,bool,string)", self._color, p0, p1, p2, p3, CRESET));
+    }
+
+    function log(Console storage self, address p0, address p1, address p2, address p3) internal view {
+        _sendLogPayload(abi.encodeWithSignature("log(string,address,address,address,address,string)", self._color, p0, p1, p2, p3, CRESET));
     }
 
 }

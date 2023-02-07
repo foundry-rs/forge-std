@@ -3,6 +3,7 @@ pragma solidity >=0.6.2 <0.9.0;
 
 import {StdStorage} from "./StdStorage.sol";
 import {Vm, VmSafe} from "./Vm.sol";
+import {Console, console2} from "./console2.sol";
 
 abstract contract CommonBase {
     // Cheat code address, 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D.
@@ -21,6 +22,7 @@ abstract contract CommonBase {
 
     Vm internal constant vm = Vm(VM_ADDRESS);
     StdStorage internal stdstore;
+    Console internal console;
 }
 
 abstract contract TestBase is CommonBase {}
