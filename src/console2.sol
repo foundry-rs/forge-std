@@ -1591,7 +1591,7 @@ library console2 {
     }
 
     // Log Functions with Color functionality.
-        function log(Console storage self, uint256 p0) internal view {
+    function log(Console storage self, uint256 p0) internal view {
         _sendLogPayload(abi.encodeWithSignature("log(string,uint256,string)", self._color, p0, CRESET));
     }
 
