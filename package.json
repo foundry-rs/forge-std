@@ -7,8 +7,12 @@
   "license": "(Apache-2.0 OR MIT)",
   "author": "Contributors to Forge Standard Library",
   "files": [
-    "src/**/*"
+    "src/**/*",
+    ".gitmodules"
   ],
+  "scripts": {
+    "postinstall": "git submodule update --recursive"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/foundry-rs/forge-std.git"
