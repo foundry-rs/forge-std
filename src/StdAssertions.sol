@@ -28,8 +28,8 @@ abstract contract StdAssertions is DSTest {
     function assertEq(bool a, bool b) internal virtual {
         if (a != b) {
             emit log("Error: a == b not satisfied [bool]");
-            emit log_named_string("  Expected", b ? "true" : "false");
-            emit log_named_string("    Actual", a ? "true" : "false");
+            emit log_named_string("      Left", a ? "true" : "false");
+            emit log_named_string("     Right", b ? "true" : "false");
             fail();
         }
     }
@@ -52,8 +52,8 @@ abstract contract StdAssertions is DSTest {
     function assertEq(uint256[] memory a, uint256[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [uint[]]");
-            emit log_named_array("  Expected", b);
-            emit log_named_array("    Actual", a);
+            emit log_named_array("      Left", a);
+            emit log_named_array("     Right", b);
             fail();
         }
     }
@@ -61,8 +61,8 @@ abstract contract StdAssertions is DSTest {
     function assertEq(int256[] memory a, int256[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [int[]]");
-            emit log_named_array("  Expected", b);
-            emit log_named_array("    Actual", a);
+            emit log_named_array("      Left", a);
+            emit log_named_array("     Right", b);
             fail();
         }
     }
@@ -70,8 +70,8 @@ abstract contract StdAssertions is DSTest {
     function assertEq(address[] memory a, address[] memory b) internal virtual {
         if (keccak256(abi.encode(a)) != keccak256(abi.encode(b))) {
             emit log("Error: a == b not satisfied [address[]]");
-            emit log_named_array("  Expected", b);
-            emit log_named_array("    Actual", a);
+            emit log_named_array("      Left", a);
+            emit log_named_array("     Right", b);
             fail();
         }
     }
@@ -107,8 +107,8 @@ abstract contract StdAssertions is DSTest {
 
         if (delta > maxDelta) {
             emit log("Error: a ~= b not satisfied [uint]");
-            emit log_named_uint("  Expected", b);
-            emit log_named_uint("    Actual", a);
+            emit log_named_uint("      Left", a);
+            emit log_named_uint("     Right", b);
             emit log_named_uint(" Max Delta", maxDelta);
             emit log_named_uint("     Delta", delta);
             fail();
@@ -154,8 +154,8 @@ abstract contract StdAssertions is DSTest {
 
         if (delta > maxDelta) {
             emit log("Error: a ~= b not satisfied [int]");
-            emit log_named_int("  Expected", b);
-            emit log_named_int("    Actual", a);
+            emit log_named_int("       Left", a);
+            emit log_named_int("      Right", b);
             emit log_named_uint(" Max Delta", maxDelta);
             emit log_named_uint("     Delta", delta);
             fail();
@@ -201,14 +201,14 @@ abstract contract StdAssertions is DSTest {
         uint256 b,
         uint256 maxPercentDelta // An 18 decimal fixed point number, where 1e18 == 100%
     ) internal virtual {
-        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b); // If the left is 0, right must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log("Error: a ~= b not satisfied [uint]");
-            emit log_named_uint("    Expected", b);
-            emit log_named_uint("      Actual", a);
+            emit log_named_uint("        Left", a);
+            emit log_named_uint("       Right", b);
             emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
             emit log_named_decimal_uint("     % Delta", percentDelta, 18);
             fail();
@@ -221,7 +221,7 @@ abstract contract StdAssertions is DSTest {
         uint256 maxPercentDelta, // An 18 decimal fixed point number, where 1e18 == 100%
         string memory err
     ) internal virtual {
-        if (b == 0) return assertEq(a, b, err); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b, err); // If the left is 0, right must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
@@ -269,14 +269,14 @@ abstract contract StdAssertions is DSTest {
     }
 
     function assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta) internal virtual {
-        if (b == 0) return assertEq(a, b); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b); // If the left is 0, right must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         if (percentDelta > maxPercentDelta) {
             emit log("Error: a ~= b not satisfied [int]");
-            emit log_named_int("    Expected", b);
-            emit log_named_int("      Actual", a);
+            emit log_named_int("        Left", a);
+            emit log_named_int("       Right", b);
             emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
             emit log_named_decimal_uint("     % Delta", percentDelta, 18);
             fail();
@@ -284,7 +284,7 @@ abstract contract StdAssertions is DSTest {
     }
 
     function assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, string memory err) internal virtual {
-        if (b == 0) return assertEq(a, b, err); // If the expected is 0, actual must be too.
+        if (b == 0) return assertEq(a, b, err); // If the left is 0, right must be too.
 
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
