@@ -549,8 +549,10 @@ abstract contract StdCheats is StdCheatsSafe {
         deal(token, to, give, false);
     }
 
-    function deal(address token, address to, uint256 id, uint256 give) internal virtual {
-        deal(token, to, id, give, false);
+    // Set the balance of an account for any ERC1155 token
+    // Use the alternative signature to update `totalSupply`
+    function dealERC1155(address token, address to, uint256 id, uint256 give) internal virtual {
+        dealERC1155(token, to, id, give, false);
     }
 
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
