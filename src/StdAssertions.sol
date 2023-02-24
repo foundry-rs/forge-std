@@ -322,4 +322,55 @@ abstract contract StdAssertions is DSTest {
             assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals);
         }
     }
+
+    function assertEqCall(address target, bytes memory callDataA, bytes memory callDataB) internal virtual {
+        assertEqCall(target, callDataA, target, callDataB, true);
+    }
+
+    function assertEqCall(address targetA, bytes memory callDataA, address targetB, bytes memory callDataB)
+        internal
+        virtual
+    {
+        assertEqCall(targetA, callDataA, targetB, callDataB, true);
+    }
+
+    function assertEqCall(address target, bytes memory callDataA, bytes memory callDataB, bool strictRevertData)
+        internal
+        virtual
+    {
+        assertEqCall(target, callDataA, target, callDataB, strictRevertData);
+    }
+
+    function assertEqCall(
+        address targetA,
+        bytes memory callDataA,
+        address targetB,
+        bytes memory callDataB,
+        bool strictRevertData
+    ) internal virtual {
+        (bool successA, bytes memory returnDataA) = address(targetA).call(callDataA);
+        (bool successB, bytes memory returnDataB) = address(targetB).call(callDataB);
+
+        if (successA && successB) {
+            assertEq(returnDataA, returnDataB, "Call return data does not match");
+        }
+
+        if (!successA && !successB && strictRevertData) {
+            assertEq(returnDataA, returnDataB, "Call revert data does not match");
+        }
+
+        if (!successA && successB) {
+            emit log("Error: Call reverted unexpectedly");
+            emit log_named_bytes("  Left call revert data", returnDataA);
+            emit log_named_bytes(" Right call return data", returnDataB);
+            fail();
+        }
+
+        if (successA && !successB) {
+            emit log("Error: Call did not revert");
+            emit log_named_bytes("  Left call return data", returnDataA);
+            emit log_named_bytes(" Right call revert data", returnDataB);
+            fail();
+        }
+    }
 }
