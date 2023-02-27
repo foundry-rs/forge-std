@@ -24,19 +24,19 @@ library StdStyle {
     }
 
     function red(uint256 self) internal view returns (string memory) {
-        return string.concat(RED, vm.toString(self), RESET);
+        return red(vm.toString(self));
     }
 
     function red(int256 self) internal view returns (string memory) {
-        return string.concat(RED, vm.toString(self), RESET);
+        return red(vm.toString(self));
     }
 
     function red(address self) internal view returns (string memory) {
-        return string.concat(RED, vm.toString(self), RESET);
+        return red(vm.toString(self));
     }
 
     function red(bool self) internal view returns (string memory) {
-        return string.concat(RED, vm.toString(self), RESET);
+        return red(vm.toString(self));
     }
 
     function green(string memory self) internal view returns (string memory) {
@@ -44,19 +44,19 @@ library StdStyle {
     }
 
     function green(uint256 self) internal view returns (string memory) {
-        return string.concat(GREEN, vm.toString(self), RESET);
+        return green(vm.toString(self));
     }
 
     function green(int256 self) internal view returns (string memory) {
-        return string.concat(GREEN, vm.toString(self), RESET);
+        return green(vm.toString(self));
     }
 
     function green(address self) internal view returns (string memory) {
-        return string.concat(GREEN, vm.toString(self), RESET);
+        return green(vm.toString(self));
     }
 
     function green(bool self) internal view returns (string memory) {
-        return string.concat(GREEN, vm.toString(self), RESET);
+        return green(vm.toString(self));
     }
 
     function yellow(string memory self) internal view returns (string memory) {
@@ -64,19 +64,19 @@ library StdStyle {
     }
 
     function yellow(uint256 self) internal view returns (string memory) {
-        return string.concat(YELLOW, vm.toString(self), RESET);
+        return yellow(vm.toString(self));
     }
 
     function yellow(int256 self) internal view returns (string memory) {
-        return string.concat(YELLOW, vm.toString(self), RESET);
+        return yellow(vm.toString(self));
     }
 
     function yellow(address self) internal view returns (string memory) {
-        return string.concat(YELLOW, vm.toString(self), RESET);
+        return yellow(vm.toString(self));
     }
 
     function yellow(bool self) internal view returns (string memory) {
-        return string.concat(YELLOW, vm.toString(self), RESET);
+        return yellow(vm.toString(self));
     }
 
     function blue(string memory self) internal view returns (string memory) {
@@ -84,19 +84,19 @@ library StdStyle {
     }
 
     function blue(uint256 self) internal view returns (string memory) {
-        return string.concat(BLUE, vm.toString(self), RESET);
+        return blue(vm.toString(self));
     }
 
     function blue(int256 self) internal view returns (string memory) {
-        return string.concat(BLUE, vm.toString(self), RESET);
+        return blue(vm.toString(self));
     }
 
     function blue(address self) internal view returns (string memory) {
-        return string.concat(BLUE, vm.toString(self), RESET);
+        return blue(vm.toString(self));
     }
 
     function blue(bool self) internal view returns (string memory) {
-        return string.concat(BLUE, vm.toString(self), RESET);
+        return blue(vm.toString(self));
     }
 
     function magenta(string memory self) internal view returns (string memory) {
@@ -104,19 +104,19 @@ library StdStyle {
     }
 
     function magenta(uint256 self) internal view returns (string memory) {
-        return string.concat(MAGENTA, vm.toString(self), RESET);
+        return magenta(vm.toString(self));
     }
 
     function magenta(int256 self) internal view returns (string memory) {
-        return string.concat(MAGENTA, vm.toString(self), RESET);
+        return magenta(vm.toString(self));
     }
 
     function magenta(address self) internal view returns (string memory) {
-        return string.concat(MAGENTA, vm.toString(self), RESET);
+        return magenta(vm.toString(self));
     }
 
     function magenta(bool self) internal view returns (string memory) {
-        return string.concat(MAGENTA, vm.toString(self), RESET);
+        return magenta(vm.toString(self));
     }
 
     function cyan(string memory self) internal view returns (string memory) {
@@ -124,19 +124,19 @@ library StdStyle {
     }
 
     function cyan(uint256 self) internal view returns (string memory) {
-        return string.concat(CYAN, vm.toString(self), RESET);
+        return cyan(vm.toString(self));
     }
 
     function cyan(int256 self) internal view returns (string memory) {
-        return string.concat(CYAN, vm.toString(self), RESET);
+        return cyan(vm.toString(self));
     }
 
     function cyan(address self) internal view returns (string memory) {
-        return string.concat(CYAN, vm.toString(self), RESET);
+        return cyan(vm.toString(self));
     }
 
     function cyan(bool self) internal view returns (string memory) {
-        return string.concat(CYAN, vm.toString(self), RESET);
+        return cyan(vm.toString(self));
     }
 
     function bold(string memory self) internal view returns (string memory) {
@@ -144,19 +144,19 @@ library StdStyle {
     }
 
     function bold(uint256 self) internal view returns (string memory) {
-        return string.concat(BOLD, vm.toString(self), RESET);
+        return bold(vm.toString(self));
     }
 
     function bold(int256 self) internal view returns (string memory) {
-        return string.concat(BOLD, vm.toString(self), RESET);
+        return bold(vm.toString(self));
     }
 
     function bold(address self) internal view returns (string memory) {
-        return string.concat(BOLD, vm.toString(self), RESET);
+        return bold(vm.toString(self));
     }
 
     function bold(bool self) internal view returns (string memory) {
-        return string.concat(BOLD, vm.toString(self), RESET);
+        return bold(vm.toString(self));
     }
 
     function dim(string memory self) internal view returns (string memory) {
@@ -164,19 +164,19 @@ library StdStyle {
     }
 
     function dim(uint256 self) internal view returns (string memory) {
-        return string.concat(DIM, vm.toString(self), RESET);
+        return dim(vm.toString(self));
     }
 
     function dim(int256 self) internal view returns (string memory) {
-        return string.concat(DIM, vm.toString(self), RESET);
+        return dim(vm.toString(self));
     }
 
     function dim(address self) internal view returns (string memory) {
-        return string.concat(DIM, vm.toString(self), RESET);
+        return dim(vm.toString(self));
     }
 
     function dim(bool self) internal view returns (string memory) {
-        return string.concat(DIM, vm.toString(self), RESET);
+        return dim(vm.toString(self));
     }
 
     function italic(string memory self) internal view returns (string memory) {
@@ -184,19 +184,19 @@ library StdStyle {
     }
 
     function italic(uint256 self) internal view returns (string memory) {
-        return string.concat(ITALIC, vm.toString(self), RESET);
+        return italic(vm.toString(self));
     }
 
     function italic(int256 self) internal view returns (string memory) {
-        return string.concat(ITALIC, vm.toString(self), RESET);
+        return italic(vm.toString(self));
     }
 
     function italic(address self) internal view returns (string memory) {
-        return string.concat(ITALIC, vm.toString(self), RESET);
+        return italic(vm.toString(self));
     }
 
     function italic(bool self) internal view returns (string memory) {
-        return string.concat(ITALIC, vm.toString(self), RESET);
+        return italic(vm.toString(self));
     }
 
     function underline(string memory self) internal view returns (string memory) {
@@ -204,19 +204,19 @@ library StdStyle {
     }
 
     function underline(uint256 self) internal view returns (string memory) {
-        return string.concat(UNDERLINE, vm.toString(self), RESET);
+        return underline(vm.toString(self));
     }
 
     function underline(int256 self) internal view returns (string memory) {
-        return string.concat(UNDERLINE, vm.toString(self), RESET);
+        return underline(vm.toString(self));
     }
 
     function underline(address self) internal view returns (string memory) {
-        return string.concat(UNDERLINE, vm.toString(self), RESET);
+        return underline(vm.toString(self));
     }
 
     function underline(bool self) internal view returns (string memory) {
-        return string.concat(UNDERLINE, vm.toString(self), RESET);
+        return underline(vm.toString(self));
     }
 
     function reverse(string memory self) internal view returns (string memory) {
@@ -224,18 +224,18 @@ library StdStyle {
     }
 
     function reverse(uint256 self) internal view returns (string memory) {
-        return string.concat(REVERSE, vm.toString(self), RESET);
+        return reverse(vm.toString(self));
     }
 
     function reverse(int256 self) internal view returns (string memory) {
-        return string.concat(REVERSE, vm.toString(self), RESET);
+        return reverse(vm.toString(self));
     }
 
     function reverse(address self) internal view returns (string memory) {
-        return string.concat(REVERSE, vm.toString(self), RESET);
+        return reverse(vm.toString(self));
     }
 
     function reverse(bool self) internal view returns (string memory) {
-        return string.concat(REVERSE, vm.toString(self), RESET);
+        return reverse(vm.toString(self));
     }
 }
