@@ -347,6 +347,10 @@ interface Vm is VmSafe {
     function expectCall(address callee, bytes calldata data) external;
     // Expects a call to an address with the specified msg.value and calldata
     function expectCall(address callee, uint256 msgValue, bytes calldata data) external;
+    // Expect a call to an address with the specified msg.value, gas, and calldata.
+    function expectCall(address callee, uint256 msgValue, uint64 gas, bytes calldata data) external;
+    // Expect a call to an address with the specified msg.value and calldata, and a *minimum* amount of gas.
+    function expectCallMinGas(address callee, uint256 msgValue, uint64 minGas, bytes calldata data) external;
     // Sets block.coinbase
     function coinbase(address newCoinbase) external;
     // Snapshot the current state of the evm.
