@@ -367,7 +367,7 @@ abstract contract StdAssertions is DSTest {
         }
 
         if (successA && !successB) {
-            emit log("Error: Call did not revert");
+            emit log("Error: Calls were not equal");
             emit log_named_bytes("  Left call return data", returnDataA);
             emit log_named_bytes(" Right call revert data", returnDataB);
             fail();
