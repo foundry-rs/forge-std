@@ -390,7 +390,6 @@ contract BarERC721 {
         return owner;
     }
 
-
     mapping(uint256 => address) private _owners;
     mapping(address => uint256) private _balances;
 }
