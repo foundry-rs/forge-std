@@ -549,6 +549,12 @@ abstract contract StdCheats is StdCheatsSafe {
         deal(token, to, give, false);
     }
 
+    // Set the balance of an account for any ERC1155 token
+    // Use the alternative signature to update `totalSupply`
+    function dealERC1155(address token, address to, uint256 id, uint256 give) internal virtual {
+        dealERC1155(token, to, id, give, false);
+    }
+
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
         // get current balance
         (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
@@ -568,5 +574,51 @@ abstract contract StdCheats is StdCheatsSafe {
             }
             stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
         }
+    }
+
+    function dealERC1155(address token, address to, uint256 id, uint256 give, bool adjust) internal virtual {
+        // get current balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x00fdd58e, to, id));
+        uint256 prevBal = abi.decode(balData, (uint256));
+
+        // update balance
+        stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(give);
+
+        // update total supply
+        if (adjust) {
+            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0xbd85b039, id));
+            require(
+                totSupData.length != 0,
+                "StdCheats deal(address,address,uint,uint,bool): target contract is not ERC1155Supply."
+            );
+            uint256 totSup = abi.decode(totSupData, (uint256));
+            if (give < prevBal) {
+                totSup -= (prevBal - give);
+            } else {
+                totSup += (give - prevBal);
+            }
+            stdstore.target(token).sig(0xbd85b039).with_key(id).checked_write(totSup);
+        }
+    }
+
+    function dealERC721(address token, address to, uint256 id) internal virtual {
+        // check if token id is already minted and the actual owner.
+        (bool successMinted, bytes memory ownerData) = token.staticcall(abi.encodeWithSelector(0x6352211e, id));
+        require(successMinted, "StdCheats deal(address,address,uint,bool): id not minted.");
+
+        // get owner current balance
+        (, bytes memory fromBalData) = token.call(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
+        uint256 fromPrevBal = abi.decode(fromBalData, (uint256));
+
+        // get new user current balance
+        (, bytes memory toBalData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        uint256 toPrevBal = abi.decode(toBalData, (uint256));
+
+        // update balances
+        stdstore.target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
+        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
+
+        // update owner
+        stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
     }
 }
