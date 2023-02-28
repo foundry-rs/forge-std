@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/Test.sol";
 
 contract StdStyleTest is Test {
-    function testStyleColor() public {
+    function testStyleColor() public view {
         console2.log(StdStyle.red("StdStyle.red String Test"));
         console2.log(StdStyle.red(uint256(10e18)));
         console2.log(StdStyle.red(int256(-10e18)));
@@ -37,7 +37,7 @@ contract StdStyleTest is Test {
         console2.log(StdStyle.cyan(address(0)));
     }
 
-    function testStyleFontWeight() public {
+    function testStyleFontWeight() public view {
         console2.log(StdStyle.bold("StdStyle.bold String Test"));
         console2.log(StdStyle.bold(uint256(10e18)));
         console2.log(StdStyle.bold(int256(-10e18)));
@@ -58,31 +58,31 @@ contract StdStyleTest is Test {
         console2.log(StdStyle.underline(int256(-10e18)));
         console2.log(StdStyle.underline(address(0)));
         console2.log(StdStyle.underline(true));
-        console2.log(StdStyle.reverse("StdStyle.reverse String Test"));
-        console2.log(StdStyle.reverse(uint256(10e18)));
-        console2.log(StdStyle.reverse(int256(-10e18)));
-        console2.log(StdStyle.reverse(address(0)));
-        console2.log(StdStyle.reverse(true));
+        console2.log(StdStyle.inverse("StdStyle.inverse String Test"));
+        console2.log(StdStyle.inverse(uint256(10e18)));
+        console2.log(StdStyle.inverse(int256(-10e18)));
+        console2.log(StdStyle.inverse(address(0)));
+        console2.log(StdStyle.inverse(true));
     }
 
-    function testStyleCombined() public {
+    function testStyleCombined() public view {
         console2.log(StdStyle.red(StdStyle.bold("Red Bold String Test")));
         console2.log(StdStyle.green(StdStyle.dim(uint256(10e18))));
         console2.log(StdStyle.yellow(StdStyle.italic(int256(-10e18))));
         console2.log(StdStyle.blue(StdStyle.underline(address(0))));
-        console2.log(StdStyle.magenta(StdStyle.reverse(true)));
+        console2.log(StdStyle.magenta(StdStyle.inverse(true)));
     }
 
-    function testStyleCustom() public {
+    function testStyleCustom() public view {
         console2.log(h1("Custom Style 1"));
         console2.log(h2("Custom Style 2"));
     }
 
-    function h1(string memory a) private view returns (string memory) {
-        return StdStyle.cyan(StdStyle.reverse(StdStyle.bold(a)));
+    function h1(string memory a) private pure returns (string memory) {
+        return StdStyle.cyan(StdStyle.inverse(StdStyle.bold(a)));
     }
 
-    function h2(string memory a) private view returns (string memory) {
+    function h2(string memory a) private pure returns (string memory) {
         return StdStyle.magenta(StdStyle.bold(StdStyle.underline(a)));
     }
 }
