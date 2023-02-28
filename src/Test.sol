@@ -19,6 +19,7 @@ import {stdMath} from "./StdMath.sol";
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {StdUtils} from "./StdUtils.sol";
 import {Vm} from "./Vm.sol";
+import {StdStyle} from "./StdStyle.sol";
 
 // 📦 BOILERPLATE
 import {TestBase} from "./Base.sol";
