@@ -92,7 +92,7 @@ contract StdCheatsTest is Test {
         assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
-    function testDealTokenAdjustTS() public {
+    function testDealTokenAdjustTotalSupply() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
         deal(bar, address(this), 10000e18, true);
