@@ -43,6 +43,14 @@ library StdStyle {
         return red(vm.toString(self));
     }
 
+    function redBytes(bytes memory self) internal pure returns (string memory) {
+        return red(vm.toString(self));
+    }
+
+    function redBytes32(bytes32 self) internal pure returns (string memory) {
+        return red(vm.toString(self));
+    }
+
     function green(string memory self) internal pure returns (string memory) {
         return styleConcat(GREEN, self);
     }
@@ -60,6 +68,14 @@ library StdStyle {
     }
 
     function green(bool self) internal pure returns (string memory) {
+        return green(vm.toString(self));
+    }
+
+    function greenBytes(bytes memory self) internal pure returns (string memory) {
+        return green(vm.toString(self));
+    }
+
+    function greenBytes32(bytes32 self) internal pure returns (string memory) {
         return green(vm.toString(self));
     }
 
@@ -83,6 +99,14 @@ library StdStyle {
         return yellow(vm.toString(self));
     }
 
+    function yellowBytes(bytes memory self) internal pure returns (string memory) {
+        return yellow(vm.toString(self));
+    }
+
+    function yellowBytes32(bytes32 self) internal pure returns (string memory) {
+        return yellow(vm.toString(self));
+    }
+
     function blue(string memory self) internal pure returns (string memory) {
         return styleConcat(BLUE, self);
     }
@@ -100,6 +124,14 @@ library StdStyle {
     }
 
     function blue(bool self) internal pure returns (string memory) {
+        return blue(vm.toString(self));
+    }
+
+    function blueBytes(bytes memory self) internal pure returns (string memory) {
+        return blue(vm.toString(self));
+    }
+
+    function blueBytes32(bytes32 self) internal pure returns (string memory) {
         return blue(vm.toString(self));
     }
 
@@ -123,6 +155,14 @@ library StdStyle {
         return magenta(vm.toString(self));
     }
 
+    function magentaBytes(bytes memory self) internal pure returns (string memory) {
+        return magenta(vm.toString(self));
+    }
+
+    function magentaBytes32(bytes32 self) internal pure returns (string memory) {
+        return magenta(vm.toString(self));
+    }
+
     function cyan(string memory self) internal pure returns (string memory) {
         return styleConcat(CYAN, self);
     }
@@ -140,6 +180,14 @@ library StdStyle {
     }
 
     function cyan(bool self) internal pure returns (string memory) {
+        return cyan(vm.toString(self));
+    }
+
+    function cyanBytes(bytes memory self) internal pure returns (string memory) {
+        return cyan(vm.toString(self));
+    }
+
+    function cyanBytes32(bytes32 self) internal pure returns (string memory) {
         return cyan(vm.toString(self));
     }
 
@@ -163,6 +211,14 @@ library StdStyle {
         return bold(vm.toString(self));
     }
 
+    function boldBytes(bytes memory self) internal pure returns (string memory) {
+        return bold(vm.toString(self));
+    }
+
+    function boldBytes32(bytes32 self) internal pure returns (string memory) {
+        return bold(vm.toString(self));
+    }
+
     function dim(string memory self) internal pure returns (string memory) {
         return styleConcat(DIM, self);
     }
@@ -180,6 +236,14 @@ library StdStyle {
     }
 
     function dim(bool self) internal pure returns (string memory) {
+        return dim(vm.toString(self));
+    }
+
+    function dimBytes(bytes memory self) internal pure returns (string memory) {
+        return dim(vm.toString(self));
+    }
+
+    function dimBytes32(bytes32 self) internal pure returns (string memory) {
         return dim(vm.toString(self));
     }
 
@@ -203,6 +267,14 @@ library StdStyle {
         return italic(vm.toString(self));
     }
 
+    function italicBytes(bytes memory self) internal pure returns (string memory) {
+        return italic(vm.toString(self));
+    }
+
+    function italicBytes32(bytes32 self) internal pure returns (string memory) {
+        return italic(vm.toString(self));
+    }
+
     function underline(string memory self) internal pure returns (string memory) {
         return styleConcat(UNDERLINE, self);
     }
@@ -223,6 +295,14 @@ library StdStyle {
         return underline(vm.toString(self));
     }
 
+    function underlineBytes(bytes memory self) internal pure returns (string memory) {
+        return underline(vm.toString(self));
+    }
+
+    function underlineBytes32(bytes32 self) internal pure returns (string memory) {
+        return underline(vm.toString(self));
+    }
+
     function inverse(string memory self) internal pure returns (string memory) {
         return styleConcat(INVERSE, self);
     }
@@ -240,6 +320,14 @@ library StdStyle {
     }
 
     function inverse(bool self) internal pure returns (string memory) {
+        return inverse(vm.toString(self));
+    }
+
+    function inverseBytes(bytes memory self) internal pure returns (string memory) {
+        return inverse(vm.toString(self));
+    }
+
+    function inverseBytes32(bytes32 self) internal pure returns (string memory) {
         return inverse(vm.toString(self));
     }
 }
