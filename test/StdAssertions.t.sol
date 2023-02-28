@@ -642,7 +642,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_RETURN));
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_string("Error", "Call return data does not match");
         t._assertEqCall(targetA, targetB, callDataA, callDataB, returnDataA, returnDataB, strictRevertData, EXPECT_FAIL);
     }
@@ -672,7 +672,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(revertDataA, SHOULD_REVERT));
         address targetB = address(new TestMockCall(revertDataB, SHOULD_REVERT));
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_string("Error", "Call revert data does not match");
         t._assertEqCall(
             targetA, targetB, callDataA, callDataB, revertDataA, revertDataB, STRICT_REVERT_DATA, EXPECT_FAIL
@@ -689,15 +689,15 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_REVERT));
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_bytes("  Left call return data", returnDataA);
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_bytes(" Right call revert data", returnDataB);
         t._assertEqCall(targetA, targetB, callDataA, callDataB, returnDataA, returnDataB, strictRevertData, EXPECT_FAIL);
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_bytes("  Left call revert data", returnDataB);
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit(true, true, true, true);
         emit log_named_bytes(" Right call return data", returnDataA);
         t._assertEqCall(targetB, targetA, callDataB, callDataA, returnDataB, returnDataA, strictRevertData, EXPECT_FAIL);
     }
