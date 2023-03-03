@@ -479,6 +479,11 @@ abstract contract StdCheats is StdCheatsSafe {
     StdStorage private stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    // Expects an event to be emitted by checking all three topics and the data.
+    function expectEmit() internal {
+        vm.expectEmit({ checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true });
+    }
+
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
         vm.warp(block.timestamp + time);
