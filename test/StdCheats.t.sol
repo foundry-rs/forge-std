@@ -57,13 +57,23 @@ contract StdCheatsTest is Test {
         test.bar(address(this));
     }
 
-    function testChangePrank() public {
+    function testChangePrankMsgSender() public {
         vm.startPrank(address(1337));
         test.bar(address(1337));
         changePrank(address(0xdead));
         test.bar(address(0xdead));
         changePrank(address(1337));
         test.bar(address(1337));
+        vm.stopPrank();
+    }
+
+    function testChangePrankMsgSenderAndTxOrigin() public {
+        vm.startPrank(address(1337), address(1338));
+        test.origin(address(1337), address(1338));
+        changePrank(address(0xdead), address(0xbeef));
+        test.origin(address(0xdead), address(0xbeef));
+        changePrank(address(1337), address(1338));
+        test.origin(address(1337), address(1338));
         vm.stopPrank();
     }
 
@@ -331,7 +341,7 @@ contract Bar {
         balanceOf[address(this)] = totalSupply;
     }
 
-    /// `HOAX` STDCHEATS
+    /// `HOAX` and `CHANGEPRANK` STDCHEATS
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
