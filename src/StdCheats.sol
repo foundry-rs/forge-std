@@ -537,6 +537,11 @@ abstract contract StdCheats is StdCheatsSafe {
         vm.startPrank(msgSender);
     }
 
+    function changePrank(address msgSender, address txOrigin) internal virtual {
+        vm.stopPrank();
+        vm.startPrank(msgSender, txOrigin);
+    }
+
     // The same as Vm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) internal virtual {
