@@ -12,5 +12,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/foundry-rs/forge-std.git"
+  },
+  "dependencies": {
+    "ds-test": "https://github.com/dapphub/ds-test"
   }
 }
