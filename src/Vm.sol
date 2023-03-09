@@ -326,12 +326,22 @@ interface Vm is VmSafe {
     function expectRevert(bytes calldata revertData) external;
     function expectRevert(bytes4 revertData) external;
     function expectRevert() external;
+
+    // Prepare an expected log with all four checks enabled.
+    // Call this function, then emit an event, then call a function. Internally after the call, we check if
+    // logs were emitted in the expected order with the expected topics and data.
+    // Second form also checks supplied address against emitting contract.
+    function expectEmit() external;
+    function expectEmit(address) external;
+
     // Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
     // Call this function, then emit an event, then call a function. Internally after the call, we check if
-    // logs were emitted in the expected order with the expected topics and data (as specified by the booleans)
+    // logs were emitted in the expected order with the expected topics and data (as specified by the booleans).
+    // Second form also checks supplied address against emitting contract.
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData) external;
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, address emitter)
         external;
+
     // Mocks a call to an address, returning specified data.
     // Calldata can either be strict or a partial match, e.g. if you only
     // pass a Solidity selector to the expected calldata, then the entire Solidity
