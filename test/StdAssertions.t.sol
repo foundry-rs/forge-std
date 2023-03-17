@@ -920,8 +920,8 @@ contract TestTest is Test {
         address targetB,
         bytes memory callDataA,
         bytes memory callDataB,
-        bytes memory returnDataA,
-        bytes memory returnDataB,
+        bytes memory,
+        bytes memory,
         bool strictRevertData,
         bool expectFail
     ) external expectFailure(expectFail) {
