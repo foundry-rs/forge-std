@@ -332,7 +332,7 @@ interface Vm is VmSafe {
     // logs were emitted in the expected order with the expected topics and data.
     // Second form also checks supplied address against emitting contract.
     function expectEmit() external;
-    function expectEmit(address) external;
+    function expectEmit(address emitter) external;
 
     // Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
     // Call this function, then emit an event, then call a function. Internally after the call, we check if
