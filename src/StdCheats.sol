@@ -188,6 +188,11 @@ abstract contract StdCheatsSafe {
         string value;
     }
 
+    struct Account {
+        address addr;
+        uint256 key;
+    }
+
     function assumeNoPrecompiles(address addr) internal virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         uint256 chainId;
@@ -409,6 +414,11 @@ abstract contract StdCheatsSafe {
     // creates a labeled address
     function makeAddr(string memory name) internal virtual returns (address addr) {
         (addr,) = makeAddrAndKey(name);
+    }
+
+    // creates a struct containing both a labeled address and the corresponding private key
+    function makeAccount(string memory name) internal virtual returns (Account memory account) {
+        (account.addr, account.key) = makeAddrAndKey(name);
     }
 
     function deriveRememberKey(string memory mnemonic, uint32 index)
