@@ -361,6 +361,13 @@ interface Vm is VmSafe {
     function expectCall(address callee, uint256 msgValue, uint64 gas, bytes calldata data) external;
     // Expect a call to an address with the specified msg.value and calldata, and a *minimum* amount of gas.
     function expectCallMinGas(address callee, uint256 msgValue, uint64 minGas, bytes calldata data) external;
+    // Only allows memory writes to offsets [0x00, 0x60) ∪ [min, max) in the current subcontext. If any other
+    // memory is written to, the test will fail. Can be called multiple times to add more ranges to the set.
+    function expectSafeMemory(uint64 min, uint64 max) external;
+    // Only allows memory writes to offsets [0x00, 0x60) ∪ [min, max) in the next created subcontext.
+    // If any other memory is written to, the test will fail. Can be called multiple times to add more ranges
+    // to the set.
+    function expectSafeMemoryCall(uint64 min, uint64 max) external;
     // Sets block.coinbase
     function coinbase(address newCoinbase) external;
     // Snapshot the current state of the evm.
