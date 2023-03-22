@@ -77,6 +77,13 @@ contract StdCheatsTest is Test {
         vm.stopPrank();
     }
 
+    function testMakeAccountEquivalence() public {
+        Account memory account = makeAccount("1337");
+        (address addr, uint256 key) = makeAddrAndKey("1337");
+        assertEq(account.addr, addr);
+        assertEq(account.key, key);
+    }
+
     function testMakeAddrEquivalence() public {
         (address addr,) = makeAddrAndKey("1337");
         assertEq(makeAddr("1337"), addr);
