@@ -350,6 +350,10 @@ interface Vm is VmSafe {
     // Mocks a call to an address with a specific msg.value, returning specified data.
     // Calldata match takes precedence over msg.value in case of ambiguity.
     function mockCall(address callee, uint256 msgValue, bytes calldata data, bytes calldata returnData) external;
+    // Reverts a call to an address with specified revert data.
+    function mockCallRevert(address, bytes calldata, bytes calldata) external;
+    // Reverts a call to an address with a specific msg.value, with specified revert data.
+    function mockCallRevert(address, uint256 msgValue, bytes calldata, bytes calldata) external;
     // Clears all mocked calls
     function clearMockedCalls() external;
     // Expects a call to an address with the specified calldata.
