@@ -697,6 +697,46 @@ contract StdAssertionsTest is Test {
         emit log_named_bytes(" Right call return data", returnDataA);
         t._assertEqCall(targetB, callDataB, targetA, callDataA, strictRevertData, EXPECT_FAIL);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                ASSERT_NOT_EQ(BYTES)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertNotEq_Bytes_Pass(bytes32 a, bytes32 b) external {
+        vm.assume(a != b);
+        t._assertNotEq(a, b, EXPECT_PASS);
+    }
+
+    function testAssertNotEq_Bytes_Fail(bytes32 a) external {
+        vm.expectEmit(false, false, false, true);
+        emit log("Error: a != b not satisfied [bytes32]");
+        t._assertNotEq(a, a, EXPECT_FAIL);
+    }
+
+    function testAssertNotEq_BytesErr_Pass(bytes32 a, bytes32 b) external {
+        vm.assume(a != b);
+        t._assertNotEq(a, b, CUSTOM_ERROR, EXPECT_PASS);
+    }
+
+    function testAsserNottEq_BytesErr_Fail(bytes32 a) external {
+        vm.expectEmit(false, false, false, true);
+        emit log_named_string("Error", CUSTOM_ERROR);
+        t._assertNotEq(a, a, CUSTOM_ERROR, EXPECT_FAIL);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                ASSERT_NOT_EQ(UINT)
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function testAssertNotEqUint() public {
+        assertNotEq(uint8(1), uint128(2));
+        assertNotEq(uint64(3), uint64(4));
+    }
+
+    function testFailAssertNotEqUint() public {
+        assertNotEq(uint64(1), uint96(1));
+        assertNotEq(uint160(2), uint160(2));
+    }
 }
 
 contract TestTest is Test {
@@ -781,6 +821,17 @@ contract TestTest is Test {
         expectFailure(expectFail)
     {
         assertEq(a, b, err);
+    }
+
+    function _assertNotEq(bytes32 a, bytes32 b, bool expectFail) external expectFailure(expectFail) {
+        assertNotEq32(a, b);
+    }
+
+    function _assertNotEq(bytes32 a, bytes32 b, string memory err, bool expectFail)
+        external
+        expectFailure(expectFail)
+    {
+        assertNotEq32(a, b, err);
     }
 
     function _assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, bool expectFail)
