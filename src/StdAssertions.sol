@@ -278,7 +278,7 @@ abstract contract StdAssertions is DSTest {
             emit log_named_int("        Left", a);
             emit log_named_int("       Right", b);
             emit log_named_decimal_uint(" Max % Delta", maxPercentDelta * 100, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta* 100, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta * 100, 18);
             fail();
         }
     }
