@@ -209,8 +209,8 @@ abstract contract StdAssertions is DSTest {
             emit log("Error: a ~= b not satisfied [uint]");
             emit log_named_uint("        Left", a);
             emit log_named_uint("       Right", b);
-            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta * 100, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta * 100, 18);
             fail();
         }
     }
@@ -245,8 +245,8 @@ abstract contract StdAssertions is DSTest {
             emit log("Error: a ~= b not satisfied [uint]");
             emit log_named_decimal_uint("        Left", a, decimals);
             emit log_named_decimal_uint("       Right", b, decimals);
-            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta * 100, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta * 100, 18);
             fail();
         }
     }
@@ -277,8 +277,8 @@ abstract contract StdAssertions is DSTest {
             emit log("Error: a ~= b not satisfied [int]");
             emit log_named_int("        Left", a);
             emit log_named_int("       Right", b);
-            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta * 100, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta * 100, 18);
             fail();
         }
     }
@@ -303,8 +303,8 @@ abstract contract StdAssertions is DSTest {
             emit log("Error: a ~= b not satisfied [int]");
             emit log_named_decimal_int("        Left", a, decimals);
             emit log_named_decimal_int("       Right", b, decimals);
-            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta, 18);
-            emit log_named_decimal_uint("     % Delta", percentDelta, 18);
+            emit log_named_decimal_uint(" Max % Delta", maxPercentDelta * 100, 18);
+            emit log_named_decimal_uint("     % Delta", percentDelta * 100, 18);
             fail();
         }
     }
