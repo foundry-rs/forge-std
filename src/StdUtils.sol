@@ -35,7 +35,7 @@ abstract contract StdUtils {
 
         uint256 size = max - min + 1;
 
-        // If the value is 0, 1, 2, 3, warp that to min, min+1, min+2, min+3. Similarly for the UINT256_MAX side.
+        // If the value is 0, 1, 2, 3, wrap that to min, min+1, min+2, min+3. Similarly for the UINT256_MAX side.
         // This helps ensure coverage of the min/max values.
         if (x <= 3 && size > x) return min + x;
         if (x >= UINT256_MAX - 3 && size > UINT256_MAX - x) return max - (UINT256_MAX - x);
