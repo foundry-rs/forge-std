@@ -304,6 +304,8 @@ interface Vm is VmSafe {
     function difficulty(uint256 newDifficulty) external;
     // Sets block.chainid
     function chainId(uint256 newChainId) external;
+    // Sets tx.gasprice
+    function txGasPrice(uint256 newGasPrice) external;
     // Stores a value to an address' storage slot.
     function store(address target, bytes32 slot, bytes32 value) external;
     // Sets the nonce of an account; must be higher than the current nonce of the account
