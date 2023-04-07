@@ -291,6 +291,11 @@ interface VmSafe {
     function pauseGasMetering() external;
     // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
+    function startMappingRecording() external;
+    function getMappingLength(address target, bytes32 slot) external returns (uint);
+    function getMappingSlotAt(address target, bytes32 slot, uint256 idx) external returns (bytes32);
+    function getMappingKeyOf(address target, bytes32 slot) external returns (uint);
+    function getMappingParentOf(address target, bytes32 slot) external returns (bytes32);
 }
 
 interface Vm is VmSafe {
