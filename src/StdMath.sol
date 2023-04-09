@@ -14,7 +14,11 @@ library stdMath {
     }
 
     function delta(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a > b ? a - b : b - a;
+        // SAFETY: The subtraction can never underflow as we explicitly sub the
+        // smaller value from the larger.
+        unchecked {
+            return a > b ? a - b : b - a;
+        }
     }
 
     function delta(int256 a, int256 b) internal pure returns (uint256) {
