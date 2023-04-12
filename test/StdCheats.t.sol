@@ -149,6 +149,65 @@ contract StdCheatsTest is Test {
         assertEq(barToken.balanceOf(bar), 1);
     }
 
+    function testGrow() public {
+        deal(address(this), 0 ether);
+        grow(address(this), 1 ether);
+        grow(address(this), 1 ether);
+        assertEq(address(this).balance, 2 ether);
+    }
+
+    function testGrowToken() public {
+        Bar barToken = new Bar();
+        address bar = address(barToken);
+        grow(bar, address(this), 10000e18);
+        assertEq(barToken.balanceOf(address(this)), 10000e18);
+        assertEq(barToken.totalSupply(), 20000e18);
+        grow(bar, address(this), 10000e18);
+        assertEq(barToken.balanceOf(address(this)), 20000e18);
+        assertEq(barToken.totalSupply(), 30000e18);
+    }
+
+    function testGrowTokenERC1155() public {
+        BarERC1155 barToken = new BarERC1155();
+        address bar = address(barToken);
+        growERC1155(bar, address(this), 0, 10000e18);
+        assertEq(barToken.balanceOf(address(this), 0), 10000e18);
+        assertEq(barToken.totalSupply(0), 20000e18);
+        growERC1155(bar, address(this), 0, 10000e18);
+        assertEq(barToken.balanceOf(address(this), 0), 20000e18);
+        assertEq(barToken.totalSupply(0), 30000e18);
+    }
+
+    function testDrop() public {
+        deal(address(this), 2 ether);
+        drop(address(this), 1 ether);
+        assertEq(address(this).balance, 1 ether);
+    }
+
+    function testDropToken() public {
+        Bar barToken = new Bar();
+        address bar = address(barToken);
+        deal(bar, address(this), 10000e18, true);
+        drop(bar, address(this), 5000e18);
+        assertEq(barToken.balanceOf(address(this)), 5000e18);
+        assertEq(barToken.totalSupply(), 15000e18);
+        drop(bar, address(this), 5000e18);
+        assertEq(barToken.balanceOf(address(this)), 0);
+        assertEq(barToken.totalSupply(), 10000e18);
+    }
+
+    function testDropTokenERC1155() public {
+        BarERC1155 barToken = new BarERC1155();
+        address bar = address(barToken);
+        dealERC1155(bar, address(this), 0, 10000e18, true);
+        dropERC1155(bar, address(this), 0, 5000e18);
+        assertEq(barToken.balanceOf(address(this), 0), 5000e18);
+        assertEq(barToken.totalSupply(0), 15000e18);
+        dropERC1155(bar, address(this), 0, 5000e18);
+        assertEq(barToken.balanceOf(address(this), 0), 0);
+        assertEq(barToken.totalSupply(0), 10000e18);
+    }
+
     function testDeployCode() public {
         address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(test))));

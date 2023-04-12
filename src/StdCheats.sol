@@ -636,4 +636,72 @@ abstract contract StdCheats is StdCheatsSafe {
         // update owner
         stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
     }
+
+    // Increases the ether balance of an account.
+    function grow(address to, uint256 give) internal virtual {
+        vm.deal(to, to.balance + give);
+    }
+
+    // Increases the balance of an account for any ERC20 token, updating `totalSupply`.
+    function grow(address token, address to, uint256 give) internal virtual {
+        // update balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        uint256 prevBal = abi.decode(balData, (uint256));
+        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(prevBal + give);
+
+        // update total supply
+        (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
+        uint256 totSup = abi.decode(totSupData, (uint256));
+        stdstore.target(token).sig(0x18160ddd).checked_write(totSup + give);
+    }
+
+    function growERC1155(address token, address to, uint256 id, uint256 give) internal virtual {
+        // update balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x00fdd58e, to, id));
+        uint256 prevBal = abi.decode(balData, (uint256));
+        stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(prevBal + give);
+
+        // update total supply
+        (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0xbd85b039, id));
+        require(
+            totSupData.length != 0,
+            "StdCheats grow(address,address,uint,uint): target contract is not ERC1155Supply."
+        );
+        uint256 totSup = abi.decode(totSupData, (uint256));
+        stdstore.target(token).sig(0xbd85b039).with_key(id).checked_write(totSup + give);
+    }
+
+    // Decreases the ether balance of an account.
+    function drop(address to, uint256 give) internal virtual {
+        vm.deal(to, to.balance - give);
+    }
+
+    // Decreases the balance of an account for any ERC20 token, updating `totalSupply`.
+    function drop(address token, address to, uint256 give) internal virtual {
+        // update balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        uint256 prevBal = abi.decode(balData, (uint256));
+        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(prevBal - give);
+
+        // update total supply
+        (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
+        uint256 totSup = abi.decode(totSupData, (uint256));
+        stdstore.target(token).sig(0x18160ddd).checked_write(totSup - give);
+    }
+
+    function dropERC1155(address token, address to, uint256 id, uint256 give) internal virtual {
+        // update balance
+        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x00fdd58e, to, id));
+        uint256 prevBal = abi.decode(balData, (uint256));
+        stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(prevBal - give);
+
+        // update total supply
+        (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0xbd85b039, id));
+        require(
+            totSupData.length != 0,
+            "StdCheats grow(address,address,uint,uint): target contract is not ERC1155Supply."
+        );
+        uint256 totSup = abi.decode(totSupData, (uint256));
+        stdstore.target(token).sig(0xbd85b039).with_key(id).checked_write(totSup - give);
+    }
 }
