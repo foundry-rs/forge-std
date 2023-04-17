@@ -59,7 +59,7 @@ abstract contract StdUtils {
         console2_log("Bound Result", result);
     }
 
-    function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
+    function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         require(min <= max, "StdUtils bound(int256,int256,int256): Max is less than min.");
 
         // Shifting all int256 values to uint256 to use _bound function. The range of two types are:
@@ -77,6 +77,10 @@ abstract contract StdUtils {
 
         // To move it back to int256 value, subtract INT256_MIN_ABS at here.
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
+    }
+
+    function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
+        result = _bound(x, min, max);
         console2_log("Bound result", vm.toString(result));
     }
 
