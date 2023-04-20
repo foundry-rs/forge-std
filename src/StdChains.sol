@@ -25,13 +25,11 @@ import {VmSafe} from "./Vm.sol";
  * The `setChain` function is straightforward, and it simply saves off the given chain data.
  *
  * The `getChain` methods use `getChainWithUpdatedRpcUrl` to return a chain. For example, let's say
- * we want to retrieve `mainnet`'s RPC URL:
- *   - If you haven't set any mainnet chain info with `setChain`, you haven't specified that
- *     chain in `foundry.toml` and no env var is set, the default data and RPC URL will be returned.
- *   - If you have set a mainnet RPC URL in `foundry.toml` it will return that, if valid (e.g. if
- *     a URL is given or if an environment variable is given and that environment variable exists).
- *     Otherwise, the default data is returned.
- *   - If you specified data with `setChain` it will return that.
+ * we want to retrieve the RPC URL for `mainnet`:
+ *   - If you have specified data with `setChain`, it will return that.
+ *   - If you have configured a mainnet RPC URL in `foundry.toml`, it will return the URL, provided it
+ *     is valid (e.g. a URL is specified, or an environment variable is given and exists).
+ *   - If neither of the above conditions is met, the default data is returned.
  *
  * Summarizing the above, the prioritization hierarchy is `setChain` -> `foundry.toml` -> environment variable -> defaults.
  */
