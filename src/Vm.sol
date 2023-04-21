@@ -292,7 +292,7 @@ interface VmSafe {
     // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
     // Writes a breakpoint to jump to in the debugger
-    function breakpoint(string memory char) external;
+    function breakpoint(string calldata char) external;
 }
 
 interface Vm is VmSafe {
