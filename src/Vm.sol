@@ -366,12 +366,21 @@ interface Vm is VmSafe {
     // Expects a call to an address with the specified calldata.
     // Calldata can either be a strict or a partial match
     function expectCall(address callee, bytes calldata data) external;
+    // Expects given number of calls to an address with the specified calldata.
+    function expectCall(address callee, bytes calldata data, uint64 count) external;
     // Expects a call to an address with the specified msg.value and calldata
     function expectCall(address callee, uint256 msgValue, bytes calldata data) external;
+    // Expects given number of calls to an address with the specified msg.value and calldata
+    function expectCall(address callee, uint256 msgValue, bytes calldata data, uint64 count) external;
     // Expect a call to an address with the specified msg.value, gas, and calldata.
     function expectCall(address callee, uint256 msgValue, uint64 gas, bytes calldata data) external;
+    // Expects given number of calls to an address with the specified msg.value, gas, and calldata.
+    function expectCall(address callee, uint256 msgValue, uint64 gas, bytes calldata data, uint64 count) external;
     // Expect a call to an address with the specified msg.value and calldata, and a *minimum* amount of gas.
     function expectCallMinGas(address callee, uint256 msgValue, uint64 minGas, bytes calldata data) external;
+    // Expect given number of calls to an address with the specified msg.value and calldata, and a *minimum* amount of gas.
+    function expectCallMinGas(address callee, uint256 msgValue, uint64 minGas, bytes calldata data, uint64 count)
+        external;
     // Only allows memory writes to offsets [0x00, 0x60) ∪ [min, max) in the current subcontext. If any other
     // memory is written to, the test will fail. Can be called multiple times to add more ranges to the set.
     function expectSafeMemory(uint64 min, uint64 max) external;
