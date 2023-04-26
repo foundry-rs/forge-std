@@ -293,6 +293,8 @@ interface VmSafe {
     function resumeGasMetering() external;
     // Writes a breakpoint to jump to in the debugger
     function breakpoint(string calldata char) external;
+    // Writes a conditional breakpoint to jump to in the debugger
+    function breakpoint(string calldata char, bool value) external;
 }
 
 interface Vm is VmSafe {
