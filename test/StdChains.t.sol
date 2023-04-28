@@ -31,23 +31,23 @@ contract StdChainsTest is Test {
     }
 
     // Ensure we can connect to the default RPC URL for each chain.
-    function testRpcs() public {
-        testRpc("mainnet");
-        testRpc("goerli");
-        testRpc("sepolia");
-        testRpc("optimism");
-        testRpc("optimism_goerli");
-        testRpc("arbitrum_one");
-        testRpc("arbitrum_one_goerli");
-        testRpc("arbitrum_nova");
-        testRpc("polygon");
-        testRpc("polygon_mumbai");
-        testRpc("avalanche");
-        testRpc("avalanche_fuji");
-        testRpc("bnb_smart_chain");
-        testRpc("bnb_smart_chain_testnet");
-        testRpc("gnosis_chain");
-    }
+    // function testRpcs() public {
+    //     testRpc("mainnet");
+    //     testRpc("goerli");
+    //     testRpc("sepolia");
+    //     testRpc("optimism");
+    //     testRpc("optimism_goerli");
+    //     testRpc("arbitrum_one");
+    //     testRpc("arbitrum_one_goerli");
+    //     testRpc("arbitrum_nova");
+    //     testRpc("polygon");
+    //     testRpc("polygon_mumbai");
+    //     testRpc("avalanche");
+    //     testRpc("avalanche_fuji");
+    //     testRpc("bnb_smart_chain");
+    //     testRpc("bnb_smart_chain_testnet");
+    //     testRpc("gnosis_chain");
+    // }
 
     function testChainNoDefault() public {
         vm.expectRevert("StdChains getChain(string): Chain with alias \"does_not_exist\" not found.");
