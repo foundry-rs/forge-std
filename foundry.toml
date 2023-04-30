@@ -3,7 +3,7 @@ fs_permissions = [{ access = "read-write", path = "./"}]
 
 [rpc_endpoints]
 # The RPC URLs are modified versions of the default for testing initialization.
-mainnet = "https://mainnet.infura.io/v3/16a8be88795540b9b3903d8de0f7baa5" # Different API key.
+mainnet = "https://mainnet.infura.io/v3/b1d3925804e74152b316ca7da97060d3" # Different API key.
 optimism_goerli = "https://goerli.optimism.io/" # Adds a trailing slash.
 arbitrum_one_goerli = "https://goerli-rollup.arbitrum.io/rpc/" # Adds a trailing slash.
 needs_undefined_env_var = "${UNDEFINED_RPC_URL_PLACEHOLDER}"
