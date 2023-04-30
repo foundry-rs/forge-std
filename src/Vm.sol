@@ -169,7 +169,10 @@ interface VmSafe {
     // Follows symbolic links if `follow_links` is true.
     function readDir(string calldata path) external view returns (DirEntry[] memory entries);
     function readDir(string calldata path, uint64 maxDepth) external view returns (DirEntry[] memory entries);
-    function readDir(string calldata path, uint64 maxDepth, bool followLinks) external view returns (DirEntry[] memory entries);
+    function readDir(string calldata path, uint64 maxDepth, bool followLinks)
+        external
+        view
+        returns (DirEntry[] memory entries);
     // Reads a symbolic link, returning the path that the link points to.
     // This cheatcode will revert in the following situations, but is not limited to just these cases:
     // - `path` is not a symbolic link.
