@@ -122,7 +122,7 @@ interface VmSafe {
     // Stops collecting onchain transactions
     function stopBroadcast() external;
 
-    // Get the path of the current project root
+    // Get the path of the current project root.
     function projectRoot() external view returns (string memory path);
     // Reads the entire content of file to string. `path` is relative to the project root.
     function readFile(string calldata path) external view returns (string memory data);
@@ -167,16 +167,16 @@ interface VmSafe {
     // Reads the directory at the given path recursively, up to `max_depth`.
     // `max_depth` defaults to 1, meaning only the direct children of the given directory will be returned.
     // Follows symbolic links if `follow_links` is true.
-    function readDir(string calldata path) external returns (DirEntry[] memory entries);
-    function readDir(string calldata path, uint64 maxDepth) external returns (DirEntry[] memory entries);
-    function readDir(string calldata path, uint64 maxDepth, bool followLinks) external returns (DirEntry[] memory entries);
+    function readDir(string calldata path) external view returns (DirEntry[] memory entries);
+    function readDir(string calldata path, uint64 maxDepth) external view returns (DirEntry[] memory entries);
+    function readDir(string calldata path, uint64 maxDepth, bool followLinks) external view returns (DirEntry[] memory entries);
     // Reads a symbolic link, returning the path that the link points to.
     // This cheatcode will revert in the following situations, but is not limited to just these cases:
     // - `path` is not a symbolic link.
     // - `path` does not exist.
-    function readLink(string calldata linkPath) external returns (string memory targetPath);
+    function readLink(string calldata linkPath) external view returns (string memory targetPath);
     // Given a path, query the file system to get information about a file, directory, etc.
-    function fsMetadata(string calldata path) external returns (FsMetadata memory metadata);
+    function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
 
     // Convert values to a string
     function toString(address value) external pure returns (string memory stringifiedValue);
