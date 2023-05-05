@@ -1,14 +1,14 @@
 name: Sync Release Branch
 
 on:
-  release:
-    types:
-      - created
+  push:
+    tags:
+      - "v1.*"
 
 jobs:
   sync-release-branch:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.release.tag_name, 'v1')
+    if: startsWith(github.ref, 'refs/tags/v1.')
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
