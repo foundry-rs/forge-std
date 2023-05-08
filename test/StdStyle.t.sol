@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/Test.sol";
 
 contract StdStyleTest is Test {
-    function testStyleColor() public view {
+    function testStyleColor() public pure {
         console2.log(StdStyle.red("StdStyle.red String Test"));
         console2.log(StdStyle.red(uint256(10e18)));
         console2.log(StdStyle.red(int256(-10e18)));
@@ -49,7 +49,7 @@ contract StdStyleTest is Test {
         console2.log(StdStyle.cyanBytes32("StdStyle.cyanBytes32"));
     }
 
-    function testStyleFontWeight() public view {
+    function testStyleFontWeight() public pure {
         console2.log(StdStyle.bold("StdStyle.bold String Test"));
         console2.log(StdStyle.bold(uint256(10e18)));
         console2.log(StdStyle.bold(int256(-10e18)));
@@ -87,7 +87,7 @@ contract StdStyleTest is Test {
         console2.log(StdStyle.inverseBytes32("StdStyle.inverseBytes32"));
     }
 
-    function testStyleCombined() public view {
+    function testStyleCombined() public pure {
         console2.log(StdStyle.red(StdStyle.bold("Red Bold String Test")));
         console2.log(StdStyle.green(StdStyle.dim(uint256(10e18))));
         console2.log(StdStyle.yellow(StdStyle.italic(int256(-10e18))));
@@ -95,7 +95,7 @@ contract StdStyleTest is Test {
         console2.log(StdStyle.magenta(StdStyle.inverse(true)));
     }
 
-    function testStyleCustom() public view {
+    function testStyleCustom() public pure {
         console2.log(h1("Custom Style 1"));
         console2.log(h2("Custom Style 2"));
     }
