@@ -6,18 +6,84 @@ pragma solidity >=0.6.2 <0.9.0;
 library safeconsole {
     uint256 constant CONSOLE_ADDR = 0x000000000000000000000000000000000000000000636F6e736F6c652e6c6f67;
 
-    function _viewCallLog(uint256 psize) private view {
+    // Credit to [0age](https://twitter.com/z0age/status/1654922202930888704) and [0xdapper](https://github.com/foundry-rs/forge-std/pull/374)
+    // for the view-to-pure log trick.
+    function _sendLogPayload(uint256 offset, uint256 size) private pure {
+        function(uint256, uint256) internal view fnIn = _sendLogPayloadView;
+        function(uint256, uint256) internal pure pureSendLogPayload;
         assembly {
-            pop(staticcall(gas(), CONSOLE_ADDR, 0x1c, psize, 0x0, 0x0))
+            pureSendLogPayload := fnIn
+        }
+        pureSendLogPayload(offset, size);
+    }
+
+    function _sendLogPayloadView(uint256 offset, uint256 size) private view {
+        assembly {
+            pop(staticcall(gas(), CONSOLE_ADDR, offset, size, 0x0, 0x0))
         }
     }
 
-    // Credit to [0age](https://twitter.com/z0age/status/1654922202930888704) and [0xdapper](https://github.com/foundry-rs/forge-std/pull/374)
-    // for the view-to-pure log trick.
-    function _getLog() private pure returns (function(uint256) internal pure logFn) {
-        function(uint256) internal view viewLog = _viewCallLog;
+    function _memcopy(uint256 fromOffset, uint256 toOffset, uint256 length) private pure {
+        function(uint256, uint256, uint) internal view fnIn = _memcopyView;
+        function(uint256, uint256, uint) internal pure pureMemcopy;
         assembly {
-            logFn := viewLog
+            pureMemcopy := fnIn
+        }
+        pureMemcopy(fromOffset, toOffset, length);
+    }
+
+    function _memcopyView(uint256 fromOffset, uint256 toOffset, uint256 length) private view {
+        assembly {
+            pop(staticcall(gas(), 0x4, fromOffset, length, toOffset, length))
+        }
+    }
+
+    function logMemory(uint256 offset, uint256 length) internal pure {
+        if (offset >= 0x60) {
+            // Sufficient memory before slice to prepare call header.
+            bytes32 m0;
+            bytes32 m1;
+            bytes32 m2;
+            assembly {
+                m0 := mload(sub(offset, 0x60))
+                m1 := mload(sub(offset, 0x40))
+                m2 := mload(sub(offset, 0x20))
+                // Selector of `logBytes(bytes)`.
+                mstore(sub(offset, 0x60), 0xe17bf956)
+                mstore(sub(offset, 0x40), 0x20)
+                mstore(sub(offset, 0x20), length)
+            }
+            _sendLogPayload(offset - 0x44, length + 0x44);
+            assembly {
+                mstore(sub(offset, 0x60), m0)
+                mstore(sub(offset, 0x40), m1)
+                mstore(sub(offset, 0x20), m2)
+            }
+        } else {
+            // Insufficient space, so copy slice forward, add header and reverse.
+            bytes32 m0;
+            bytes32 m1;
+            bytes32 m2;
+            uint256 endOffset = offset + length;
+            assembly {
+                m0 := mload(add(endOffset, 0x00))
+                m1 := mload(add(endOffset, 0x20))
+                m2 := mload(add(endOffset, 0x40))
+            }
+            _memcopy(offset, offset + 0x60, length);
+            assembly {
+                // Selector of `logBytes(bytes)`.
+                mstore(add(offset, 0x00), 0xe17bf956)
+                mstore(add(offset, 0x20), 0x20)
+                mstore(add(offset, 0x40), length)
+            }
+            _sendLogPayload(offset + 0x1c, length + 0x44);
+            _memcopy(offset + 0x60, offset, length);
+            assembly {
+                mstore(add(endOffset, 0x00), m0)
+                mstore(add(endOffset, 0x20), m1)
+                mstore(add(endOffset, 0x40), m2)
+            }
         }
     }
 
@@ -31,7 +97,7 @@ library safeconsole {
             mstore(0x00, 0x2c2ecbc2)
             mstore(0x20, p0)
         }
-        _getLog()(0x24);
+        _sendLogPayload(0x1c, 0x24);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -48,7 +114,7 @@ library safeconsole {
             mstore(0x00, 0x32458eed)
             mstore(0x20, p0)
         }
-        _getLog()(0x24);
+        _sendLogPayload(0x1c, 0x24);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -65,7 +131,7 @@ library safeconsole {
             mstore(0x00, 0xf82c50f1)
             mstore(0x20, p0)
         }
-        _getLog()(0x24);
+        _sendLogPayload(0x1c, 0x24);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -94,7 +160,7 @@ library safeconsole {
             mstore(0x20, 0x20)
             writeString(0x40, p0)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -116,7 +182,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -137,7 +203,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -158,7 +224,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -191,7 +257,7 @@ library safeconsole {
             mstore(0x40, 0x40)
             writeString(0x60, p1)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -214,7 +280,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -235,7 +301,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -256,7 +322,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -289,7 +355,7 @@ library safeconsole {
             mstore(0x40, 0x40)
             writeString(0x60, p1)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -312,7 +378,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -333,7 +399,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -354,7 +420,7 @@ library safeconsole {
             mstore(0x20, p0)
             mstore(0x40, p1)
         }
-        _getLog()(0x44);
+        _sendLogPayload(0x1c, 0x44);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -387,7 +453,7 @@ library safeconsole {
             mstore(0x40, 0x40)
             writeString(0x60, p1)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -422,7 +488,7 @@ library safeconsole {
             mstore(0x40, p1)
             writeString(0x60, p0)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -457,7 +523,7 @@ library safeconsole {
             mstore(0x40, p1)
             writeString(0x60, p0)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -492,7 +558,7 @@ library safeconsole {
             mstore(0x40, p1)
             writeString(0x60, p0)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -532,7 +598,7 @@ library safeconsole {
             writeString(0x60, p0)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -560,7 +626,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -585,7 +651,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -610,7 +676,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -647,7 +713,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -674,7 +740,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -699,7 +765,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -724,7 +790,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -761,7 +827,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -788,7 +854,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -813,7 +879,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -838,7 +904,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -875,7 +941,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -914,7 +980,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -953,7 +1019,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -992,7 +1058,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1036,7 +1102,7 @@ library safeconsole {
             writeString(0x80, p1)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1065,7 +1131,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1090,7 +1156,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1115,7 +1181,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1152,7 +1218,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1179,7 +1245,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1204,7 +1270,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1229,7 +1295,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1266,7 +1332,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1293,7 +1359,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1318,7 +1384,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1343,7 +1409,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1380,7 +1446,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1419,7 +1485,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1458,7 +1524,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1497,7 +1563,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1541,7 +1607,7 @@ library safeconsole {
             writeString(0x80, p1)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1570,7 +1636,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1595,7 +1661,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1620,7 +1686,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1657,7 +1723,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1684,7 +1750,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1709,7 +1775,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1734,7 +1800,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1771,7 +1837,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1798,7 +1864,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1823,7 +1889,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1848,7 +1914,7 @@ library safeconsole {
             mstore(0x40, p1)
             mstore(0x60, p2)
         }
-        _getLog()(0x64);
+        _sendLogPayload(0x1c, 0x64);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1885,7 +1951,7 @@ library safeconsole {
             mstore(0x60, 0x60)
             writeString(0x80, p2)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1924,7 +1990,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -1963,7 +2029,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2002,7 +2068,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p1)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2046,7 +2112,7 @@ library safeconsole {
             writeString(0x80, p1)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2087,7 +2153,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2126,7 +2192,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2165,7 +2231,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2209,7 +2275,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2250,7 +2316,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2289,7 +2355,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2328,7 +2394,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2372,7 +2438,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2413,7 +2479,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2452,7 +2518,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2491,7 +2557,7 @@ library safeconsole {
             mstore(0x60, p2)
             writeString(0x80, p0)
         }
-        _getLog()(0xa4);
+        _sendLogPayload(0x1c, 0xa4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2535,7 +2601,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p2)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2581,7 +2647,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p1)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2627,7 +2693,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p1)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2673,7 +2739,7 @@ library safeconsole {
             writeString(0x80, p0)
             writeString(0xc0, p1)
         }
-        _getLog()(0xe4);
+        _sendLogPayload(0x1c, 0xe4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2724,7 +2790,7 @@ library safeconsole {
             writeString(0xc0, p1)
             writeString(0x100, p2)
         }
-        _getLog()(0x124);
+        _sendLogPayload(0x1c, 0x124);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2758,7 +2824,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2787,7 +2853,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2816,7 +2882,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2857,7 +2923,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2888,7 +2954,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2917,7 +2983,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2946,7 +3012,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -2987,7 +3053,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3018,7 +3084,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3047,7 +3113,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3076,7 +3142,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3117,7 +3183,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3160,7 +3226,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3203,7 +3269,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3246,7 +3312,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3294,7 +3360,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3327,7 +3393,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3356,7 +3422,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3385,7 +3451,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3426,7 +3492,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3457,7 +3523,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3486,7 +3552,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3515,7 +3581,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3556,7 +3622,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3587,7 +3653,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3616,7 +3682,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3645,7 +3711,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3686,7 +3752,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3729,7 +3795,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3772,7 +3838,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3815,7 +3881,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3863,7 +3929,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3896,7 +3962,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3925,7 +3991,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3954,7 +4020,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -3995,7 +4061,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4026,7 +4092,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4055,7 +4121,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4084,7 +4150,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4125,7 +4191,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4156,7 +4222,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4185,7 +4251,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4214,7 +4280,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4255,7 +4321,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4298,7 +4364,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4341,7 +4407,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4384,7 +4450,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4432,7 +4498,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4477,7 +4543,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4520,7 +4586,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4563,7 +4629,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4611,7 +4677,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4656,7 +4722,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4699,7 +4765,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4742,7 +4808,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4790,7 +4856,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4835,7 +4901,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4878,7 +4944,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4921,7 +4987,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -4969,7 +5035,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5019,7 +5085,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5069,7 +5135,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5119,7 +5185,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5174,7 +5240,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5209,7 +5275,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5238,7 +5304,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5267,7 +5333,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5308,7 +5374,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5339,7 +5405,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5368,7 +5434,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5397,7 +5463,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5438,7 +5504,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5469,7 +5535,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5498,7 +5564,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5527,7 +5593,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5568,7 +5634,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5611,7 +5677,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5654,7 +5720,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5697,7 +5763,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5745,7 +5811,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5778,7 +5844,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5807,7 +5873,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5836,7 +5902,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5877,7 +5943,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5908,7 +5974,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5937,7 +6003,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -5966,7 +6032,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6007,7 +6073,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6038,7 +6104,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6067,7 +6133,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6096,7 +6162,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6137,7 +6203,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6180,7 +6246,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6223,7 +6289,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6266,7 +6332,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6314,7 +6380,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6347,7 +6413,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6376,7 +6442,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6405,7 +6471,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6446,7 +6512,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6477,7 +6543,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6506,7 +6572,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6535,7 +6601,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6576,7 +6642,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6607,7 +6673,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6636,7 +6702,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6665,7 +6731,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6706,7 +6772,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6749,7 +6815,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6792,7 +6858,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6835,7 +6901,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6883,7 +6949,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6928,7 +6994,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -6971,7 +7037,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7014,7 +7080,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7062,7 +7128,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7107,7 +7173,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7150,7 +7216,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7193,7 +7259,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7241,7 +7307,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7286,7 +7352,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7329,7 +7395,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7372,7 +7438,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7420,7 +7486,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7470,7 +7536,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7520,7 +7586,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7570,7 +7636,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7625,7 +7691,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7660,7 +7726,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7689,7 +7755,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7718,7 +7784,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7759,7 +7825,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7790,7 +7856,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7819,7 +7885,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7848,7 +7914,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7889,7 +7955,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7920,7 +7986,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7949,7 +8015,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -7978,7 +8044,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8019,7 +8085,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8062,7 +8128,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8105,7 +8171,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8148,7 +8214,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8196,7 +8262,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8229,7 +8295,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8258,7 +8324,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8287,7 +8353,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8328,7 +8394,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8359,7 +8425,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8388,7 +8454,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8417,7 +8483,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8458,7 +8524,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8489,7 +8555,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8518,7 +8584,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8547,7 +8613,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8588,7 +8654,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8631,7 +8697,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8674,7 +8740,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8717,7 +8783,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8765,7 +8831,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8798,7 +8864,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8827,7 +8893,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8856,7 +8922,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8897,7 +8963,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8928,7 +8994,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8957,7 +9023,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -8986,7 +9052,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9027,7 +9093,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9058,7 +9124,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9087,7 +9153,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9116,7 +9182,7 @@ library safeconsole {
             mstore(0x60, p2)
             mstore(0x80, p3)
         }
-        _getLog()(0x84);
+        _sendLogPayload(0x1c, 0x84);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9157,7 +9223,7 @@ library safeconsole {
             mstore(0x80, 0x80)
             writeString(0xa0, p3)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9200,7 +9266,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9243,7 +9309,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9286,7 +9352,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p2)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9334,7 +9400,7 @@ library safeconsole {
             writeString(0xa0, p2)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9379,7 +9445,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9422,7 +9488,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9465,7 +9531,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9513,7 +9579,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9558,7 +9624,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9601,7 +9667,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9644,7 +9710,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9692,7 +9758,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9737,7 +9803,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9780,7 +9846,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9823,7 +9889,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p1)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9871,7 +9937,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9921,7 +9987,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -9971,7 +10037,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10021,7 +10087,7 @@ library safeconsole {
             writeString(0xa0, p1)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10076,7 +10142,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10123,7 +10189,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10166,7 +10232,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10209,7 +10275,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10257,7 +10323,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10302,7 +10368,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10345,7 +10411,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10388,7 +10454,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10436,7 +10502,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10481,7 +10547,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10524,7 +10590,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10567,7 +10633,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10615,7 +10681,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10665,7 +10731,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10715,7 +10781,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10765,7 +10831,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10820,7 +10886,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10867,7 +10933,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10910,7 +10976,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -10953,7 +11019,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11001,7 +11067,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11046,7 +11112,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11089,7 +11155,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11132,7 +11198,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11180,7 +11246,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11225,7 +11291,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11268,7 +11334,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11311,7 +11377,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11359,7 +11425,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11409,7 +11475,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11459,7 +11525,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11509,7 +11575,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11564,7 +11630,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11611,7 +11677,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11654,7 +11720,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11697,7 +11763,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11745,7 +11811,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11790,7 +11856,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11833,7 +11899,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11876,7 +11942,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11924,7 +11990,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -11969,7 +12035,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12012,7 +12078,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12055,7 +12121,7 @@ library safeconsole {
             mstore(0x80, p3)
             writeString(0xa0, p0)
         }
-        _getLog()(0xc4);
+        _sendLogPayload(0x1c, 0xc4);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12103,7 +12169,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p3)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12153,7 +12219,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12203,7 +12269,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12253,7 +12319,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p2)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12308,7 +12374,7 @@ library safeconsole {
             writeString(0xe0, p2)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12360,7 +12426,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12410,7 +12476,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12460,7 +12526,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12515,7 +12581,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12567,7 +12633,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12617,7 +12683,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12667,7 +12733,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12722,7 +12788,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12774,7 +12840,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12824,7 +12890,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12874,7 +12940,7 @@ library safeconsole {
             writeString(0xa0, p0)
             writeString(0xe0, p1)
         }
-        _getLog()(0x104);
+        _sendLogPayload(0x1c, 0x104);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12929,7 +12995,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p3)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -12986,7 +13052,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p2)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -13043,7 +13109,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p2)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -13100,7 +13166,7 @@ library safeconsole {
             writeString(0xe0, p1)
             writeString(0x120, p2)
         }
-        _getLog()(0x144);
+        _sendLogPayload(0x1c, 0x144);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
@@ -13162,7 +13228,7 @@ library safeconsole {
             writeString(0x120, p2)
             writeString(0x160, p3)
         }
-        _getLog()(0x184);
+        _sendLogPayload(0x1c, 0x184);
         assembly {
             mstore(0x00, m0)
             mstore(0x20, m1)
