@@ -24,8 +24,8 @@ library safeconsole {
     }
 
     function _memcopy(uint256 fromOffset, uint256 toOffset, uint256 length) private pure {
-        function(uint256, uint256, uint) internal view fnIn = _memcopyView;
-        function(uint256, uint256, uint) internal pure pureMemcopy;
+        function(uint256, uint256, uint256) internal view fnIn = _memcopyView;
+        function(uint256, uint256, uint256) internal pure pureMemcopy;
         assembly {
             pureMemcopy := fnIn
         }
