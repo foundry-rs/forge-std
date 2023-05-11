@@ -351,7 +351,13 @@ interface Vm is VmSafe {
     // Sets block.basefee
     function fee(uint256 newBasefee) external;
     // Sets block.difficulty
+    // Not available on EVM versions from Paris onwards. Use `prevrandao` instead.
+    // If used on unsupported EVM versions it will revert.
     function difficulty(uint256 newDifficulty) external;
+    // Sets block.prevrandao
+    // Not available on EVM versions before Paris. Use `difficulty` instead.
+    // If used on unsupported EVM versions it will revert.
+    function prevrandao(bytes32 newPrevrandao) external;
     // Sets block.chainid
     function chainId(uint256 newChainId) external;
     // Sets tx.gasprice
