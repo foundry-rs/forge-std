@@ -686,11 +686,15 @@ contract StdAssertionsTest is Test {
         address targetB = address(new TestMockCall(returnDataB, SHOULD_REVERT));
 
         vm.expectEmit(true, true, true, true);
+        emit log("Error: Calls were not equal");
+        vm.expectEmit(true, true, true, true);
         emit log_named_bytes("  Left call return data", returnDataA);
         vm.expectEmit(true, true, true, true);
         emit log_named_bytes(" Right call revert data", returnDataB);
         t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_FAIL);
 
+        vm.expectEmit(true, true, true, true);
+        emit log("Error: Calls were not equal");
         vm.expectEmit(true, true, true, true);
         emit log_named_bytes("  Left call revert data", returnDataB);
         vm.expectEmit(true, true, true, true);
