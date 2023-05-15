@@ -7,12 +7,15 @@ contract StdChainsMock is Test {
     function getChain_(string memory chainAlias) public returns (Chain memory) {
         return getChain(chainAlias);
     }
+
     function getChain_(uint256 chainId) public returns (Chain memory) {
         return getChain(chainId);
     }
+
     function setChain_(string memory chainAlias, ChainData memory chainData) public {
         setChain(chainAlias, chainData);
     }
+
     function setFallbackToDefaultRpcUrls_(bool useDefault) public {
         setFallbackToDefaultRpcUrls(useDefault);
     }
@@ -71,7 +74,6 @@ contract StdChainsTest is Test {
         vm.expectRevert("StdChains getChain(string): Chain with alias \"does_not_exist\" not found.");
         stdChainsMock.getChain_("does_not_exist");
     }
-
 
     function testSetChainFirstFails() public {
         // We deploy a mock to properly test the revert.

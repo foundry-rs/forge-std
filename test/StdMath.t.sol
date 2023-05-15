@@ -8,6 +8,7 @@ contract StdMathMock is Test {
     function percentDelta_(uint256 a, uint256 b) public pure returns (uint256) {
         return stdMath.percentDelta(a, b);
     }
+
     function percentDelta_(int256 a, int256 b) public pure returns (uint256) {
         return stdMath.percentDelta(a, b);
     }
@@ -132,7 +133,6 @@ contract StdMathTest is Test {
         vm.expectRevert(stdError.divisionError);
         stdMathMock.percentDelta_(uint256(1), 0);
     }
-
 
     function testGetPercentDelta_Uint_Fuzz(uint192 a, uint192 b) external {
         vm.assume(b != 0);
