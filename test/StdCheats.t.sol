@@ -5,6 +5,12 @@ import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
 
+contract StdCheatsMock is Test {
+    function assumePayable_(address addr) public {
+        assumePayable(addr);
+    }
+}
+
 contract StdCheatsTest is Test {
     Bar test;
 
@@ -316,20 +322,26 @@ contract StdCheatsTest is Test {
         );
     }
 
+    function _assumePayable(address addr) public {
+        assumePayable(addr);
+    }
+
     function testAssumePayable() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
         // all should revert since these addresses are not payable
 
         // VM address
         vm.expectRevert();
-        assumePayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+        stdCheatsMock.assumePayable_(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
         // Console address
         vm.expectRevert();
-        assumePayable(0x000000000000000000636F6e736F6c652e6c6f67);
+        stdCheatsMock.assumePayable_(0x000000000000000000636F6e736F6c652e6c6f67);
 
         // Create2Deployer
         vm.expectRevert();
-        assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+        stdCheatsMock.assumePayable_(0x4e59b44847b379578588920cA78FbF26c0B4956C);
     }
 
     function testAssumePayable(address addr) external {
