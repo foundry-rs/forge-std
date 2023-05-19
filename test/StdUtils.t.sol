@@ -191,7 +191,6 @@ contract StdUtilsTest is Test {
         assertEq(boundPrivateKey(UINT256_MAX), UINT256_MAX & SECP256K1_ORDER - 1); // x&y is equivalent to x-x%y
     }
 
-
     /*//////////////////////////////////////////////////////////////////////////
                                    BYTES TO UINT
     //////////////////////////////////////////////////////////////////////////*/
