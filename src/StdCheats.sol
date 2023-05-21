@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {Vm} from "./Vm.sol";
+import {console2} from "./console2.sol";
 
 abstract contract StdCheatsSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -191,6 +192,27 @@ abstract contract StdCheatsSafe {
     struct Account {
         address addr;
         uint256 key;
+    }
+
+    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
+    function assumeNoBlacklisted(address token, address addr) internal virtual {
+        // Nothing to check if `token` is not a contract.
+        uint256 tokenCodeSize;
+        assembly {
+            tokenCodeSize := extcodesize(token)
+        }
+        require(tokenCodeSize > 0, "StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+
+        bool success;
+        bytes memory returnData;
+
+        // 4-byte selector for `isBlacklisted(address)`, used by USDC.
+        (success, returnData) = token.staticcall(abi.encodeWithSelector(0xfe575a87, addr));
+        vm.assume(!success || abi.decode(returnData, (bool)) == false);
+
+        // 4-byte selector for `isBlackListed(address)`, used by USDT.
+        (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
+        vm.assume(!success || abi.decode(returnData, (bool)) == false);
     }
 
     function assumeNoPrecompiles(address addr) internal virtual {
