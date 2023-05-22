@@ -477,6 +477,7 @@ abstract contract StdCheatsSafe {
     // a cheat for fuzzing addresses that are payable only
     // see https://github.com/foundry-rs/foundry/issues/3631
     function assumePayable(address addr) internal virtual {
+        vm.assume(addr != address(8));
         (bool success,) = payable(addr).call{value: 0}("");
         vm.assume(success);
     }

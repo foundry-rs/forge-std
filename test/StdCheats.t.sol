@@ -319,6 +319,10 @@ contract StdCheatsTest is Test {
     function testAssumePayable() external {
         // all should revert since these addresses are not payable
 
+        // precompiled contract 0x08
+        vm.expectRevert();
+        assumePayable(0x0000000000000000000000000000000000000008);
+
         // VM address
         vm.expectRevert();
         assumePayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
