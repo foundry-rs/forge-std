@@ -572,7 +572,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
         // get current balance
-        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
@@ -580,7 +580,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
         // update total supply
         if (adjust) {
-            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
+            (, bytes memory totSupData) = token.staticcall(abi.encodeWithSelector(0x18160ddd));
             uint256 totSup = abi.decode(totSupData, (uint256));
             if (give < prevBal) {
                 totSup -= (prevBal - give);
@@ -593,7 +593,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
     function dealERC1155(address token, address to, uint256 id, uint256 give, bool adjust) internal virtual {
         // get current balance
-        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x00fdd58e, to, id));
+        (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x00fdd58e, to, id));
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
@@ -601,7 +601,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
         // update total supply
         if (adjust) {
-            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0xbd85b039, id));
+            (, bytes memory totSupData) = token.staticcall(abi.encodeWithSelector(0xbd85b039, id));
             require(
                 totSupData.length != 0,
                 "StdCheats deal(address,address,uint,uint,bool): target contract is not ERC1155Supply."
@@ -622,11 +622,12 @@ abstract contract StdCheats is StdCheatsSafe {
         require(successMinted, "StdCheats deal(address,address,uint,bool): id not minted.");
 
         // get owner current balance
-        (, bytes memory fromBalData) = token.call(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
+        (, bytes memory fromBalData) =
+            token.staticcall(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
         uint256 fromPrevBal = abi.decode(fromBalData, (uint256));
 
         // get new user current balance
-        (, bytes memory toBalData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        (, bytes memory toBalData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
         // update balances
