@@ -154,6 +154,33 @@ contract StdCheatsTest is Test {
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
+    function testDestroyAccount() public {
+        // deploy something to destroy it
+        BarERC721 barToken = new BarERC721();
+        address bar = address(barToken);
+        vm.setNonce(bar, 10);
+        deal(bar, 100);
+
+        uint256 prevThisBalance = address(this).balance;
+        uint256 size;
+        assembly {
+            size := extcodesize(bar)
+        }
+
+        assertGt(size, 0);
+        assertEq(bar.balance, 100);
+        assertEq(vm.getNonce(bar), 10);
+
+        destroyAccount(bar, address(this));
+        assembly {
+            size := extcodesize(bar)
+        }
+        assertEq(address(this).balance, prevThisBalance + 100);
+        assertEq(vm.getNonce(bar), 0);
+        assertEq(size, 0);
+        assertEq(bar.balance, 0);
+    }
+
     function testDeployCodeNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:Bar");
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
