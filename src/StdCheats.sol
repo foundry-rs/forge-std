@@ -416,10 +416,11 @@ abstract contract StdCheatsSafe {
         (addr,) = makeAddrAndKey(name);
     }
 
-    // destroys an account inmediatly, sending the balance to beneficiary 
-    // destroying means: balance will be zero, code will be empty, nonce will be zero
-    // similar to selfdestruct but not identical: selfdestruct destroys code and nonce
-    // only after tx ends, this will run inmediatly
+    // Destroys an account immediately, sending the balance to beneficiary.
+    // Destroying means: balance will be zero, code will be empty, and nonce will be 0
+    // for EOAs or 1 for contract accounts.
+    // This is similar to selfdestruct but not identical: selfdestruct destroys code and nonce
+    // only after tx ends, this will run immediately.
     function destroyAccount(address who, address beneficiary) internal virtual {
         uint256 currBalance = who.balance;
         vm.etch(who, abi.encode());
