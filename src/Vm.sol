@@ -367,7 +367,7 @@ interface Vm is VmSafe {
     // Sets the nonce of an account; must be higher than the current nonce of the account
     function setNonce(address account, uint64 newNonce) external;
     // Sets the nonce of an account to an arbitrary value
-    function setNonceUnsafe(address account) external;
+    function setNonceUnsafe(address account, uint64 newNonce) external;
     // Resets the nonce of an account to zero.
     function resetNonce(address account) external;
     // Sets the *next* call's msg.sender to be the input address
