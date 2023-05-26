@@ -416,6 +416,20 @@ abstract contract StdCheatsSafe {
         (addr,) = makeAddrAndKey(name);
     }
 
+    // Destroys an account immediately, sending the balance to beneficiary.
+    // Destroying means: balance will be zero, code will be empty, and nonce will be 0
+    // This is similar to selfdestruct but not identical: selfdestruct destroys code and nonce
+    // only after tx ends, this will run immediately.
+    function destroyAccount(address who, address beneficiary) internal virtual {
+        uint256 currBalance = who.balance;
+        vm.etch(who, abi.encode());
+        vm.deal(who, 0);
+        vm.resetNonce(who);
+
+        uint256 beneficiaryBalance = beneficiary.balance;
+        vm.deal(beneficiary, currBalance + beneficiaryBalance);
+    }
+
     // creates a struct containing both a labeled address and the corresponding private key
     function makeAccount(string memory name) internal virtual returns (Account memory account) {
         (account.addr, account.key) = makeAddrAndKey(name);
