@@ -368,6 +368,60 @@ contract StdCheatsTest is Test {
     }
 }
 
+contract StdCheatsMock is StdCheats {
+    // We deploy a mock version so we can properly test expected reverts.
+    function assumeNoBlacklisted_(address token, address addr) external {
+        return assumeNoBlacklisted(token, addr);
+    }
+}
+
+contract StdCheatsForkTest is Test {
+    address internal constant SHIB = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
+    address internal constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address internal constant USDC_BLACKLISTED_USER = 0x1E34A77868E19A6647b1f2F47B51ed72dEDE95DD;
+    address internal constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address internal constant USDT_BLACKLISTED_USER = 0x8f8a8F4B54a2aAC7799d7bc81368aC27b852822A;
+
+    // We deploy a mock version so we can properly test the revert.
+    StdCheatsMock private stdCheats = new StdCheatsMock();
+
+    function setUp() public {
+        // All tests of the `assumeNoBlacklisted` method are fork tests using live contracts.
+        vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
+    }
+
+    function testCannotAssumeNoBlacklisted_EOA() external {
+        address eoa = vm.addr({privateKey: 1});
+        vm.expectRevert("StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+        assumeNoBlacklisted(eoa, address(0));
+    }
+
+    function testAssumeNoBlacklisted_TokenWithoutBlacklist(address addr) external {
+        assumeNoBlacklisted(SHIB, addr);
+        assertTrue(true);
+    }
+
+    function testAssumeNoBlacklisted_USDC() external {
+        vm.expectRevert();
+        stdCheats.assumeNoBlacklisted_(USDC, USDC_BLACKLISTED_USER);
+    }
+
+    function testAssumeNoBlacklisted_USDC(address addr) external {
+        assumeNoBlacklisted(USDC, addr);
+        assertFalse(USDCLike(USDC).isBlacklisted(addr));
+    }
+
+    function testAssumeNoBlacklisted_USDT() external {
+        vm.expectRevert();
+        stdCheats.assumeNoBlacklisted_(USDT, USDT_BLACKLISTED_USER);
+    }
+
+    function testAssumeNoBlacklisted_USDT(address addr) external {
+        assumeNoBlacklisted(USDT, addr);
+        assertFalse(USDTLike(USDT).isBlackListed(addr));
+    }
+}
+
 contract Bar {
     constructor() payable {
         /// `DEAL` STDCHEAT
@@ -436,6 +490,14 @@ contract BarERC721 {
 
     mapping(uint256 => address) private _owners;
     mapping(address => uint256) private _balances;
+}
+
+interface USDCLike {
+    function isBlacklisted(address) external view returns (bool);
+}
+
+interface USDTLike {
+    function isBlackListed(address) external view returns (bool);
 }
 
 contract RevertingContract {
