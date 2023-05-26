@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {Vm} from "./Vm.sol";
-import {console2} from "./console2.sol";
 
 abstract contract StdCheatsSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
