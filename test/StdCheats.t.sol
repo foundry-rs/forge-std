@@ -368,7 +368,9 @@ contract StdCheatsTest is Test {
     }
 
     function testEtchify() external {
-        etchify(vm.getCode("StdCheats.t.sol:CtWithConstructorArgs"), address(1000), abi.encode(uint256(6), true), 1 ether);
+        etchify(
+            vm.getCode("StdCheats.t.sol:CtWithConstructorArgs"), address(1000), abi.encode(uint256(6), true), 1 ether
+        );
 
         CtWithConstructorArgs ct = CtWithConstructorArgs(address(1000));
 
@@ -517,7 +519,7 @@ contract RevertingContract {
 }
 
 contract CtWithConstructorArgs {
-    uint256 immutable public x;
+    uint256 public immutable x;
     bool public y;
 
     constructor(uint256 _x, bool _y) payable {
