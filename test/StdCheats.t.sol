@@ -370,7 +370,7 @@ contract StdCheatsTest is Test {
 
 contract StdCheatsMock is StdCheats {
     // We deploy a mock version so we can properly test expected reverts.
-    function assumeNoBlacklisted_(address token, address addr) external {
+    function assumeNoBlacklisted_(address token, address addr) external view {
         return assumeNoBlacklisted(token, addr);
     }
 }

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-pragma experimental ABIEncoderV2;
-
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 import {VmSafe} from "./Vm.sol";
 
@@ -85,7 +83,7 @@ abstract contract StdUtils {
         console2_log("Bound result", vm.toString(result));
     }
 
-    function boundPrivateKey(uint256 privateKey) internal view virtual returns (uint256 result) {
+    function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
         result = _bound(privateKey, 1, SECP256K1_ORDER - 1);
     }
 
