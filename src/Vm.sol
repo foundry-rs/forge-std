@@ -389,7 +389,7 @@ interface Vm is VmSafe {
     // Resets subsequent calls' msg.sender to be `address(this)`
     function stopPrank() external;
     // Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification
-    function readCallers() external returns (CallerMode, address, address);
+    function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
     // Sets an address' balance
     function deal(address account, uint256 newBalance) external;
     // Sets an address' code
