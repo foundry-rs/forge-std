@@ -686,19 +686,4 @@ abstract contract StdCheats is StdCheatsSafe {
         // update owner
         stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
     }
-
-    function etchify(bytes memory creationCode, address to) internal virtual {
-        etchify(creationCode, to, "", 0);
-    }
-
-    function etchify(bytes memory creationCode, address to, bytes memory data) internal virtual {
-        etchify(creationCode, to, data, 0);
-    }
-
-    function etchify(bytes memory creationCode, address to, bytes memory data, uint256 value) internal virtual {
-        vm.etch(to, abi.encodePacked(creationCode, data));
-        (bool success, bytes memory runtimeBytecode) = to.call{value: value}("");
-        require(success, "StdCheats etchify(bytes,address,bytes,uint256): Failed to create runtime bytecode.");
-        vm.etch(to, runtimeBytecode);
-    }
 }

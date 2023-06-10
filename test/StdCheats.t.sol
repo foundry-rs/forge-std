@@ -367,17 +367,7 @@ contract StdCheatsTest is Test {
         );
     }
 
-    function testEtchify() external {
-        etchify(
-            vm.getCode("StdCheats.t.sol:CtWithConstructorArgs"), address(1000), abi.encode(uint256(6), true), 1 ether
-        );
 
-        CtWithConstructorArgs ct = CtWithConstructorArgs(address(1000));
-
-        assertEq(address(1000).balance, 1 ether);
-        assertEq(ct.x(), 6);
-        assertTrue(ct.y());
-    }
 }
 
 contract StdCheatsMock is StdCheats {
@@ -515,15 +505,5 @@ interface USDTLike {
 contract RevertingContract {
     constructor() {
         revert();
-    }
-}
-
-contract CtWithConstructorArgs {
-    uint256 public immutable x;
-    bool public y;
-
-    constructor(uint256 _x, bool _y) payable {
-        x = _x;
-        y = _y;
     }
 }
