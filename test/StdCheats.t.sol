@@ -6,7 +6,7 @@ import "../src/Test.sol";
 import "../src/StdJson.sol";
 
 contract StdCheatsMock is Test {
-    function assumePayable_(address addr) public {
+    function exposed_assumePayable(address addr) public {
         assumePayable(addr);
     }
 }
@@ -333,15 +333,15 @@ contract StdCheatsTest is Test {
 
         // VM address
         vm.expectRevert();
-        stdCheatsMock.assumePayable_(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+        stdCheatsMock.exposed_assumePayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
         // Console address
         vm.expectRevert();
-        stdCheatsMock.assumePayable_(0x000000000000000000636F6e736F6c652e6c6f67);
+        stdCheatsMock.exposed_assumePayable(0x000000000000000000636F6e736F6c652e6c6f67);
 
         // Create2Deployer
         vm.expectRevert();
-        stdCheatsMock.assumePayable_(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+        stdCheatsMock.exposed_assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
     }
 
     function testAssumePayable(address addr) external {

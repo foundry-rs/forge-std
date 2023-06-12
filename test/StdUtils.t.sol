@@ -5,22 +5,22 @@ import "../src/Test.sol";
 
 contract StdUtilsMock is StdUtils {
     // We deploy a mock version so we can properly test expected reverts.
-    function getTokenBalances_(address token, address[] memory addresses)
+    function exposed_getTokenBalances(address token, address[] memory addresses)
         external
         returns (uint256[] memory balances)
     {
         return getTokenBalances(token, addresses);
     }
 
-    function bound_(int256 num, int256 min, int256 max) external view returns (int256) {
+    function exposed_bound(int256 num, int256 min, int256 max) external view returns (int256) {
         return bound(num, min, max);
     }
 
-    function bound_(uint256 num, uint256 min, uint256 max) external view returns (uint256) {
+    function exposed_bound(uint256 num, uint256 min, uint256 max) external view returns (uint256) {
         return bound(num, min, max);
     }
 
-    function bytesToUint_(bytes memory b) external pure returns (uint256) {
+    function exposed_bytesToUint(bytes memory b) external pure returns (uint256) {
         return bytesToUint(b);
     }
 }
@@ -39,14 +39,14 @@ contract StdUtilsTest is Test {
         assertEq(bound(uint256(9999), 1337, 6666), 4669);
     }
 
-    function testBound_WithinRange() public {
+    function testexposed_boundWithinRange() public {
         assertEq(bound(uint256(51), 50, 150), 51);
         assertEq(bound(uint256(51), 50, 150), bound(bound(uint256(51), 50, 150), 50, 150));
         assertEq(bound(uint256(149), 50, 150), 149);
         assertEq(bound(uint256(149), 50, 150), bound(bound(uint256(149), 50, 150), 50, 150));
     }
 
-    function testBound_EdgeCoverage() public {
+    function testexposed_boundEdgeCoverage() public {
         assertEq(bound(uint256(0), 50, 150), 50);
         assertEq(bound(uint256(1), 50, 150), 51);
         assertEq(bound(uint256(2), 50, 150), 52);
@@ -57,7 +57,7 @@ contract StdUtilsTest is Test {
         assertEq(bound(type(uint256).max - 3, 50, 150), 147);
     }
 
-    function testBound_DistributionIsEven(uint256 min, uint256 size) public {
+    function testexposed_boundDistributionIsEven(uint256 min, uint256 size) public {
         size = size % 100 + 1;
         min = bound(min, UINT256_MAX / 2, UINT256_MAX / 2 + size);
         uint256 max = min + size - 1;
@@ -94,7 +94,7 @@ contract StdUtilsTest is Test {
         StdUtilsMock stdUtils = new StdUtilsMock();
 
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
-        stdUtils.bound_(uint256(5), 100, 10);
+        stdUtils.exposed_bound(uint256(5), 100, 10);
     }
 
     function testCannotBoundMaxLessThanMin(uint256 num, uint256 min, uint256 max) public {
@@ -103,7 +103,7 @@ contract StdUtilsTest is Test {
 
         vm.assume(min > max);
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
-        stdUtils.bound_(num, min, max);
+        stdUtils.exposed_bound(num, min, max);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ contract StdUtilsTest is Test {
         StdUtilsMock stdUtils = new StdUtilsMock();
 
         vm.expectRevert(bytes("StdUtils bound(int256,int256,int256): Max is less than min."));
-        stdUtils.bound_(-5, 100, 10);
+        stdUtils.exposed_bound(-5, 100, 10);
     }
 
     function testCannotBoundIntMaxLessThanMin(int256 num, int256 min, int256 max) public {
@@ -197,7 +197,7 @@ contract StdUtilsTest is Test {
 
         vm.assume(min > max);
         vm.expectRevert(bytes("StdUtils bound(int256,int256,int256): Max is less than min."));
-        stdUtils.bound_(num, min, max);
+        stdUtils.exposed_bound(num, min, max);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ contract StdUtilsTest is Test {
 
         bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
-        stdUtils.bytesToUint_(thirty3Bytes);
+        stdUtils.exposed_bytesToUint(thirty3Bytes);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -274,7 +274,7 @@ contract StdUtilsForkTest is Test {
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
     }
 
-    function testCannotGetTokenBalances_NonTokenContract() external {
+    function testCannotexposed_getTokenBalancesNonTokenContract() external {
         // We deploy a mock version so we can properly test the revert.
         StdUtilsMock stdUtils = new StdUtilsMock();
 
@@ -285,10 +285,10 @@ contract StdUtilsForkTest is Test {
         addresses[0] = USDC_HOLDER_0;
 
         vm.expectRevert("Multicall3: call failed");
-        stdUtils.getTokenBalances_(token, addresses);
+        stdUtils.exposed_getTokenBalances(token, addresses);
     }
 
-    function testCannotGetTokenBalances_EOA() external {
+    function testCannotexposed_getTokenBalancesEOA() external {
         // We deploy a mock version so we can properly test the revert.
         StdUtilsMock stdUtils = new StdUtilsMock();
 
@@ -296,16 +296,16 @@ contract StdUtilsForkTest is Test {
         address[] memory addresses = new address[](1);
         addresses[0] = USDC_HOLDER_0;
         vm.expectRevert("StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
-        stdUtils.getTokenBalances_(eoa, addresses);
+        stdUtils.exposed_getTokenBalances(eoa, addresses);
     }
 
-    function testGetTokenBalances_Empty() external {
+    function testexposed_getTokenBalancesEmpty() external {
         address[] memory addresses = new address[](0);
         uint256[] memory balances = getTokenBalances(USDC, addresses);
         assertEq(balances.length, 0);
     }
 
-    function testGetTokenBalances_USDC() external {
+    function testexposed_getTokenBalancesUSDC() external {
         address[] memory addresses = new address[](2);
         addresses[0] = USDC_HOLDER_0;
         addresses[1] = USDC_HOLDER_1;
@@ -314,7 +314,7 @@ contract StdUtilsForkTest is Test {
         assertEq(balances[1], 131_350_000_000_000);
     }
 
-    function testGetTokenBalances_SHIB() external {
+    function testexposed_getTokenBalancesSHIB() external {
         address[] memory addresses = new address[](3);
         addresses[0] = SHIB_HOLDER_0;
         addresses[1] = SHIB_HOLDER_1;
