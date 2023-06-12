@@ -379,6 +379,7 @@ contract StdCheatsMock is StdCheats {
         assumePayable(addr);
     }
     // We deploy a mock version so we can properly test expected reverts.
+
     function assumeNoBlacklisted_(address token, address addr) external {
         return assumeNoBlacklisted(token, addr);
     }
