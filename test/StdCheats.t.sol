@@ -5,12 +5,6 @@ import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
 
-contract StdCheatsMock is Test {
-    function exposed_assumePayable(address addr) public {
-        assumePayable(addr);
-    }
-}
-
 contract StdCheatsTest is Test {
     Bar test;
 
@@ -381,6 +375,9 @@ contract StdCheatsTest is Test {
 }
 
 contract StdCheatsMock is StdCheats {
+    function exposed_assumePayable(address addr) public {
+        assumePayable(addr);
+    }
     // We deploy a mock version so we can properly test expected reverts.
     function assumeNoBlacklisted_(address token, address addr) external {
         return assumeNoBlacklisted(token, addr);
