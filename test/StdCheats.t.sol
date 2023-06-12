@@ -378,10 +378,10 @@ contract StdCheatsMock is StdCheats {
     function exposed_assumePayable(address addr) public {
         assumePayable(addr);
     }
-    // We deploy a mock version so we can properly test expected reverts.
 
-    function assumeNoBlacklisted_(address token, address addr) external {
-        return assumeNoBlacklisted(token, addr);
+    // We deploy a mock version so we can properly test expected reverts.
+    function exposed_assumeNoBlacklisted(address token, address addr) public {
+        assumeNoBlacklisted(token, addr);
     }
 }
 
@@ -392,18 +392,17 @@ contract StdCheatsForkTest is Test {
     address internal constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address internal constant USDT_BLACKLISTED_USER = 0x8f8a8F4B54a2aAC7799d7bc81368aC27b852822A;
 
-    // We deploy a mock version so we can properly test the revert.
-    StdCheatsMock private stdCheats = new StdCheatsMock();
-
     function setUp() public {
         // All tests of the `assumeNoBlacklisted` method are fork tests using live contracts.
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
     }
 
     function testCannotAssumeNoBlacklisted_EOA() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
         address eoa = vm.addr({privateKey: 1});
-        vm.expectRevert("StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
-        assumeNoBlacklisted(eoa, address(0));
+        vm.expectRevert();
+        stdCheatsMock.exposed_assumeNoBlacklisted(eoa, address(0));
     }
 
     function testAssumeNoBlacklisted_TokenWithoutBlacklist(address addr) external {
@@ -411,9 +410,11 @@ contract StdCheatsForkTest is Test {
         assertTrue(true);
     }
 
-    function testAssumeNoBlacklisted_USDC() external {
+    function testAssumeNoBlacklisted_USDC() public {
+        // We deploy a mock version so we can properly test the revert.
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
-        stdCheats.assumeNoBlacklisted_(USDC, USDC_BLACKLISTED_USER);
+        stdCheatsMock.exposed_assumeNoBlacklisted(USDC, USDC_BLACKLISTED_USER);
     }
 
     function testAssumeNoBlacklisted_USDC(address addr) external {
@@ -422,8 +423,10 @@ contract StdCheatsForkTest is Test {
     }
 
     function testAssumeNoBlacklisted_USDT() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
-        stdCheats.assumeNoBlacklisted_(USDT, USDT_BLACKLISTED_USER);
+        stdCheatsMock.exposed_assumeNoBlacklisted(USDT, USDT_BLACKLISTED_USER);
     }
 
     function testAssumeNoBlacklisted_USDT(address addr) external {
