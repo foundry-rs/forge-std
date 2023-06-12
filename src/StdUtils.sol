@@ -16,6 +16,8 @@ abstract contract StdUtils {
     address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
     uint256 private constant INT256_MIN_ABS =
         57896044618658097711785492504343953926634992332820282019728792003956564819968;
+    uint256 private constant SECP256K1_ORDER =
+        115792089237316195423570985008687907852837564279074904382605163141518161494337;
     uint256 private constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
@@ -81,6 +83,10 @@ abstract contract StdUtils {
     function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
         result = _bound(x, min, max);
         console2_log("Bound result", vm.toString(result));
+    }
+
+    function boundPrivateKey(uint256 privateKey) internal view virtual returns (uint256 result) {
+        result = _bound(privateKey, 1, SECP256K1_ORDER - 1);
     }
 
     function bytesToUint(bytes memory b) internal pure virtual returns (uint256) {

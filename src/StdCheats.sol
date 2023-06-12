@@ -193,6 +193,27 @@ abstract contract StdCheatsSafe {
         uint256 key;
     }
 
+    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
+    function assumeNoBlacklisted(address token, address addr) internal virtual {
+        // Nothing to check if `token` is not a contract.
+        uint256 tokenCodeSize;
+        assembly {
+            tokenCodeSize := extcodesize(token)
+        }
+        require(tokenCodeSize > 0, "StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+
+        bool success;
+        bytes memory returnData;
+
+        // 4-byte selector for `isBlacklisted(address)`, used by USDC.
+        (success, returnData) = token.staticcall(abi.encodeWithSelector(0xfe575a87, addr));
+        vm.assume(!success || abi.decode(returnData, (bool)) == false);
+
+        // 4-byte selector for `isBlackListed(address)`, used by USDT.
+        (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
+        vm.assume(!success || abi.decode(returnData, (bool)) == false);
+    }
+
     function assumeNoPrecompiles(address addr) internal virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         uint256 chainId;
@@ -416,6 +437,20 @@ abstract contract StdCheatsSafe {
         (addr,) = makeAddrAndKey(name);
     }
 
+    // Destroys an account immediately, sending the balance to beneficiary.
+    // Destroying means: balance will be zero, code will be empty, and nonce will be 0
+    // This is similar to selfdestruct but not identical: selfdestruct destroys code and nonce
+    // only after tx ends, this will run immediately.
+    function destroyAccount(address who, address beneficiary) internal virtual {
+        uint256 currBalance = who.balance;
+        vm.etch(who, abi.encode());
+        vm.deal(who, 0);
+        vm.resetNonce(who);
+
+        uint256 beneficiaryBalance = beneficiary.balance;
+        vm.deal(beneficiary, currBalance + beneficiaryBalance);
+    }
+
     // creates a struct containing both a labeled address and the corresponding private key
     function makeAccount(string memory name) internal virtual returns (Account memory account) {
         (account.addr, account.key) = makeAddrAndKey(name);
@@ -572,7 +607,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
         // get current balance
-        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
@@ -580,7 +615,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
         // update total supply
         if (adjust) {
-            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0x18160ddd));
+            (, bytes memory totSupData) = token.staticcall(abi.encodeWithSelector(0x18160ddd));
             uint256 totSup = abi.decode(totSupData, (uint256));
             if (give < prevBal) {
                 totSup -= (prevBal - give);
@@ -593,7 +628,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
     function dealERC1155(address token, address to, uint256 id, uint256 give, bool adjust) internal virtual {
         // get current balance
-        (, bytes memory balData) = token.call(abi.encodeWithSelector(0x00fdd58e, to, id));
+        (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x00fdd58e, to, id));
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
@@ -601,7 +636,7 @@ abstract contract StdCheats is StdCheatsSafe {
 
         // update total supply
         if (adjust) {
-            (, bytes memory totSupData) = token.call(abi.encodeWithSelector(0xbd85b039, id));
+            (, bytes memory totSupData) = token.staticcall(abi.encodeWithSelector(0xbd85b039, id));
             require(
                 totSupData.length != 0,
                 "StdCheats deal(address,address,uint,uint,bool): target contract is not ERC1155Supply."
@@ -622,11 +657,12 @@ abstract contract StdCheats is StdCheatsSafe {
         require(successMinted, "StdCheats deal(address,address,uint,bool): id not minted.");
 
         // get owner current balance
-        (, bytes memory fromBalData) = token.call(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
+        (, bytes memory fromBalData) =
+            token.staticcall(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
         uint256 fromPrevBal = abi.decode(fromBalData, (uint256));
 
         // get new user current balance
-        (, bytes memory toBalData) = token.call(abi.encodeWithSelector(0x70a08231, to));
+        (, bytes memory toBalData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
         // update balances
