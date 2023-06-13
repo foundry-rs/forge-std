@@ -39,14 +39,14 @@ contract StdUtilsTest is Test {
         assertEq(bound(uint256(9999), 1337, 6666), 4669);
     }
 
-    function testexposed_boundWithinRange() public {
+    function testBound_WithinRange() public {
         assertEq(bound(uint256(51), 50, 150), 51);
         assertEq(bound(uint256(51), 50, 150), bound(bound(uint256(51), 50, 150), 50, 150));
         assertEq(bound(uint256(149), 50, 150), 149);
         assertEq(bound(uint256(149), 50, 150), bound(bound(uint256(149), 50, 150), 50, 150));
     }
 
-    function testexposed_boundEdgeCoverage() public {
+    function testBound_EdgeCoverage() public {
         assertEq(bound(uint256(0), 50, 150), 50);
         assertEq(bound(uint256(1), 50, 150), 51);
         assertEq(bound(uint256(2), 50, 150), 52);
@@ -57,7 +57,7 @@ contract StdUtilsTest is Test {
         assertEq(bound(type(uint256).max - 3, 50, 150), 147);
     }
 
-    function testexposed_boundDistributionIsEven(uint256 min, uint256 size) public {
+    function testBound_DistributionIsEven(uint256 min, uint256 size) public {
         size = size % 100 + 1;
         min = bound(min, UINT256_MAX / 2, UINT256_MAX / 2 + size);
         uint256 max = min + size - 1;
@@ -289,7 +289,7 @@ contract StdUtilsForkTest is Test {
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
     }
 
-    function testCannotexposed_getTokenBalancesNonTokenContract() external {
+    function testCannotGetTokenBalances_NonTokenContract() external {
         // We deploy a mock version so we can properly test the revert.
         StdUtilsMock stdUtils = new StdUtilsMock();
 
@@ -303,7 +303,7 @@ contract StdUtilsForkTest is Test {
         stdUtils.exposed_getTokenBalances(token, addresses);
     }
 
-    function testCannotexposed_getTokenBalancesEOA() external {
+    function testCannotGetTokenBalances_EOA() external {
         // We deploy a mock version so we can properly test the revert.
         StdUtilsMock stdUtils = new StdUtilsMock();
 
@@ -314,13 +314,13 @@ contract StdUtilsForkTest is Test {
         stdUtils.exposed_getTokenBalances(eoa, addresses);
     }
 
-    function testexposed_getTokenBalancesEmpty() external {
+    function testGetTokenBalances_Empty() external {
         address[] memory addresses = new address[](0);
         uint256[] memory balances = getTokenBalances(USDC, addresses);
         assertEq(balances.length, 0);
     }
 
-    function testexposed_getTokenBalancesUSDC() external {
+    function testGetTokenBalances_USDC() external {
         address[] memory addresses = new address[](2);
         addresses[0] = USDC_HOLDER_0;
         addresses[1] = USDC_HOLDER_1;
@@ -329,7 +329,7 @@ contract StdUtilsForkTest is Test {
         assertEq(balances[1], 131_350_000_000_000);
     }
 
-    function testexposed_getTokenBalancesSHIB() external {
+    function testGetTokenBalances_SHIB() external {
         address[] memory addresses = new address[](3);
         addresses[0] = SHIB_HOLDER_0;
         addresses[1] = SHIB_HOLDER_1;

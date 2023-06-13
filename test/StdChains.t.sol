@@ -94,7 +94,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("needs_undefined_env_var");
     }
 
-    function testCannotexposed_setChainChainIdExists() public {
+    function testCannotSetChain_ChainIdExists() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -180,7 +180,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain(321);
     }
 
-    function testexposed_setChainExistingOne() public {
+    function testSetChain_ExistingOne() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 

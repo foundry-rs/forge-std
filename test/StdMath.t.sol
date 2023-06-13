@@ -115,7 +115,7 @@ contract StdMathTest is Test {
         assertEq(delta, manualDelta);
     }
 
-    function testGetexposed_percentDeltaUint() external {
+    function testGetPercentDelta_Uint() external {
         StdMathMock stdMathMock = new StdMathMock();
 
         assertEq(stdMath.percentDelta(uint256(0), uint256(1337)), 1e18);
@@ -134,7 +134,7 @@ contract StdMathTest is Test {
         stdMathMock.exposed_percentDelta(uint256(1), 0);
     }
 
-    function testGetexposed_percentDeltaUint_Fuzz(uint192 a, uint192 b) external {
+    function testGetPercentDelta_Uint_Fuzz(uint192 a, uint192 b) external {
         vm.assume(b != 0);
         uint256 manualDelta;
         if (a > b) {
@@ -149,7 +149,7 @@ contract StdMathTest is Test {
         assertEq(percentDelta, manualPercentDelta);
     }
 
-    function testGetexposed_percentDeltaInt() external {
+    function testGetPercentDelta_Int() external {
         // We deploy a mock version so we can properly test the revert.
         StdMathMock stdMathMock = new StdMathMock();
 
@@ -177,7 +177,7 @@ contract StdMathTest is Test {
         stdMathMock.exposed_percentDelta(int256(1), 0);
     }
 
-    function testGetexposed_percentDeltaInt_Fuzz(int192 a, int192 b) external {
+    function testGetPercentDelta_Int_Fuzz(int192 a, int192 b) external {
         vm.assume(b != 0);
         uint256 absA = getAbs(a);
         uint256 absB = getAbs(b);

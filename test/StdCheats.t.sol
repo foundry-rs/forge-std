@@ -375,12 +375,12 @@ contract StdCheatsTest is Test {
 }
 
 contract StdCheatsMock is StdCheats {
-    function exposed_assumePayable(address addr) public {
+    function exposed_assumePayable(address addr) external {
         assumePayable(addr);
     }
 
     // We deploy a mock version so we can properly test expected reverts.
-    function exposed_assumeNoBlacklisted(address token, address addr) public {
+    function exposed_assumeNoBlacklisted(address token, address addr) external {
         assumeNoBlacklisted(token, addr);
     }
 }
@@ -410,7 +410,7 @@ contract StdCheatsForkTest is Test {
         assertTrue(true);
     }
 
-    function testAssumeNoBlacklisted_USDC() public {
+    function testAssumeNoBlacklisted_USDC() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
