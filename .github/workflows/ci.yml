@@ -21,7 +21,9 @@ jobs:
       - name: Print forge version
         run: forge --version
 
-      # Backwards compatibility checks.
+      # Backwards compatibility checks:
+      # - the oldest and newest version of each supported minor version
+      # - versions with specific issues
       - name: Check compatibility with latest
         if: always()
         run: |
