@@ -368,7 +368,7 @@ contract StdCheatsTest is Test {
     }
 
     function testCannotDeployCodeTo() external {
-        vm.expectRevert("StdCheats deployCodeTo(bytes,address,bytes,uint256): Failed to create runtime bytecode.");
+        vm.expectRevert("StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
         this._revertDeployCodeTo();
     }
 
