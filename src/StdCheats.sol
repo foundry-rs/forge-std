@@ -710,7 +710,7 @@ abstract contract StdCheats is StdCheatsSafe {
         bytes memory creationCode = vm.getCode(what);
         vm.etch(where, abi.encodePacked(creationCode, args));
         (bool success, bytes memory runtimeBytecode) = where.call{value: value}("");
-        require(success, "StdCheats deployCodeTo(bytes,address,bytes,uint256): Failed to create runtime bytecode.");
+        require(success, "StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
         vm.etch(where, runtimeBytecode);
     }
 }
