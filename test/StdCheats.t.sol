@@ -340,8 +340,7 @@ contract StdCheatsTest is Test {
         assumeNoPrecompiles(addr, getChain("optimism_goerli").chainId);
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                || (addr > address(0x4200000000000000000000000000000000000800) && addr < address(vm)) 
-                || addr > address(vm)
+                || (addr > address(0x4200000000000000000000000000000000000800) && addr < address(vm)) || addr > address(vm)
         );
     }
 
