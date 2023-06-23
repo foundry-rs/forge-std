@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
+import "../src/console.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -339,7 +340,8 @@ contract StdCheatsTest is Test {
         assumeNoPrecompiles(addr, getChain("optimism_goerli").chainId);
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                || addr > address(0x4200000000000000000000000000000000000800)
+                || (addr > address(0x4200000000000000000000000000000000000800) && addr < address(vm)) 
+                || addr > address(vm)
         );
     }
 

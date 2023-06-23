@@ -228,7 +228,7 @@ abstract contract StdCheatsSafe {
         // address), but the same rationale for excluding them applies so we include those too.
 
         // These should be present on all EVM-compatible chains.
-        vm.assume(addr < address(0x1) || addr > address(0x9));
+        vm.assume((addr < address(0x1) || addr > address(0x9)) && addr != address(vm));
 
         // forgefmt: disable-start
         if (chainId == 10 || chainId == 420) {
