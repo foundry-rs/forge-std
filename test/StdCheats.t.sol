@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
-import "../src/console.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
