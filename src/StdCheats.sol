@@ -194,13 +194,13 @@ abstract contract StdCheatsSafe {
     }
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
-    function assumeNoBlacklisted(address token, address addr) internal view virtual {
+    function assumeNotBlacklisted(address token, address addr) internal view virtual {
         // Nothing to check if `token` is not a contract.
         uint256 tokenCodeSize;
         assembly {
             tokenCodeSize := extcodesize(token)
         }
-        require(tokenCodeSize > 0, "StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+        require(tokenCodeSize > 0, "StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
 
         bool success;
         bytes memory returnData;
@@ -212,6 +212,14 @@ abstract contract StdCheatsSafe {
         // 4-byte selector for `isBlackListed(address)`, used by USDT.
         (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
+    }
+
+    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
+    // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
+    // backwards compatibility, since this name was used in the original PR which has already has
+    // a release. This function can be removed in a future release once we want a breaking change.
+    function assumeNoBlacklisted(address token, address addr) internal view virtual {
+        assumeNotBlacklisted(token, addr);
     }
 
     function assumeNoPrecompiles(address addr) internal pure virtual {
