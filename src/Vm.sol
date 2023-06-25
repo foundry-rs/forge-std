@@ -116,7 +116,7 @@ interface VmSafe {
     // Labels an address in call traces
     function label(address account, string calldata newLabel) external;
     // Gets the label for the specified address
-    function getLabel(address account) external returns (string memory label);
+    function getLabel(address account) external returns (string memory currentLabel);
     // Using the address that calls the test contract, has the next call (at this call depth only) create a transaction that can later be signed and sent onchain
     function broadcast() external;
     // Has the next call (at this call depth only) create a transaction with the address provided as the sender that can later be signed and sent onchain
