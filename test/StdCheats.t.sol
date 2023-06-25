@@ -366,6 +366,33 @@ contract StdCheatsTest is Test {
                 && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
         );
     }
+
+    function testCannotDeployCodeTo() external {
+        vm.expectRevert("StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
+        this._revertDeployCodeTo();
+    }
+
+    function _revertDeployCodeTo() external {
+        deployCodeTo("StdCheats.t.sol:RevertingContract", address(0));
+    }
+
+    function testDeployCodeTo() external {
+        address arbitraryAddress = makeAddr("arbitraryAddress");
+
+        deployCodeTo(
+            "StdCheats.t.sol:MockContractWithConstructorArgs",
+            abi.encode(uint256(6), true, bytes20(arbitraryAddress)),
+            1 ether,
+            arbitraryAddress
+        );
+
+        MockContractWithConstructorArgs ct = MockContractWithConstructorArgs(arbitraryAddress);
+
+        assertEq(arbitraryAddress.balance, 1 ether);
+        assertEq(ct.x(), 6);
+        assertTrue(ct.y());
+        assertEq(ct.z(), bytes20(arbitraryAddress));
+    }
 }
 
 contract StdCheatsMock is StdCheats {
@@ -503,5 +530,17 @@ interface USDTLike {
 contract RevertingContract {
     constructor() {
         revert();
+    }
+}
+
+contract MockContractWithConstructorArgs {
+    uint256 public immutable x;
+    bool public y;
+    bytes20 public z;
+
+    constructor(uint256 _x, bool _y, bytes20 _z) payable {
+        x = _x;
+        y = _y;
+        z = _z;
     }
 }
