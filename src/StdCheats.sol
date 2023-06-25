@@ -194,13 +194,13 @@ abstract contract StdCheatsSafe {
     }
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
-    function assumeNoBlacklisted(address token, address addr) internal virtual {
+    function assumeNotBlacklisted(address token, address addr) internal view virtual {
         // Nothing to check if `token` is not a contract.
         uint256 tokenCodeSize;
         assembly {
             tokenCodeSize := extcodesize(token)
         }
-        require(tokenCodeSize > 0, "StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+        require(tokenCodeSize > 0, "StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
 
         bool success;
         bytes memory returnData;
@@ -214,13 +214,16 @@ abstract contract StdCheatsSafe {
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
     }
 
-    function assumeNoPrecompiles(address addr) internal virtual {
-        // Assembly required since `block.chainid` was introduced in 0.8.0.
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        assumeNoPrecompiles(addr, chainId);
+    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
+    // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
+    // backwards compatibility, since this name was used in the original PR which has already has
+    // a release. This function can be removed in a future release once we want a breaking change.
+    function assumeNoBlacklisted(address token, address addr) internal view virtual {
+        assumeNotBlacklisted(token, addr);
+    }
+
+    function assumeNoPrecompiles(address addr) internal pure virtual {
+        assumeNoPrecompiles(addr, _pureChainId());
     }
 
     function assumeNoPrecompiles(address addr, uint256 chainId) internal pure virtual {
@@ -514,6 +517,28 @@ abstract contract StdCheatsSafe {
     function assumePayable(address addr) internal virtual {
         (bool success,) = payable(addr).call{value: 0}("");
         vm.assume(success);
+    }
+
+    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
+    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
+    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
+    // Checker changed `chainid` from pure to view in 0.8.0.
+    function _viewChainId() private view returns (uint256 chainId) {
+        // Assembly required since `block.chainid` was introduced in 0.8.0.
+        assembly {
+            chainId := chainid()
+        }
+
+        address(this); // Silence warnings in older Solc versions.
+    }
+
+    function _pureChainId() private pure returns (uint256 chainId) {
+        function() internal view returns (uint256) fnIn = _viewChainId;
+        function() internal pure returns (uint256) pureChainId;
+        assembly {
+            pureChainId := fnIn
+        }
+        chainId = pureChainId();
     }
 }
 

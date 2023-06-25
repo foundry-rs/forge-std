@@ -370,8 +370,8 @@ contract StdCheatsTest is Test {
 
 contract StdCheatsMock is StdCheats {
     // We deploy a mock version so we can properly test expected reverts.
-    function assumeNoBlacklisted_(address token, address addr) external {
-        return assumeNoBlacklisted(token, addr);
+    function assumeNotBlacklisted_(address token, address addr) external view {
+        return assumeNotBlacklisted(token, addr);
     }
 }
 
@@ -386,38 +386,38 @@ contract StdCheatsForkTest is Test {
     StdCheatsMock private stdCheats = new StdCheatsMock();
 
     function setUp() public {
-        // All tests of the `assumeNoBlacklisted` method are fork tests using live contracts.
+        // All tests of the `assumeNotBlacklisted` method are fork tests using live contracts.
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
     }
 
-    function testCannotAssumeNoBlacklisted_EOA() external {
+    function testCannotAssumeNotBlacklisted_EOA() external {
         address eoa = vm.addr({privateKey: 1});
-        vm.expectRevert("StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
-        assumeNoBlacklisted(eoa, address(0));
+        vm.expectRevert("StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
+        assumeNotBlacklisted(eoa, address(0));
     }
 
-    function testAssumeNoBlacklisted_TokenWithoutBlacklist(address addr) external {
-        assumeNoBlacklisted(SHIB, addr);
+    function testAssumeNotBlacklisted_TokenWithoutBlacklist(address addr) external {
+        assumeNotBlacklisted(SHIB, addr);
         assertTrue(true);
     }
 
-    function testAssumeNoBlacklisted_USDC() external {
+    function testAssumeNotBlacklisted_USDC() external {
         vm.expectRevert();
-        stdCheats.assumeNoBlacklisted_(USDC, USDC_BLACKLISTED_USER);
+        stdCheats.assumeNotBlacklisted_(USDC, USDC_BLACKLISTED_USER);
     }
 
-    function testAssumeNoBlacklisted_USDC(address addr) external {
-        assumeNoBlacklisted(USDC, addr);
+    function testAssumeNotBlacklisted_USDC(address addr) external {
+        assumeNotBlacklisted(USDC, addr);
         assertFalse(USDCLike(USDC).isBlacklisted(addr));
     }
 
-    function testAssumeNoBlacklisted_USDT() external {
+    function testAssumeNotBlacklisted_USDT() external {
         vm.expectRevert();
-        stdCheats.assumeNoBlacklisted_(USDT, USDT_BLACKLISTED_USER);
+        stdCheats.assumeNotBlacklisted_(USDT, USDT_BLACKLISTED_USER);
     }
 
-    function testAssumeNoBlacklisted_USDT(address addr) external {
-        assumeNoBlacklisted(USDT, addr);
+    function testAssumeNotBlacklisted_USDT(address addr) external {
+        assumeNotBlacklisted(USDT, addr);
         assertFalse(USDTLike(USDT).isBlackListed(addr));
     }
 }
