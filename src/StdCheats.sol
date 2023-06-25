@@ -519,14 +519,17 @@ abstract contract StdCheatsSafe {
         vm.assume(success);
     }
 
+    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
+    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
+    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
+    // Checker changed `chainid` from pure to view in 0.8.0.
     function _viewChainId() private view returns (uint256 chainId) {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         assembly {
             chainId := chainid()
         }
 
-        //Silence warnings in older Solc versions.
-        address(this);
+        address(this); // Silence warnings in older Solc versions.
     }
 
     function _pureChainId() private pure returns (uint256 chainId) {
