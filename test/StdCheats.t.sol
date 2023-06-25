@@ -429,7 +429,7 @@ contract StdCheatsForkTest is Test {
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         address eoa = vm.addr({privateKey: 1});
         vm.expectRevert("StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
-        stdCheatsMock.exposed_assumeNoBlacklisted(eoa, address(0));
+        stdCheatsMock.exposed_assumeNotBlacklisted(eoa, address(0));
     }
 
     function testAssumeNotBlacklisted_TokenWithoutBlacklist(address addr) external {
@@ -441,7 +441,7 @@ contract StdCheatsForkTest is Test {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
-        stdCheatsMock.exposed_assumeNoBlacklisted(USDC, USDC_BLACKLISTED_USER);
+        stdCheatsMock.exposed_assumeNotBlacklisted(USDC, USDC_BLACKLISTED_USER);
     }
 
     function testAssumeNotBlacklisted_USDC(address addr) external {
@@ -453,7 +453,7 @@ contract StdCheatsForkTest is Test {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
-        stdCheatsMock.exposed_assumeNoBlacklisted(USDT, USDT_BLACKLISTED_USER);
+        stdCheatsMock.exposed_assumeNotBlacklisted(USDT, USDT_BLACKLISTED_USER);
     }
 
     function testAssumeNotBlacklisted_USDT(address addr) external {
