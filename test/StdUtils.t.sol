@@ -5,11 +5,23 @@ import "../src/Test.sol";
 
 contract StdUtilsMock is StdUtils {
     // We deploy a mock version so we can properly test expected reverts.
-    function getTokenBalances_(address token, address[] memory addresses)
+    function exposed_getTokenBalances(address token, address[] memory addresses)
         external
         returns (uint256[] memory balances)
     {
         return getTokenBalances(token, addresses);
+    }
+
+    function exposed_bound(int256 num, int256 min, int256 max) external view returns (int256) {
+        return bound(num, min, max);
+    }
+
+    function exposed_bound(uint256 num, uint256 min, uint256 max) external view returns (uint256) {
+        return bound(num, min, max);
+    }
+
+    function exposed_bytesToUint(bytes memory b) external pure returns (uint256) {
+        return bytesToUint(b);
     }
 }
 
@@ -78,14 +90,20 @@ contract StdUtilsTest is Test {
     }
 
     function testCannotBoundMaxLessThanMin() public {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
-        bound(uint256(5), 100, 10);
+        stdUtils.exposed_bound(uint256(5), 100, 10);
     }
 
     function testCannotBoundMaxLessThanMin(uint256 num, uint256 min, uint256 max) public {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         vm.assume(min > max);
         vm.expectRevert(bytes("StdUtils bound(uint256,uint256,uint256): Max is less than min."));
-        bound(num, min, max);
+        stdUtils.exposed_bound(num, min, max);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -166,14 +184,20 @@ contract StdUtilsTest is Test {
     }
 
     function testCannotBoundIntMaxLessThanMin() public {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         vm.expectRevert(bytes("StdUtils bound(int256,int256,int256): Max is less than min."));
-        bound(-5, 100, 10);
+        stdUtils.exposed_bound(-5, 100, 10);
     }
 
     function testCannotBoundIntMaxLessThanMin(int256 num, int256 min, int256 max) public {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         vm.assume(min > max);
         vm.expectRevert(bytes("StdUtils bound(int256,int256,int256): Max is less than min."));
-        bound(num, min, max);
+        stdUtils.exposed_bound(num, min, max);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -206,9 +230,12 @@ contract StdUtilsTest is Test {
     }
 
     function testCannotConvertGT32Bytes() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         bytes memory thirty3Bytes = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         vm.expectRevert("StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
-        bytesToUint(thirty3Bytes);
+        stdUtils.exposed_bytesToUint(thirty3Bytes);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -273,15 +300,18 @@ contract StdUtilsForkTest is Test {
         addresses[0] = USDC_HOLDER_0;
 
         vm.expectRevert("Multicall3: call failed");
-        stdUtils.getTokenBalances_(token, addresses);
+        stdUtils.exposed_getTokenBalances(token, addresses);
     }
 
     function testCannotGetTokenBalances_EOA() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdUtilsMock stdUtils = new StdUtilsMock();
+
         address eoa = vm.addr({privateKey: 1});
         address[] memory addresses = new address[](1);
         addresses[0] = USDC_HOLDER_0;
         vm.expectRevert("StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
-        getTokenBalances(eoa, addresses);
+        stdUtils.exposed_getTokenBalances(eoa, addresses);
     }
 
     function testGetTokenBalances_Empty() external {
