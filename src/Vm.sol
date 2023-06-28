@@ -395,7 +395,7 @@ interface Vm is VmSafe {
     // Sets an address' code
     function etch(address target, bytes calldata newRuntimeBytecode) external;
     // Marks a test as skipped. Must be called at the top of the test.
-    function skip(bool skip) external;
+    function skip(bool skipTest) external;
     // Expects an error on next call
     function expectRevert(bytes calldata revertData) external;
     function expectRevert(bytes4 revertData) external;
