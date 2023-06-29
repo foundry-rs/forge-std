@@ -245,6 +245,9 @@ abstract contract StdCheatsSafe {
             vm.assume(addr < address(0x0100000000000000000000000000000000000000) || addr > address(0x01000000000000000000000000000000000000ff));
             vm.assume(addr < address(0x0200000000000000000000000000000000000000) || addr > address(0x02000000000000000000000000000000000000FF));
             vm.assume(addr < address(0x0300000000000000000000000000000000000000) || addr > address(0x03000000000000000000000000000000000000Ff));
+        } else if (chainId == 599 || chainId == 1088) {
+            // https://github.com/MetisProtocol/mvm/blob/81ca077e4c58791578531f108526840056a44b88/packages/contracts/src/predeploys.ts#L20
+            vm.assume(addr < address(0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000) || addr > address(0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000));
         }
         // forgefmt: disable-end
     }

@@ -27,6 +27,7 @@ contract StdChainsTest is Test {
         assertEq(getChain(1).rpcUrl, "https://mainnet.infura.io/v3/b1d3925804e74152b316ca7da97060d3");
         assertEq(getChain("optimism_goerli").rpcUrl, "https://goerli.optimism.io/");
         assertEq(getChain("arbitrum_one_goerli").rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
+        assertEq(getChain("metis").rpcUrl, "https://andromeda.metis.io/?owner=1088");
 
         // Environment variables should be the next fallback
         assertEq(getChain("arbitrum_nova").rpcUrl, "https://nova.arbitrum.io/rpc");
