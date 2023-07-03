@@ -9,6 +9,9 @@ import {Vm} from "./Vm.sol";
 abstract contract StdCheatsSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    uint256 private constant UINT256_MAX =
+        115792089237316195423570985008687907853269984665640564039457584007913129639935;
+
     bool private gasMeteringOff;
 
     // Data structures to parse Transaction objects from the broadcast artifact
@@ -279,7 +282,7 @@ abstract contract StdCheatsSafe {
         assumeAddressIsNot(addressType4, addr);
     }
 
-    function _isPayable(address addr) private returns (bool) {        
+    function _isPayable(address addr) private returns (bool) {
         uint256 size;
         assembly {
             size := extcodesize(addr)
@@ -289,7 +292,7 @@ abstract contract StdCheatsSafe {
             // return false if no code
             return false;
         } else {
-            require(addr.balance < type(uint256).max, "balance exceeds max uint256");
+            require(addr.balance < UINT256_MAX, "balance exceeds max uint256");
             uint256 origBalanceTest = address(this).balance;
             uint256 origBalanceAddr = address(addr).balance;
             (bool success,) = payable(addr).call{value: 1}("");
