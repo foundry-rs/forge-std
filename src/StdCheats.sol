@@ -279,8 +279,14 @@ abstract contract StdCheatsSafe {
         assumeAddressIsNot(addressType4, addr);
     }
 
-    function _isPayable(address addr) private returns (bool) {
-        if (addr.code.length == 0) {
+    function _isPayable(address addr) private returns (bool) {        
+        uint256 size;
+        assembly {
+            size := extcodesize(addr)
+        }
+
+        if (size == 0) {
+            // return false if no code
             return false;
         } else {
             require(addr.balance < type(uint256).max, "balance exceeds max uint256");
