@@ -4,6 +4,16 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../src/StdMath.sol";
 import "../src/Test.sol";
 
+contract StdMathMock is Test {
+    function exposed_percentDelta(uint256 a, uint256 b) public pure returns (uint256) {
+        return stdMath.percentDelta(a, b);
+    }
+
+    function exposed_percentDelta(int256 a, int256 b) public pure returns (uint256) {
+        return stdMath.percentDelta(a, b);
+    }
+}
+
 contract StdMathTest is Test {
     function testGetAbs() external {
         assertEq(stdMath.abs(-50), 50);
@@ -106,6 +116,8 @@ contract StdMathTest is Test {
     }
 
     function testGetPercentDelta_Uint() external {
+        StdMathMock stdMathMock = new StdMathMock();
+
         assertEq(stdMath.percentDelta(uint256(0), uint256(1337)), 1e18);
         assertEq(stdMath.percentDelta(uint256(0), type(uint64).max), 1e18);
         assertEq(stdMath.percentDelta(uint256(0), type(uint128).max), 1e18);
@@ -119,7 +131,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(7500, uint256(2500)), 2e18);
 
         vm.expectRevert(stdError.divisionError);
-        stdMath.percentDelta(uint256(1), 0);
+        stdMathMock.exposed_percentDelta(uint256(1), 0);
     }
 
     function testGetPercentDelta_Uint_Fuzz(uint192 a, uint192 b) external {
@@ -138,6 +150,9 @@ contract StdMathTest is Test {
     }
 
     function testGetPercentDelta_Int() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdMathMock stdMathMock = new StdMathMock();
+
         assertEq(stdMath.percentDelta(int256(0), int256(1337)), 1e18);
         assertEq(stdMath.percentDelta(int256(0), -1337), 1e18);
         assertEq(stdMath.percentDelta(int256(0), type(int64).min), 1e18);
@@ -159,7 +174,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(7500, int256(2500)), 2e18);
 
         vm.expectRevert(stdError.divisionError);
-        stdMath.percentDelta(int256(1), 0);
+        stdMathMock.exposed_percentDelta(int256(1), 0);
     }
 
     function testGetPercentDelta_Int_Fuzz(int192 a, int192 b) external {

@@ -202,13 +202,13 @@ abstract contract StdCheatsSafe {
     }
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
-    function assumeNoBlacklisted(address token, address addr) internal virtual {
+    function assumeNotBlacklisted(address token, address addr) internal view virtual {
         // Nothing to check if `token` is not a contract.
         uint256 tokenCodeSize;
         assembly {
             tokenCodeSize := extcodesize(token)
         }
-        require(tokenCodeSize > 0, "StdCheats assumeNoBlacklisted(address,address): Token address is not a contract.");
+        require(tokenCodeSize > 0, "StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
 
         bool success;
         bytes memory returnData;
@@ -220,6 +220,14 @@ abstract contract StdCheatsSafe {
         // 4-byte selector for `isBlackListed(address)`, used by USDT.
         (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
+    }
+    
+    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
+    // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
+    // backwards compatibility, since this name was used in the original PR which has already has
+    // a release. This function can be removed in a future release once we want a breaking change.
+    function assumeNoBlacklisted(address token, address addr) internal view virtual {
+        assumeNotBlacklisted(token, addr);
     }
 
     function assumeAddressIsNot(AddressType addressType, address addr) internal virtual {
@@ -298,6 +306,9 @@ abstract contract StdCheatsSafe {
 
     function assumeNoZeroAddress(address addr) internal virtual {
         vm.assume(addr != address(0));
+
+    function assumeNoPrecompiles(address addr) internal pure virtual {
+        assumeNoPrecompiles(addr, _pureChainId());
     }
 
     function assumeNoPrecompiles(address addr, uint256 chainId) internal pure virtual {
@@ -592,6 +603,28 @@ abstract contract StdCheatsSafe {
             vm.resumeGasMetering();
         }
     }
+
+    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
+    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
+    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
+    // Checker changed `chainid` from pure to view in 0.8.0.
+    function _viewChainId() private view returns (uint256 chainId) {
+        // Assembly required since `block.chainid` was introduced in 0.8.0.
+        assembly {
+            chainId := chainid()
+        }
+
+        address(this); // Silence warnings in older Solc versions.
+    }
+
+    function _pureChainId() private pure returns (uint256 chainId) {
+        function() internal view returns (uint256) fnIn = _viewChainId;
+        function() internal pure returns (uint256) pureChainId;
+        assembly {
+            pureChainId := fnIn
+        }
+        chainId = pureChainId();
+    }
 }
 
 // Wrappers around cheatcodes to avoid footguns
@@ -748,5 +781,21 @@ abstract contract StdCheats is StdCheatsSafe {
 
         // update owner
         stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
+    }
+
+    function deployCodeTo(string memory what, address where) internal virtual {
+        deployCodeTo(what, "", 0, where);
+    }
+
+    function deployCodeTo(string memory what, bytes memory args, address where) internal virtual {
+        deployCodeTo(what, args, 0, where);
+    }
+
+    function deployCodeTo(string memory what, bytes memory args, uint256 value, address where) internal virtual {
+        bytes memory creationCode = vm.getCode(what);
+        vm.etch(where, abi.encodePacked(creationCode, args));
+        (bool success, bytes memory runtimeBytecode) = where.call{value: value}("");
+        require(success, "StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
+        vm.etch(where, runtimeBytecode);
     }
 }

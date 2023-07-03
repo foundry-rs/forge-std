@@ -21,18 +21,58 @@ jobs:
       - name: Print forge version
         run: forge --version
 
-      # Backwards compatibility checks.
+      # Backwards compatibility checks:
+      # - the oldest and newest version of each supported minor version
+      # - versions with specific issues
+      - name: Check compatibility with latest
+        if: always()
+        run: |
+          output=$(forge build --skip test)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
+
       - name: Check compatibility with 0.8.0
         if: always()
-        run: forge build --skip test --use solc:0.8.0
+        run: |
+          output=$(forge build --skip test --use solc:0.8.0)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
 
       - name: Check compatibility with 0.7.6
         if: always()
-        run: forge build --skip test --use solc:0.7.6
+        run: |
+          output=$(forge build --skip test --use solc:0.7.6)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
 
       - name: Check compatibility with 0.7.0
         if: always()
-        run: forge build --skip test --use solc:0.7.0
+        run: |
+          output=$(forge build --skip test --use solc:0.7.0)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
+
+      - name: Check compatibility with 0.6.12
+        if: always()
+        run: |
+          output=$(forge build --skip test --use solc:0.6.12)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
 
       - name: Check compatibility with 0.6.12
         if: always()
@@ -40,7 +80,13 @@ jobs:
 
       - name: Check compatibility with 0.6.2
         if: always()
-        run: forge build --skip test --use solc:0.6.2
+        run: |
+          output=$(forge build --skip test --use solc:0.6.2)
+
+          if echo "$output" | grep -q "Warning"; then
+            echo "$output"
+            exit 1
+          fi
 
       # via-ir compilation time checks.
       - name: Measure compilation time of Test with 0.8.17 --via-ir
