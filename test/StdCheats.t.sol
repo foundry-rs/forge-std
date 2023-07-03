@@ -335,36 +335,46 @@ contract StdCheatsTest is Test {
         return number;
     }
 
-    function testAssumeNoPrecompiles(address addr) external {
-        assumeNoPrecompiles(addr, getChain("optimism_goerli").chainId);
+    function testAssumeAddressIsNot(address addr) external {
+        // skip over Payable and NonPayable enums
+        for (uint8 i = 2; i < uint8(type(AddressType).max); i++) {
+            assumeAddressIsNot(AddressType(i), addr);
+        }
+        assertTrue(addr != address(0));
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                || (addr > address(0x4200000000000000000000000000000000000800) && addr < address(vm)) || addr > address(vm)
-        );
+                    || addr > address(0x4200000000000000000000000000000000000800)        
+            );
+        assertTrue(addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67);
     }
 
-    function testAssumePayable() external {
+    function testAssumeNoPayable() external {
+        // all should pass since these addresses are not payable
+
+        // VM address
+        assumeNoPayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
+        // Console address
+        assumeNoPayable(0x000000000000000000636F6e736F6c652e6c6f67);
+
+        // Create2Deployer
+        assumeNoPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+    }
+
+    function testAssumeNoNonPayable() external {
         // all should revert since these addresses are not payable
 
         // VM address
         vm.expectRevert();
-        assumePayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+        assumeNoNonPayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
         // Console address
         vm.expectRevert();
-        assumePayable(0x000000000000000000636F6e736F6c652e6c6f67);
+        assumeNoNonPayable(0x000000000000000000636F6e736F6c652e6c6f67);
 
         // Create2Deployer
         vm.expectRevert();
-        assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
-    }
-
-    function testAssumePayable(address addr) external {
-        assumePayable(addr);
-        assertTrue(
-            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
-                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
-        );
+        assumeNoNonPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
     }
 }
 

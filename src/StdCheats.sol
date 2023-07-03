@@ -193,6 +193,14 @@ abstract contract StdCheatsSafe {
         uint256 key;
     }
 
+    enum AddressType {
+        Payable,
+        NonPayable,
+        ZeroAddress,
+        Precompiles,
+        ForgeAddresses
+    }
+
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
     function assumeNoBlacklisted(address token, address addr) internal virtual {
         // Nothing to check if `token` is not a contract.
@@ -214,13 +222,82 @@ abstract contract StdCheatsSafe {
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
     }
 
-    function assumeNoPrecompiles(address addr) internal virtual {
+    function assumeAddressIsNot(AddressType addressType, address addr) internal virtual {
         // Assembly required since `block.chainid` was introduced in 0.8.0.
         uint256 chainId;
         assembly {
             chainId := chainid()
         }
-        assumeNoPrecompiles(addr, chainId);
+
+        if (addressType == AddressType.Payable) {
+            assumeNoPayable(addr);
+        } else if (addressType == AddressType.NonPayable) {
+            assumeNoNonPayable(addr);
+        } else if (addressType == AddressType.ZeroAddress) {
+            assumeNoZeroAddress(addr);
+        } else if (addressType == AddressType.Precompiles) {
+            assumeNoPrecompiles(addr, chainId);
+        } else if (addressType == AddressType.ForgeAddresses) {
+            assumeNoForgeAddresses(addr);
+        }
+    }
+
+    function assumeAddressIsNot(AddressType addressType1, AddressType addressType2, address addr) internal virtual {
+        assumeAddressIsNot(addressType1, addr);
+        assumeAddressIsNot(addressType2, addr);
+    }
+
+    function assumeAddressIsNot(
+        AddressType addressType1,
+        AddressType addressType2,
+        AddressType addressType3,
+        address addr
+    ) internal virtual {
+        assumeAddressIsNot(addressType1, addr);
+        assumeAddressIsNot(addressType2, addr);
+        assumeAddressIsNot(addressType3, addr);
+    }
+
+    function assumeAddressIsNot(
+        AddressType addressType1,
+        AddressType addressType2,
+        AddressType addressType3,
+        AddressType addressType4,
+        address addr
+    ) internal virtual {
+        assumeAddressIsNot(addressType1, addr);
+        assumeAddressIsNot(addressType2, addr);
+        assumeAddressIsNot(addressType3, addr);
+        assumeAddressIsNot(addressType4, addr);
+    }
+
+    function _isPayable(address addr) private returns (bool) {
+        if (addr.code.length == 0) {
+            return false;
+        } else {
+            require(addr.balance < type(uint256).max, "balance exceeds max uint256");
+            uint256 origBalanceTest = address(this).balance;
+            uint256 origBalanceAddr = address(addr).balance;
+            (bool success,) = payable(addr).call{value: 1}("");
+
+            // reset balances
+            vm.deal(address(this), origBalanceTest);
+            vm.deal(addr, origBalanceAddr);
+
+            return success;
+        }
+    }
+
+    function assumeNoPayable(address addr) internal virtual {
+        vm.assume(!_isPayable(addr));
+    }
+
+    function assumeNoNonPayable(address addr) internal virtual {
+        vm.assume(_isPayable(addr));
+    }
+
+    function assumeNoZeroAddress(address addr) internal virtual {
+        vm.assume(addr != address(0));
     }
 
     function assumeNoPrecompiles(address addr, uint256 chainId) internal pure virtual {
@@ -244,6 +321,11 @@ abstract contract StdCheatsSafe {
             vm.assume(addr < address(0x0300000000000000000000000000000000000000) || addr > address(0x03000000000000000000000000000000000000Ff));
         }
         // forgefmt: disable-end
+    }
+
+    function assumeNoForgeAddresses(address addr) internal virtual {
+        // vm and console addresses
+        vm.assume(addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67);
     }
 
     function readEIP1559ScriptArtifact(string memory path)
@@ -507,13 +589,6 @@ abstract contract StdCheatsSafe {
             gasMeteringOff = false;
             vm.resumeGasMetering();
         }
-    }
-
-    // a cheat for fuzzing addresses that are payable only
-    // see https://github.com/foundry-rs/foundry/issues/3631
-    function assumePayable(address addr) internal virtual {
-        (bool success,) = payable(addr).call{value: 0}("");
-        vm.assume(success);
     }
 }
 
