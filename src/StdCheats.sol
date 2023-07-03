@@ -305,7 +305,7 @@ abstract contract StdCheatsSafe {
         // address), but the same rationale for excluding them applies so we include those too.
 
         // These should be present on all EVM-compatible chains.
-        vm.assume((addr < address(0x1) || addr > address(0x9)) && addr != address(vm));
+        vm.assume(addr < address(0x1) || addr > address(0x9));
 
         // forgefmt: disable-start
         if (chainId == 10 || chainId == 420) {
@@ -325,7 +325,9 @@ abstract contract StdCheatsSafe {
 
     function assumeNoForgeAddresses(address addr) internal virtual {
         // vm and console addresses
-        vm.assume(addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67);
+        vm.assume(
+            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+        );
     }
 
     function readEIP1559ScriptArtifact(string memory path)

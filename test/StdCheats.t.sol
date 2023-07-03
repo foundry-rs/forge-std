@@ -343,9 +343,11 @@ contract StdCheatsTest is Test {
         assertTrue(addr != address(0));
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                    || addr > address(0x4200000000000000000000000000000000000800)        
-            );
-        assertTrue(addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67);
+                || addr > address(0x4200000000000000000000000000000000000800)
+        );
+        assertTrue(
+            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+        );
     }
 
     function testAssumeNoPayable() external {
