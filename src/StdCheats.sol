@@ -221,7 +221,7 @@ abstract contract StdCheatsSafe {
         (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
     }
-    
+
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
     // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
     // backwards compatibility, since this name was used in the original PR which has already has
@@ -306,6 +306,7 @@ abstract contract StdCheatsSafe {
 
     function assumeNoZeroAddress(address addr) internal virtual {
         vm.assume(addr != address(0));
+    }
 
     function assumeNoPrecompiles(address addr) internal pure virtual {
         assumeNoPrecompiles(addr, _pureChainId());
