@@ -313,7 +313,7 @@ abstract contract StdCheatsSafe {
         vm.assume(_isPayable(addr));
     }
 
-    function assumeNoZeroAddress(address addr) internal virtual {
+    function assumeNoZeroAddress(address addr) internal pure virtual {
         vm.assume(addr != address(0));
     }
 
@@ -344,7 +344,7 @@ abstract contract StdCheatsSafe {
         // forgefmt: disable-end
     }
 
-    function assumeNoForgeAddresses(address addr) internal virtual {
+    function assumeNoForgeAddresses(address addr) internal pure virtual {
         // vm and console addresses
         vm.assume(
             addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
