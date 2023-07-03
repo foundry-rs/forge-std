@@ -408,10 +408,6 @@ contract StdCheatsTest is Test {
 }
 
 contract StdCheatsMock is StdCheats {
-    function exposed_assumePayable(address addr) external {
-        assumePayable(addr);
-    }
-
     // We deploy a mock version so we can properly test expected reverts.
     function exposed_assumeNotBlacklisted(address token, address addr) external view {
         return assumeNotBlacklisted(token, addr);
