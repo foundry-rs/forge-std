@@ -234,12 +234,6 @@ abstract contract StdCheatsSafe {
     }
 
     function assumeAddressIsNot(AddressType addressType, address addr) internal virtual {
-        // Assembly required since `block.chainid` was introduced in 0.8.0.
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-
         if (addressType == AddressType.Payable) {
             assumeNoPayable(addr);
         } else if (addressType == AddressType.NonPayable) {
