@@ -247,7 +247,7 @@ abstract contract StdCheatsSafe {
         } else if (addressType == AddressType.ZeroAddress) {
             assumeNoZeroAddress(addr);
         } else if (addressType == AddressType.Precompiles) {
-            assumeNoPrecompiles(addr, chainId);
+            assumeNoPrecompiles(addr);
         } else if (addressType == AddressType.ForgeAddresses) {
             assumeNoForgeAddresses(addr);
         }
@@ -347,7 +347,7 @@ abstract contract StdCheatsSafe {
     function assumeNoForgeAddresses(address addr) internal pure virtual {
         // vm and console addresses
         vm.assume(
-            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D || addr != 0x000000000000000000636F6e736F6c652e6c6f67
         );
     }
 
