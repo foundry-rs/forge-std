@@ -74,10 +74,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check compatibility with 0.6.12
-        if: always()
-        run: forge build --skip test --use solc:0.6.12
-
       - name: Check compatibility with 0.6.2
         if: always()
         run: |
