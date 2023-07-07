@@ -239,6 +239,10 @@ library stdStorage {
         checked_write(self, bytes32(amt));
     }
 
+    function checked_write_int(StdStorage storage self, int256 val) internal {
+        checked_write(self, bytes32(uint256(val)));
+    }
+
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
         /// @solidity memory-safe-assembly

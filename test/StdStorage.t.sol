@@ -31,6 +31,16 @@ contract StdStorageTest is Test {
         assertEq(test.exists(), 100);
     }
 
+    function testStorageCheckedWriteSignedIntegerHidden() public {
+        stdstore.target(address(test)).sig(test.hidden.selector).checked_write_int(-100);
+        assertEq(int256(uint256(test.hidden())), -100);
+    }
+
+    function testStorageCheckedWriteSignedIntegerObvious() public {
+        stdstore.target(address(test)).sig(test.tG.selector).checked_write_int(-100);
+        assertEq(test.tG(), -100);
+    }
+
     function testStorageMapStructA() public {
         uint256 slot =
             stdstore.target(address(test)).sig(test.map_struct.selector).with_key(address(this)).depth(0).find();
