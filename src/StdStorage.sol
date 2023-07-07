@@ -239,7 +239,7 @@ library stdStorage {
         checked_write(self, bytes32(amt));
     }
 
-    function checked_write_signed(StdStorage storage self, int256 val) internal {
+    function checked_write_int(StdStorage storage self, int256 val) internal {
         checked_write(self, bytes32(uint256(val)));
     }
 

@@ -32,12 +32,12 @@ contract StdStorageTest is Test {
     }
 
     function testStorageCheckedWriteSignedIntegerHidden() public {
-        stdstore.target(address(test)).sig(test.hidden.selector).checked_write_signed(-100);
+        stdstore.target(address(test)).sig(test.hidden.selector).checked_write_int(-100);
         assertEq(int256(uint256(test.hidden())), -100);
     }
 
     function testStorageCheckedWriteSignedIntegerObvious() public {
-        stdstore.target(address(test)).sig(test.tG.selector).checked_write_signed(-100);
+        stdstore.target(address(test)).sig(test.tG.selector).checked_write_int(-100);
         assertEq(test.tG(), -100);
     }
 
