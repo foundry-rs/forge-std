@@ -11,6 +11,10 @@ abstract contract StdCheatsSafe {
 
     bool private gasMeteringOff;
 
+    string[] private ffiInput_fs;
+    // keccak256("forge-std-rawIndicator")
+    bytes32 private constant rawIndicator_fs = hex"80d764db4aee0815ea67538476a1787596b0e47559f3eb9dfa10f00b0d581b83";
+
     // Data structures to parse Transaction objects from the broadcast artifact
     // that conform to EIP1559. The Raw structs is what is parsed from the JSON
     // and then converted to the one that is used by the user for better UX.
@@ -468,11 +472,6 @@ abstract contract StdCheatsSafe {
         who = vm.rememberKey(privateKey);
     }
 
-    function _bytesToUint(bytes memory b) private pure returns (uint256) {
-        require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
-        return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
-    }
-
     function isFork() internal view virtual returns (bool status) {
         try vm.activeFork() {
             status = true;
@@ -517,6 +516,122 @@ abstract contract StdCheatsSafe {
     function assumePayable(address addr) internal virtual {
         (bool success,) = payable(addr).call{value: 0}("");
         vm.assume(success);
+    }
+
+    function ffi(string memory part1) internal virtual returns (bytes memory out) {
+        out = ffi(part1, "", "", "", "");
+    }
+
+    function ffi(string memory part1, string memory part2) internal virtual returns (bytes memory out) {
+        out = ffi(part1, part2, "", "", "");
+    }
+
+    function ffi(string memory part1, string memory part2, string memory part3)
+        internal
+        virtual
+        returns (bytes memory out)
+    {
+        out = ffi(part1, part2, part3, "", "");
+    }
+
+    function ffi(string memory part1, string memory part2, string memory part3, string memory part4)
+        internal
+        virtual
+        returns (bytes memory out)
+    {
+        out = ffi(part1, part2, part3, part4, "");
+    }
+
+    function ffi(
+        string memory part1,
+        string memory part2,
+        string memory part3,
+        string memory part4,
+        string memory part5
+    ) internal virtual returns (bytes memory out) {
+        string[] memory parts = new string[](5);
+        parts[0] = part1;
+        parts[1] = part2;
+        parts[2] = part3;
+        parts[3] = part4;
+        parts[4] = part5;
+
+        bytes32 indicator;
+
+        for (uint256 i = 0; i < 5; ++i) {
+            bytes memory part = bytes(parts[i]);
+
+            // check if the first 32 bytes are the rawIndicator
+            assembly {
+                indicator := mload(add(part, 32))
+            }
+
+            // if are, push the text raw
+            if (indicator == rawIndicator_fs) {
+                (, string memory rawText) = abi.decode(part, (bytes32, string));
+
+                ffiInput_fs.push(rawText);
+                continue;
+            } else {
+                _updateFfiInput(parts[i]);
+            }
+        }
+
+        out = vm.ffi(ffiInput_fs);
+    }
+
+    function raw(string memory text) internal pure virtual returns (string memory) {
+        return string(abi.encode(rawIndicator_fs, text));
+    }
+
+    function _updateFfiInput(string memory input) private {
+        bytes memory inputBytes = bytes(input);
+
+        uint256 length = inputBytes.length;
+        uint256 i;
+        uint256 start;
+
+        // until the last char
+        while (i < length) {
+            // if the char is a space or this is the last char
+            if (inputBytes[i] == " " || i == length - 1) {
+                // if haven't started a word yet
+                if (i == start && inputBytes[i] == " ") {
+                    // move on
+                    ++i;
+                    ++start;
+                    continue;
+                    // if have started a word
+                } else {
+                    // end the word (do not include the space)
+                    ffiInput_fs.push(_substring(input, start, i == length - 1 ? i + 1 : i));
+                    ++i;
+                    start = i;
+                }
+            }
+            // if the char is not a space
+            else {
+                ++i;
+            }
+        }
+    }
+
+    function _substring(string memory str, uint256 startIndex, uint256 endIndex) private pure returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        //require(startIndex < strBytes.length, "Invalid start index");
+        //require(endIndex <= strBytes.length, "Invalid end index");
+        //require(endIndex >= startIndex, "Invalid indices");
+
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
+
+    function _bytesToUint(bytes memory b) private pure returns (uint256) {
+        require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
+        return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 
     // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
