@@ -578,6 +578,8 @@ abstract contract StdCheatsSafe {
         }
 
         out = vm.ffi(ffiInput_fs);
+
+        ffiInput_fs = new string[](0);
     }
 
     function raw(string memory text) internal pure virtual returns (string memory) {
