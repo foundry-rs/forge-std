@@ -355,15 +355,14 @@ contract StdCheatsTest is Test {
         vm.expectRevert();
         stdCheatsMock.exposed_assumePayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
-        // Console address
-        vm.expectRevert();
-        stdCheatsMock.exposed_assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
-
         // Create2Deployer
         vm.expectRevert();
         stdCheatsMock.exposed_assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
 
         // all should pass since these addresses are payable
+
+        // Console address (no code)
+        stdCheatsMock.exposed_assumePayable(0x000000000000000000636F6e736F6c652e6c6f67);
 
         // vitalik.eth
         stdCheatsMock.exposed_assumePayable(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
@@ -380,18 +379,19 @@ contract StdCheatsTest is Test {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
 
-        // should pass since these addresses are not payable
+        // all should pass since these addresses are not payable
 
         // VM address
         stdCheatsMock.exposed_assumeNotPayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
-        // Console address
-        stdCheatsMock.exposed_assumeNotPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
-
         // Create2Deployer
         stdCheatsMock.exposed_assumeNotPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
 
-        // should fail since these addresses are payable
+        // all should revert since these addresses are payable
+
+        // Console address (no code)
+        vm.expectRevert();
+        stdCheatsMock.exposed_assumeNotPayable(0x000000000000000000636F6e736F6c652e6c6f67);
 
         // vitalik.eth
         vm.expectRevert();
