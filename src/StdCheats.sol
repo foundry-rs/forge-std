@@ -276,9 +276,9 @@ abstract contract StdCheatsSafe {
         assumeAddressIsNot(addressType4, addr);
     }
 
-    // This function checks whether an address, `addr`, is payable. It returns true if addr has no code in which case 
-    // it is an EOA. It will then send 1 wei to `addr` and check the success return value. There may be state changes 
-    // depending on the fallback/receive logic implemented by `addr` which should be taken into account when 
+    // This function checks whether an address, `addr`, is payable. It returns true if addr has no code in which case
+    // it is an EOA. It will then send 1 wei to `addr` and check the success return value. There may be state changes
+    // depending on the fallback/receive logic implemented by `addr` which should be taken into account when
     // this function is used.
     function _isPayable(address addr) private returns (bool) {
         uint256 size;
@@ -290,7 +290,10 @@ abstract contract StdCheatsSafe {
             // return true if no code
             return true;
         } else {
-            require(addr.balance < UINT256_MAX, "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds");
+            require(
+                addr.balance < UINT256_MAX,
+                "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
+            );
             uint256 origBalanceTest = address(this).balance;
             uint256 origBalanceAddr = address(addr).balance;
 
@@ -346,9 +349,7 @@ abstract contract StdCheatsSafe {
 
     function assumeNotForgeAddress(address addr) internal pure virtual {
         // vm and console addresses
-        vm.assume(
-            addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67
-        );
+        vm.assume(addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67);
     }
 
     function readEIP1559ScriptArtifact(string memory path)

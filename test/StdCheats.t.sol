@@ -342,15 +342,13 @@ contract StdCheatsTest is Test {
         }
         assertTrue(addr != address(0));
         assertTrue(addr < address(1) || addr > address(9));
-        assertTrue(
-            addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67
-        );
+        assertTrue(addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67);
     }
 
     function testAssumePayable() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
-        
+
         // all should revert since these addresses are not payable
 
         // VM address
@@ -406,7 +404,6 @@ contract StdCheatsTest is Test {
 
         vm.expectRevert();
         stdCheatsMock.exposed_assumeNotPayable(address(cp));
-
     }
 
     function testAssumeNotPrecompile(address addr) external {
