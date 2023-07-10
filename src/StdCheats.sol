@@ -281,31 +281,21 @@ abstract contract StdCheatsSafe {
     // depending on the fallback/receive logic implemented by `addr` which should be taken into account when
     // this function is used.
     function _isPayable(address addr) private returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(addr)
-        }
+        require(
+            addr.balance < UINT256_MAX,
+            "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
+        );
+        uint256 origBalanceTest = address(this).balance;
+        uint256 origBalanceAddr = address(addr).balance;
 
-        if (size == 0) {
-            // return true if no code
-            return true;
-        } else {
-            require(
-                addr.balance < UINT256_MAX,
-                "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
-            );
-            uint256 origBalanceTest = address(this).balance;
-            uint256 origBalanceAddr = address(addr).balance;
+        vm.deal(address(this), 1);
+        (bool success,) = payable(addr).call{value: 1}("");
 
-            vm.deal(address(this), 1);
-            (bool success,) = payable(addr).call{value: 1}("");
+        // reset balances
+        vm.deal(address(this), origBalanceTest);
+        vm.deal(addr, origBalanceAddr);
 
-            // reset balances
-            vm.deal(address(this), origBalanceTest);
-            vm.deal(addr, origBalanceAddr);
-
-            return success;
-        }
+        return success;
     }
 
     function assumePayable(address addr) internal virtual {
