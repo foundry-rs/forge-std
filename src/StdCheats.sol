@@ -200,8 +200,8 @@ abstract contract StdCheatsSafe {
         Payable,
         NonPayable,
         ZeroAddress,
-        Precompiles,
-        ForgeAddresses
+        Precompile,
+        ForgeAddress
     }
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
@@ -235,28 +235,28 @@ abstract contract StdCheatsSafe {
 
     function assumeAddressIsNot(AddressType addressType, address addr) internal virtual {
         if (addressType == AddressType.Payable) {
-            assumeNoPayable(addr);
+            assumeNotPayable(addr);
         } else if (addressType == AddressType.NonPayable) {
-            assumeNoNonPayable(addr);
+            assumePayable(addr);
         } else if (addressType == AddressType.ZeroAddress) {
-            assumeNoZeroAddress(addr);
-        } else if (addressType == AddressType.Precompiles) {
-            assumeNoPrecompiles(addr);
-        } else if (addressType == AddressType.ForgeAddresses) {
-            assumeNoForgeAddresses(addr);
+            assumeNotZeroAddress(addr);
+        } else if (addressType == AddressType.Precompile) {
+            assumeNotPrecompile(addr);
+        } else if (addressType == AddressType.ForgeAddress) {
+            assumeNotForgeAddress(addr);
         }
     }
 
-    function assumeAddressIsNot(AddressType addressType1, AddressType addressType2, address addr) internal virtual {
+    function assumeAddressIsNot(address addr, AddressType addressType1, AddressType addressType2) internal virtual {
         assumeAddressIsNot(addressType1, addr);
         assumeAddressIsNot(addressType2, addr);
     }
 
     function assumeAddressIsNot(
+        address addr,
         AddressType addressType1,
         AddressType addressType2,
-        AddressType addressType3,
-        address addr
+        AddressType addressType3
     ) internal virtual {
         assumeAddressIsNot(addressType1, addr);
         assumeAddressIsNot(addressType2, addr);
@@ -264,11 +264,11 @@ abstract contract StdCheatsSafe {
     }
 
     function assumeAddressIsNot(
+        address addr,
         AddressType addressType1,
         AddressType addressType2,
         AddressType addressType3,
-        AddressType addressType4,
-        address addr
+        AddressType addressType4
     ) internal virtual {
         assumeAddressIsNot(addressType1, addr);
         assumeAddressIsNot(addressType2, addr);
@@ -276,6 +276,10 @@ abstract contract StdCheatsSafe {
         assumeAddressIsNot(addressType4, addr);
     }
 
+    // This function checks whether an address, `addr`, is payable. It returns true if addr has no code in which case 
+    // it is an EOA. It will then send 1 wei to `addr` and check the success return value. There may be state changes 
+    // depending on the fallback/receive logic implemented by `addr` which should be taken into account when 
+    // this function is used.
     function _isPayable(address addr) private returns (bool) {
         uint256 size;
         assembly {
@@ -283,12 +287,14 @@ abstract contract StdCheatsSafe {
         }
 
         if (size == 0) {
-            // return false if no code
-            return false;
+            // return true if no code
+            return true;
         } else {
-            require(addr.balance < UINT256_MAX, "balance exceeds max uint256");
+            require(addr.balance < UINT256_MAX, "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds");
             uint256 origBalanceTest = address(this).balance;
             uint256 origBalanceAddr = address(addr).balance;
+
+            vm.deal(address(this), 1);
             (bool success,) = payable(addr).call{value: 1}("");
 
             // reset balances
@@ -299,23 +305,23 @@ abstract contract StdCheatsSafe {
         }
     }
 
-    function assumeNoPayable(address addr) internal virtual {
-        vm.assume(!_isPayable(addr));
-    }
-
-    function assumeNoNonPayable(address addr) internal virtual {
+    function assumePayable(address addr) internal virtual {
         vm.assume(_isPayable(addr));
     }
 
-    function assumeNoZeroAddress(address addr) internal pure virtual {
+    function assumeNotPayable(address addr) internal virtual {
+        vm.assume(!_isPayable(addr));
+    }
+
+    function assumeNotZeroAddress(address addr) internal pure virtual {
         vm.assume(addr != address(0));
     }
 
-    function assumeNoPrecompiles(address addr) internal pure virtual {
-        assumeNoPrecompiles(addr, _pureChainId());
+    function assumeNotPrecompile(address addr) internal pure virtual {
+        assumeNotPrecompile(addr, _pureChainId());
     }
 
-    function assumeNoPrecompiles(address addr, uint256 chainId) internal pure virtual {
+    function assumeNotPrecompile(address addr, uint256 chainId) internal pure virtual {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
@@ -338,10 +344,10 @@ abstract contract StdCheatsSafe {
         // forgefmt: disable-end
     }
 
-    function assumeNoForgeAddresses(address addr) internal pure virtual {
+    function assumeNotForgeAddress(address addr) internal pure virtual {
         // vm and console addresses
         vm.assume(
-            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D || addr != 0x000000000000000000636F6e736F6c652e6c6f67
+            addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67
         );
     }
 
