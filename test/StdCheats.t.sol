@@ -335,21 +335,20 @@ contract StdCheatsTest is Test {
         return number;
     }
 
-    function testAssumeNoPrecompiles(address addr) external {
-        assumeNoPrecompiles(addr, getChain("optimism_goerli").chainId);
-        assertTrue(
-            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                || addr > address(0x4200000000000000000000000000000000000800)
-        );
-    }
-
-    function _assumePayable(address addr) public {
-        assumePayable(addr);
+    function testAssumeAddressIsNot(address addr) external {
+        // skip over Payable and NonPayable enums
+        for (uint8 i = 2; i < uint8(type(AddressType).max); i++) {
+            assumeAddressIsNot(addr, AddressType(i));
+        }
+        assertTrue(addr != address(0));
+        assertTrue(addr < address(1) || addr > address(9));
+        assertTrue(addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67);
     }
 
     function testAssumePayable() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
+
         // all should revert since these addresses are not payable
 
         // VM address
@@ -363,13 +362,49 @@ contract StdCheatsTest is Test {
         // Create2Deployer
         vm.expectRevert();
         stdCheatsMock.exposed_assumePayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+
+        // all should pass since these addresses are payable
+
+        // vitalik.eth
+        stdCheatsMock.exposed_assumePayable(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
+
+        // mock payable contract
+        MockContractPayable cp = new MockContractPayable();
+        stdCheatsMock.exposed_assumePayable(address(cp));
     }
 
-    function testAssumePayable(address addr) external {
-        assumePayable(addr);
+    function testAssumeNotPayable() external {
+        // We deploy a mock version so we can properly test the revert.
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
+
+        // all should pass since these addresses are not payable
+
+        // VM address
+        stdCheatsMock.exposed_assumeNotPayable(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
+        // Console address
+        stdCheatsMock.exposed_assumeNotPayable(0x000000000000000000636F6e736F6c652e6c6f67);
+
+        // Create2Deployer
+        stdCheatsMock.exposed_assumeNotPayable(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+
+        // all should revert since these addresses are payable
+
+        // vitalik.eth
+        vm.expectRevert();
+        stdCheatsMock.exposed_assumeNotPayable(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
+
+        // mock payable contract
+        MockContractPayable cp = new MockContractPayable();
+        vm.expectRevert();
+        stdCheatsMock.exposed_assumeNotPayable(address(cp));
+    }
+
+    function testAssumeNotPrecompile(address addr) external {
+        assumeNotPrecompile(addr, getChain("optimism_goerli").chainId);
         assertTrue(
-            addr != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D && addr != 0x000000000000000000636F6e736F6c652e6c6f67
-                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
+            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
+                || addr > address(0x4200000000000000000000000000000000000800)
         );
     }
 
@@ -404,6 +439,10 @@ contract StdCheatsTest is Test {
 contract StdCheatsMock is StdCheats {
     function exposed_assumePayable(address addr) external {
         assumePayable(addr);
+    }
+
+    function exposed_assumeNotPayable(address addr) external {
+        assumeNotPayable(addr);
     }
 
     // We deploy a mock version so we can properly test expected reverts.
@@ -556,4 +595,8 @@ contract MockContractWithConstructorArgs {
         y = _y;
         z = _z;
     }
+}
+
+contract MockContractPayable {
+    receive() external payable {}
 }
