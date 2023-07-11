@@ -338,7 +338,7 @@ contract StdCheatsTest is Test {
     function testAssumeAddressIsNot(address addr) external {
         // skip over Payable and NonPayable enums
         for (uint8 i = 2; i < uint8(type(AddressType).max); i++) {
-            assumeAddressIsNot(AddressType(i), addr);
+            assumeAddressIsNot(addr, AddressType(i));
         }
         assertTrue(addr != address(0));
         assertTrue(addr < address(1) || addr > address(9));
@@ -369,10 +369,7 @@ contract StdCheatsTest is Test {
         stdCheatsMock.exposed_assumePayable(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
 
         // mock payable contract
-        address arbitraryAddress = makeAddr("arbitraryAddress");
-        deployCodeTo("StdCheats.t.sol:MockContractPayable", arbitraryAddress);
-        MockContractPayable cp = MockContractPayable(payable(arbitraryAddress));
-
+        MockContractPayable cp = new MockContractPayable();
         stdCheatsMock.exposed_assumePayable(address(cp));
     }
 
@@ -398,10 +395,7 @@ contract StdCheatsTest is Test {
         stdCheatsMock.exposed_assumeNotPayable(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
 
         // mock payable contract
-        address arbitraryAddress = makeAddr("arbitraryAddress");
-        deployCodeTo("StdCheats.t.sol:MockContractPayable", arbitraryAddress);
-        MockContractPayable cp = MockContractPayable(payable(arbitraryAddress));
-
+        MockContractPayable cp = new MockContractPayable();
         vm.expectRevert();
         stdCheatsMock.exposed_assumeNotPayable(address(cp));
     }

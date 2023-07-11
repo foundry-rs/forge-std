@@ -233,7 +233,7 @@ abstract contract StdCheatsSafe {
         assumeNotBlacklisted(token, addr);
     }
 
-    function assumeAddressIsNot(AddressType addressType, address addr) internal virtual {
+    function assumeAddressIsNot(address addr, AddressType addressType) internal virtual {
         if (addressType == AddressType.Payable) {
             assumeNotPayable(addr);
         } else if (addressType == AddressType.NonPayable) {
@@ -248,8 +248,8 @@ abstract contract StdCheatsSafe {
     }
 
     function assumeAddressIsNot(address addr, AddressType addressType1, AddressType addressType2) internal virtual {
-        assumeAddressIsNot(addressType1, addr);
-        assumeAddressIsNot(addressType2, addr);
+        assumeAddressIsNot(addr, addressType1);
+        assumeAddressIsNot(addr, addressType2);
     }
 
     function assumeAddressIsNot(
@@ -258,9 +258,9 @@ abstract contract StdCheatsSafe {
         AddressType addressType2,
         AddressType addressType3
     ) internal virtual {
-        assumeAddressIsNot(addressType1, addr);
-        assumeAddressIsNot(addressType2, addr);
-        assumeAddressIsNot(addressType3, addr);
+        assumeAddressIsNot(addr, addressType1);
+        assumeAddressIsNot(addr, addressType2);
+        assumeAddressIsNot(addr, addressType3);
     }
 
     function assumeAddressIsNot(
@@ -270,16 +270,16 @@ abstract contract StdCheatsSafe {
         AddressType addressType3,
         AddressType addressType4
     ) internal virtual {
-        assumeAddressIsNot(addressType1, addr);
-        assumeAddressIsNot(addressType2, addr);
-        assumeAddressIsNot(addressType3, addr);
-        assumeAddressIsNot(addressType4, addr);
+        assumeAddressIsNot(addr, addressType1);
+        assumeAddressIsNot(addr, addressType2);
+        assumeAddressIsNot(addr, addressType3);
+        assumeAddressIsNot(addr, addressType4);
     }
 
-    // This function checks whether an address, `addr`, is payable. It returns true if addr has no code in which case
-    // it is an EOA. It will then send 1 wei to `addr` and check the success return value. There may be state changes
-    // depending on the fallback/receive logic implemented by `addr` which should be taken into account when
-    // this function is used.
+    // This function checks whether an address, `addr`, is payable. It works by sending 1 wei to
+    // `addr` and checking the `success` return value.
+    // NOTE: This function may result in state changes depending on the fallback/receive logic
+    // implemented by `addr`, which should be taken into account when this function is used.
     function _isPayable(address addr) private returns (bool) {
         require(
             addr.balance < UINT256_MAX,
@@ -298,6 +298,9 @@ abstract contract StdCheatsSafe {
         return success;
     }
 
+    // NOTE: This function may result in state changes depending on the fallback/receive logic
+    // implemented by `addr`, which should be taken into account when this function is used. See the
+    // `_isPayable` method for more information.
     function assumePayable(address addr) internal virtual {
         vm.assume(_isPayable(addr));
     }
