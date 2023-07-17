@@ -259,6 +259,17 @@ contract StdCheatsTest is Test {
         assertEq(txDetail.value, 0);
     }
 
+    struct Simple {
+        uint256 timestamp;
+    }
+
+    function testParseJsonErrorName() public {
+        string memory json = '{\'timestamp": 1655140035}';
+        bytes memory data = vm.parseJson(json);
+        Simple memory fixture = abi.decode(data, (Simple));
+        assertEq(fixture.timestamp, 1655140035);
+    }
+
     function testReadEIP1559Transaction() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
