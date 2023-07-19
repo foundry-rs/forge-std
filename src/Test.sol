@@ -27,8 +27,7 @@ import {TestBase} from "./Base.sol";
 import {DSTest} from "ds-test/test.sol";
 
 // ⭐️ TEST
-// Note: DSTest and any contracts that inherit it must be inherited first, https://github.com/foundry-rs/forge-std/pull/241
-abstract contract Test is DSTest, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils, TestBase {
+abstract contract Test is TestBase, DSTest, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {
 // Note: IS_TEST() must return true.
 // Note: Must have failure system, https://github.com/dapphub/ds-test/blob/cd98eff28324bfac652e63a239a60632a761790b/src/test.sol#L39-L76.
 }
