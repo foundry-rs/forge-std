@@ -21,7 +21,7 @@ import {VmSafe} from "./Vm.sol";
 import {ScriptBase} from "./Base.sol";
 
 // ⭐️ SCRIPT
-abstract contract Script is StdChains, StdCheatsSafe, StdUtils, ScriptBase {
+abstract contract Script is ScriptBase, StdChains, StdCheatsSafe, StdUtils {
     // Note: IS_SCRIPT() must return true.
     bool public IS_SCRIPT = true;
 }
