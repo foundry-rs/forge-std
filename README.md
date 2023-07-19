@@ -1,12 +1,12 @@
 # 🏛️ Forge Standard Library &nbsp; [![CI status](https://github.com/foundry-rs/forge-std/actions/workflows/ci.yml/badge.svg)](https://github.com/foundry-rs/forge-std/actions/workflows/ci.yml)
 
-**Forge Std** simplifies Forge tests - it comes with everyting you need to get started with [**⚒️ Foundry**](https://github.com/foundry-rs/foundry).
+Forge Std simplifies Forge tests - it comes with everyting you need to get started with [**⚒️ Foundry**](https://github.com/foundry-rs/foundry).
 
-Explore **Forge Std** in [**📖 Foundry Book**](https://book.getfoundry.sh/forge/forge-std.html).
+Explore Forge Std in [**📖 Foundry Book**](https://book.getfoundry.sh/forge/forge-std.html).
 
 ## Install
 
-**Forge Std** will be pre-installed when you initialize a new project.
+Forge Std will be pre-installed when you initialize a new project.
 
 Manual:
 
@@ -167,4 +167,4 @@ console.log(StdStyle.blue(example.x()));
 
 ## License
 
-**Forge Std** is offered under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE) license.
+Forge Std is offered under [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE) license.
