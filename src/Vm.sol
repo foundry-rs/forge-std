@@ -259,6 +259,9 @@ interface VmSafe {
     function parseJsonBytes32(string calldata, string calldata) external returns (bytes32);
     function parseJsonBytes32Array(string calldata, string calldata) external returns (bytes32[] memory);
 
+    // Returns array of keys for a JSON object
+    function parseJsonKeys(string calldata json, string calldata key) external returns (string[] memory keys);
+
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
     function serializeBool(string calldata objectKey, string calldata valueKey, bool value)
