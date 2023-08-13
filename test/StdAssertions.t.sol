@@ -32,7 +32,7 @@ contract StdAssertionsTest is Test {
     //////////////////////////////////////////////////////////////////////////*/
 
     function test_AssertFalse() external {
-        t._assertFalse(false, EXPECT);
+        t._assertFalse(false, EXPECT_PASS);
     }
 
     function testFail_AssertFalse() external {
@@ -42,7 +42,7 @@ contract StdAssertionsTest is Test {
     }
 
     function test_AssertFalse_Err() external {
-        t._assertFalse(false, CUSTOM_ERROR, EXPECT);
+        t._assertFalse(false, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFail_AssertFalse_Err() external {
@@ -56,7 +56,7 @@ contract StdAssertionsTest is Test {
     //////////////////////////////////////////////////////////////////////////*/
 
     function testFuzz_AssertEq_Bool(bool a) external {
-        t._assertEq(a, a, EXPECT);
+        t._assertEq(a, a, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEq_Bool(bool a, bool b) external {
@@ -68,7 +68,7 @@ contract StdAssertionsTest is Test {
     }
 
     function testFuzz_AssertEq_BoolErr(bool a) external {
-        t._assertEq(a, a, CUSTOM_ERROR, EXPECT);
+        t._assertEq(a, a, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEq_BoolErr(bool a, bool b) external {
@@ -84,7 +84,7 @@ contract StdAssertionsTest is Test {
     //////////////////////////////////////////////////////////////////////////*/
 
     function testFuzz_AssertEq_Bytes(bytes calldata a) external {
-        t._assertEq(a, a, EXPECT);
+        t._assertEq(a, a, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEq_Bytes(bytes calldata a, bytes calldata b) external {
@@ -96,7 +96,7 @@ contract StdAssertionsTest is Test {
     }
 
     function testFuzz_AssertEq_BytesErr(bytes calldata a) external {
-        t._assertEq(a, a, CUSTOM_ERROR, EXPECT);
+        t._assertEq(a, a, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEq_BytesErr(bytes calldata a, bytes calldata b) external {
@@ -121,7 +121,7 @@ contract StdAssertionsTest is Test {
         b[1] = e1;
         b[2] = e2;
 
-        t._assertEq(a, b, EXPECT);
+        t._assertEq(a, b, EXPECT_PASS);
     }
 
     function testFuzz_AssertEq_IntArr(int256 e0, int256 e1, int256 e2) public {
@@ -134,7 +134,7 @@ contract StdAssertionsTest is Test {
         b[1] = e1;
         b[2] = e2;
 
-        t._assertEq(a, b, EXPECT);
+        t._assertEq(a, b, EXPECT_PASS);
     }
 
     function testFuzz_AssertEq_AddressArr(address e0, address e1, address e2) public {
@@ -147,7 +147,7 @@ contract StdAssertionsTest is Test {
         b[1] = e1;
         b[2] = e2;
 
-        t._assertEq(a, b, EXPECT);
+        t._assertEq(a, b, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEq_UintArr(uint256 e1) public {
@@ -321,7 +321,7 @@ contract StdAssertionsTest is Test {
     function testFuzz_AssertApproxEqAbs_Uint(uint256 a, uint256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT);
+        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbs_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
@@ -335,7 +335,7 @@ contract StdAssertionsTest is Test {
     function testFuzz_AssertApproxEqAbs_UintErr(uint256 a, uint256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbs_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
@@ -355,7 +355,7 @@ contract StdAssertionsTest is Test {
     {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbsDecimal_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
@@ -373,7 +373,7 @@ contract StdAssertionsTest is Test {
     {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbsDecimal_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
@@ -393,7 +393,7 @@ contract StdAssertionsTest is Test {
     function testFuzz_AssertApproxEqAbs_Int(int256 a, int256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT);
+        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbs_Int_Fail(int256 a, int256 b, uint256 maxDelta) external {
@@ -407,7 +407,7 @@ contract StdAssertionsTest is Test {
     function testFuzz_AssertApproxEqAbs_IntErr(int256 a, int256 b, uint256 maxDelta) external {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbs_IntErr_Fail(int256 a, int256 b, uint256 maxDelta) external {
@@ -425,10 +425,12 @@ contract StdAssertionsTest is Test {
     function testFuzz_AssertApproxEqAbsDecimal_Int(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
+    function testFuzz_AssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
         vm.assume(stdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(false, false, false, true);
@@ -441,7 +443,7 @@ contract StdAssertionsTest is Test {
     {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFuzz_AssertApproxEqAbsDecimal_IntErr_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
@@ -462,7 +464,7 @@ contract StdAssertionsTest is Test {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT);
+        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRel_Uint(uint256 a, uint256 b, uint256 maxPercentDelta) external {
@@ -478,7 +480,7 @@ contract StdAssertionsTest is Test {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRel_UintErr(uint256 a, uint256 b, uint256 maxPercentDelta) external {
@@ -500,7 +502,7 @@ contract StdAssertionsTest is Test {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT);
+        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRelDecimal_Uint(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
@@ -520,12 +522,15 @@ contract StdAssertionsTest is Test {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
     }
 
-    function testFailFuzz_AssertApproxEqRelDecimal_UintErr(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
-        external
-    {
+    function testFailFuzz_AssertApproxEqRelDecimal_UintErr(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta,
+        uint256 decimals
+    ) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
 
@@ -542,7 +547,7 @@ contract StdAssertionsTest is Test {
         vm.assume(b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT);
+        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRel_Int(int128 a, int128 b, uint128 maxPercentDelta) external {
@@ -558,7 +563,7 @@ contract StdAssertionsTest is Test {
         vm.assume(b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRel_IntErr(int128 a, int128 b, uint128 maxPercentDelta) external {
@@ -580,7 +585,7 @@ contract StdAssertionsTest is Test {
         vm.assume(b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT);
+        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRelDecimal_Int(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
@@ -600,7 +605,7 @@ contract StdAssertionsTest is Test {
         vm.assume(b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT);
+        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertApproxEqRelDecimal_IntErr(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
@@ -627,7 +632,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnData, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnData, SHOULD_RETURN));
 
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT);
+        t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEqCall_Return(
@@ -656,7 +661,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(revertDataA, SHOULD_REVERT));
         address targetB = address(new TestMockCall(revertDataB, SHOULD_REVERT));
 
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, NON_STRICT_REVERT_DATA, EXPECT);
+        t._assertEqCall(targetA, callDataA, targetB, callDataB, NON_STRICT_REVERT_DATA, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertEqCall_Revert(
@@ -704,7 +709,7 @@ contract StdAssertionsTest is Test {
 
     function testFuzz_AssertNotEq_Bytes(bytes32 a, bytes32 b) external {
         vm.assume(a != b);
-        t._assertNotEq(a, b, EXPECT);
+        t._assertNotEq(a, b, EXPECT_PASS);
     }
 
     function testFailFuzz_AssertNotEq_Bytes(bytes32 a) external {
@@ -715,7 +720,7 @@ contract StdAssertionsTest is Test {
 
     function testFuzz_AssertNotEq_BytesErr(bytes32 a, bytes32 b) external {
         vm.assume(a != b);
-        t._assertNotEq(a, b, CUSTOM_ERROR, EXPECT);
+        t._assertNotEq(a, b, CUSTOM_ERROR, EXPECT_PASS);
     }
 
     function testFailFuzz_AsserNottEq_BytesErr(bytes32 a) external {
