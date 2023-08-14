@@ -4,6 +4,7 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
+import {console2} from "./console2.sol";
 import {Vm} from "./Vm.sol";
 
 abstract contract StdCheatsSafe {
@@ -692,6 +693,7 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     function changePrank(address msgSender) internal virtual {
+        console2.log("changePrank is deprecated. Please use vm.startPrank instead.");
         vm.stopPrank();
         vm.startPrank(msgSender);
     }
