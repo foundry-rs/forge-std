@@ -149,6 +149,10 @@ interface VmSafe {
     // Writes line to file, creating a file if it does not exist.
     // `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+    // Copies the contents of one file to another. This function will **overwrite** the contents of `to`.
+    // On success, the total number of bytes copied is returned and it is equal to the length of the `to` file as reported by `metadata`.
+    // Both `from` and `to` are relative to the project root.
+    function copyFile(string calldata from, string calldata to) external returns (uint64 copied);
     // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
     // `path` is relative to the project root.
     function closeFile(string calldata path) external;
