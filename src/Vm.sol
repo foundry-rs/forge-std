@@ -149,6 +149,10 @@ interface VmSafe {
     // Writes line to file, creating a file if it does not exist.
     // `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+    // Copies the contents of one file to another. This function will **overwrite** the contents of `to`.
+    // On success, the total number of bytes copied is returned and it is equal to the length of the `to` file as reported by `metadata`.
+    // Both `from` and `to` are relative to the project root.
+    function copyFile(string calldata from, string calldata to) external returns (uint64 copied);
     // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
     // `path` is relative to the project root.
     function closeFile(string calldata path) external;
@@ -259,8 +263,13 @@ interface VmSafe {
     function parseJsonBytes32(string calldata, string calldata) external returns (bytes32);
     function parseJsonBytes32Array(string calldata, string calldata) external returns (bytes32[] memory);
 
+
     // Checks if a key exists in a JSON or TOML object.
     function keyExists(string calldata, string calldata) external view returns (bool);
+
+    // Returns array of keys for a JSON object
+    function parseJsonKeys(string calldata json, string calldata key) external returns (string[] memory keys);
+
 
     // Serialize a key and value to a JSON object stored in-memory that can be later written to a file
     // It returns the stringified version of the specific JSON file up to that moment.
