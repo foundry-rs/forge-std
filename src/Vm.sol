@@ -55,15 +55,15 @@ interface VmSafe {
     }
 
     // Derives a private key from the name, labels the account with that name, and returns the wallet
-    function createWallet(string calldata) external returns (Wallet memory);
+    function createWallet(string calldata label) external returns (Wallet memory wallet);
     // Generates a wallet from the private key and returns the wallet
-    function createWallet(uint256) external returns (Wallet memory);
+    function createWallet(uint256 privateKey) external returns (Wallet memory wallet);
     // Generates a wallet from the private key, labels the account with that name, and returns the wallet
-    function createWallet(uint256, string calldata) external returns (Wallet memory);
+    function createWallet(uint256 privateKey, string calldata label) external returns (Wallet memory wallet);
     // Signs data, (Wallet, digest) => (v, r, s)
-    function sign(Wallet calldata, bytes32) external returns (uint8, bytes32, bytes32);
+    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
     // Get nonce for a Wallet
-    function getNonce(Wallet calldata) external returns (uint64);
+    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
 
     // Loads a storage slot from an address
     function load(address target, bytes32 slot) external view returns (bytes32 data);
