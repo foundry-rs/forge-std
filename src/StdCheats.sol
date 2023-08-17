@@ -342,8 +342,11 @@ abstract contract StdCheatsSafe {
     }
 
     function assumeNotForgeAddress(address addr) internal pure virtual {
-        // vm and console addresses
-        vm.assume(addr != address(vm) || addr != 0x000000000000000000636F6e736F6c652e6c6f67);
+        // vm, console, and Create2Deployer addresses
+        vm.assume(
+            addr != address(vm) && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
+        );
     }
 
     function readEIP1559ScriptArtifact(string memory path)

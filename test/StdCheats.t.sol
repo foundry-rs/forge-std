@@ -408,6 +408,14 @@ contract StdCheatsTest is Test {
         );
     }
 
+    function testAssumeNotForgeAddress(address addr) external {
+        assumeNotForgeAddress(addr);
+        assertTrue(
+            addr != address(vm) && addr != 0x000000000000000000636F6e736F6c652e6c6f67
+                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
+        );
+    }
+
     function testCannotDeployCodeTo() external {
         vm.expectRevert("StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
         this._revertDeployCodeTo();
