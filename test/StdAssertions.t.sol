@@ -422,13 +422,17 @@ contract StdAssertionsTest is Test {
                                     APPROX_EQ_ABS_DECIMAL(INT)
     //////////////////////////////////////////////////////////////////////////*/
 
-    function testFuzz_AssertApproxEqAbsDecimal_Int_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
+    function testFuzz_AssertApproxEqAbsDecimal_Int_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
         vm.assume(stdMath.delta(a, b) <= maxDelta);
 
         t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals) external {
+    function testFuzz_AssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
+        external
+    {
         vm.assume(stdMath.delta(a, b) > maxDelta);
 
         vm.expectEmit(false, false, false, true);
@@ -494,18 +498,24 @@ contract StdAssertionsTest is Test {
                                     APPROX_EQ_REL_DECIMAL(UINT)
     //////////////////////////////////////////////////////////////////////////*/
 
-    function testFuzz_AssertApproxEqRelDecimal_Uint_Pass(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
-        external
-    {
+    function testFuzz_AssertApproxEqRelDecimal_Uint_Pass(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta,
+        uint256 decimals
+    ) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_PASS);
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_Uint_Fail(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
-        external
-    {
+    function testFuzz_AssertApproxEqRelDecimal_Uint_Fail(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta,
+        uint256 decimals
+    ) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
 
@@ -514,18 +524,24 @@ contract StdAssertionsTest is Test {
         t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_FAIL);
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_UintErr_Pass(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
-        external
-    {
+    function testFuzz_AssertApproxEqRelDecimal_UintErr_Pass(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta,
+        uint256 decimals
+    ) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
 
         t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_UintErr_Fail(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals)
-        external
-    {
+    function testFuzz_AssertApproxEqRelDecimal_UintErr_Fail(
+        uint256 a,
+        uint256 b,
+        uint256 maxPercentDelta,
+        uint256 decimals
+    ) external {
         vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
         vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
 
