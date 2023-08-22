@@ -47,6 +47,24 @@ interface VmSafe {
         uint256 created;
     }
 
+    struct Wallet {
+        address addr;
+        uint256 publicKeyX;
+        uint256 publicKeyY;
+        uint256 privateKey;
+    }
+
+    // Derives a private key from the name, labels the account with that name, and returns the wallet
+    function createWallet(string calldata walletLabel) external returns (Wallet memory wallet);
+    // Generates a wallet from the private key and returns the wallet
+    function createWallet(uint256 privateKey) external returns (Wallet memory wallet);
+    // Generates a wallet from the private key, labels the account with that name, and returns the wallet
+    function createWallet(uint256 privateKey, string calldata walletLabel) external returns (Wallet memory wallet);
+    // Signs data, (Wallet, digest) => (v, r, s)
+    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+    // Get nonce for a Wallet
+    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
+
     // Loads a storage slot from an address
     function load(address target, bytes32 slot) external view returns (bytes32 data);
     // Signs data
@@ -149,6 +167,10 @@ interface VmSafe {
     // Writes line to file, creating a file if it does not exist.
     // `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+    // Copies the contents of one file to another. This function will **overwrite** the contents of `to`.
+    // On success, the total number of bytes copied is returned and it is equal to the length of the `to` file as reported by `metadata`.
+    // Both `from` and `to` are relative to the project root.
+    function copyFile(string calldata from, string calldata to) external returns (uint64 copied);
     // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
     // `path` is relative to the project root.
     function closeFile(string calldata path) external;
@@ -244,20 +266,23 @@ interface VmSafe {
     // and hex numbers '0xEF'.
     // Type coercion works ONLY for discrete values or arrays. That means that the key must return a value or array, not
     // a JSON object.
-    function parseJsonUint(string calldata, string calldata) external returns (uint256);
-    function parseJsonUintArray(string calldata, string calldata) external returns (uint256[] memory);
-    function parseJsonInt(string calldata, string calldata) external returns (int256);
-    function parseJsonIntArray(string calldata, string calldata) external returns (int256[] memory);
-    function parseJsonBool(string calldata, string calldata) external returns (bool);
-    function parseJsonBoolArray(string calldata, string calldata) external returns (bool[] memory);
-    function parseJsonAddress(string calldata, string calldata) external returns (address);
-    function parseJsonAddressArray(string calldata, string calldata) external returns (address[] memory);
-    function parseJsonString(string calldata, string calldata) external returns (string memory);
-    function parseJsonStringArray(string calldata, string calldata) external returns (string[] memory);
-    function parseJsonBytes(string calldata, string calldata) external returns (bytes memory);
-    function parseJsonBytesArray(string calldata, string calldata) external returns (bytes[] memory);
-    function parseJsonBytes32(string calldata, string calldata) external returns (bytes32);
-    function parseJsonBytes32Array(string calldata, string calldata) external returns (bytes32[] memory);
+    function parseJsonUint(string calldata json, string calldata key) external returns (uint256);
+    function parseJsonUintArray(string calldata json, string calldata key) external returns (uint256[] memory);
+    function parseJsonInt(string calldata json, string calldata key) external returns (int256);
+    function parseJsonIntArray(string calldata json, string calldata key) external returns (int256[] memory);
+    function parseJsonBool(string calldata json, string calldata key) external returns (bool);
+    function parseJsonBoolArray(string calldata json, string calldata key) external returns (bool[] memory);
+    function parseJsonAddress(string calldata json, string calldata key) external returns (address);
+    function parseJsonAddressArray(string calldata json, string calldata key) external returns (address[] memory);
+    function parseJsonString(string calldata json, string calldata key) external returns (string memory);
+    function parseJsonStringArray(string calldata json, string calldata key) external returns (string[] memory);
+    function parseJsonBytes(string calldata json, string calldata key) external returns (bytes memory);
+    function parseJsonBytesArray(string calldata json, string calldata key) external returns (bytes[] memory);
+    function parseJsonBytes32(string calldata json, string calldata key) external returns (bytes32);
+    function parseJsonBytes32Array(string calldata json, string calldata key) external returns (bytes32[] memory);
+
+    // Checks if a key exists in a JSON or TOML object.
+    function keyExists(string calldata json, string calldata key) external view returns (bool);
 
     // Returns array of keys for a JSON object
     function parseJsonKeys(string calldata json, string calldata key) external returns (string[] memory keys);
