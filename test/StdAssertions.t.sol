@@ -646,7 +646,7 @@ contract StdAssertionsTest is Test {
         t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_PASS);
     }
 
-    function testFuzz_AssertEqCall_Return_Fail(
+    function testFuzz_RevertWhenCalled_AssertEqCall_Return_Fail(
         bytes memory callDataA,
         bytes memory callDataB,
         bytes memory returnDataA,
@@ -675,7 +675,7 @@ contract StdAssertionsTest is Test {
         t._assertEqCall(targetA, callDataA, targetB, callDataB, NON_STRICT_REVERT_DATA, EXPECT_PASS);
     }
 
-    function testFuzz_AssertEqCall_Revert_Fail(
+    function testFuzz_RevertWhenCalled_AssertEqCall_Revert_Fail(
         bytes memory callDataA,
         bytes memory callDataB,
         bytes memory revertDataA,
@@ -691,7 +691,7 @@ contract StdAssertionsTest is Test {
         t._assertEqCall(targetA, callDataA, targetB, callDataB, STRICT_REVERT_DATA, EXPECT_FAIL);
     }
 
-    function testFuzz_AssertEqCall_Fail(
+    function testFuzz_RevertWhenCalled_AssertEqCall_Fail(
         bytes memory callDataA,
         bytes memory callDataB,
         bytes memory returnDataA,
