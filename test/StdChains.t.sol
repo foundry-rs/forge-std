@@ -65,6 +65,8 @@ contract StdChainsTest is Test {
     //     testRpc("bnb_smart_chain");
     //     testRpc("bnb_smart_chain_testnet");
     //     testRpc("gnosis_chain");
+    //     testRpc("moonbeam");
+    //     testRpc("moonriver");
     //     testRpc("base_goerli");
     //     testRpc("base");
     // }
