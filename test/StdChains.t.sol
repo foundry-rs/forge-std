@@ -67,6 +67,7 @@ contract StdChainsTest is Test {
     //     testRpc("gnosis_chain");
     //     testRpc("moonbeam");
     //     testRpc("moonriver");
+    //     testRpc("moonbase");
     //     testRpc("base_goerli");
     //     testRpc("base");
     // }
