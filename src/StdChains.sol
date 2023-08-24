@@ -222,7 +222,7 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl("moonbase", ChainData("Moonbase", 1287, "https://rpc.testnet.moonbeam.network"));
         setChainWithDefaultRpcUrl("base_goerli", ChainData("Base Goerli", 84531, "https://goerli.base.org"));
-        setChainWithDefaultRpcUrl("base",ChainData("Base", 8453, "https://mainnet.base.org"));
+        setChainWithDefaultRpcUrl("base", ChainData("Base", 8453, "https://mainnet.base.org"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
