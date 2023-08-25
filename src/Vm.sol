@@ -542,9 +542,9 @@ interface Vm is VmSafe {
     // Suspends execution of the main thread for `duration` milliseconds
     function sleep(uint256 duration) external;
     // Returns true if the given path points to an existing entity, else returns false
-    function exists(string calldata path) external returns (bool);
+    function exists(string calldata path) external returns (bool exists);
     // Returns true if the path exists on disk and is pointing at a regular file, else returns false
-    function isFile(string calldata path) external returns (bool);
+    function isFile(string calldata path) external returns (bool isFile);
     // Returns true if the path exists on disk and is pointing at a directory, else returns false
-    function isDir(string calldata path) external returns (bool);
+    function isDir(string calldata path) external returns (bool isDir);
 }
