@@ -212,6 +212,12 @@ interface VmSafe {
     function readLink(string calldata linkPath) external view returns (string memory targetPath);
     // Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
+    // Returns true if the given path points to an existing entity, else returns false
+    function exists(string calldata path) external returns (bool result);
+    // Returns true if the path exists on disk and is pointing at a regular file, else returns false
+    function isFile(string calldata path) external returns (bool result);
+    // Returns true if the path exists on disk and is pointing at a directory, else returns false
+    function isDir(string calldata path) external returns (bool result);
 
     // Convert values to a string
     function toString(address value) external pure returns (string memory stringifiedValue);
@@ -377,6 +383,8 @@ interface VmSafe {
     function breakpoint(string calldata char) external;
     // Writes a conditional breakpoint to jump to in the debugger
     function breakpoint(string calldata char, bool value) external;
+    // Suspends execution of the main thread for `duration` milliseconds
+    function sleep(uint256 duration) external;
 }
 
 interface Vm is VmSafe {
@@ -539,6 +547,4 @@ interface Vm is VmSafe {
     function transact(bytes32 txHash) external;
     // Fetches the given transaction from the given fork and executes it on the current state
     function transact(uint256 forkId, bytes32 txHash) external;
-    // Suspends execution of the main thread for `duration` milliseconds
-    function sleep(uint256 duration) external;
 }
