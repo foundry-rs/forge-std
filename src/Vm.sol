@@ -82,7 +82,7 @@ interface VmSafe {
     // Performs a foreign function call via the terminal
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
     // Performs a foreign function call via terminal and returns the exit code, stdout, and stderr
-    function tryFfi(string[] calldata) external returns (FfiResult memory);
+    function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
     // Sets environment variables
     function setEnv(string calldata name, string calldata value) external;
     // Reads environment variables, (name) => (value)
