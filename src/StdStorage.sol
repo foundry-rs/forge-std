@@ -68,16 +68,21 @@ library stdStorageSafe {
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
                 }
+                if (prev != fdat) {
+                    continue;
+                }
+                bytes32 newVal = bytes32(~uint256(prev));
                 // store
-                vm.store(who, reads[i], bytes32(hex"1337"));
+                vm.store(who, reads[i], newVal);
                 bool success;
-                bytes memory rdat;
+                bytes32 dat;
                 {
+                    bytes memory rdat;
                     (success, rdat) = who.staticcall(cald);
-                    fdat = bytesToBytes32(rdat, 32 * field_depth);
+                    dat = bytesToBytes32(rdat, 32 * field_depth);
                 }
 
-                if (success && fdat == bytes32(hex"1337")) {
+                if (success && dat == newVal) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
                     self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
