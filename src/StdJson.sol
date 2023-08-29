@@ -33,59 +33,59 @@ library stdJson {
         return vm.parseJson(json, key);
     }
 
-    function readUint(string memory json, string memory key) internal returns (uint256) {
+    function readUint(string memory json, string memory key) internal pure returns (uint256) {
         return vm.parseJsonUint(json, key);
     }
 
-    function readUintArray(string memory json, string memory key) internal returns (uint256[] memory) {
+    function readUintArray(string memory json, string memory key) internal pure returns (uint256[] memory) {
         return vm.parseJsonUintArray(json, key);
     }
 
-    function readInt(string memory json, string memory key) internal returns (int256) {
+    function readInt(string memory json, string memory key) internal pure returns (int256) {
         return vm.parseJsonInt(json, key);
     }
 
-    function readIntArray(string memory json, string memory key) internal returns (int256[] memory) {
+    function readIntArray(string memory json, string memory key) internal pure returns (int256[] memory) {
         return vm.parseJsonIntArray(json, key);
     }
 
-    function readBytes32(string memory json, string memory key) internal returns (bytes32) {
+    function readBytes32(string memory json, string memory key) internal pure returns (bytes32) {
         return vm.parseJsonBytes32(json, key);
     }
 
-    function readBytes32Array(string memory json, string memory key) internal returns (bytes32[] memory) {
+    function readBytes32Array(string memory json, string memory key) internal pure returns (bytes32[] memory) {
         return vm.parseJsonBytes32Array(json, key);
     }
 
-    function readString(string memory json, string memory key) internal returns (string memory) {
+    function readString(string memory json, string memory key) internal pure returns (string memory) {
         return vm.parseJsonString(json, key);
     }
 
-    function readStringArray(string memory json, string memory key) internal returns (string[] memory) {
+    function readStringArray(string memory json, string memory key) internal pure returns (string[] memory) {
         return vm.parseJsonStringArray(json, key);
     }
 
-    function readAddress(string memory json, string memory key) internal returns (address) {
+    function readAddress(string memory json, string memory key) internal pure returns (address) {
         return vm.parseJsonAddress(json, key);
     }
 
-    function readAddressArray(string memory json, string memory key) internal returns (address[] memory) {
+    function readAddressArray(string memory json, string memory key) internal pure returns (address[] memory) {
         return vm.parseJsonAddressArray(json, key);
     }
 
-    function readBool(string memory json, string memory key) internal returns (bool) {
+    function readBool(string memory json, string memory key) internal pure returns (bool) {
         return vm.parseJsonBool(json, key);
     }
 
-    function readBoolArray(string memory json, string memory key) internal returns (bool[] memory) {
+    function readBoolArray(string memory json, string memory key) internal pure returns (bool[] memory) {
         return vm.parseJsonBoolArray(json, key);
     }
 
-    function readBytes(string memory json, string memory key) internal returns (bytes memory) {
+    function readBytes(string memory json, string memory key) internal pure returns (bytes memory) {
         return vm.parseJsonBytes(json, key);
     }
 
-    function readBytesArray(string memory json, string memory key) internal returns (bytes[] memory) {
+    function readBytesArray(string memory json, string memory key) internal pure returns (bytes[] memory) {
         return vm.parseJsonBytesArray(json, key);
     }
 
