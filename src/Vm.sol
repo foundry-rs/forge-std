@@ -54,6 +54,12 @@ interface VmSafe {
         uint256 privateKey;
     }
 
+    struct FfiResult {
+        int32 exit_code;
+        bytes stdout;
+        bytes stderr;
+    }
+
     // Derives a private key from the name, labels the account with that name, and returns the wallet
     function createWallet(string calldata walletLabel) external returns (Wallet memory wallet);
     // Generates a wallet from the private key and returns the wallet
@@ -75,6 +81,8 @@ interface VmSafe {
     function getNonce(address account) external view returns (uint64 nonce);
     // Performs a foreign function call via the terminal
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
+    // Performs a foreign function call via terminal and returns the exit code, stdout, and stderr
+    function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
     // Sets environment variables
     function setEnv(string calldata name, string calldata value) external;
     // Reads environment variables, (name) => (value)
