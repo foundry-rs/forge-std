@@ -393,6 +393,18 @@ interface VmSafe {
     function pauseGasMetering() external;
     // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
+    // Starts recording all map SSTOREs for later retrieval.
+    function startMappingRecording() external;
+    // Stops recording all map SSTOREs for later retrieval and clears the recorded data.
+    function stopMappingRecording() external;
+    // Gets the length of a mapping at a given slot, for a given address.
+    function getMappingLength(address target, bytes32 slot) external returns (uint256 length);
+    // Gets the element at index idx of a mapping at a given slot, for a given address.
+    function getMappingSlotAt(address target, bytes32 slot, uint256 idx) external returns (bytes32 value);
+    // Gets the map key and parent of a mapping at a given slot, for a given address.
+    function getMappingKeyAndParentOf(address target, bytes32 slot)
+        external
+        returns (bool found, bytes32 key, bytes32 parent);
     // Writes a breakpoint to jump to in the debugger
     function breakpoint(string calldata char) external;
     // Writes a conditional breakpoint to jump to in the debugger
