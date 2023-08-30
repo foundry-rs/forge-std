@@ -146,7 +146,8 @@ contract StdStorageTest is Test {
     }
 
     function test_StorageMapAddrRoot() public {
-        (uint256 slot, bytes32 key) = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).parent();
+        (uint256 slot, bytes32 key) =
+            stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).parent();
         assertEq(address(uint160(uint256(key))), address(this));
         assertEq(uint256(1), slot);
         slot = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).root();

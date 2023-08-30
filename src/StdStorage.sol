@@ -175,7 +175,9 @@ library stdStorageSafe {
         uint256 child = find(self) - field_depth;
         (bool found, bytes32 key, bytes32 parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
         if (!found) {
-            revert("stdStorage read_bool(StdStorage): Cannot found parent. Make sure you give a slot and startMappingRecord() is called.");
+            revert(
+                "stdStorage read_bool(StdStorage): Cannot found parent. Make sure you give a slot and startMappingRecord() is called."
+            );
         }
         return (uint256(parent_slot), key);
     }
@@ -188,13 +190,15 @@ library stdStorageSafe {
         bool found;
         bytes32 root_slot;
         bytes32 parent_slot;
-        (found, , parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
+        (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
         if (!found) {
-            revert("stdStorage read_bool(StdStorage): Cannot found parent. Make sure you give a slot and startMappingRecord() is called.");
+            revert(
+                "stdStorage read_bool(StdStorage): Cannot found parent. Make sure you give a slot and startMappingRecord() is called."
+            );
         }
         while (found) {
             root_slot = parent_slot;
-            (found, , parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(root_slot));
+            (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(root_slot));
         }
         return uint256(root_slot);
     }
