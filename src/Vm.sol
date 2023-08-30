@@ -397,12 +397,13 @@ interface VmSafe {
     function startMappingRecording() external;
     // Stops recording all map SSTOREs for later retrieval and clears the recorded data.
     function stopMappingRecording() external;
-    // Gets the length of a mapping at a given slot, for a given address.
-    function getMappingLength(address target, bytes32 slot) external returns (uint256 length);
-    // Gets the element at index idx of a mapping at a given slot, for a given address.
-    function getMappingSlotAt(address target, bytes32 slot, uint256 idx) external returns (bytes32 value);
+    // Gets the number of elements in the mapping at the given slot, for a given address.
+    function getMappingLength(address target, bytes32 mappingSlot) external returns (uint256 length);
+    // Gets the elements at index idx of the mapping at the given slot, for a given address. The
+    // index must be less than the length of the mapping (i.e. the number of keys in the mapping).
+    function getMappingSlotAt(address target, bytes32 mappingSlot, uint256 idx) external returns (bytes32 value);
     // Gets the map key and parent of a mapping at a given slot, for a given address.
-    function getMappingKeyAndParentOf(address target, bytes32 slot)
+    function getMappingKeyAndParentOf(address target, bytes32 elementSlot)
         external
         returns (bool found, bytes32 key, bytes32 parent);
     // Writes a breakpoint to jump to in the debugger
