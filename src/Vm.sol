@@ -280,20 +280,26 @@ interface VmSafe {
     // and hex numbers '0xEF'.
     // Type coercion works ONLY for discrete values or arrays. That means that the key must return a value or array, not
     // a JSON object.
-    function parseJsonUint(string calldata json, string calldata key) external returns (uint256);
-    function parseJsonUintArray(string calldata json, string calldata key) external returns (uint256[] memory);
-    function parseJsonInt(string calldata json, string calldata key) external returns (int256);
-    function parseJsonIntArray(string calldata json, string calldata key) external returns (int256[] memory);
-    function parseJsonBool(string calldata json, string calldata key) external returns (bool);
-    function parseJsonBoolArray(string calldata json, string calldata key) external returns (bool[] memory);
-    function parseJsonAddress(string calldata json, string calldata key) external returns (address);
-    function parseJsonAddressArray(string calldata json, string calldata key) external returns (address[] memory);
-    function parseJsonString(string calldata json, string calldata key) external returns (string memory);
-    function parseJsonStringArray(string calldata json, string calldata key) external returns (string[] memory);
-    function parseJsonBytes(string calldata json, string calldata key) external returns (bytes memory);
-    function parseJsonBytesArray(string calldata json, string calldata key) external returns (bytes[] memory);
-    function parseJsonBytes32(string calldata json, string calldata key) external returns (bytes32);
-    function parseJsonBytes32Array(string calldata json, string calldata key) external returns (bytes32[] memory);
+    function parseJsonUint(string calldata json, string calldata key) external pure returns (uint256);
+    function parseJsonUintArray(string calldata json, string calldata key) external pure returns (uint256[] memory);
+    function parseJsonInt(string calldata json, string calldata key) external pure returns (int256);
+    function parseJsonIntArray(string calldata json, string calldata key) external pure returns (int256[] memory);
+    function parseJsonBool(string calldata json, string calldata key) external pure returns (bool);
+    function parseJsonBoolArray(string calldata json, string calldata key) external pure returns (bool[] memory);
+    function parseJsonAddress(string calldata json, string calldata key) external pure returns (address);
+    function parseJsonAddressArray(string calldata json, string calldata key)
+        external
+        pure
+        returns (address[] memory);
+    function parseJsonString(string calldata json, string calldata key) external pure returns (string memory);
+    function parseJsonStringArray(string calldata json, string calldata key) external pure returns (string[] memory);
+    function parseJsonBytes(string calldata json, string calldata key) external pure returns (bytes memory);
+    function parseJsonBytesArray(string calldata json, string calldata key) external pure returns (bytes[] memory);
+    function parseJsonBytes32(string calldata json, string calldata key) external pure returns (bytes32);
+    function parseJsonBytes32Array(string calldata json, string calldata key)
+        external
+        pure
+        returns (bytes32[] memory);
 
     // Checks if a key exists in a JSON or TOML object.
     function keyExists(string calldata json, string calldata key) external view returns (bool);
