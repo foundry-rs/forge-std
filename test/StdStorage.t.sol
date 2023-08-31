@@ -266,7 +266,7 @@ contract StorageTest {
     address public tF = address(1337);
     int256 public tG = type(int256).min;
     bool public tH = true;
-    bytes32 private tI = bytes32(~uint256(bytes32(hex"1337")));
+    bytes32 private tI = ~bytes32(hex"1337");
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});

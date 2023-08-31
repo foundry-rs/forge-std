@@ -71,18 +71,17 @@ library stdStorageSafe {
                 if (prev != fdat) {
                     continue;
                 }
-                bytes32 newVal = bytes32(~uint256(prev));
+                bytes32 newVal = ~prev;
                 // store
                 vm.store(who, reads[i], newVal);
                 bool success;
-                bytes32 dat;
                 {
                     bytes memory rdat;
                     (success, rdat) = who.staticcall(cald);
-                    dat = bytesToBytes32(rdat, 32 * field_depth);
+                    fdat = bytesToBytes32(rdat, 32 * field_depth);
                 }
 
-                if (success && dat == newVal) {
+                if (success && fdat == newVal) {
                     // we found which of the slots is the actual one
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
                     self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
