@@ -145,6 +145,15 @@ contract StdStorageTest is Test {
         assertEq(uint256(keccak256(abi.encode(address(this), uint256(1)))), slot);
     }
 
+    function test_StorageMapAddrRoot() public {
+        (uint256 slot, bytes32 key) =
+            stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).parent();
+        assertEq(address(uint160(uint256(key))), address(this));
+        assertEq(uint256(1), slot);
+        slot = stdstore.target(address(test)).sig(test.map_addr.selector).with_key(address(this)).root();
+        assertEq(uint256(1), slot);
+    }
+
     function test_StorageMapUintFound() public {
         uint256 slot = stdstore.target(address(test)).sig(test.map_uint.selector).with_key(100).find();
         assertEq(uint256(keccak256(abi.encode(100, uint256(2)))), slot);

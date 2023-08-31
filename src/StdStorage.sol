@@ -168,6 +168,41 @@ library stdStorageSafe {
         return abi.decode(read(self), (int256));
     }
 
+    function parent(StdStorage storage self) internal returns (uint256, bytes32) {
+        address who = self._target;
+        uint256 field_depth = self._depth;
+        vm.startMappingRecording();
+        uint256 child = find(self) - field_depth;
+        (bool found, bytes32 key, bytes32 parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
+        if (!found) {
+            revert(
+                "stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called."
+            );
+        }
+        return (uint256(parent_slot), key);
+    }
+
+    function root(StdStorage storage self) internal returns (uint256) {
+        address who = self._target;
+        uint256 field_depth = self._depth;
+        vm.startMappingRecording();
+        uint256 child = find(self) - field_depth;
+        bool found;
+        bytes32 root_slot;
+        bytes32 parent_slot;
+        (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
+        if (!found) {
+            revert(
+                "stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called."
+            );
+        }
+        while (found) {
+            root_slot = parent_slot;
+            (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(root_slot));
+        }
+        return uint256(root_slot);
+    }
+
     function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
         bytes32 out;
 
@@ -302,6 +337,14 @@ library stdStorage {
 
     function read_int(StdStorage storage self) internal returns (int256) {
         return stdStorageSafe.read_int(self);
+    }
+
+    function parent(StdStorage storage self) internal returns (uint256, bytes32) {
+        return stdStorageSafe.parent(self);
+    }
+
+    function root(StdStorage storage self) internal returns (uint256) {
+        return stdStorageSafe.root(self);
     }
 
     // Private function so needs to be copied over
