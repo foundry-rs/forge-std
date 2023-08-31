@@ -21,6 +21,10 @@ contract StdStorageTest is Test {
         assertEq(uint256(0), stdstore.target(address(test)).sig("exists()").find());
     }
 
+    function test_StorageExtraSload() public {
+        assertEq(16, stdstore.target(address(test)).sig(test.extra_sload.selector).find());
+    }
+
     function test_StorageCheckedWriteHidden() public {
         stdstore.target(address(test)).sig(test.hidden.selector).checked_write(100);
         assertEq(uint256(test.hidden()), 100);
@@ -271,6 +275,7 @@ contract StorageTest {
     address public tF = address(1337);
     int256 public tG = type(int256).min;
     bool public tH = true;
+    bytes32 private tI = ~bytes32(hex"1337");
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});
@@ -298,5 +303,13 @@ contract StorageTest {
 
     function const() public pure returns (bytes32 t) {
         t = bytes32(hex"1337");
+    }
+
+    function extra_sload() public view returns (bytes32 t) {
+        // trigger read on slot `tE`, and make a staticcall to make sure compiler doesn't optimize this SLOAD away
+        assembly {
+            pop(staticcall(gas(), sload(tE.slot), 0, 0, 0, 0))
+        }
+        t = tI;
     }
 }
