@@ -89,6 +89,10 @@ library stdJson {
         return vm.parseJsonBytesArray(json, key);
     }
 
+    function serialize(string memory jsonKey, string memory rootObject) internal returns (string memory) {
+        return vm.serializeJson(jsonKey, rootObject);
+    }
+
     function serialize(string memory jsonKey, string memory key, bool value) internal returns (string memory) {
         return vm.serializeBool(jsonKey, key, value);
     }
