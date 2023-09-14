@@ -73,6 +73,8 @@ interface VmSafe {
 
     // Loads a storage slot from an address
     function load(address target, bytes32 slot) external view returns (bytes32 data);
+    // Cools off a warm address and it's storage slots
+    function cool(address target) external;
     // Signs data
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
     // Gets the address for a given private key
