@@ -55,7 +55,7 @@ interface VmSafe {
     }
 
     struct FfiResult {
-        int32 exit_code;
+        int32 exitCode;
         bytes stdout;
         bytes stderr;
     }
