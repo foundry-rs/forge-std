@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
+import {Test} from "../src/Test.sol";
 import {Vm, VmSafe} from "../src/Vm.sol";
 
 contract VmTest is Test {
