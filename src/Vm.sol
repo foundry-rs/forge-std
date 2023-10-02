@@ -414,7 +414,7 @@ interface VmSafe {
     // Suspends execution of the main thread for `duration` milliseconds
     function sleep(uint256 duration) external;
     // Returns the time since unix epoch in milliseconds
-    function unixTime() external returns (uint milliseconds);
+    function unixTime() external returns (uint256 milliseconds);
 }
 
 interface Vm is VmSafe {
