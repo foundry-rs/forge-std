@@ -165,6 +165,9 @@ interface VmSafe {
     // Get the path of the current project root.
     function projectRoot() external view returns (string memory path);
 
+    // Returns the time since unix epoch in milliseconds
+    function unixTime() external returns (uint256 milliseconds);
+
     // -------- Reading and writing --------
 
     // Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
@@ -238,18 +241,13 @@ interface VmSafe {
     // `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
 
-    // -------- Running executables --------
+    // -------- Foreign Function Interface --------
 
     // Performs a foreign function call via the terminal
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
 
     // Performs a foreign function call via terminal and returns the exit code, stdout, and stderr
     function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
-
-    // -------- System information --------
-
-    // Returns the time since unix epoch in milliseconds
-    function unixTime() external returns (uint256 milliseconds);
 
     // ======== Environment Variables ========
 
