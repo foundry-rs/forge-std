@@ -146,7 +146,7 @@ interface VmSafe {
     // Suspends execution of the main thread for `duration` milliseconds
     function sleep(uint256 duration) external;
 
-    // ======== Filesystem ========
+    // ======== OS and Filesystem ========
 
     // -------- Metadata --------
 
@@ -164,6 +164,9 @@ interface VmSafe {
 
     // Get the path of the current project root.
     function projectRoot() external view returns (string memory path);
+
+    // Returns the time since unix epoch in milliseconds
+    function unixTime() external returns (uint256 milliseconds);
 
     // -------- Reading and writing --------
 
@@ -237,6 +240,14 @@ interface VmSafe {
     // Writes line to file, creating a file if it does not exist.
     // `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+
+    // -------- Foreign Function Interface --------
+
+    // Performs a foreign function call via the terminal
+    function ffi(string[] calldata commandInput) external returns (bytes memory result);
+
+    // Performs a foreign function call via terminal and returns the exit code, stdout, and stderr
+    function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
 
     // ======== Environment Variables ========
 
@@ -316,14 +327,6 @@ interface VmSafe {
 
     // Signs data, (Wallet, digest) => (v, r, s)
     function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
-
-    // ======== External Interactions ========
-
-    // Performs a foreign function call via the terminal
-    function ffi(string[] calldata commandInput) external returns (bytes memory result);
-
-    // Performs a foreign function call via terminal and returns the exit code, stdout, and stderr
-    function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
 
     // ======== Scripts ========
 
