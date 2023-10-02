@@ -413,6 +413,8 @@ interface VmSafe {
     function breakpoint(string calldata char, bool value) external;
     // Suspends execution of the main thread for `duration` milliseconds
     function sleep(uint256 duration) external;
+    // Returns the time since unix epoch in milliseconds
+    function unixTime() external returns (uint milliseconds);
 }
 
 interface Vm is VmSafe {
