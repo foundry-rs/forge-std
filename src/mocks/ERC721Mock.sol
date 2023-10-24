@@ -105,7 +105,7 @@ contract ERC721Mock {
         transferFrom(from, to, id);
 
         require(
-            !isContract(to)
+            !_isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, "")
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -116,7 +116,7 @@ contract ERC721Mock {
         transferFrom(from, to, id);
 
         require(
-            !isContract(to)
+            !_isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, data)
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -173,7 +173,7 @@ contract ERC721Mock {
         _mint(to, id);
 
         require(
-            !isContract(to)
+            !_isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, "")
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -184,7 +184,7 @@ contract ERC721Mock {
         _mint(to, id);
 
         require(
-            !isContract(to)
+            !_isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, data)
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -195,7 +195,7 @@ contract ERC721Mock {
                                 HELPERS
     //////////////////////////////////////////////////////////////*/
 
-    function isContract(address _addr) internal view returns (bool) {
+    function _isContract(address _addr) private view returns (bool) {
         uint256 codeLength;
 
         // Assembly required for versions < 0.8.0 to check extcodesize.
