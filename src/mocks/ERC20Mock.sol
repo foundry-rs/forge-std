@@ -20,7 +20,7 @@ contract ERC20Mock {
 
     string public symbol;
 
-    uint8 public immutable decimals;
+    uint8 public decimals;
 
     /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
@@ -36,9 +36,9 @@ contract ERC20Mock {
                             EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    uint256 internal immutable INITIAL_CHAIN_ID;
+    uint256 internal INITIAL_CHAIN_ID;
 
-    bytes32 internal immutable INITIAL_DOMAIN_SEPARATOR;
+    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
     mapping(address => uint256) public nonces;
 
@@ -46,12 +46,12 @@ contract ERC20Mock {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimals) public {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
 
-        INITIAL_CHAIN_ID = block.chainid;
+        INITIAL_CHAIN_ID = _pureChainId();
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
     }
 
@@ -79,7 +79,7 @@ contract ERC20Mock {
     function transferFrom(address from, address to, uint256 amount) public virtual returns (bool) {
         uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
 
-        if (allowed != type(uint256).max) allowance[from][msg.sender] = _sub(allowed, amount);
+        if (allowed != ~uint256(0)) allowance[from][msg.sender] = _sub(allowed, amount);
 
         balanceOf[from] = _sub(balanceOf[from], amount);
         balanceOf[to] = _add(balanceOf[to], amount);
@@ -131,7 +131,7 @@ contract ERC20Mock {
     }
 
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
-        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
+        return _pureChainId() == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
     }
 
     function computeDomainSeparator() internal view virtual returns (bytes32) {
@@ -140,7 +140,7 @@ contract ERC20Mock {
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(name)),
                 keccak256("1"),
-                block.chainid,
+                _pureChainId(),
                 address(this)
             )
         );
@@ -177,5 +177,31 @@ contract ERC20Mock {
     function _sub(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b <= a, "ERC20: subtraction underflow");
         return a - b;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                HELPERS
+    //////////////////////////////////////////////////////////////*/
+
+    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
+    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
+    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
+    // Checker changed `chainid` from pure to view in 0.8.0.
+    function _viewChainId() private view returns (uint256 chainId) {
+        // Assembly required since `block.chainid` was introduced in 0.8.0.
+        assembly {
+            chainId := chainid()
+        }
+
+        address(this); // Silence warnings in older Solc versions.
+    }
+
+    function _pureChainId() private pure returns (uint256 chainId) {
+        function() internal view returns (uint256) fnIn = _viewChainId;
+        function() internal pure returns (uint256) pureChainId;
+        assembly {
+            pureChainId := fnIn
+        }
+        chainId = pureChainId();
     }
 }

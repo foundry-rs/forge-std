@@ -54,7 +54,7 @@ contract ERC721Mock {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(string memory _name, string memory _symbol) {
+    constructor(string memory _name, string memory _symbol) public {
         name = _name;
         symbol = _symbol;
     }
@@ -105,18 +105,18 @@ contract ERC721Mock {
         transferFrom(from, to, id);
 
         require(
-            to.code.length == 0
+            !isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, "")
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public virtual {
+    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
         transferFrom(from, to, id);
 
         require(
-            to.code.length == 0
+            !isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, data)
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -127,7 +127,7 @@ contract ERC721Mock {
                               ERC165 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public pure virtual returns (bool) {
         return interfaceId == 0x01ffc9a7 // ERC165 Interface ID for ERC165
             || interfaceId == 0x80ac58cd // ERC165 Interface ID for ERC721
             || interfaceId == 0x5b5e139f; // ERC165 Interface ID for ERC721Metadata
@@ -173,7 +173,7 @@ contract ERC721Mock {
         _mint(to, id);
 
         require(
-            to.code.length == 0
+            !isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, "")
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
@@ -184,11 +184,26 @@ contract ERC721Mock {
         _mint(to, id);
 
         require(
-            to.code.length == 0
+            !isContract(to)
                 || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, data)
                     == ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                HELPERS
+    //////////////////////////////////////////////////////////////*/
+
+    function isContract(address _addr) internal view returns (bool) {
+        uint256 codeLength;
+
+        // Assembly required for versions < 0.8.0 to check extcodesize.
+        assembly {
+            codeLength := extcodesize(_addr)
+        }
+
+        return codeLength > 0;
     }
 }
 
