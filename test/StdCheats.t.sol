@@ -102,7 +102,7 @@ contract StdCheatsTest is Test {
         assertEq(address(this).balance, 1 ether);
     }
 
-    function tes_tDealToken() public {
+    function test_DealToken() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
         deal(bar, address(this), 10000e18);
