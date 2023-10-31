@@ -159,10 +159,10 @@ abstract contract StdChains {
                 } else {
                     chain.rpcUrl = vm.envString(envName);
                 }
-                // distinguish 'not found' from 'cannot read'
+                // Distinguish 'not found' from 'cannot read'
+                // The upstream error thrown by forge for failing cheats changed so we check both the old and new versions
                 bytes memory oldNotFoundError =
                     abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
-                // TODO: use `abi.encodeWithSelector(Vm.CheatcodeError)` on next Vm update
                 bytes memory newNotFoundError = abi.encodeWithSignature(
                     "CheatcodeError(string)", string(abi.encodePacked("invalid rpc url: ", chainAlias))
                 );
