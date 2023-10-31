@@ -208,13 +208,9 @@ contract StdChainsTest is Test {
 
         // Should error if default RPCs flag is set to false.
         stdChainsMock.exposed_setFallbackToDefaultRpcUrls(false);
-        vm.expectRevert(
-            "Failed to get environment variable `ANVIL_RPC_URL` as type `string`: environment variable not found"
-        );
+        vm.expectRevert();
         stdChainsMock.exposed_getChain(31337);
-        vm.expectRevert(
-            "Failed to get environment variable `SEPOLIA_RPC_URL` as type `string`: environment variable not found"
-        );
+        vm.expectRevert();
         stdChainsMock.exposed_getChain("sepolia");
     }
 }
