@@ -540,6 +540,9 @@ interface Vm is VmSafe {
     // Sets an address' code
     function etch(address target, bytes calldata newRuntimeBytecode) external;
 
+    // Load a genesis JSON file's `allocs` into the in-memory state.
+    function loadAllocs(string calldata pathToAllocsJson) external;
+
     // Resets the nonce of an account to 0 for EOAs and 1 for contract accounts
     function resetNonce(address account) external;
 
@@ -551,9 +554,6 @@ interface Vm is VmSafe {
 
     // Stores a value to an address' storage slot.
     function store(address target, bytes32 slot, bytes32 value) external;
-
-    // Load a genesis JSON file's `allocs` into the in-memory state.
-    function loadAllocs(string calldata pathToAllocsJson) external;
 
     // -------- Call Manipulation --------
     // --- Mocks ---
