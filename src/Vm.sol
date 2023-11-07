@@ -552,6 +552,9 @@ interface Vm is VmSafe {
     // Stores a value to an address' storage slot.
     function store(address target, bytes32 slot, bytes32 value) external;
 
+    // Load a genesis JSON file's `allocs` into the in-memory state.
+    function loadAllocs(string calldata pathToAllocsJson) external;
+
     // -------- Call Manipulation --------
     // --- Mocks ---
 
