@@ -147,7 +147,9 @@ interface VmSafe {
     function breakpoint(string calldata char, bool value) external;
 
     /// Gets all the logs according to specified filter.
-    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr, bytes32[] memory topics) external returns (EthGetLogs[] memory logs);
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr, bytes32[] calldata topics)
+        external
+        returns (EthGetLogs[] memory logs);
 
     // Performs an Ethereum JSON-RPC request to the current fork URL.
     function rpc(string calldata method, string calldata params) external returns (bytes memory data);
