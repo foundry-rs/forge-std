@@ -33,6 +33,18 @@ interface VmSafe {
         string url;
     }
 
+    struct EthGetLogs {
+        address emitter;
+        bytes32[] topics;
+        bytes data;
+        bytes32 blockHash;
+        uint64 blockNumber;
+        bytes32 transactionHash;
+        uint64 transactionIndex;
+        uint256 logIndex;
+        bool removed;
+    }
+
     struct DirEntry {
         string errorMessage;
         string path;
@@ -133,6 +145,12 @@ interface VmSafe {
 
     // Writes a conditional breakpoint to jump to in the debugger
     function breakpoint(string calldata char, bool value) external;
+
+    /// Gets all the logs according to specified filter.
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr, bytes32[] memory topics) external returns (EthGetLogs[] memory logs);
+
+    // Performs an Ethereum JSON-RPC request to the current fork URL.
+    function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata rpcAlias) external view returns (string memory json);
