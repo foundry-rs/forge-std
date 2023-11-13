@@ -33,6 +33,18 @@ interface VmSafe {
         string url;
     }
 
+    struct EthGetLogs {
+        address emitter;
+        bytes32[] topics;
+        bytes data;
+        bytes32 blockHash;
+        uint64 blockNumber;
+        bytes32 transactionHash;
+        uint64 transactionIndex;
+        uint256 logIndex;
+        bool removed;
+    }
+
     struct DirEntry {
         string errorMessage;
         string path;
@@ -122,6 +134,16 @@ interface VmSafe {
 
     // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
+
+    // -------- RPC Methods --------
+
+    /// Gets all the logs according to specified filter.
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
+        external
+        returns (EthGetLogs[] memory logs);
+
+    // Performs an Ethereum JSON-RPC request to the current fork URL.
+    function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
     // ======== Test Configuration ========
 
