@@ -135,6 +135,16 @@ interface VmSafe {
     // Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
 
+    // -------- RPC Methods --------
+
+    /// Gets all the logs according to specified filter.
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
+        external
+        returns (EthGetLogs[] memory logs);
+
+    // Performs an Ethereum JSON-RPC request to the current fork URL.
+    function rpc(string calldata method, string calldata params) external returns (bytes memory data);
+
     // ======== Test Configuration ========
 
     // If the condition is false, discard this run's fuzz inputs and generate new ones.
@@ -145,14 +155,6 @@ interface VmSafe {
 
     // Writes a conditional breakpoint to jump to in the debugger
     function breakpoint(string calldata char, bool value) external;
-
-    /// Gets all the logs according to specified filter.
-    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
-        external
-        returns (EthGetLogs[] memory logs);
-
-    // Performs an Ethereum JSON-RPC request to the current fork URL.
-    function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
     // Returns the RPC url for the given alias
     function rpcUrl(string calldata rpcAlias) external view returns (string memory json);
