@@ -4,6 +4,8 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
+import {ERC20Mock} from "./mocks/ERC20Mock.sol";
+import {ERC721Mock} from "./mocks/ERC721Mock.sol";
 import {VmSafe} from "./Vm.sol";
 
 abstract contract StdUtils {
@@ -131,6 +133,21 @@ abstract contract StdUtils {
     /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal pure returns (address) {
         return computeCreate2Address(salt, initCodeHash, CREATE2_FACTORY);
+    }
+
+    /// @dev returns a initilized mock ERC20 contract
+    function deployERC20Mock(string memory name, string memory symbol, uint8 decimals)
+        internal
+        returns (ERC20Mock mock)
+    {
+        mock = new ERC20Mock();
+        mock.initialize(name, symbol, decimals);
+    }
+
+    /// @dev returns a initilized mock ERC721 contract
+    function deployERC721Mock(string memory name, string memory symbol) internal returns (ERC721Mock mock) {
+        mock = new ERC721Mock();
+        mock.initialize(name, symbol);
     }
 
     /// @dev returns the hash of the init code (creation code + no args) used in CREATE2 with no constructor arguments

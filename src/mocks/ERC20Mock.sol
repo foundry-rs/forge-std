@@ -43,16 +43,25 @@ contract ERC20Mock {
     mapping(address => uint256) public nonces;
 
     /*//////////////////////////////////////////////////////////////
-                               CONSTRUCTOR
+                               INITIALIZE
     //////////////////////////////////////////////////////////////*/
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals) public {
+    /// @dev A bool to track whether the contract has been initialized.
+    bool private initialized;
+
+    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
+    /// syntaxes, we add a initialization function that can be called only once.
+    function initialize(string memory _name, string memory _symbol, uint8 _decimals) public {
+        require(!initialized, "ALREADY_INITIALIZED");
+
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
 
         INITIAL_CHAIN_ID = _pureChainId();
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+
+        initialized = true;
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -51,12 +51,21 @@ contract ERC721Mock {
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     /*//////////////////////////////////////////////////////////////
-                               CONSTRUCTOR
+                               INITIALIZE
     //////////////////////////////////////////////////////////////*/
 
-    constructor(string memory _name, string memory _symbol) public {
+    /// @dev A bool to track whether the contract has been initialized.
+    bool private initialized;
+
+    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
+    /// syntaxes, we add a initialization function that can be called only once.
+    function initialize(string memory _name, string memory _symbol) public {
+        require(!initialized, "ALREADY_INITIALIZED");
+
         name = _name;
         symbol = _symbol;
+
+        initialized = true;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -207,8 +216,6 @@ contract ERC721Mock {
     }
 }
 
-abstract contract ERC721TokenReceiver {
-    function onERC721Received(address, address, uint256, bytes calldata) external virtual returns (bytes4) {
-        return ERC721TokenReceiver.onERC721Received.selector;
-    }
+interface ERC721TokenReceiver {
+    function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4);
 }
