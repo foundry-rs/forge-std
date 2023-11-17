@@ -22,6 +22,16 @@ interface VmSafe {
         RecurrentPrank
     }
 
+    enum AccountAccessKind {
+        Call,
+        DelegateCall,
+        CallCode,
+        StaticCall,
+        Create,
+        SelfDestruct,
+        Resume
+    }
+
     struct Log {
         bytes32[] topics;
         bytes data;
@@ -76,6 +86,35 @@ interface VmSafe {
         bytes stderr;
     }
 
+    struct ChainInfo {
+        uint256 forkId;
+        uint256 chainId;
+    }
+
+    struct AccountAccess {
+        ChainInfo chainInfo;
+        AccountAccessKind kind;
+        address account;
+        address accessor;
+        bool initialized;
+        uint256 oldBalance;
+        uint256 newBalance;
+        bytes deployedCode;
+        uint256 value;
+        bytes data;
+        bool reverted;
+        StorageAccess[] storageAccesses;
+    }
+
+    struct StorageAccess {
+        address account;
+        bytes32 slot;
+        bool isWrite;
+        bytes32 previousValue;
+        bytes32 newValue;
+        bool reverted;
+    }
+
     // ======== EVM  ========
 
     // Gets the address for a given private key
@@ -97,6 +136,13 @@ interface VmSafe {
 
     // Gets all accessed reads and write slot from a `vm.record` session, for a given address
     function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
+
+    // Record all account accesses as part of CREATE, CALL or SELFDESTRUCT opcodes in order,
+    // along with the context of the calls.
+    function startStateDiffRecording() external;
+
+    // Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
+    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accountAccesses);
 
     // -------- Recording Map Writes --------
 
