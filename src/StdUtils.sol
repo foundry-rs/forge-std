@@ -57,7 +57,7 @@ abstract contract StdUtils {
 
     function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
         result = _bound(x, min, max);
-        console2_log("Bound Result", result);
+        console2_log_StdUtils("Bound Result", result);
     }
 
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
@@ -82,7 +82,7 @@ abstract contract StdUtils {
 
     function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
         result = _bound(x, min, max);
-        console2_log("Bound result", vm.toString(result));
+        console2_log_StdUtils("Bound result", vm.toString(result));
     }
 
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
@@ -97,7 +97,7 @@ abstract contract StdUtils {
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
     /// @notice adapted from Solmate implementation (https://github.com/Rari-Capital/solmate/blob/main/src/utils/LibRLP.sol)
     function computeCreateAddress(address deployer, uint256 nonce) internal view virtual returns (address) {
-        console2_log("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
+        console2_log_StdUtils("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
         return vm.computeCreateAddress(deployer, nonce);
     }
 
@@ -107,13 +107,13 @@ abstract contract StdUtils {
         virtual
         returns (address)
     {
-        console2_log("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
         return vm.computeCreate2Address(salt, initcodeHash, deployer);
     }
 
     /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal view returns (address) {
-        console2_log("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
         return vm.computeCreate2Address(salt, initCodeHash);
     }
 
@@ -170,17 +170,17 @@ abstract contract StdUtils {
 
     // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
 
-    function console2_log(string memory p0) private view {
+    function console2_log_StdUtils(string memory p0) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
         status;
     }
     
-    function console2_log(string memory p0, uint256 p1) private view {
+    function console2_log_StdUtils(string memory p0, uint256 p1) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
         status;
     }
 
-    function console2_log(string memory p0, string memory p1) private view {
+    function console2_log_StdUtils(string memory p0, string memory p1) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,string)", p0, p1));
         status;
     }

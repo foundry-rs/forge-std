@@ -697,7 +697,7 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     function changePrank(address msgSender) internal virtual {
-        console2_log("changePrank is deprecated. Please use vm.startPrank instead.");
+        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
         vm.stopPrank();
         vm.startPrank(msgSender);
     }
@@ -810,7 +810,7 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
-    function console2_log(string memory p0) private view {
+    function console2_log_StdCheats(string memory p0) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
         status;
     }
