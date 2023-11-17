@@ -3,7 +3,7 @@ pragma solidity >=0.6.2 <0.9.0;
 
 /// @notice This is a mock contract of the ERC20 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC20.sol
-contract ERC20Mock {
+contract MockERC20 {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -50,7 +50,7 @@ contract ERC20Mock {
     bool private initialized;
 
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
-    /// syntaxes, we add a initialization function that can be called only once.
+    /// syntaxes, we add an initialization function that can be called only once.
     function initialize(string memory _name, string memory _symbol, uint8 _decimals) public {
         require(!initialized, "ALREADY_INITIALIZED");
 
@@ -184,7 +184,7 @@ contract ERC20Mock {
     }
 
     function _sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "ERC20: subtraction underflow");
+        require(a >= b, "ERC20: subtraction underflow");
         return a - b;
     }
 

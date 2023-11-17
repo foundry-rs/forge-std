@@ -4,8 +4,8 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
-import {ERC20Mock} from "./mocks/ERC20Mock.sol";
-import {ERC721Mock} from "./mocks/ERC721Mock.sol";
+import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockERC721} from "./mocks/MockERC721.sol";
 import {VmSafe} from "./Vm.sol";
 
 abstract contract StdUtils {
@@ -135,18 +135,18 @@ abstract contract StdUtils {
         return computeCreate2Address(salt, initCodeHash, CREATE2_FACTORY);
     }
 
-    /// @dev returns a initilized mock ERC20 contract
-    function deployERC20Mock(string memory name, string memory symbol, uint8 decimals)
+    /// @dev returns an initilized mock ERC20 contract
+    function deployMockERC20(string memory name, string memory symbol, uint8 decimals)
         internal
-        returns (ERC20Mock mock)
+        returns (MockERC20 mock)
     {
-        mock = new ERC20Mock();
+        mock = new MockERC20();
         mock.initialize(name, symbol, decimals);
     }
 
-    /// @dev returns a initilized mock ERC721 contract
-    function deployERC721Mock(string memory name, string memory symbol) internal returns (ERC721Mock mock) {
-        mock = new ERC721Mock();
+    /// @dev returns an initilized mock ERC721 contract
+    function deployMockERC721(string memory name, string memory symbol) internal returns (MockERC721 mock) {
+        mock = new MockERC721();
         mock.initialize(name, symbol);
     }
 

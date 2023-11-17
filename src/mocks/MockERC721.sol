@@ -3,7 +3,7 @@ pragma solidity >=0.6.2 <0.9.0;
 
 /// @notice This is a mock contract of the ERC721 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC721.sol
-contract ERC721Mock {
+contract MockERC721 {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -58,7 +58,7 @@ contract ERC721Mock {
     bool private initialized;
 
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
-    /// syntaxes, we add a initialization function that can be called only once.
+    /// syntaxes, we add an initialization function that can be called only once.
     function initialize(string memory _name, string memory _symbol) public {
         require(!initialized, "ALREADY_INITIALIZED");
 
@@ -115,8 +115,8 @@ contract ERC721Mock {
 
         require(
             !_isContract(to)
-                || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, "")
-                    == ERC721TokenReceiver.onERC721Received.selector,
+                || IERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, "")
+                    == IERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
     }
@@ -126,8 +126,8 @@ contract ERC721Mock {
 
         require(
             !_isContract(to)
-                || ERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, data)
-                    == ERC721TokenReceiver.onERC721Received.selector,
+                || IERC721TokenReceiver(to).onERC721Received(msg.sender, from, id, data)
+                    == IERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
     }
@@ -183,8 +183,8 @@ contract ERC721Mock {
 
         require(
             !_isContract(to)
-                || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, "")
-                    == ERC721TokenReceiver.onERC721Received.selector,
+                || IERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, "")
+                    == IERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
     }
@@ -194,8 +194,8 @@ contract ERC721Mock {
 
         require(
             !_isContract(to)
-                || ERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, data)
-                    == ERC721TokenReceiver.onERC721Received.selector,
+                || IERC721TokenReceiver(to).onERC721Received(msg.sender, address(0), id, data)
+                    == IERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
     }
@@ -216,6 +216,6 @@ contract ERC721Mock {
     }
 }
 
-interface ERC721TokenReceiver {
+interface IERC721TokenReceiver {
     function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4);
 }
