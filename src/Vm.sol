@@ -142,7 +142,7 @@ interface VmSafe {
     function startStateDiffRecording() external;
 
     // Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
-    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accesses);
+    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accountAccesses);
 
     // -------- Recording Map Writes --------
 
