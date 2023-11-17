@@ -174,7 +174,7 @@ abstract contract StdUtils {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
         status;
     }
-    
+
     function console2_log_StdUtils(string memory p0, uint256 p1) private view {
         (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
         status;
