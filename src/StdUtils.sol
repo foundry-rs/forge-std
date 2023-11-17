@@ -96,14 +96,14 @@ abstract contract StdUtils {
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
     /// @notice adapted from Solmate implementation (https://github.com/Rari-Capital/solmate/blob/main/src/utils/LibRLP.sol)
-    function computeCreateAddress(address deployer, uint256 nonce) internal view virtual returns (address) {
+    function computeCreateAddress(address deployer, uint256 nonce) internal pure virtual returns (address) {
         console2_log_StdUtils("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
         return vm.computeCreateAddress(deployer, nonce);
     }
 
     function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer)
         internal
-        view
+        pure
         virtual
         returns (address)
     {
@@ -112,7 +112,7 @@ abstract contract StdUtils {
     }
 
     /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
-    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal view returns (address) {
+    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal pure returns (address) {
         console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
         return vm.computeCreate2Address(salt, initCodeHash);
     }
@@ -168,20 +168,42 @@ abstract contract StdUtils {
         return address(uint160(uint256(bytesValue)));
     }
 
-    // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
-
-    function console2_log_StdUtils(string memory p0) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
-        status;
+    // This section is used to prevent the compilation of console, which shortens the compilation time when console is
+    // not used elsewhere. We also trick the compiler into letting us make the console log methods as `pure` to avoid
+    // any breaking changes to function signatures.
+    function _castLogPayloadViewToPure(function(bytes memory) internal view fnIn)
+        internal
+        pure
+        returns (function(bytes memory) internal pure fnOut)
+    {
+        assembly {
+            fnOut := fnIn
+        }
     }
 
-    function console2_log_StdUtils(string memory p0, uint256 p1) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
-        status;
+    function _sendLogPayload(bytes memory payload) internal pure {
+        _castLogPayloadViewToPure(_sendLogPayloadView)(payload);
     }
 
-    function console2_log_StdUtils(string memory p0, string memory p1) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,string)", p0, p1));
-        status;
+    function _sendLogPayloadView(bytes memory payload) private view {
+        uint256 payloadLength = payload.length;
+        address consoleAddress = CONSOLE2_ADDRESS;
+        /// @solidity memory-safe-assembly
+        assembly {
+            let payloadStart := add(payload, 32)
+            let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
+        }
+    }
+
+    function console2_log_StdUtils(string memory p0) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string)", p0));
+    }
+
+    function console2_log_StdUtils(string memory p0, uint256 p1) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256)", p0, p1));
+    }
+
+    function console2_log_StdUtils(string memory p0, string memory p1) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string)", p0, p1));
     }
 }
