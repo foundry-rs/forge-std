@@ -55,7 +55,7 @@ abstract contract StdUtils {
         }
     }
 
-    function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
+    function bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         result = _bound(x, min, max);
         console2_log_StdUtils("Bound Result", result);
     }
@@ -80,7 +80,7 @@ abstract contract StdUtils {
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
     }
 
-    function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
+    function bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         result = _bound(x, min, max);
         console2_log_StdUtils("Bound result", vm.toString(result));
     }
