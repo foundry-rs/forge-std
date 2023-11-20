@@ -135,7 +135,7 @@ abstract contract StdUtils {
         return computeCreate2Address(salt, initCodeHash, CREATE2_FACTORY);
     }
 
-    /// @dev returns an initilized mock ERC20 contract
+    /// @dev returns an initialized mock ERC20 contract
     function deployMockERC20(string memory name, string memory symbol, uint8 decimals)
         internal
         returns (MockERC20 mock)
@@ -144,7 +144,7 @@ abstract contract StdUtils {
         mock.initialize(name, symbol, decimals);
     }
 
-    /// @dev returns an initilized mock ERC721 contract
+    /// @dev returns an initialized mock ERC721 contract
     function deployMockERC721(string memory name, string memory symbol) internal returns (MockERC721 mock) {
         mock = new MockERC721();
         mock.initialize(name, symbol);
