@@ -468,7 +468,8 @@ interface VmSafe {
         pure
         returns (address);
 
-    // Compute the address of a contract created with CREATE2 using the default CREATE2 deployer.
+    // Compute the address of a contract created with CREATE2 using foundry's default CREATE2
+    // deployer: 0x4e59b44847b379578588920cA78FbF26c0B4956C, https://github.com/Arachnid/deterministic-deployment-proxy
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) external pure returns (address);
 
     // ======== JSON Parsing and Manipulation ========
