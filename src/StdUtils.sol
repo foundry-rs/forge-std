@@ -55,9 +55,9 @@ abstract contract StdUtils {
         }
     }
 
-    function bound(uint256 x, uint256 min, uint256 max) internal view virtual returns (uint256 result) {
+    function bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         result = _bound(x, min, max);
-        console2_log("Bound Result", result);
+        console2_log_StdUtils("Bound Result", result);
     }
 
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
@@ -80,9 +80,9 @@ abstract contract StdUtils {
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
     }
 
-    function bound(int256 x, int256 min, int256 max) internal view virtual returns (int256 result) {
+    function bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         result = _bound(x, min, max);
-        console2_log("Bound result", vm.toString(result));
+        console2_log_StdUtils("Bound result", vm.toString(result));
     }
 
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
@@ -97,26 +97,8 @@ abstract contract StdUtils {
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
     /// @notice adapted from Solmate implementation (https://github.com/Rari-Capital/solmate/blob/main/src/utils/LibRLP.sol)
     function computeCreateAddress(address deployer, uint256 nonce) internal pure virtual returns (address) {
-        // forgefmt: disable-start
-        // The integer zero is treated as an empty byte string, and as a result it only has a length prefix, 0x80, computed via 0x80 + 0.
-        // A one byte integer uses its own value as its length prefix, there is no additional "0x80 + length" prefix that comes before it.
-        if (nonce == 0x00)      return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), deployer, bytes1(0x80))));
-        if (nonce <= 0x7f)      return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), deployer, uint8(nonce))));
-
-        // Nonces greater than 1 byte all follow a consistent encoding scheme, where each value is preceded by a prefix of 0x80 + length.
-        if (nonce <= 2**8 - 1)  return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xd7), bytes1(0x94), deployer, bytes1(0x81), uint8(nonce))));
-        if (nonce <= 2**16 - 1) return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xd8), bytes1(0x94), deployer, bytes1(0x82), uint16(nonce))));
-        if (nonce <= 2**24 - 1) return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xd9), bytes1(0x94), deployer, bytes1(0x83), uint24(nonce))));
-        // forgefmt: disable-end
-
-        // More details about RLP encoding can be found here: https://eth.wiki/fundamentals/rlp
-        // 0xda = 0xc0 (short RLP prefix) + 0x16 (length of: 0x94 ++ proxy ++ 0x84 ++ nonce)
-        // 0x94 = 0x80 + 0x14 (0x14 = the length of an address, 20 bytes, in hex)
-        // 0x84 = 0x80 + 0x04 (0x04 = the bytes length of the nonce, 4 bytes, in hex)
-        // We assume nobody can have a nonce large enough to require more than 32 bytes.
-        return addressFromLast20Bytes(
-            keccak256(abi.encodePacked(bytes1(0xda), bytes1(0x94), deployer, bytes1(0x84), uint32(nonce)))
-        );
+        console2_log_StdUtils("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
+        return vm.computeCreateAddress(deployer, nonce);
     }
 
     function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer)
@@ -125,12 +107,14 @@ abstract contract StdUtils {
         virtual
         returns (address)
     {
-        return addressFromLast20Bytes(keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initcodeHash)));
+        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+        return vm.computeCreate2Address(salt, initcodeHash, deployer);
     }
 
     /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal pure returns (address) {
-        return computeCreate2Address(salt, initCodeHash, CREATE2_FACTORY);
+        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+        return vm.computeCreate2Address(salt, initCodeHash);
     }
 
     /// @dev returns the hash of the init code (creation code + no args) used in CREATE2 with no constructor arguments
@@ -184,15 +168,42 @@ abstract contract StdUtils {
         return address(uint160(uint256(bytesValue)));
     }
 
-    // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
-
-    function console2_log(string memory p0, uint256 p1) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,uint256)", p0, p1));
-        status;
+    // This section is used to prevent the compilation of console, which shortens the compilation time when console is
+    // not used elsewhere. We also trick the compiler into letting us make the console log methods as `pure` to avoid
+    // any breaking changes to function signatures.
+    function _castLogPayloadViewToPure(function(bytes memory) internal view fnIn)
+        internal
+        pure
+        returns (function(bytes memory) internal pure fnOut)
+    {
+        assembly {
+            fnOut := fnIn
+        }
     }
 
-    function console2_log(string memory p0, string memory p1) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string,string)", p0, p1));
-        status;
+    function _sendLogPayload(bytes memory payload) internal pure {
+        _castLogPayloadViewToPure(_sendLogPayloadView)(payload);
+    }
+
+    function _sendLogPayloadView(bytes memory payload) private view {
+        uint256 payloadLength = payload.length;
+        address consoleAddress = CONSOLE2_ADDRESS;
+        /// @solidity memory-safe-assembly
+        assembly {
+            let payloadStart := add(payload, 32)
+            let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
+        }
+    }
+
+    function console2_log_StdUtils(string memory p0) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string)", p0));
+    }
+
+    function console2_log_StdUtils(string memory p0, uint256 p1) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string,uint256)", p0, p1));
+    }
+
+    function console2_log_StdUtils(string memory p0, string memory p1) private pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string,string)", p0, p1));
     }
 }

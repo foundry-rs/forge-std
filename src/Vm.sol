@@ -459,6 +459,19 @@ interface VmSafe {
     // Gets the deployed bytecode from an artifact file. Takes in the relative path to the json file
     function getDeployedCode(string calldata artifactPath) external view returns (bytes memory runtimeBytecode);
 
+    // Compute the address a contract will be deployed at for a given deployer address and nonce.
+    function computeCreateAddress(address deployer, uint256 nonce) external pure returns (address);
+
+    // Compute the address of a contract created with CREATE2 using the given CREATE2 deployer.
+    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash, address deployer)
+        external
+        pure
+        returns (address);
+
+    // Compute the address of a contract created with CREATE2 using foundry's default CREATE2
+    // deployer: 0x4e59b44847b379578588920cA78FbF26c0B4956C, https://github.com/Arachnid/deterministic-deployment-proxy
+    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) external pure returns (address);
+
     // ======== JSON Parsing and Manipulation ========
 
     // -------- Reading --------
