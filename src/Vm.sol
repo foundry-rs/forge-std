@@ -697,7 +697,7 @@ interface Vm is VmSafe {
     // Returns true if the snapshot existed, false otherwise.
     //
     // This does not revert to the state of the snapshot, only deletes it.
-    function deleteSnapshot(uint256 snapshotId) external returns (bool);
+    function deleteSnapshot(uint256 snapshotId) external returns (bool success);
 
     // Deletes all snapshots.
     function deleteSnapshots() external;
