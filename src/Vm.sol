@@ -29,7 +29,10 @@ interface VmSafe {
         StaticCall,
         Create,
         SelfDestruct,
-        Resume
+        Resume,
+        Extcodesize,
+        Extcodehash,
+        Extcodecopy
     }
 
     struct Log {
