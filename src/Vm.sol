@@ -30,6 +30,7 @@ interface VmSafe {
         Create,
         SelfDestruct,
         Resume,
+        Balance,
         Extcodesize,
         Extcodehash,
         Extcodecopy
