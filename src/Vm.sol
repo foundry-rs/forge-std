@@ -692,8 +692,25 @@ interface Vm is VmSafe {
 
     // Revert the state of the EVM to a previous snapshot
     // Takes the snapshot id to revert to.
-    // This deletes the snapshot and all snapshots taken after the given snapshot id.
+    // Returns true if the revert succeeded, false otherwise.
+    //
+    // This does not automatically delete the snapshot. To delete the snapshot use `deleteSnapshot` or `revertToAndDelete`
     function revertTo(uint256 snapshotId) external returns (bool success);
+
+    // Deletes the snapshot.
+    // Returns true if the snapshot existed, false otherwise.
+    //
+    // This does not revert to the state of the snapshot, only deletes it.
+    function deleteSnapshot(uint256 snapshotId) external returns (bool success);
+
+    // Deletes all snapshots.
+    function deleteSnapshots() external;
+
+    // Revert the state of the EVM to a previous snapshot
+    // Takes the snapshot id to revert to.
+    //
+    // This also deletes the snapshot after reverting to its state.
+    function revertToAndDelete(uint256 snapshotId) external returns (bool success);
 
     // -------- Forking --------
     // --- Creation and Selection ---
