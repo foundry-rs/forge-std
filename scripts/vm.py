@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import subprocess
 from enum import Enum as PyEnum
 from typing import Callable
@@ -72,10 +73,21 @@ def main():
     pp.p_contract(vm_unsafe, "Vm", "VmSafe")
     out += pp.finish()
 
+    # Compatibility with <0.8.0
+    def memory_to_calldata(m: re.Match) -> str:
+        return " calldata " + m.group(1)
+
+    out = re.sub(r" memory (.*returns)", memory_to_calldata, out)
+    out = out.replace("address addr", "address addr_")
+    out = out.replace(
+        "AccountAccess[] memory accesses", "AccountAccess[] memory accesses_"
+    )
+
     with open(OUT_PATH, "w") as f:
         f.write(out)
 
-    subprocess.run(["forge", "fmt", OUT_PATH])
+    res = subprocess.run(["forge", "fmt", OUT_PATH])
+    assert res.returncode == 0
 
     print(f"Wrote to {OUT_PATH}")
 
@@ -499,7 +511,7 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_error(error))
 
     def p_error(self, error: Error):
-        self._p_doc(error.description)
+        self._p_comment(error.description, doc=True)
         self._p_line(lambda: self._p_str(error.declaration))
 
     def p_events(self, events: list[Event]):
@@ -507,7 +519,7 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_event(event))
 
     def p_event(self, event: Event):
-        self._p_doc(event.description)
+        self._p_comment(event.description, doc=True)
         self._p_line(lambda: self._p_str(event.declaration))
 
     def p_enums(self, enums: list[Enum]):
@@ -515,7 +527,7 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_enum(enum))
 
     def p_enum(self, enum: Enum):
-        self._p_doc(enum.description)
+        self._p_comment(enum.description, doc=True)
         self._p_line(lambda: self._p_str(f"enum {enum.name} {{"))
         self._with_indent(lambda: self.p_enum_variants(enum.variants))
         self._p_line(lambda: self._p_str("}"))
@@ -523,7 +535,7 @@ class CheatcodesPrinter:
     def p_enum_variants(self, variants: list[EnumVariant]):
         for i, variant in enumerate(variants):
             self._p_indent()
-            self._p_doc(variant.description)
+            self._p_comment(variant.description)
 
             self._p_indent()
             self._p_str(variant.name)
@@ -536,7 +548,7 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_struct(struct))
 
     def p_struct(self, struct: Struct):
-        self._p_doc(struct.description)
+        self._p_comment(struct.description, doc=True)
         self._p_line(lambda: self._p_str(f"struct {struct.name} {{"))
         self._with_indent(lambda: self.p_struct_fields(struct.fields))
         self._p_line(lambda: self._p_str("}"))
@@ -546,7 +558,7 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_struct_field(field))
 
     def p_struct_field(self, field: StructField):
-        self._p_doc(field.description)
+        self._p_comment(field.description)
         self._p_indented(lambda: self._p_str(f"{field.ty} {field.name};"))
 
     def p_functions(self, cheatcodes: list[Cheatcode]):
@@ -554,21 +566,25 @@ class CheatcodesPrinter:
             self._p_line(lambda: self.p_function(cheatcode.func))
 
     def p_function(self, func: Function):
-        self._p_doc(func.description)
+        self._p_comment(func.description, doc=True)
         self._p_line(lambda: self._p_str(func.declaration))
 
-    def _p_doc(self, doc: str):
-        doc = doc.strip()
-        if doc == "":
+    def _p_comment(self, s: str, doc: bool = False):
+        s = s.strip()
+        if s == "":
             return
 
-        doc = map(lambda line: line.lstrip(), doc.split("\n"))
+        s = map(lambda line: line.lstrip(), s.split("\n"))
         if self.block_doc_style:
-            self._p_str("/**")
+            self._p_str("/*")
+            if doc:
+                self._p_str("*")
             self._p_nl()
-            for line in doc:
+            for line in s:
                 self._p_indent()
-                self._p_str(" * ")
+                self._p_str(" ")
+                if doc:
+                    self._p_str("* ")
                 self._p_str(line)
                 self._p_nl()
             self._p_indent()
@@ -576,12 +592,15 @@ class CheatcodesPrinter:
             self._p_nl()
         else:
             first_line = True
-            for line in doc:
+            for line in s:
                 if not first_line:
                     self._p_indent()
                 first_line = False
 
-                self._p_str("/// ")
+                if doc:
+                    self._p_str("/// ")
+                else:
+                    self._p_str("// ")
                 self._p_str(line)
                 self._p_nl()
 

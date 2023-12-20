@@ -10,97 +10,97 @@ pragma experimental ABIEncoderV2;
 interface VmSafe {
     /// A modification applied to either `msg.sender` or `tx.origin`. Returned by `readCallers`.
     enum CallerMode
-    /// No caller modification is currently active.
+    // No caller modification is currently active.
     {
         None,
-        /// A one time broadcast triggered by a `vm.broadcast()` call is currently active.
+        // A one time broadcast triggered by a `vm.broadcast()` call is currently active.
         Broadcast,
-        /// A recurrent broadcast triggered by a `vm.startBroadcast()` call is currently active.
+        // A recurrent broadcast triggered by a `vm.startBroadcast()` call is currently active.
         RecurrentBroadcast,
-        /// A one time prank triggered by a `vm.prank()` call is currently active.
+        // A one time prank triggered by a `vm.prank()` call is currently active.
         Prank,
-        /// A recurrent prank triggered by a `vm.startPrank()` call is currently active.
+        // A recurrent prank triggered by a `vm.startPrank()` call is currently active.
         RecurrentPrank
     }
 
     /// The kind of account access that occurred.
     enum AccountAccessKind
-    /// The account was called.
+    // The account was called.
     {
         Call,
-        /// The account was called via delegatecall.
+        // The account was called via delegatecall.
         DelegateCall,
-        /// The account was called via callcode.
+        // The account was called via callcode.
         CallCode,
-        /// The account was called via staticcall.
+        // The account was called via staticcall.
         StaticCall,
-        /// The account was created.
+        // The account was created.
         Create,
-        /// The account was selfdestructed.
+        // The account was selfdestructed.
         SelfDestruct,
-        /// Synthetic access indicating the current context has resumed after a previous sub-context (AccountAccess).
+        // Synthetic access indicating the current context has resumed after a previous sub-context (AccountAccess).
         Resume,
-        /// The account's balance was read.
+        // The account's balance was read.
         Balance,
-        /// The account's codesize was read.
+        // The account's codesize was read.
         Extcodesize,
-        /// The account's code was copied.
+        // The account's code was copied.
         Extcodecopy,
-        /// The account's codehash was read.
+        // The account's codehash was read.
         Extcodehash
     }
 
     /// An Ethereum log. Returned by `getRecordedLogs`.
     struct Log {
-        /// The topics of the log, including the signature, if any.
+        // The topics of the log, including the signature, if any.
         bytes32[] topics;
-        /// The raw data of the log.
+        // The raw data of the log.
         bytes data;
-        /// The address of the log's emitter.
+        // The address of the log's emitter.
         address emitter;
     }
 
     /// An RPC URL and its alias. Returned by `rpcUrlStructs`.
     struct Rpc {
-        /// The alias of the RPC URL.
+        // The alias of the RPC URL.
         string key;
-        /// The RPC URL.
+        // The RPC URL.
         string url;
     }
 
     /// An RPC log object. Returned by `eth_getLogs`.
     struct EthGetLogs {
-        /// The address of the log's emitter.
+        // The address of the log's emitter.
         address emitter;
-        /// The topics of the log, including the signature, if any.
+        // The topics of the log, including the signature, if any.
         bytes32[] topics;
-        /// The raw data of the log.
+        // The raw data of the log.
         bytes data;
-        /// The block hash.
+        // The block hash.
         bytes32 blockHash;
-        /// The block number.
+        // The block number.
         uint64 blockNumber;
-        /// The transaction hash.
+        // The transaction hash.
         bytes32 transactionHash;
-        /// The transaction index in the block.
+        // The transaction index in the block.
         uint64 transactionIndex;
-        /// The log index.
+        // The log index.
         uint256 logIndex;
-        /// Whether the log was removed.
+        // Whether the log was removed.
         bool removed;
     }
 
     /// A single entry in a directory listing. Returned by `readDir`.
     struct DirEntry {
-        /// The error message, if any.
+        // The error message, if any.
         string errorMessage;
-        /// The path of the entry.
+        // The path of the entry.
         string path;
-        /// The depth of the entry.
+        // The depth of the entry.
         uint64 depth;
-        /// Whether the entry is a directory.
+        // Whether the entry is a directory.
         bool isDir;
-        /// Whether the entry is a symlink.
+        // Whether the entry is a symlink.
         bool isSymlink;
     }
 
@@ -109,101 +109,101 @@ interface VmSafe {
     /// metadata about a file such as its permissions, size, modification
     /// times, etc.
     struct FsMetadata {
-        /// True if this metadata is for a directory.
+        // True if this metadata is for a directory.
         bool isDir;
-        /// True if this metadata is for a symlink.
+        // True if this metadata is for a symlink.
         bool isSymlink;
-        /// The size of the file, in bytes, this metadata is for.
+        // The size of the file, in bytes, this metadata is for.
         uint256 length;
-        /// True if this metadata is for a readonly (unwritable) file.
+        // True if this metadata is for a readonly (unwritable) file.
         bool readOnly;
-        /// The last modification time listed in this metadata.
+        // The last modification time listed in this metadata.
         uint256 modified;
-        /// The last access time of this metadata.
+        // The last access time of this metadata.
         uint256 accessed;
-        /// The creation time listed in this metadata.
+        // The creation time listed in this metadata.
         uint256 created;
     }
 
     /// A wallet with a public and private key.
     struct Wallet {
-        /// The wallet's address.
-        address addr;
-        /// The wallet's public key `X`.
+        // The wallet's address.
+        address addr_;
+        // The wallet's public key `X`.
         uint256 publicKeyX;
-        /// The wallet's public key `Y`.
+        // The wallet's public key `Y`.
         uint256 publicKeyY;
-        /// The wallet's private key.
+        // The wallet's private key.
         uint256 privateKey;
     }
 
     /// The result of a `tryFfi` call.
     struct FfiResult {
-        /// The exit code of the call.
+        // The exit code of the call.
         int32 exitCode;
-        /// The optionally hex-decoded `stdout` data.
+        // The optionally hex-decoded `stdout` data.
         bytes stdout;
-        /// The `stderr` data.
+        // The `stderr` data.
         bytes stderr;
     }
 
     /// Information on the chain and fork.
     struct ChainInfo {
-        /// The fork identifier. Set to zero if no fork is active.
+        // The fork identifier. Set to zero if no fork is active.
         uint256 forkId;
-        /// The chain ID of the current fork.
+        // The chain ID of the current fork.
         uint256 chainId;
     }
 
     /// The result of a `stopAndReturnStateDiff` call.
     struct AccountAccess {
-        /// The chain and fork the access occurred.
+        // The chain and fork the access occurred.
         ChainInfo chainInfo;
-        /// The kind of account access that determines what the account is.
-        /// If kind is Call, DelegateCall, StaticCall or CallCode, then the account is the callee.
-        /// If kind is Create, then the account is the newly created account.
-        /// If kind is SelfDestruct, then the account is the selfdestruct recipient.
-        /// If kind is a Resume, then account represents a account context that has resumed.
+        // The kind of account access that determines what the account is.
+        // If kind is Call, DelegateCall, StaticCall or CallCode, then the account is the callee.
+        // If kind is Create, then the account is the newly created account.
+        // If kind is SelfDestruct, then the account is the selfdestruct recipient.
+        // If kind is a Resume, then account represents a account context that has resumed.
         AccountAccessKind kind;
-        /// The account that was accessed.
-        /// It's either the account created, callee or a selfdestruct recipient for CREATE, CALL or SELFDESTRUCT.
+        // The account that was accessed.
+        // It's either the account created, callee or a selfdestruct recipient for CREATE, CALL or SELFDESTRUCT.
         address account;
-        /// What accessed the account.
+        // What accessed the account.
         address accessor;
-        /// If the account was initialized or empty prior to the access.
-        /// An account is considered initialized if it has code, a
-        /// non-zero nonce, or a non-zero balance.
+        // If the account was initialized or empty prior to the access.
+        // An account is considered initialized if it has code, a
+        // non-zero nonce, or a non-zero balance.
         bool initialized;
-        /// The previous balance of the accessed account.
+        // The previous balance of the accessed account.
         uint256 oldBalance;
-        /// The potential new balance of the accessed account.
-        /// That is, all balance changes are recorded here, even if reverts occurred.
+        // The potential new balance of the accessed account.
+        // That is, all balance changes are recorded here, even if reverts occurred.
         uint256 newBalance;
-        /// Code of the account deployed by CREATE.
+        // Code of the account deployed by CREATE.
         bytes deployedCode;
-        /// Value passed along with the account access
+        // Value passed along with the account access
         uint256 value;
-        /// Input data provided to the CREATE or CALL
+        // Input data provided to the CREATE or CALL
         bytes data;
-        /// If this access reverted in either the current or parent context.
+        // If this access reverted in either the current or parent context.
         bool reverted;
-        /// An ordered list of storage accesses made during an account access operation.
+        // An ordered list of storage accesses made during an account access operation.
         StorageAccess[] storageAccesses;
     }
 
     /// The storage accessed during an `AccountAccess`.
     struct StorageAccess {
-        /// The account whose storage was accessed.
+        // The account whose storage was accessed.
         address account;
-        /// The slot that was accessed.
+        // The slot that was accessed.
         bytes32 slot;
-        /// If the access was a write.
+        // If the access was a write.
         bool isWrite;
-        /// The previous value of the slot.
+        // The previous value of the slot.
         bytes32 previousValue;
-        /// The new value of the slot.
+        // The new value of the slot.
         bytes32 newValue;
-        /// If the access was reverted.
+        // If the access was reverted.
         bool reverted;
     }
 
@@ -357,7 +357,7 @@ interface VmSafe {
     function addr(uint256 privateKey) external pure returns (address keyAddr);
 
     /// Gets all the logs according to specified filter.
-    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr, bytes32[] memory topics)
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr_, bytes32[] calldata topics)
         external
         returns (EthGetLogs[] memory logs);
 
@@ -408,7 +408,7 @@ interface VmSafe {
     function startStateDiffRecording() external;
 
     /// Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
-    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accesses);
+    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accesses_);
 
     /// Stops recording all map SSTOREs for later retrieval and clears the recorded data.
     function stopMappingRecording() external;
