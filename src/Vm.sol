@@ -42,10 +42,10 @@ interface VmSafe {
         Balance,
         // The account's codesize was read.
         Extcodesize,
-        // The account's code was copied.
-        Extcodecopy,
         // The account's codehash was read.
-        Extcodehash
+        Extcodehash,
+        // The account's code was copied.
+        Extcodecopy
     }
 
     /// An Ethereum log. Returned by `getRecordedLogs`.
@@ -838,9 +838,6 @@ interface Vm is VmSafe {
 
     /// Sets `block.coinbase`.
     function coinbase(address newCoinbase) external;
-
-    /// Marks the slots of an account and the account address as cold.
-    function cool(address target) external;
 
     /// Creates a new fork with the given endpoint and the _latest_ block and returns the identifier of the fork.
     function createFork(string calldata urlOrAlias) external returns (uint256 forkId);
