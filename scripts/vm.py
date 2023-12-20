@@ -35,10 +35,10 @@ def main():
 
     safe = list(filter(lambda cc: cc.safety == Safety.SAFE, ccs))
     safe.sort(key=CmpCheatcode)
-    prefix_with_group_comment(safe)
+    prefix_with_group_headers(safe)
     unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, ccs))
     unsafe.sort(key=CmpCheatcode)
-    prefix_with_group_comment(unsafe)
+    prefix_with_group_headers(unsafe)
 
     out = ""
 
@@ -87,8 +87,9 @@ def main():
     with open(OUT_PATH, "w") as f:
         f.write(out)
 
-    res = subprocess.run(["forge", "fmt", OUT_PATH])
-    assert res.returncode == 0
+    forge_fmt = ["forge", "fmt", OUT_PATH]
+    res = subprocess.run(forge_fmt)
+    assert res.returncode == 0, f"command failed: {forge_fmt}"
 
     print(f"Wrote to {OUT_PATH}")
 
@@ -122,7 +123,7 @@ def cmp_cheatcode(a: "Cheatcode", b: "Cheatcode") -> int:
 
 
 # HACK: A way to add group header comments without having to modify printer code
-def prefix_with_group_comment(cheats: list["Cheatcode"]):
+def prefix_with_group_headers(cheats: list["Cheatcode"]):
     s = set()
     for i, cheat in enumerate(cheats):
         if cheat.group in s:
