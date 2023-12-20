@@ -27,13 +27,16 @@ VM_DOC = """\
 def main():
     json_str = request.urlopen(CHEATCODES_JSON_URL).read().decode("utf-8")
     contract = Cheatcodes.from_json(json_str)
-    contract.cheatcodes.sort(key=lambda cc: cc.func.id)
 
-    safe = list(filter(lambda cc: cc.safety == Safety.SAFE, contract.cheatcodes))
+    ccs = contract.cheatcodes
+    ccs = list(filter(lambda cc: cc.status != Status.EXPERIMENTAL, ccs))
+    ccs.sort(key=lambda cc: cc.func.id)
+
+    safe = list(filter(lambda cc: cc.safety == Safety.SAFE, ccs))
     safe.sort(key=CmpCheatcode)
-    unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, contract.cheatcodes))
+    unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, ccs))
     unsafe.sort(key=CmpCheatcode)
-    assert len(safe) + len(unsafe) == len(contract.cheatcodes)
+    assert len(safe) + len(unsafe) == len(ccs)
 
     out = ""
 

@@ -9,9 +9,8 @@ pragma experimental ABIEncoderV2;
 /// these cheats in scripts.
 interface VmSafe {
     /// A modification applied to either `msg.sender` or `tx.origin`. Returned by `readCallers`.
-    enum CallerMode
-    // No caller modification is currently active.
-    {
+    enum CallerMode {
+        // No caller modification is currently active.
         None,
         // A one time broadcast triggered by a `vm.broadcast()` call is currently active.
         Broadcast,
@@ -24,9 +23,8 @@ interface VmSafe {
     }
 
     /// The kind of account access that occurred.
-    enum AccountAccessKind
-    // The account was called.
-    {
+    enum AccountAccessKind {
+        // The account was called.
         Call,
         // The account was called via delegatecall.
         DelegateCall,
