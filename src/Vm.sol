@@ -205,6 +205,8 @@ interface VmSafe {
         bool reverted;
     }
 
+    // ======== Environment ========
+
     /// Gets the environment variable `name` and parses it as `address`.
     /// Reverts if the variable was not found or could not be parsed.
     function envAddress(string calldata name) external view returns (address value);
@@ -348,6 +350,8 @@ interface VmSafe {
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
+    // ======== EVM ========
+
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
     function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
 
@@ -410,6 +414,8 @@ interface VmSafe {
 
     /// Stops recording all map SSTOREs for later retrieval and clears the recorded data.
     function stopMappingRecording() external;
+
+    // ======== Filesystem ========
 
     /// Closes file for reading, resetting the offset and allowing to read it from beginning with readLine.
     /// `path` is relative to the project root.
@@ -515,6 +521,8 @@ interface VmSafe {
     /// Writes line to file, creating a file if it does not exist.
     /// `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+
+    // ======== JSON ========
 
     /// Checks if `key` exists in a JSON object.
     function keyExists(string calldata json, string calldata key) external view returns (bool);
@@ -657,6 +665,8 @@ interface VmSafe {
     /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
     function writeJson(string calldata json, string calldata path, string calldata valueKey) external;
 
+    // ======== Scripting ========
+
     /// Using the address that calls the test contract, has the next call (at this call depth only)
     /// create a transaction that can later be signed and sent onchain.
     function broadcast() external;
@@ -683,6 +693,8 @@ interface VmSafe {
 
     /// Stops collecting onchain transactions.
     function stopBroadcast() external;
+
+    // ======== String ========
 
     /// Parses the given `string` into an `address`.
     function parseAddress(string calldata stringifiedValue) external pure returns (address parsedValue);
@@ -720,6 +732,8 @@ interface VmSafe {
     /// Converts the given value to a `string`.
     function toString(int256 value) external pure returns (string memory stringifiedValue);
 
+    // ======== Testing ========
+
     /// If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool condition) external pure;
 
@@ -740,6 +754,8 @@ interface VmSafe {
 
     /// Suspends execution of the main thread for `duration` milliseconds.
     function sleep(uint256 duration) external;
+
+    // ======== Utilities ========
 
     /// Compute the address of a contract created with CREATE2 using the given CREATE2 deployer.
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash, address deployer)
@@ -806,6 +822,8 @@ interface VmSafe {
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
 /// in tests, but it is not recommended to use these cheats in scripts.
 interface Vm is VmSafe {
+    // ======== EVM ========
+
     /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
     function activeFork() external view returns (uint256 forkId);
 
@@ -993,6 +1011,8 @@ interface Vm is VmSafe {
 
     /// Sets `block.timestamp`.
     function warp(uint256 newTimestamp) external;
+
+    // ======== Testing ========
 
     /// Expect a call to an address with the specified `msg.value` and calldata, and a *minimum* amount of gas.
     function expectCallMinGas(address callee, uint256 msgValue, uint64 minGas, bytes calldata data) external;

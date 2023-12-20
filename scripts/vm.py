@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import copy
 import json
 import re
 import subprocess
@@ -34,9 +35,10 @@ def main():
 
     safe = list(filter(lambda cc: cc.safety == Safety.SAFE, ccs))
     safe.sort(key=CmpCheatcode)
+    prefix_with_group_comment(safe)
     unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, ccs))
     unsafe.sort(key=CmpCheatcode)
-    assert len(safe) + len(unsafe) == len(ccs)
+    prefix_with_group_comment(unsafe)
 
     out = ""
 
@@ -119,6 +121,22 @@ def cmp_cheatcode(a: "Cheatcode", b: "Cheatcode") -> int:
     return 0
 
 
+# HACK: A way to add group header comments without having to modify printer code
+def prefix_with_group_comment(cheats: list["Cheatcode"]):
+    s = set()
+    for i, cheat in enumerate(cheats):
+        if cheat.group in s:
+            continue
+
+        s.add(cheat.group)
+
+        c = copy.deepcopy(cheat)
+        c.func.description = ""
+        c.func.declaration = f"// ======== {c.group} ========"
+        cheats.insert(i, c)
+    return cheats
+
+
 class Status(PyEnum):
     STABLE: str = "stable"
     EXPERIMENTAL: str = "experimental"
@@ -138,6 +156,13 @@ class Group(PyEnum):
     STRING: str = "string"
     JSON: str = "json"
     UTILITIES: str = "utilities"
+
+    def __str__(self):
+        if self == Group.EVM:
+            return "EVM"
+        if self == Group.JSON:
+            return "JSON"
+        return self.value[0].upper() + self.value[1:]
 
     def __lt__(self, other: "Group") -> bool:
         return self.value < other.value
