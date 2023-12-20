@@ -128,7 +128,7 @@ interface VmSafe {
     /// A wallet with a public and private key.
     struct Wallet {
         // The wallet's address.
-        address addr_;
+        address addr;
         // The wallet's public key `X`.
         uint256 publicKeyX;
         // The wallet's public key `Y`.
