@@ -357,7 +357,7 @@ interface VmSafe {
     function addr(uint256 privateKey) external pure returns (address keyAddr);
 
     /// Gets all the logs according to specified filter.
-    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address addr_, bytes32[] calldata topics)
+    function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
         returns (EthGetLogs[] memory logs);
 
@@ -408,7 +408,7 @@ interface VmSafe {
     function startStateDiffRecording() external;
 
     /// Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
-    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accesses_);
+    function stopAndReturnStateDiff() external returns (AccountAccess[] memory accountAccesses);
 
     /// Stops recording all map SSTOREs for later retrieval and clears the recorded data.
     function stopMappingRecording() external;

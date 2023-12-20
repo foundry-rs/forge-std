@@ -78,10 +78,6 @@ def main():
         return " calldata " + m.group(1)
 
     out = re.sub(r" memory (.*returns)", memory_to_calldata, out)
-    out = out.replace("address addr,", "address addr_,")
-    out = out.replace(
-        "AccountAccess[] memory accesses)", "AccountAccess[] memory accesses_)"
-    )
 
     with open(OUT_PATH, "w") as f:
         f.write(out)
