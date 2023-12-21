@@ -35,9 +35,11 @@ def main():
 
     safe = list(filter(lambda cc: cc.safety == Safety.SAFE, ccs))
     safe.sort(key=CmpCheatcode)
-    prefix_with_group_headers(safe)
     unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, ccs))
     unsafe.sort(key=CmpCheatcode)
+    assert len(safe) + len(unsafe) == len(ccs)
+
+    prefix_with_group_headers(safe)
     prefix_with_group_headers(unsafe)
 
     out = ""
