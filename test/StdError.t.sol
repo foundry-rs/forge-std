@@ -63,7 +63,9 @@ contract StdErrorsTest is Test {
 }
 
 contract ErrorsTest {
-    enum T {T1}
+    enum T {
+        T1
+    }
 
     uint256[] public someArr;
     bytes someBytes;
