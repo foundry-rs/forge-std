@@ -1,0 +1,20 @@
+name: "Multibuild"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 0" # at 3:00am UTC every Sunday
+
+jobs:
+  multibuild:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out the repo"
+        uses: "actions/checkout@v3"
+
+      - name: "Check that forge-std can be built with multiple Solidity versions"
+        uses: "PaulRBerg/foundry-multibuild@v1"
+        with:
+          min: "0.6.2"
+          max: "0.8.23"
+          skip-test: "true"
