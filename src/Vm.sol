@@ -250,18 +250,19 @@ interface VmSafe {
     /// Gets the environment variable `name` and parses it as `bool`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, bool defaultValue) external returns (bool value);
+    function envOr(string calldata name, bool defaultValue) external view returns (bool value);
 
     /// Gets the environment variable `name` and parses it as `uint256`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, uint256 defaultValue) external returns (uint256 value);
+    function envOr(string calldata name, uint256 defaultValue) external view returns (uint256 value);
 
     /// Gets the environment variable `name` and parses it as an array of `address`, delimited by `delim`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, address[] calldata defaultValue)
         external
+        view
         returns (address[] memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `bytes32`, delimited by `delim`.
@@ -269,6 +270,7 @@ interface VmSafe {
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, bytes32[] calldata defaultValue)
         external
+        view
         returns (bytes32[] memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `string`, delimited by `delim`.
@@ -276,6 +278,7 @@ interface VmSafe {
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, string[] calldata defaultValue)
         external
+        view
         returns (string[] memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `bytes`, delimited by `delim`.
@@ -283,38 +286,40 @@ interface VmSafe {
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, bytes[] calldata defaultValue)
         external
+        view
         returns (bytes[] memory value);
 
     /// Gets the environment variable `name` and parses it as `int256`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, int256 defaultValue) external returns (int256 value);
+    function envOr(string calldata name, int256 defaultValue) external view returns (int256 value);
 
     /// Gets the environment variable `name` and parses it as `address`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, address defaultValue) external returns (address value);
+    function envOr(string calldata name, address defaultValue) external view returns (address value);
 
     /// Gets the environment variable `name` and parses it as `bytes32`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, bytes32 defaultValue) external returns (bytes32 value);
+    function envOr(string calldata name, bytes32 defaultValue) external view returns (bytes32 value);
 
     /// Gets the environment variable `name` and parses it as `string`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, string calldata defaultValue) external returns (string memory value);
+    function envOr(string calldata name, string calldata defaultValue) external view returns (string memory value);
 
     /// Gets the environment variable `name` and parses it as `bytes`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
-    function envOr(string calldata name, bytes calldata defaultValue) external returns (bytes memory value);
+    function envOr(string calldata name, bytes calldata defaultValue) external view returns (bytes memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `bool`, delimited by `delim`.
     /// Reverts if the variable could not be parsed.
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, bool[] calldata defaultValue)
         external
+        view
         returns (bool[] memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `uint256`, delimited by `delim`.
@@ -322,6 +327,7 @@ interface VmSafe {
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, uint256[] calldata defaultValue)
         external
+        view
         returns (uint256[] memory value);
 
     /// Gets the environment variable `name` and parses it as an array of `int256`, delimited by `delim`.
@@ -329,6 +335,7 @@ interface VmSafe {
     /// Returns `defaultValue` if the variable was not found.
     function envOr(string calldata name, string calldata delim, int256[] calldata defaultValue)
         external
+        view
         returns (int256[] memory value);
 
     /// Gets the environment variable `name` and parses it as `string`.
@@ -816,7 +823,7 @@ interface VmSafe {
         returns (uint256 privateKey);
 
     /// Gets the label for the specified address.
-    function getLabel(address account) external returns (string memory currentLabel);
+    function getLabel(address account) external view returns (string memory currentLabel);
 
     /// Get a `Wallet`'s nonce.
     function getNonce(Wallet calldata wallet) external returns (uint64 nonce);

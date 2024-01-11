@@ -12,11 +12,11 @@ contract StdUtilsMock is StdUtils {
         return getTokenBalances(token, addresses);
     }
 
-    function exposed_bound(int256 num, int256 min, int256 max) external view returns (int256) {
+    function exposed_bound(int256 num, int256 min, int256 max) external pure returns (int256) {
         return bound(num, min, max);
     }
 
-    function exposed_bound(uint256 num, uint256 min, uint256 max) external view returns (uint256) {
+    function exposed_bound(uint256 num, uint256 min, uint256 max) external pure returns (uint256) {
         return bound(num, min, max);
     }
 
