@@ -418,8 +418,11 @@ interface VmSafe {
     /// Performs an Ethereum JSON-RPC request to the current fork URL.
     function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
-    /// Signs data.
+    /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with `privateKey` using the secp256r1 curve.
+    function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
 
     /// Starts recording all map SSTOREs for later retrieval.
     function startMappingRecording() external;
