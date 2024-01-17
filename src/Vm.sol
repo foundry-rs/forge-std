@@ -205,14 +205,6 @@ interface VmSafe {
         bool reverted;
     }
 
-    // ======== Base64 ========
-
-    /// Encodes a `bytes` value to base64 string
-    function toBase64(bytes calldata data) external pure returns (string memory);
-
-    /// Encodes a `bytes` value to base64url string
-    function toBase64URL(bytes calldata data) external pure returns (string memory);
-
     // ======== Environment ========
 
     /// Gets the environment variable `name` and parses it as `address`.
@@ -847,6 +839,18 @@ interface VmSafe {
 
     /// Signs data with a `Wallet`.
     function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Encodes a `bytes` value to a base64url string.
+    function toBase64URL(bytes calldata data) external pure returns (string memory);
+
+    /// Encodes a `string` value to a base64url string.
+    function toBase64URL(string calldata data) external pure returns (string memory);
+
+    /// Encodes a `bytes` value to a base64 string.
+    function toBase64(bytes calldata data) external pure returns (string memory);
+
+    /// Encodes a `string` value to a base64 string.
+    function toBase64(string calldata data) external pure returns (string memory);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
