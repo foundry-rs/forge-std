@@ -208,7 +208,7 @@ abstract contract StdCheatsSafe {
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
     function assumeNotBlacklisted(address token, address addr) internal virtual {
         // `USDT` blacklists `address(0)` and `address(1)` for unknown reasons.
-        assumeAddressIsNot(addr, AddressType.ZeroAddress, AddressType.Precompile, AddressType.ForgeAddress);
+        assumeAddressIsNot(addr, AddressType.ZeroAddress, AddressType.Precompile);
 
         // Nothing to check if `token` is not a contract.
         uint256 tokenCodeSize;
