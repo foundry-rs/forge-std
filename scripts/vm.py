@@ -30,12 +30,12 @@ def main():
     contract = Cheatcodes.from_json(json_str)
 
     ccs = contract.cheatcodes
-    ccs = list(filter(lambda cc: cc.status != Status.EXPERIMENTAL, ccs))
+    ccs = list(filter(lambda cc: cc.status != "experimental", ccs))
     ccs.sort(key=lambda cc: cc.func.id)
 
-    safe = list(filter(lambda cc: cc.safety == Safety.SAFE, ccs))
+    safe = list(filter(lambda cc: cc.safety == "safe", ccs))
     safe.sort(key=CmpCheatcode)
-    unsafe = list(filter(lambda cc: cc.safety == Safety.UNSAFE, ccs))
+    unsafe = list(filter(lambda cc: cc.safety == "unsafe", ccs))
     unsafe.sort(key=CmpCheatcode)
     assert len(safe) + len(unsafe) == len(ccs)
 
@@ -135,48 +135,17 @@ def prefix_with_group_headers(cheats: list["Cheatcode"]):
 
         c = copy.deepcopy(cheat)
         c.func.description = ""
-        c.func.declaration = f"// ======== {c.group} ========"
+        c.func.declaration = f"// ======== {group(c.group)} ========"
         cheats.insert(i, c)
     return cheats
 
 
-class Status(PyEnum):
-    STABLE: str = "stable"
-    EXPERIMENTAL: str = "experimental"
-    DEPRECATED: str = "deprecated"
-    REMOVED: str = "removed"
-
-    def __lt__(self, other: "Group") -> bool:
-        return self.value < other.value
-
-
-class Group(PyEnum):
-    EVM: str = "evm"
-    TESTING: str = "testing"
-    SCRIPTING: str = "scripting"
-    FILESYSTEM: str = "filesystem"
-    ENVIRONMENT: str = "environment"
-    STRING: str = "string"
-    JSON: str = "json"
-    UTILITIES: str = "utilities"
-
-    def __str__(self):
-        if self == Group.EVM:
-            return "EVM"
-        if self == Group.JSON:
-            return "JSON"
-        return self.value[0].upper() + self.value[1:]
-
-    def __lt__(self, other: "Group") -> bool:
-        return self.value < other.value
-
-
-class Safety(PyEnum):
-    UNSAFE: str = "unsafe"
-    SAFE: str = "safe"
-
-    def __lt__(self, other: "Group") -> bool:
-        return self.value < other.value
+def group(s: str) -> str:
+    if s == "evm":
+        return "EVM"
+    if s == "json":
+        return "JSON"
+    return s[0].upper() + s[1:]
 
 
 class Visibility(PyEnum):
@@ -244,11 +213,11 @@ class Function:
 
 class Cheatcode:
     func: Function
-    group: Group
-    status: Status
-    safety: Safety
+    group: str
+    status: str
+    safety: str
 
-    def __init__(self, func: Function, group: Group, status: Status, safety: Safety):
+    def __init__(self, func: Function, group: str, status: str, safety: str):
         self.func = func
         self.group = group
         self.status = status
@@ -258,9 +227,9 @@ class Cheatcode:
     def from_dict(d: dict) -> "Cheatcode":
         return Cheatcode(
             Function.from_dict(d["func"]),
-            Group(d["group"]),
-            Status(d["status"]),
-            Safety(d["safety"]),
+            str(d["group"]),
+            str(d["status"]),
+            str(d["safety"]),
         )
 
 
