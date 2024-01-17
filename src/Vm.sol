@@ -906,6 +906,9 @@ interface Vm is VmSafe {
     /// Reverts if used on unsupported EVM versions.
     function difficulty(uint256 newDifficulty) external;
 
+    /// Dump a genesis JSON file's `allocs` to disk.
+    function dumpState(string calldata pathToStateJson) external;
+
     /// Sets an address' code.
     function etch(address target, bytes calldata newRuntimeBytecode) external;
 
