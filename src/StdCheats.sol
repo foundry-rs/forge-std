@@ -206,7 +206,10 @@ abstract contract StdCheatsSafe {
     }
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
-    function assumeNotBlacklisted(address token, address addr) internal view virtual {
+    function assumeNotBlacklisted(address token, address addr) internal virtual {
+        // `USDT` blacklists `address(0)` and `address(1)` for unknown reasons.
+        assumeAddressIsNot(addr, AddressType.ZeroAddress, AddressType.Precompile, AddressType.ForgeAddress);
+
         // Nothing to check if `token` is not a contract.
         uint256 tokenCodeSize;
         assembly {
@@ -230,7 +233,7 @@ abstract contract StdCheatsSafe {
     // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
     // backwards compatibility, since this name was used in the original PR which has already has
     // a release. This function can be removed in a future release once we want a breaking change.
-    function assumeNoBlacklisted(address token, address addr) internal view virtual {
+    function assumeNoBlacklisted(address token, address addr) internal virtual {
         assumeNotBlacklisted(token, addr);
     }
 
