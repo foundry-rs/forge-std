@@ -30,7 +30,7 @@ def main():
     contract = Cheatcodes.from_json(json_str)
 
     ccs = contract.cheatcodes
-    ccs = list(filter(lambda cc: cc.status != "experimental", ccs))
+    ccs = list(filter(lambda cc: cc.status not in ["experimental", "internal"], ccs))
     ccs.sort(key=lambda cc: cc.func.id)
 
     safe = list(filter(lambda cc: cc.safety == "safe", ccs))
