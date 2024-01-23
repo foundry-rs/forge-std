@@ -418,7 +418,10 @@ interface VmSafe {
     /// Performs an Ethereum JSON-RPC request to the current fork URL.
     function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
-    /// Signs data.
+    /// Signs `digest` with `privateKey` using the secp256r1 curve.
+    function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
+
+    /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Starts recording all map SSTOREs for later retrieval.
@@ -836,6 +839,18 @@ interface VmSafe {
 
     /// Signs data with a `Wallet`.
     function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Encodes a `bytes` value to a base64url string.
+    function toBase64URL(bytes calldata data) external pure returns (string memory);
+
+    /// Encodes a `string` value to a base64url string.
+    function toBase64URL(string calldata data) external pure returns (string memory);
+
+    /// Encodes a `bytes` value to a base64 string.
+    function toBase64(bytes calldata data) external pure returns (string memory);
+
+    /// Encodes a `string` value to a base64 string.
+    function toBase64(string calldata data) external pure returns (string memory);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
@@ -894,6 +909,9 @@ interface Vm is VmSafe {
     /// Not available on EVM versions from Paris onwards. Use `prevrandao` instead.
     /// Reverts if used on unsupported EVM versions.
     function difficulty(uint256 newDifficulty) external;
+
+    /// Dump a genesis JSON file's `allocs` to disk.
+    function dumpState(string calldata pathToStateJson) external;
 
     /// Sets an address' code.
     function etch(address target, bytes calldata newRuntimeBytecode) external;
