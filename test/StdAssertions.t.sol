@@ -56,14 +56,14 @@ contract StdAssertionsTest is StdAssertions {
         return string.concat(intPart, ".", decimalPart);
     }
 
-    function _formatWithDecimals(uint256 value, uint256 decimals) internal returns (string memory) {
+    function _formatWithDecimals(uint256 value, uint256 decimals) internal pure returns (string memory) {
         string memory intPart = vm.toString(value / (10 ** decimals));
         string memory decimalPart = vm.toString(value % (10 ** decimals));
 
         return _prefixDecWithZeroes(intPart, decimalPart, decimals);
     }
 
-    function _formatWithDecimals(int256 value, uint256 decimals) internal returns (string memory) {
+    function _formatWithDecimals(int256 value, uint256 decimals) internal pure returns (string memory) {
         string memory intPart = vm.toString(value / int256(10 ** decimals));
         int256 mod = value % int256(10 ** decimals);
         string memory decimalPart = vm.toString(mod > 0 ? mod : -mod);
@@ -904,8 +904,7 @@ contract StdAssertionsTest is StdAssertions {
         bytes memory callDataB,
         bytes memory returnDataA,
         bytes memory returnDataB,
-        bool strictRevertData,
-        bool shouldARevert
+        bool strictRevertData
     ) external {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_REVERT));
