@@ -305,9 +305,6 @@ contract StdCheatsTest is Test {
         addInLoopNoGasNoGas();
         uint256 gas_used_double = gas_start_double - gasleft();
 
-        emit log_named_uint("Normal gas", gas_used_normal);
-        emit log_named_uint("Single modifier gas", gas_used_single);
-        emit log_named_uint("Double modifier  gas", gas_used_double);
         assertTrue(gas_used_double + gas_used_single < gas_used_normal);
     }
 
