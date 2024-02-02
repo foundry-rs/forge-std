@@ -38,8 +38,8 @@ library stdStorageSafe {
         bytes32 fdat;
     }
 
-    /// @notice tries to find values of `offsetLeft` and `offsetRight` such 
-    /// that return value of the given call exactly matches value of 
+    /// @notice tries to find values of `offsetLeft` and `offsetRight` such
+    /// that return value of the given call exactly matches value of
     /// given_slot[offsetLeft:-offsetRight]
     function findOffset(StdStorage storage self, bytes32 slot, bytes memory cald)
         public
@@ -73,8 +73,8 @@ library stdStorageSafe {
                 uint256 new_val;
                 {
                     // `offsetLeft` zeroes + (256 - offsetRight - offsetLeft) ones + `offsetRight` zeroes
-                    uint256 mask = (type(uint256).max - ((1 << offsetRight) - 1))
-                        & ~((2 ** offsetLeft - 1) << (256 - offsetLeft));
+                    uint256 mask =
+                        (type(uint256).max - ((1 << offsetRight) - 1)) & ~((2 ** offsetLeft - 1) << (256 - offsetLeft));
 
                     if (((uint256(vars.prev) & mask) >> offsetRight) != uint256(vars.prevData)) {
                         continue;
