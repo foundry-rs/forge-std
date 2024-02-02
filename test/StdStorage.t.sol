@@ -178,13 +178,15 @@ contract StdStorageTest is Test {
         assertTrue(test.map_bool(address(this)));
     }
 
-    function testFail_StorageCheckedWriteMapPacked() public {
-        // expect PackedSlot error but not external call so cant expectRevert
-        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(address(uint160(1337)))
-            .checked_write(100);
+    function testFuzz_StorageCheckedWriteMapPacked(address addr, uint128 value) public {
+        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(addr).checked_write(value);
+        assertEq(test.read_struct_lower(addr), value);
+
+        stdstore.target(address(test)).sig(test.read_struct_upper.selector).with_key(addr).checked_write(value);
+        assertEq(test.read_struct_upper(addr), value);
     }
 
-    function test_StorageCheckedWriteMapPackedSuccess() public {
+    function test_StorageCheckedWriteMapPackedFullSuccess() public {
         uint256 full = test.map_packed(address(1337));
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
@@ -199,13 +201,16 @@ contract StdStorageTest is Test {
         stdstore.target(address(test)).sig("const()").find();
     }
 
-    function testFail_StorageNativePack() public {
-        stdstore.target(address(test)).sig(test.tA.selector).find();
-        stdstore.target(address(test)).sig(test.tB.selector).find();
+    function testFuzz_StorageNativePack(uint248 val1, uint248 val2, bool boolVal1, bool boolVal2) public {
+        stdstore.target(address(test)).sig(test.tA.selector).checked_write(val1);
+        stdstore.target(address(test)).sig(test.tB.selector).checked_write(boolVal1);
+        stdstore.target(address(test)).sig(test.tC.selector).checked_write(boolVal2);
+        stdstore.target(address(test)).sig(test.tD.selector).checked_write(val2);
 
-        // these both would fail
-        stdstore.target(address(test)).sig(test.tC.selector).find();
-        stdstore.target(address(test)).sig(test.tD.selector).find();
+        assertEq(test.tA(), val1);
+        assertEq(test.tB(), boolVal1);
+        assertEq(test.tC(), boolVal2);
+        assertEq(test.tD(), val2);
     }
 
     function test_StorageReadBytes32() public {

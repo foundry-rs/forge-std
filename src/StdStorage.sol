@@ -3,9 +3,15 @@ pragma solidity >=0.6.2 <0.9.0;
 
 import {Vm} from "./Vm.sol";
 
+struct FindData {
+    uint256 slot;
+    uint256 offsetLeft;
+    uint256 offsetRight;
+    bool found;
+}
+
 struct StdStorage {
-    mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
-    mapping(address => mapping(bytes4 => mapping(bytes32 => bool))) finds;
+    mapping(address => mapping(bytes4 => mapping(bytes32 => FindData))) finds;
     bytes32[] _keys;
     bytes4 _sig;
     uint256 _depth;
@@ -23,21 +29,88 @@ library stdStorageSafe {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
+    struct FindOffsetVars {
+        uint256[] offsetsToTry;
+        bytes32 prev;
+        bytes32 prevData;
+        bool success;
+        bytes rdat;
+        bytes32 fdat;
+    }
+
+    /// @notice tries to find values of `offsetLeft` and `offsetRight` such 
+    /// that return value of the given call exactly matches value of 
+    /// given_slot[offsetLeft:-offsetRight]
+    function findOffset(StdStorage storage self, bytes32 slot, bytes memory cald)
+        public
+        returns (bool, uint256, uint256)
+    {
+        FindOffsetVars memory vars;
+        // We don't want to iterate over all possible offsets, so we are only checking most common options
+        vars.offsetsToTry = new uint256[](10);
+        vars.offsetsToTry[0] = 0;
+        vars.offsetsToTry[1] = 1;
+        vars.offsetsToTry[2] = 8;
+        vars.offsetsToTry[3] = 64;
+        vars.offsetsToTry[4] = 96;
+        vars.offsetsToTry[5] = 128;
+        vars.offsetsToTry[6] = 160;
+        vars.offsetsToTry[7] = 192;
+        vars.offsetsToTry[8] = 248;
+        vars.offsetsToTry[9] = 255;
+
+        vars.prev = vm.load(self._target, slot);
+        (vars.success, vars.rdat) = self._target.staticcall(cald);
+        vars.prevData = bytesToBytes32(vars.rdat, 32 * self._depth);
+
+        for (uint256 i = 0; i < vars.offsetsToTry.length; i++) {
+            for (uint256 j = 0; j < vars.offsetsToTry.length; j++) {
+                uint256 offsetLeft = vars.offsetsToTry[i];
+                uint256 offsetRight = vars.offsetsToTry[j];
+                if ((offsetLeft + offsetRight) >= 256) {
+                    continue;
+                }
+                uint256 new_val;
+                {
+                    // `offsetLeft` zeroes + (256 - offsetRight - offsetLeft) ones + `offsetRight` zeroes
+                    uint256 mask = (type(uint256).max - ((1 << offsetRight) - 1))
+                        & ~((2 ** offsetLeft - 1) << (256 - offsetLeft));
+
+                    if (((uint256(vars.prev) & mask) >> offsetRight) != uint256(vars.prevData)) {
+                        continue;
+                    }
+
+                    vm.store(self._target, slot, bytes32(uint256(vars.prev) | mask));
+                    new_val = (type(uint256).max & mask) >> offsetRight;
+                }
+                (vars.success, vars.rdat) = self._target.staticcall(cald);
+                vars.fdat = bytesToBytes32(vars.rdat, 32 * self._depth);
+
+                vm.store(self._target, slot, vars.prev);
+
+                if (vars.success && vars.fdat == bytes32(new_val)) {
+                    return (true, offsetLeft, offsetRight);
+                }
+            }
+        }
+        return (false, 0, 0);
+    }
+
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
     // slot complexity:
     //  if flat, will be bytes32(uint256(uint));
     //  if map, will be keccak256(abi.encode(key, uint(slot)));
     //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
-    function find(StdStorage storage self) internal returns (uint256) {
+    function find(StdStorage storage self) internal returns (FindData storage) {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
         bytes32[] memory ins = self._keys;
 
         // calldata to test against
-        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
-            return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found) {
+            return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
         }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
         vm.record();
@@ -53,15 +126,16 @@ library stdStorageSafe {
             if (curr == bytes32(0)) {
                 emit WARNING_UninitedSlot(who, uint256(reads[0]));
             }
-            if (fdat != curr) {
+            (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffset(self, reads[0], cald);
+            if (!found) {
                 require(
                     false,
                     "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported."
                 );
             }
             emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
-            self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[0]);
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
+            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
+                FindData(uint256(reads[0]), offsetLeft, offsetRight, true);
         } else if (reads.length > 1) {
             for (uint256 i = 0; i < reads.length; i++) {
                 bytes32 prev = vm.load(who, reads[i]);
@@ -71,32 +145,22 @@ library stdStorageSafe {
                 if (prev != fdat) {
                     continue;
                 }
-                bytes32 new_val = ~prev;
-                // store
-                vm.store(who, reads[i], new_val);
-                bool success;
-                {
-                    bytes memory rdat;
-                    (success, rdat) = who.staticcall(cald);
-                    fdat = bytesToBytes32(rdat, 32 * field_depth);
-                }
-
-                if (success && fdat == new_val) {
-                    // we found which of the slots is the actual one
-                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
-                    self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = uint256(reads[i]);
-                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] = true;
-                    vm.store(who, reads[i], prev);
+                (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffset(self, reads[i], cald);
+                if (!found) {
+                    continue;
+                } else {
+                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
+                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
+                        FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
                     break;
                 }
-                vm.store(who, reads[i], prev);
             }
         } else {
             revert("stdStorage find(StdStorage): No storage use detected for target.");
         }
 
         require(
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))],
+            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found,
             "stdStorage find(StdStorage): Slot(s) not found."
         );
 
@@ -105,7 +169,7 @@ library stdStorageSafe {
         delete self._keys;
         delete self._depth;
 
-        return self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
 
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
@@ -145,7 +209,7 @@ library stdStorageSafe {
 
     function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
-        uint256 s = find(self);
+        uint256 s = find(self).slot;
         return abi.encode(vm.load(t, bytes32(s)));
     }
 
@@ -176,7 +240,7 @@ library stdStorageSafe {
         address who = self._target;
         uint256 field_depth = self._depth;
         vm.startMappingRecording();
-        uint256 child = find(self) - field_depth;
+        uint256 child = find(self).slot - field_depth;
         (bool found, bytes32 key, bytes32 parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
         if (!found) {
             revert(
@@ -190,7 +254,7 @@ library stdStorageSafe {
         address who = self._target;
         uint256 field_depth = self._depth;
         vm.startMappingRecording();
-        uint256 child = find(self) - field_depth;
+        uint256 child = find(self).slot - field_depth;
         bool found;
         bytes32 root_slot;
         bytes32 parent_slot;
@@ -239,7 +303,7 @@ library stdStorage {
     }
 
     function find(StdStorage storage self) internal returns (uint256) {
-        return stdStorageSafe.find(self);
+        return stdStorageSafe.find(self).slot;
     }
 
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
@@ -297,26 +361,30 @@ library stdStorage {
         uint256 field_depth = self._depth;
         bytes32[] memory ins = self._keys;
 
-        bytes memory cald = abi.encodePacked(fsig, flatten(ins));
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]) {
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found) {
             find(self);
         }
-        bytes32 slot = bytes32(self.slots[who][fsig][keccak256(abi.encodePacked(ins, field_depth))]);
-
-        bytes32 fdat;
-        {
-            (, bytes memory rdat) = who.staticcall(cald);
-            fdat = bytesToBytes32(rdat, 32 * field_depth);
-        }
-        bytes32 curr = vm.load(who, slot);
-
-        if (fdat != curr) {
+        FindData storage data = self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        if ((data.offsetLeft + data.offsetRight) > 0) {
+            uint256 maxVal = 2 ** (256 - (data.offsetLeft + data.offsetRight));
             require(
-                false,
-                "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported."
+                uint256(set) < maxVal,
+                string.concat(
+                    "stdStorage find(StdStorage): Packed slot. We can't fit value greater than ", vm.toString(maxVal)
+                )
             );
         }
-        vm.store(who, slot, set);
+        uint256 curVal = uint256(vm.load(who, bytes32(data.slot)));
+        // <value> followed by `offserRight` zeroes
+        uint256 mask = uint256(set) << data.offsetRight;
+        // `offsetLeft` ones + `256 - offsetLeft - offsetRight` zeroes + `offsetRight`
+        uint256 helperMask = ~(
+            (type(uint256).max - ((1 << data.offsetRight) - 1))
+                - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft))
+        );
+        uint256 valToSet = (curVal & helperMask) | mask;
+
+        vm.store(who, bytes32(data.slot), bytes32(valToSet));
         delete self._target;
         delete self._sig;
         delete self._keys;
