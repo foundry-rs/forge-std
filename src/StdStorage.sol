@@ -75,7 +75,7 @@ library stdStorageSafe {
         (bool foundLeft, uint256 offsetLeft) = findOffset(self, slot, cald, true);
         (bool foundRight, uint256 offsetRight) = findOffset(self, slot, cald, false);
 
-        // `findOffset` may mutate slot value, so we are setting in to initial value
+        // `findOffset` may mutate slot value, so we are setting it to initial value
         vm.store(self._target, slot, prevSlotValue);
         return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
@@ -352,9 +352,9 @@ library stdStorage {
             );
         }
         uint256 curVal = uint256(vm.load(who, bytes32(data.slot)));
-        // <value> followed by `offserRight` zeroes
+        // <value> followed by `offsetRight` zeroes
         uint256 mask = uint256(set) << data.offsetRight;
-        // `offsetLeft` ones + `256 - offsetLeft - offsetRight` zeroes + `offsetRight`
+        // `offsetLeft` ones + `256 - offsetLeft - offsetRight` zeroes + `offsetRight` ones
         uint256 helperMask = ~(
             (type(uint256).max - ((1 << data.offsetRight) - 1))
                 - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft))
