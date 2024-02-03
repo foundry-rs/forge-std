@@ -31,7 +31,7 @@ library stdStorageSafe {
 
     // Tries setting one of the bits in slot to 1 until return value changes.
     // Index of resulted bit is an offset packed slot has from left/right side
-    function findOffsetOneSide(StdStorage storage self, bytes32 slot, bytes memory cald, bool left)
+    function findOffset(StdStorage storage self, bytes32 slot, bytes memory cald, bool left)
         public
         returns (bool, uint256)
     {
@@ -48,7 +48,7 @@ library stdStorageSafe {
         return (false, 0);
     }
 
-    function findOffset(StdStorage storage self, bytes32 slot, bytes memory cald)
+    function findOffsets(StdStorage storage self, bytes32 slot, bytes memory cald)
         public
         returns (bool, uint256, uint256)
     {
@@ -72,10 +72,10 @@ library stdStorageSafe {
             }
         }
 
-        (bool foundLeft, uint256 offsetLeft) = findOffsetOneSide(self, slot, cald, true);
-        (bool foundRight, uint256 offsetRight) = findOffsetOneSide(self, slot, cald, false);
+        (bool foundLeft, uint256 offsetLeft) = findOffset(self, slot, cald, true);
+        (bool foundRight, uint256 offsetRight) = findOffset(self, slot, cald, false);
 
-        // `findOffsetOneSide` may mutate slot value, so we are setting in to initial value
+        // `findOffset` may mutate slot value, so we are setting in to initial value
         vm.store(self._target, slot, prevSlotValue);
         return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
@@ -104,44 +104,24 @@ library stdStorageSafe {
             (, bytes memory rdat) = who.staticcall(cald);
             fdat = bytesToBytes32(rdat, 32 * field_depth);
         }
-
         (bytes32[] memory reads,) = vm.accesses(address(who));
-        if (reads.length == 1) {
-            bytes32 curr = vm.load(who, reads[0]);
-            if (curr == bytes32(0)) {
-                emit WARNING_UninitedSlot(who, uint256(reads[0]));
-            }
-            (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffset(self, reads[0], cald);
-            if (!found) {
-                require(
-                    false,
-                    "stdStorage find(StdStorage): Packed slot. This would cause dangerous overwriting and currently isn't supported."
-                );
-            }
-            emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
-                FindData(uint256(reads[0]), offsetLeft, offsetRight, true);
-        } else if (reads.length > 1) {
+
+        if (reads.length == 0) {
+            revert("stdStorage find(StdStorage): No storage use detected for target.");
+        } else {
             for (uint256 i = 0; i < reads.length; i++) {
                 bytes32 prev = vm.load(who, reads[i]);
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
                 }
-                if (prev != fdat) {
-                    continue;
-                }
-                (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffset(self, reads[i], cald);
-                if (!found) {
-                    continue;
-                } else {
+                (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffsets(self, reads[i], cald);
+                if (found) {
                     emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[0]));
                     self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
                         FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
                     break;
                 }
             }
-        } else {
-            revert("stdStorage find(StdStorage): No storage use detected for target.");
         }
 
         require(
