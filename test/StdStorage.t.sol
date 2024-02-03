@@ -251,6 +251,49 @@ contract StdStorageTest is Test {
         int256 val = stdstore.target(address(test)).sig(test.tG.selector).read_int();
         assertEq(val, type(int256).min);
     }
+
+    function testFuzzPacked2(uint256 nvars, uint256 seed) public {
+        // Number of random variables to generate.
+        nvars = bound(nvars, 1, 20);
+
+        // This will decrease as we generate values in the below loop.
+        uint256 bitsRemaining = 256;
+
+        // Generate a random value and size for each variable.
+        uint256[] memory vals = new uint256[](nvars);
+        uint256[] memory sizes = new uint256[](nvars);
+        uint256[] memory offsets = new uint256[](nvars);
+
+        for (uint256 i = 0; i < nvars; i++) {
+            // Generate a random value and size.
+            offsets[i] = i == 0 ? 0 : offsets[i - 1] + sizes[i - 1];
+
+            uint256 nvarsRemaining = nvars - i;
+            uint256 maxVarSize = bitsRemaining - nvarsRemaining + 1;
+            sizes[i] = bound(uint256(keccak256(abi.encodePacked(seed, i + 256))), 1, maxVarSize);
+            bitsRemaining -= sizes[i];
+
+            uint256 maxVal = (1 << sizes[i]) - 1; // Equal to (2 ** size) - 1, but won't revert on overflow for 256 bits.
+            vals[i] = bound(uint256(keccak256(abi.encodePacked(seed, i))), 0, maxVal);
+        }
+
+        // Pack all values into the slot.
+        for (uint256 i = 0; i < nvars; i++) {
+            stdstore.target(address(test)).sig("getRandomPacked(uint8,uint8)").with_key(sizes[i]).with_key(offsets[i])
+                .checked_write(vals[i]);
+        }
+
+        // Verify the read data matches.
+        for (uint256 i = 0; i < nvars; i++) {
+            uint256 readVal = stdstore.target(address(test)).sig("getRandomPacked(uint8,uint8)").with_key(sizes[i])
+                .with_key(offsets[i]).read_uint();
+
+            uint256 retVal = test.getRandomPacked(uint8(sizes[i]), uint8(offsets[i]));
+
+            assertEq(readVal, vals[i]);
+            assertEq(retVal, vals[i]);
+        }
+    }
 }
 
 contract StorageTest {
@@ -281,6 +324,8 @@ contract StorageTest {
     int256 public tG = type(int256).min;
     bool public tH = true;
     bytes32 private tI = ~bytes32(hex"1337");
+
+    uint256 randomPacking;
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});
@@ -316,5 +361,25 @@ contract StorageTest {
             pop(staticcall(gas(), sload(tE.slot), 0, 0, 0, 0))
         }
         t = tI;
+    }
+
+    function setRandomPacking(uint256 val) public {
+        randomPacking = val;
+    }
+
+    function setRandomPacking(uint256 val, uint256 size, uint256 offset) public {
+        // Generate mask based on the size of the value
+        uint256 mask = (1 << size) - 1;
+        // Zero out all bits for the word we're about to set
+        uint256 cleanedWord = uint256(randomPacking) & ~(mask << offset);
+        // Place val in the correct spot of the cleaned word
+        randomPacking = cleanedWord | val << offset;
+    }
+
+    function getRandomPacked(uint8 size, uint8 offset) public view returns (uint256) {
+        // Generate mask based on the size of the value
+        uint256 mask = (1 << size) - 1;
+        // Shift to place the bits in the correct position, and use mask to zero out remaining bits
+        return uint256(randomPacking >> offset) & mask;
     }
 }

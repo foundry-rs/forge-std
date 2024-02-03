@@ -29,71 +29,55 @@ library stdStorageSafe {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
-    struct FindOffsetVars {
-        uint256[] offsetsToTry;
-        bytes32 prev;
-        bytes32 prevData;
-        bool success;
-        bytes rdat;
-        bytes32 fdat;
+    // Tries setting one of the bits in slot to 1 until return value changes.
+    // Index of resulted bit is an offset packed slot has from left/right side
+    function findOffsetOneSide(StdStorage storage self, bytes32 slot, bytes memory cald, bool left)
+        public
+        returns (bool, uint256)
+    {
+        for (uint256 offset = 0; offset < 256; offset++) {
+            uint256 valueToPut = left ? (1 << (255 - offset)) : (1 << offset);
+            vm.store(self._target, slot, bytes32(valueToPut));
+            (, bytes memory rdat) = self._target.staticcall(cald);
+            bytes32 fdat = bytesToBytes32(rdat, 32 * self._depth);
+
+            if (uint256(fdat) > 0) {
+                return (true, offset);
+            }
+        }
+        return (false, 0);
     }
 
-    /// @notice tries to find values of `offsetLeft` and `offsetRight` such
-    /// that return value of the given call exactly matches value of
-    /// given_slot[offsetLeft:-offsetRight]
     function findOffset(StdStorage storage self, bytes32 slot, bytes memory cald)
         public
         returns (bool, uint256, uint256)
     {
-        FindOffsetVars memory vars;
-        // We don't want to iterate over all possible offsets, so we are only checking most common options
-        vars.offsetsToTry = new uint256[](10);
-        vars.offsetsToTry[0] = 0;
-        vars.offsetsToTry[1] = 1;
-        vars.offsetsToTry[2] = 8;
-        vars.offsetsToTry[3] = 64;
-        vars.offsetsToTry[4] = 96;
-        vars.offsetsToTry[5] = 128;
-        vars.offsetsToTry[6] = 160;
-        vars.offsetsToTry[7] = 192;
-        vars.offsetsToTry[8] = 248;
-        vars.offsetsToTry[9] = 255;
+        bytes32 prevSlotValue = vm.load(self._target, slot);
+        // Try mutating slot value to determine if the targeted value is stored in it.
+        // If current value is 0, then we are setting slot value to type(uint256).max
+        // Otherwise, we set it to 0. That way, return value should always be affected.
+        {
+            (bool success, bytes memory rdat) = self._target.staticcall(cald);
+            bytes32 prevReturnValue = bytesToBytes32(rdat, 32 * self._depth);
 
-        vars.prev = vm.load(self._target, slot);
-        (vars.success, vars.rdat) = self._target.staticcall(cald);
-        vars.prevData = bytesToBytes32(vars.rdat, 32 * self._depth);
+            bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(type(uint256).max) : bytes32(0);
+            vm.store(self._target, slot, testVal);
 
-        for (uint256 i = 0; i < vars.offsetsToTry.length; i++) {
-            for (uint256 j = 0; j < vars.offsetsToTry.length; j++) {
-                uint256 offsetLeft = vars.offsetsToTry[i];
-                uint256 offsetRight = vars.offsetsToTry[j];
-                if ((offsetLeft + offsetRight) >= 256) {
-                    continue;
-                }
-                uint256 new_val;
-                {
-                    // `offsetLeft` zeroes + (256 - offsetRight - offsetLeft) ones + `offsetRight` zeroes
-                    uint256 mask =
-                        (type(uint256).max - ((1 << offsetRight) - 1)) & ~((2 ** offsetLeft - 1) << (256 - offsetLeft));
+            (success, rdat) = self._target.staticcall(cald);
+            bytes32 fdat = bytesToBytes32(rdat, 32 * self._depth);
 
-                    if (((uint256(vars.prev) & mask) >> offsetRight) != uint256(vars.prevData)) {
-                        continue;
-                    }
-
-                    vm.store(self._target, slot, bytes32(uint256(vars.prev) | mask));
-                    new_val = (type(uint256).max & mask) >> offsetRight;
-                }
-                (vars.success, vars.rdat) = self._target.staticcall(cald);
-                vars.fdat = bytesToBytes32(vars.rdat, 32 * self._depth);
-
-                vm.store(self._target, slot, vars.prev);
-
-                if (vars.success && vars.fdat == bytes32(new_val)) {
-                    return (true, offsetLeft, offsetRight);
-                }
+            if (prevReturnValue == fdat) {
+                vm.store(self._target, slot, prevSlotValue);
+                return (false, 0, 0);
             }
         }
-        return (false, 0, 0);
+
+        (bool foundLeft, uint256 offsetLeft) = findOffsetOneSide(self, slot, cald, true);
+        (bool foundRight, uint256 offsetRight) = findOffsetOneSide(self, slot, cald, false);
+
+        // `findOffsetOneSide` may mutate slot value, so we are setting in to initial value
+        vm.store(self._target, slot, prevSlotValue);
+        return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
 
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
@@ -110,6 +94,7 @@ library stdStorageSafe {
 
         // calldata to test against
         if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found) {
+            clear(self);
             return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
         }
         bytes memory cald = abi.encodePacked(fsig, flatten(ins));
@@ -164,11 +149,7 @@ library stdStorageSafe {
             "stdStorage find(StdStorage): Slot(s) not found."
         );
 
-        delete self._target;
-        delete self._sig;
-        delete self._keys;
-        delete self._depth;
-
+        clear(self);
         return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
     }
 
@@ -209,8 +190,13 @@ library stdStorageSafe {
 
     function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
-        uint256 s = find(self).slot;
-        return abi.encode(vm.load(t, bytes32(s)));
+        FindData storage data = find(self);
+        uint256 helperMask = (
+            (type(uint256).max - ((1 << data.offsetRight) - 1))
+                - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft))
+        );
+        uint256 value = (uint256(vm.load(t, bytes32(data.slot))) & helperMask) >> data.offsetRight;
+        return abi.encode(value);
     }
 
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
@@ -293,6 +279,13 @@ library stdStorageSafe {
 
         return result;
     }
+
+    function clear(StdStorage storage self) internal {
+        delete self._target;
+        delete self._sig;
+        delete self._keys;
+        delete self._depth;
+    }
 }
 
 library stdStorage {
@@ -332,6 +325,10 @@ library stdStorage {
 
     function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
         return stdStorageSafe.depth(self, _depth);
+    }
+
+    function clear(StdStorage storage self) internal {
+        stdStorageSafe.clear(self);
     }
 
     function checked_write(StdStorage storage self, address who) internal {
@@ -385,10 +382,7 @@ library stdStorage {
         uint256 valToSet = (curVal & helperMask) | mask;
 
         vm.store(who, bytes32(data.slot), bytes32(valToSet));
-        delete self._target;
-        delete self._sig;
-        delete self._keys;
-        delete self._depth;
+        clear(self);
     }
 
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
