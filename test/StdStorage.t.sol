@@ -273,22 +273,28 @@ contract StdStorageTest is Test {
             sizes[i] = bound(uint256(keccak256(abi.encodePacked(seed, i + 256))), 1, maxVarSize);
             bitsRemaining -= sizes[i];
 
-            uint256 maxVal = (1 << sizes[i]) - 1; // Equal to (2 ** size) - 1, but won't revert on overflow for 256 bits.
+            uint256 maxVal;
+            uint256 varSize = sizes[i];
+            assembly {
+                // mask = (1 << varSize) - 1
+                maxVal := sub(shl(varSize, 1), 1)
+            }
             vals[i] = bound(uint256(keccak256(abi.encodePacked(seed, i))), 0, maxVal);
         }
 
         // Pack all values into the slot.
         for (uint256 i = 0; i < nvars; i++) {
-            stdstore.target(address(test)).sig("getRandomPacked(uint8,uint8)").with_key(sizes[i]).with_key(offsets[i])
-                .checked_write(vals[i]);
+            stdstore.target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(sizes[i]).with_key(
+                offsets[i]
+            ).checked_write(vals[i]);
         }
 
         // Verify the read data matches.
         for (uint256 i = 0; i < nvars; i++) {
-            uint256 readVal = stdstore.target(address(test)).sig("getRandomPacked(uint8,uint8)").with_key(sizes[i])
+            uint256 readVal = stdstore.target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(sizes[i])
                 .with_key(offsets[i]).read_uint();
 
-            uint256 retVal = test.getRandomPacked(uint8(sizes[i]), uint8(offsets[i]));
+            uint256 retVal = test.getRandomPacked(sizes[i], offsets[i]);
 
             assertEq(readVal, vals[i]);
             assertEq(retVal, vals[i]);
@@ -367,19 +373,26 @@ contract StorageTest {
         randomPacking = val;
     }
 
+    function _getMask(uint256 size) internal pure returns (uint256 mask) {
+        assembly {
+            // mask = (1 << size) - 1
+            mask := sub(shl(size, 1), 1)
+        }
+    }
+
     function setRandomPacking(uint256 val, uint256 size, uint256 offset) public {
         // Generate mask based on the size of the value
-        uint256 mask = (1 << size) - 1;
+        uint256 mask = _getMask(size);
         // Zero out all bits for the word we're about to set
-        uint256 cleanedWord = uint256(randomPacking) & ~(mask << offset);
+        uint256 cleanedWord = randomPacking & ~(mask << offset);
         // Place val in the correct spot of the cleaned word
         randomPacking = cleanedWord | val << offset;
     }
 
-    function getRandomPacked(uint8 size, uint8 offset) public view returns (uint256) {
+    function getRandomPacked(uint256 size, uint256 offset) public view returns (uint256) {
         // Generate mask based on the size of the value
-        uint256 mask = (1 << size) - 1;
+        uint256 mask = _getMask(size);
         // Shift to place the bits in the correct position, and use mask to zero out remaining bits
-        return uint256(randomPacking >> offset) & mask;
+        return (randomPacking >> offset) & mask;
     }
 }
