@@ -24,6 +24,7 @@ library stdStorageSafe {
     event WARNING_UninitedSlot(address who, uint256 slot);
 
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    uint256 constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(sigStr)));
@@ -60,7 +61,7 @@ library stdStorageSafe {
             (bool success, bytes memory rdat) = self._target.staticcall(cald);
             bytes32 prevReturnValue = bytesToBytes32(rdat, 32 * self._depth);
 
-            bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(type(uint256).max) : bytes32(0);
+            bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(UINT256_MAX) : bytes32(0);
             vm.store(self._target, slot, testVal);
 
             (success, rdat) = self._target.staticcall(cald);
@@ -171,10 +172,8 @@ library stdStorageSafe {
     function read(StdStorage storage self) private returns (bytes memory) {
         address t = self._target;
         FindData storage data = find(self);
-        uint256 helperMask = (
-            (type(uint256).max - ((1 << data.offsetRight) - 1))
-                - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft))
-        );
+        uint256 helperMask =
+            ((UINT256_MAX - ((1 << data.offsetRight) - 1)) - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft)));
         uint256 value = (uint256(vm.load(t, bytes32(data.slot))) & helperMask) >> data.offsetRight;
         return abi.encode(value);
     }
@@ -346,8 +345,11 @@ library stdStorage {
             uint256 maxVal = 2 ** (256 - (data.offsetLeft + data.offsetRight));
             require(
                 uint256(set) < maxVal,
-                string.concat(
-                    "stdStorage find(StdStorage): Packed slot. We can't fit value greater than ", vm.toString(maxVal)
+                string(
+                    abi.encodePacked(
+                        "stdStorage find(StdStorage): Packed slot. We can't fit value greater than ",
+                        vm.toString(maxVal)
+                    )
                 )
             );
         }
@@ -356,7 +358,7 @@ library stdStorage {
         uint256 mask = uint256(set) << data.offsetRight;
         // `offsetLeft` ones + `256 - offsetLeft - offsetRight` zeroes + `offsetRight` ones
         uint256 helperMask = ~(
-            (type(uint256).max - ((1 << data.offsetRight) - 1))
+            (stdStorageSafe.UINT256_MAX - ((1 << data.offsetRight) - 1))
                 - (((1 << data.offsetLeft) - 1) << (256 - data.offsetLeft))
         );
         uint256 valToSet = (curVal & helperMask) | mask;
