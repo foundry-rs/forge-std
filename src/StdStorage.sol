@@ -82,6 +82,10 @@ library stdStorageSafe {
         return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
 
+    function find(StdStorage storage self) internal returns (FindData storage) {
+        return find(self, true);
+    }
+
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
     // slot complexity:
     //  if flat, will be bytes32(uint256(uint));
