@@ -8,7 +8,30 @@ abstract contract StdAssertions {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     event log(string);
+    event logs(bytes);
+
+    event log_address(address);
+    event log_bytes32(bytes32);
+    event log_int(int256);
+    event log_uint(uint256);
+    event log_bytes(bytes);
+    event log_string(string);
+
+    event log_named_address(string key, address val);
+    event log_named_bytes32(string key, bytes32 val);
+    event log_named_decimal_int(string key, int256 val, uint256 decimals);
+    event log_named_decimal_uint(string key, uint256 val, uint256 decimals);
+    event log_named_int(string key, int256 val);
+    event log_named_uint(string key, uint256 val);
     event log_named_bytes(string key, bytes val);
+    event log_named_string(string key, string val);
+
+    event log_array(uint256[] val);
+    event log_array(int256[] val);
+    event log_array(address[] val);
+    event log_named_array(string key, uint256[] val);
+    event log_named_array(string key, int256[] val);
+    event log_named_array(string key, address[] val);
 
     function assertTrue(bool data) internal pure virtual {
         vm.assertTrue(data);
@@ -80,6 +103,14 @@ abstract contract StdAssertions {
 
     function assertEq(bytes32 left, bytes32 right, string memory err) internal pure virtual {
         vm.assertEq(left, right, err);
+    }
+
+    function assertEq32(bytes32 left, bytes32 right) internal pure virtual {
+        assertEq(left, right);
+    }
+
+    function assertEq32(bytes32 left, bytes32 right, string memory err) internal pure virtual {
+        assertEq(left, right, err);
     }
 
     function assertEq(string memory left, string memory right) internal pure virtual {
@@ -155,8 +186,8 @@ abstract contract StdAssertions {
     }
 
     // Legacy helper
-    function assertEqUint(uint256 a, uint256 b) internal pure virtual {
-        assertEq(a, b);
+    function assertEqUint(uint256 left, uint256 right) internal pure virtual {
+        assertEq(left, right);
     }
 
     function assertNotEq(bool left, bool right) internal pure virtual {
@@ -217,6 +248,14 @@ abstract contract StdAssertions {
 
     function assertNotEq(bytes32 left, bytes32 right, string memory err) internal pure virtual {
         vm.assertNotEq(left, right, err);
+    }
+
+    function assertNotEq32(bytes32 left, bytes32 right) internal pure virtual {
+        assertNotEq(left, right);
+    }
+
+    function assertNotEq32(bytes32 left, bytes32 right, string memory err) internal pure virtual {
+        assertNotEq(left, right, err);
     }
 
     function assertNotEq(string memory left, string memory right) internal pure virtual {
@@ -539,6 +578,27 @@ abstract contract StdAssertions {
         string memory err
     ) internal pure virtual {
         vm.assertApproxEqRelDecimal(left, right, maxPercentDelta, decimals, err);
+    }
+
+    // Inhertied from DSTest, not used but kept for backwards-compatibility
+    function checkEq0(bytes memory left, bytes memory right) internal pure returns (bool) {
+        return keccak256(left) == keccak256(right);
+    }
+
+    function assertEq0(bytes memory left, bytes memory right) internal pure virtual {
+        assertEq(left, right);
+    }
+
+    function assertEq0(bytes memory left, bytes memory right, string memory err) internal pure virtual {
+        assertEq(left, right, err);
+    }
+
+    function assertNotEq0(bytes memory left, bytes memory right) internal pure virtual {
+        assertNotEq(left, right);
+    }
+
+    function assertNotEq0(bytes memory left, bytes memory right, string memory err) internal pure virtual {
+        assertNotEq(left, right, err);
     }
 
     function assertEqCall(address target, bytes memory callDataA, bytes memory callDataB) internal virtual {
