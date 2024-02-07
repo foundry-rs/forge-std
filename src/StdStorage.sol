@@ -17,6 +17,7 @@ struct StdStorage {
     uint256 _depth;
     address _target;
     bytes32 _set;
+    bool _enable_packed_slots;
 }
 
 library stdStorageSafe {
@@ -39,6 +40,23 @@ library stdStorageSafe {
         return (success, result);
     }
 
+    // Tries mutating slot value to determine if the targeted value is stored in it.
+    // If current value is 0, then we are setting slot value to type(uint256).max
+    // Otherwise, we set it to 0. That way, return value should always be affected.
+    function checkSlotMutatesCall(StdStorage storage self, bytes32 slot) internal returns (bool) {
+        bytes32 prevSlotValue = vm.load(self._target, slot);
+        (bool success, bytes32 prevReturnValue) = callTarget(self);
+
+        bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(UINT256_MAX) : bytes32(0);
+        vm.store(self._target, slot, testVal);
+
+        (, bytes32 newReturnValue) = callTarget(self);
+
+        vm.store(self._target, slot, prevSlotValue);
+
+        return (success && (prevReturnValue != newReturnValue));
+    }
+
     // Tries setting one of the bits in slot to 1 until return value changes.
     // Index of resulted bit is an offset packed slot has from left/right side
     function findOffset(StdStorage storage self, bytes32 slot, bool left) internal returns (bool, uint256) {
@@ -57,22 +75,6 @@ library stdStorageSafe {
 
     function findOffsets(StdStorage storage self, bytes32 slot) internal returns (bool, uint256, uint256) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
-        // Try mutating slot value to determine if the targeted value is stored in it.
-        // If current value is 0, then we are setting slot value to type(uint256).max
-        // Otherwise, we set it to 0. That way, return value should always be affected.
-        {
-            (bool success, bytes32 prevReturnValue) = callTarget(self);
-
-            bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(UINT256_MAX) : bytes32(0);
-            vm.store(self._target, slot, testVal);
-
-            (, bytes32 newReturnValue) = callTarget(self);
-
-            if (!success || (prevReturnValue == newReturnValue)) {
-                vm.store(self._target, slot, prevSlotValue);
-                return (false, 0, 0);
-            }
-        }
 
         (bool foundLeft, uint256 offsetLeft) = findOffset(self, slot, true);
         (bool foundRight, uint256 offsetRight) = findOffset(self, slot, false);
@@ -117,19 +119,32 @@ library stdStorageSafe {
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
                 }
-                (bool found, uint256 offsetLeft, uint256 offsetRight) = findOffsets(self, reads[i]);
-                if (found) {
-                    // Check that value between found offsets is equal to the current call result
-                    uint256 curVal = (uint256(prev) & getMaskByOffsets(offsetLeft, offsetRight)) >> offsetRight;
-                    if (uint256(callResult) != curVal) {
+
+                if (!checkSlotMutatesCall(self, reads[i])) {
+                    continue;
+                }
+
+                (uint256 offsetLeft, uint256 offsetRight) = (0, 0);
+
+                if (self._enable_packed_slots) {
+                    bool found;
+                    (found, offsetLeft, offsetRight) = findOffsets(self, reads[i]);
+                    if (!found) {
                         continue;
                     }
-
-                    emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
-                    self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
-                        FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
-                    break;
                 }
+
+                // Check that value between found offsets is equal to the current call result
+                uint256 curVal = (uint256(prev) & getMaskByOffsets(offsetLeft, offsetRight)) >> offsetRight;
+
+                if (uint256(callResult) != curVal) {
+                    continue;
+                }
+
+                emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
+                self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
+                    FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
+                break;
             }
         }
 
@@ -171,6 +186,11 @@ library stdStorageSafe {
 
     function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
         self._keys.push(key);
+        return self;
+    }
+
+    function enable_packed_slots(StdStorage storage self) internal returns (StdStorage storage) {
+        self._enable_packed_slots = true;
         return self;
     }
 
@@ -273,6 +293,7 @@ library stdStorageSafe {
         delete self._sig;
         delete self._keys;
         delete self._depth;
+        delete self._enable_packed_slots;
     }
 
     // Returns mask which contains non-zero bits for values between `offsetLeft` and `offsetRight`
@@ -332,6 +353,10 @@ library stdStorage {
 
     function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
         return stdStorageSafe.with_key(self, key);
+    }
+
+    function enable_packed_slots(StdStorage storage self) internal returns (StdStorage storage) {
+        return stdStorageSafe.enable_packed_slots(self);
     }
 
     function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {

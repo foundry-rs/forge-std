@@ -179,10 +179,12 @@ contract StdStorageTest is Test {
     }
 
     function testFuzz_StorageCheckedWriteMapPacked(address addr, uint128 value) public {
-        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(addr).checked_write(value);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.read_struct_lower.selector).with_key(addr)
+            .checked_write(value);
         assertEq(test.read_struct_lower(addr), value);
 
-        stdstore.target(address(test)).sig(test.read_struct_upper.selector).with_key(addr).checked_write(value);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.read_struct_upper.selector).with_key(addr)
+            .checked_write(value);
         assertEq(test.read_struct_upper(addr), value);
     }
 
@@ -202,10 +204,10 @@ contract StdStorageTest is Test {
     }
 
     function testFuzz_StorageNativePack(uint248 val1, uint248 val2, bool boolVal1, bool boolVal2) public {
-        stdstore.target(address(test)).sig(test.tA.selector).checked_write(val1);
-        stdstore.target(address(test)).sig(test.tB.selector).checked_write(boolVal1);
-        stdstore.target(address(test)).sig(test.tC.selector).checked_write(boolVal2);
-        stdstore.target(address(test)).sig(test.tD.selector).checked_write(val2);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tA.selector).checked_write(val1);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tB.selector).checked_write(boolVal1);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tC.selector).checked_write(boolVal2);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tD.selector).checked_write(val2);
 
         assertEq(test.tA(), val1);
         assertEq(test.tB(), boolVal1);
@@ -284,15 +286,16 @@ contract StdStorageTest is Test {
 
         // Pack all values into the slot.
         for (uint256 i = 0; i < nvars; i++) {
-            stdstore.target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(sizes[i]).with_key(
-                offsets[i]
-            ).checked_write(vals[i]);
+            stdstore.enable_packed_slots().target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(
+                sizes[i]
+            ).with_key(offsets[i]).checked_write(vals[i]);
         }
 
         // Verify the read data matches.
         for (uint256 i = 0; i < nvars; i++) {
-            uint256 readVal = stdstore.target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(sizes[i])
-                .with_key(offsets[i]).read_uint();
+            uint256 readVal = stdstore.enable_packed_slots().target(address(test)).sig(
+                "getRandomPacked(uint256,uint256)"
+            ).with_key(sizes[i]).with_key(offsets[i]).read_uint();
 
             uint256 retVal = test.getRandomPacked(sizes[i], offsets[i]);
 
