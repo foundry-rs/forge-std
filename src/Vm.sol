@@ -1111,4 +1111,7 @@ interface Vm is VmSafe {
 
     /// Marks a test as skipped. Must be called at the top of the test.
     function skip(bool skipTest) external;
+
+    /// Stops all safe memory expectation in the current subcontext.
+    function stopExpectSafeMemory() external;
 }
