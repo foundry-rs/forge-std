@@ -18,6 +18,7 @@ struct StdStorage {
     address _target;
     bytes32 _set;
     bool _enable_packed_slots;
+    bytes _calldata;
 }
 
 library stdStorageSafe {
@@ -31,9 +32,17 @@ library stdStorageSafe {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
+    function getCallParams(StdStorage storage self) internal view returns (bytes memory) {
+        if (self._calldata.length == 0) {
+            return flatten(self._keys);
+        } else {
+            return self._calldata;
+        }
+    }
+
     // Calls target contract with configured parameters
     function callTarget(StdStorage storage self) internal view returns (bool, bytes32) {
-        bytes memory cald = abi.encodePacked(self._sig, flatten(self._keys));
+        bytes memory cald = abi.encodePacked(self._sig, getCallParams(self));
         (bool success, bytes memory rdat) = self._target.staticcall(cald);
         bytes32 result = bytesToBytes32(rdat, 32 * self._depth);
 
@@ -98,14 +107,14 @@ library stdStorageSafe {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
+        bytes memory params = getCallParams(self);
 
         // calldata to test against
-        if (self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found) {
+        if (self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found) {
             if (_clear) {
                 clear(self);
             }
-            return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+            return self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
         }
         vm.record();
         (, bytes32 callResult) = callTarget(self);
@@ -141,22 +150,22 @@ library stdStorageSafe {
                     continue;
                 }
 
-                emit SlotFound(who, fsig, keccak256(abi.encodePacked(ins, field_depth)), uint256(reads[i]));
-                self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))] =
+                emit SlotFound(who, fsig, keccak256(abi.encodePacked(params, field_depth)), uint256(reads[i]));
+                self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))] =
                     FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
                 break;
             }
         }
 
         require(
-            self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found,
+            self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found,
             "stdStorage find(StdStorage): Slot(s) not found."
         );
 
         if (_clear) {
             clear(self);
         }
-        return self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        return self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
     }
 
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
@@ -171,6 +180,11 @@ library stdStorageSafe {
 
     function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
         self._sig = sigs(_sig);
+        return self;
+    }
+
+    function with_calldata(StdStorage storage self, bytes memory _calldata) internal returns (StdStorage storage) {
+        self._calldata = _calldata;
         return self;
     }
 
@@ -294,6 +308,7 @@ library stdStorageSafe {
         delete self._keys;
         delete self._depth;
         delete self._enable_packed_slots;
+        delete self._calldata;
     }
 
     // Returns mask which contains non-zero bits for values between `offsetLeft` and `offsetRight`
@@ -355,6 +370,10 @@ library stdStorage {
         return stdStorageSafe.with_key(self, key);
     }
 
+    function with_calldata(StdStorage storage self, bytes memory _calldata) internal returns (StdStorage storage) {
+        return stdStorageSafe.with_calldata(self, _calldata);
+    }
+
     function enable_packed_slots(StdStorage storage self) internal returns (StdStorage storage) {
         return stdStorageSafe.enable_packed_slots(self);
     }
@@ -392,12 +411,12 @@ library stdStorage {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
-        bytes32[] memory ins = self._keys;
+        bytes memory params = stdStorageSafe.getCallParams(self);
 
-        if (!self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))].found) {
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found) {
             find(self, false);
         }
-        FindData storage data = self.finds[who][fsig][keccak256(abi.encodePacked(ins, field_depth))];
+        FindData storage data = self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
         if ((data.offsetLeft + data.offsetRight) > 0) {
             uint256 maxVal = 2 ** (256 - (data.offsetLeft + data.offsetRight));
             require(
