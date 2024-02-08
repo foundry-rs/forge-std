@@ -1,19 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
+import {IERC721} from "../interfaces/IERC721.sol";
+
 /// @notice This is a mock contract of the ERC721 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC721.sol
-contract MockERC721 {
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event Transfer(address indexed from, address indexed to, uint256 indexed id);
-
-    event Approval(address indexed owner, address indexed spender, uint256 indexed id);
-
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
+contract MockERC721 is IERC721 {
     /*//////////////////////////////////////////////////////////////
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
@@ -72,7 +64,7 @@ contract MockERC721 {
                               ERC721 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 id) public virtual {
+    function approve(address spender, uint256 id) public virtual payable {
         address owner = _ownerOf[id];
 
         require(msg.sender == owner || isApprovedForAll[owner][msg.sender], "NOT_AUTHORIZED");
@@ -88,7 +80,7 @@ contract MockERC721 {
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function transferFrom(address from, address to, uint256 id) public virtual {
+    function transferFrom(address from, address to, uint256 id) public virtual payable {
         require(from == _ownerOf[id], "WRONG_FROM");
 
         require(to != address(0), "INVALID_RECIPIENT");
@@ -110,7 +102,7 @@ contract MockERC721 {
         emit Transfer(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id) public virtual {
+    function safeTransferFrom(address from, address to, uint256 id) public virtual payable {
         transferFrom(from, to, id);
 
         require(
@@ -121,7 +113,7 @@ contract MockERC721 {
         );
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual {
+    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual payable {
         transferFrom(from, to, id);
 
         require(
