@@ -1,46 +1,62 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {IERC721} from "../interfaces/IERC721.sol";
+import {IERC721Metadata} from "../interfaces/IERC721.sol";
 
 /// @notice This is a mock contract of the ERC721 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC721.sol
-contract MockERC721 is IERC721 {
+contract MockERC721 is IERC721Metadata {
     /*//////////////////////////////////////////////////////////////
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    string public name;
+    string internal _name;
 
-    string public symbol;
+    string internal _symbol;
 
-    function tokenURI(uint256 id) public view virtual returns (string memory) {}
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    function tokenURI(uint256 id) public view virtual override returns (string memory) {}
 
     /*//////////////////////////////////////////////////////////////
                       ERC721 BALANCE/OWNER STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    mapping(uint256 => address) internal _ownerOf;
+    mapping(uint256 => address) private _owners;
 
-    mapping(address => uint256) internal _balanceOf;
+    mapping(address => uint256) private _balances;
 
-    function ownerOf(uint256 id) public view virtual returns (address owner) {
-        require((owner = _ownerOf[id]) != address(0), "NOT_MINTED");
+    function ownerOf(uint256 id) public view virtual override returns (address owner) {
+        require((owner = _owners[id]) != address(0), "NOT_MINTED");
     }
 
-    function balanceOf(address owner) public view virtual returns (uint256) {
+    function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS");
 
-        return _balanceOf[owner];
+        return _balances[owner];
     }
 
     /*//////////////////////////////////////////////////////////////
                          ERC721 APPROVAL STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    mapping(uint256 => address) public getApproved;
+    mapping(uint256 => address) private _tokenApprovals;
 
-    mapping(address => mapping(address => bool)) public isApprovedForAll;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+
+    function getApproved(uint256 id) public view virtual override returns (address) {
+        return _tokenApprovals[id];
+    }
+
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
 
     /*//////////////////////////////////////////////////////////////
                                INITIALIZE
@@ -51,11 +67,11 @@ contract MockERC721 is IERC721 {
 
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
     /// syntaxes, we add an initialization function that can be called only once.
-    function initialize(string memory _name, string memory _symbol) public {
+    function initialize(string memory name_, string memory symbol_) public {
         require(!initialized, "ALREADY_INITIALIZED");
 
-        name = _name;
-        symbol = _symbol;
+        _name = name_;
+        _symbol = symbol_;
 
         initialized = true;
     }
@@ -64,45 +80,46 @@ contract MockERC721 is IERC721 {
                               ERC721 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 id) public virtual payable {
-        address owner = _ownerOf[id];
+    function approve(address spender, uint256 id) public payable virtual override {
+        address owner = _owners[id];
 
-        require(msg.sender == owner || isApprovedForAll[owner][msg.sender], "NOT_AUTHORIZED");
+        require(msg.sender == owner || _operatorApprovals[owner][msg.sender], "NOT_AUTHORIZED");
 
-        getApproved[id] = spender;
+        _tokenApprovals[id] = spender;
 
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public virtual {
-        isApprovedForAll[msg.sender][operator] = approved;
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        _operatorApprovals[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function transferFrom(address from, address to, uint256 id) public virtual payable {
-        require(from == _ownerOf[id], "WRONG_FROM");
+    function transferFrom(address from, address to, uint256 id) public payable virtual override {
+        require(from == _owners[id], "WRONG_FROM");
 
         require(to != address(0), "INVALID_RECIPIENT");
 
         require(
-            msg.sender == from || isApprovedForAll[from][msg.sender] || msg.sender == getApproved[id], "NOT_AUTHORIZED"
+            msg.sender == from || _operatorApprovals[from][msg.sender] || msg.sender == _tokenApprovals[id],
+            "NOT_AUTHORIZED"
         );
 
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
-        _balanceOf[from]--;
+        _balances[from]--;
 
-        _balanceOf[to]++;
+        _balances[to]++;
 
-        _ownerOf[id] = to;
+        _owners[id] = to;
 
-        delete getApproved[id];
+        delete _tokenApprovals[id];
 
         emit Transfer(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id) public virtual payable {
+    function safeTransferFrom(address from, address to, uint256 id) public payable virtual override {
         transferFrom(from, to, id);
 
         require(
@@ -113,7 +130,12 @@ contract MockERC721 is IERC721 {
         );
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public virtual payable {
+    function safeTransferFrom(address from, address to, uint256 id, bytes memory data)
+        public
+        payable
+        virtual
+        override
+    {
         transferFrom(from, to, id);
 
         require(
@@ -128,7 +150,7 @@ contract MockERC721 is IERC721 {
                               ERC165 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function supportsInterface(bytes4 interfaceId) public pure virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == 0x01ffc9a7 // ERC165 Interface ID for ERC165
             || interfaceId == 0x80ac58cd // ERC165 Interface ID for ERC721
             || interfaceId == 0x5b5e139f; // ERC165 Interface ID for ERC721Metadata
@@ -141,27 +163,27 @@ contract MockERC721 is IERC721 {
     function _mint(address to, uint256 id) internal virtual {
         require(to != address(0), "INVALID_RECIPIENT");
 
-        require(_ownerOf[id] == address(0), "ALREADY_MINTED");
+        require(_owners[id] == address(0), "ALREADY_MINTED");
 
         // Counter overflow is incredibly unrealistic.
 
-        _balanceOf[to]++;
+        _balances[to]++;
 
-        _ownerOf[id] = to;
+        _owners[id] = to;
 
         emit Transfer(address(0), to, id);
     }
 
     function _burn(uint256 id) internal virtual {
-        address owner = _ownerOf[id];
+        address owner = _owners[id];
 
         require(owner != address(0), "NOT_MINTED");
 
-        _balanceOf[owner]--;
+        _balances[owner]--;
 
-        delete _ownerOf[id];
+        delete _owners[id];
 
-        delete getApproved[id];
+        delete _tokenApprovals[id];
 
         emit Transfer(owner, address(0), id);
     }
