@@ -28,34 +28,34 @@ contract MockERC721 is IERC721Metadata {
                       ERC721 BALANCE/OWNER STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    mapping(uint256 => address) private _owners;
+    mapping(uint256 => address) internal _ownerOf;
 
-    mapping(address => uint256) private _balances;
+    mapping(address => uint256) internal _balanceOf;
 
     function ownerOf(uint256 id) public view virtual override returns (address owner) {
-        require((owner = _owners[id]) != address(0), "NOT_MINTED");
+        require((owner = _ownerOf[id]) != address(0), "NOT_MINTED");
     }
 
     function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS");
 
-        return _balances[owner];
+        return _balanceOf[owner];
     }
 
     /*//////////////////////////////////////////////////////////////
                          ERC721 APPROVAL STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    mapping(uint256 => address) private _tokenApprovals;
+    mapping(uint256 => address) internal _getApproved;
 
-    mapping(address => mapping(address => bool)) private _operatorApprovals;
+    mapping(address => mapping(address => bool)) internal _isApprovedForAll;
 
     function getApproved(uint256 id) public view virtual override returns (address) {
-        return _tokenApprovals[id];
+        return _getApproved[id];
     }
 
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return _operatorApprovals[owner][operator];
+        return _isApprovedForAll[owner][operator];
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -81,40 +81,40 @@ contract MockERC721 is IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     function approve(address spender, uint256 id) public payable virtual override {
-        address owner = _owners[id];
+        address owner = _ownerOf[id];
 
-        require(msg.sender == owner || _operatorApprovals[owner][msg.sender], "NOT_AUTHORIZED");
+        require(msg.sender == owner || _isApprovedForAll[owner][msg.sender], "NOT_AUTHORIZED");
 
-        _tokenApprovals[id] = spender;
+        _getApproved[id] = spender;
 
         emit Approval(owner, spender, id);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        _operatorApprovals[msg.sender][operator] = approved;
+        _isApprovedForAll[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
     function transferFrom(address from, address to, uint256 id) public payable virtual override {
-        require(from == _owners[id], "WRONG_FROM");
+        require(from == _ownerOf[id], "WRONG_FROM");
 
         require(to != address(0), "INVALID_RECIPIENT");
 
         require(
-            msg.sender == from || _operatorApprovals[from][msg.sender] || msg.sender == _tokenApprovals[id],
+            msg.sender == from || _isApprovedForAll[from][msg.sender] || msg.sender == _getApproved[id],
             "NOT_AUTHORIZED"
         );
 
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
-        _balances[from]--;
+        _balanceOf[from]--;
 
-        _balances[to]++;
+        _balanceOf[to]++;
 
-        _owners[id] = to;
+        _ownerOf[id] = to;
 
-        delete _tokenApprovals[id];
+        delete _getApproved[id];
 
         emit Transfer(from, to, id);
     }
@@ -163,27 +163,27 @@ contract MockERC721 is IERC721Metadata {
     function _mint(address to, uint256 id) internal virtual {
         require(to != address(0), "INVALID_RECIPIENT");
 
-        require(_owners[id] == address(0), "ALREADY_MINTED");
+        require(_ownerOf[id] == address(0), "ALREADY_MINTED");
 
         // Counter overflow is incredibly unrealistic.
 
-        _balances[to]++;
+        _balanceOf[to]++;
 
-        _owners[id] = to;
+        _ownerOf[id] = to;
 
         emit Transfer(address(0), to, id);
     }
 
     function _burn(uint256 id) internal virtual {
-        address owner = _owners[id];
+        address owner = _ownerOf[id];
 
         require(owner != address(0), "NOT_MINTED");
 
-        _balances[owner]--;
+        _balanceOf[owner]--;
 
-        delete _owners[id];
+        delete _ownerOf[id];
 
-        delete _tokenApprovals[id];
+        delete _getApproved[id];
 
         emit Transfer(owner, address(0), id);
     }

@@ -10,11 +10,11 @@ contract MockERC20 is IERC20 {
                             METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string private _name;
+    string internal _name;
 
-    string private _symbol;
+    string internal _symbol;
 
-    uint8 private _decimals;
+    uint8 internal _decimals;
 
     function name() external view override returns (string memory) {
         return _name;
@@ -32,22 +32,22 @@ contract MockERC20 is IERC20 {
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    uint256 private _totalSupply;
+    uint256 internal _totalSupply;
 
-    mapping(address => uint256) private _balances;
+    mapping(address => uint256) internal _balanceOf;
 
-    mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) internal _allowance;
 
     function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
     function balanceOf(address owner) external view override returns (uint256) {
-        return _balances[owner];
+        return _balanceOf[owner];
     }
 
     function allowance(address owner, address spender) external view override returns (uint256) {
-        return _allowances[owner][spender];
+        return _allowance[owner][spender];
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ contract MockERC20 is IERC20 {
     //////////////////////////////////////////////////////////////*/
 
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        _allowances[msg.sender][spender] = amount;
+        _allowance[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
 
@@ -95,8 +95,8 @@ contract MockERC20 is IERC20 {
     }
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        _balances[msg.sender] = _sub(_balances[msg.sender], amount);
-        _balances[to] = _add(_balances[to], amount);
+        _balanceOf[msg.sender] = _sub(_balanceOf[msg.sender], amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(msg.sender, to, amount);
 
@@ -104,12 +104,12 @@ contract MockERC20 is IERC20 {
     }
 
     function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
-        uint256 allowed = _allowances[from][msg.sender]; // Saves gas for limited approvals.
+        uint256 allowed = _allowance[from][msg.sender]; // Saves gas for limited approvals.
 
-        if (allowed != ~uint256(0)) _allowances[from][msg.sender] = _sub(allowed, amount);
+        if (allowed != ~uint256(0)) _allowance[from][msg.sender] = _sub(allowed, amount);
 
-        _balances[from] = _sub(_balances[from], amount);
-        _balances[to] = _add(_balances[to], amount);
+        _balanceOf[from] = _sub(_balanceOf[from], amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(from, to, amount);
 
@@ -152,7 +152,7 @@ contract MockERC20 is IERC20 {
 
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNER");
 
-        _allowances[recoveredAddress][spender] = value;
+        _allowance[recoveredAddress][spender] = value;
 
         emit Approval(owner, spender, value);
     }
@@ -179,13 +179,13 @@ contract MockERC20 is IERC20 {
 
     function _mint(address to, uint256 amount) internal virtual {
         _totalSupply = _add(_totalSupply, amount);
-        _balances[to] = _add(_balances[to], amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(address(0), to, amount);
     }
 
     function _burn(address from, uint256 amount) internal virtual {
-        _balances[from] = _sub(_balances[from], amount);
+        _balanceOf[from] = _sub(_balanceOf[from], amount);
         _totalSupply = _sub(_totalSupply, amount);
 
         emit Transfer(from, address(0), amount);
