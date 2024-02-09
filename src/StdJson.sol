@@ -9,7 +9,7 @@ import {VmSafe} from "./Vm.sol";
 // To parse:
 // ```
 // using stdJson for string;
-// string memory json = vm.readFile("some_peth");
+// string memory json = vm.readFile("some_path");
 // json.parseUint("<json_path>");
 // ```
 // To write:
