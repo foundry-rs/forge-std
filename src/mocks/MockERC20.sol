@@ -1,36 +1,54 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
+import {IERC20} from "../interfaces/IERC20.sol";
+
 /// @notice This is a mock contract of the ERC20 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC20.sol
-contract MockERC20 {
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event Transfer(address indexed from, address indexed to, uint256 amount);
-
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
-
+contract MockERC20 is IERC20 {
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string public name;
+    string internal _name;
 
-    string public symbol;
+    string internal _symbol;
 
-    uint8 public decimals;
+    uint8 internal _decimals;
+
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    function decimals() external view override returns (uint8) {
+        return _decimals;
+    }
 
     /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    uint256 public totalSupply;
+    uint256 internal _totalSupply;
 
-    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) internal _balanceOf;
 
-    mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => mapping(address => uint256)) internal _allowance;
+
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    function balanceOf(address owner) external view override returns (uint256) {
+        return _balanceOf[owner];
+    }
+
+    function allowance(address owner, address spender) external view override returns (uint256) {
+        return _allowance[owner][spender];
+    }
 
     /*//////////////////////////////////////////////////////////////
                             EIP-2612 STORAGE
@@ -51,12 +69,12 @@ contract MockERC20 {
 
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
     /// syntaxes, we add an initialization function that can be called only once.
-    function initialize(string memory _name, string memory _symbol, uint8 _decimals) public {
+    function initialize(string memory name_, string memory symbol_, uint8 decimals_) public {
         require(!initialized, "ALREADY_INITIALIZED");
 
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
+        _name = name_;
+        _symbol = symbol_;
+        _decimals = decimals_;
 
         INITIAL_CHAIN_ID = _pureChainId();
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
@@ -68,30 +86,30 @@ contract MockERC20 {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 amount) public virtual returns (bool) {
-        allowance[msg.sender][spender] = amount;
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+        _allowance[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
 
         return true;
     }
 
-    function transfer(address to, uint256 amount) public virtual returns (bool) {
-        balanceOf[msg.sender] = _sub(balanceOf[msg.sender], amount);
-        balanceOf[to] = _add(balanceOf[to], amount);
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        _balanceOf[msg.sender] = _sub(_balanceOf[msg.sender], amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(msg.sender, to, amount);
 
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 amount) public virtual returns (bool) {
-        uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
+    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
+        uint256 allowed = _allowance[from][msg.sender]; // Saves gas for limited approvals.
 
-        if (allowed != ~uint256(0)) allowance[from][msg.sender] = _sub(allowed, amount);
+        if (allowed != ~uint256(0)) _allowance[from][msg.sender] = _sub(allowed, amount);
 
-        balanceOf[from] = _sub(balanceOf[from], amount);
-        balanceOf[to] = _add(balanceOf[to], amount);
+        _balanceOf[from] = _sub(_balanceOf[from], amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(from, to, amount);
 
@@ -134,7 +152,7 @@ contract MockERC20 {
 
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNER");
 
-        allowance[recoveredAddress][spender] = value;
+        _allowance[recoveredAddress][spender] = value;
 
         emit Approval(owner, spender, value);
     }
@@ -147,7 +165,7 @@ contract MockERC20 {
         return keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name)),
+                keccak256(bytes(_name)),
                 keccak256("1"),
                 _pureChainId(),
                 address(this)
@@ -160,15 +178,15 @@ contract MockERC20 {
     //////////////////////////////////////////////////////////////*/
 
     function _mint(address to, uint256 amount) internal virtual {
-        totalSupply = _add(totalSupply, amount);
-        balanceOf[to] = _add(balanceOf[to], amount);
+        _totalSupply = _add(_totalSupply, amount);
+        _balanceOf[to] = _add(_balanceOf[to], amount);
 
         emit Transfer(address(0), to, amount);
     }
 
     function _burn(address from, uint256 amount) internal virtual {
-        balanceOf[from] = _sub(balanceOf[from], amount);
-        totalSupply = _sub(totalSupply, amount);
+        _balanceOf[from] = _sub(_balanceOf[from], amount);
+        _totalSupply = _sub(_totalSupply, amount);
 
         emit Transfer(from, address(0), amount);
     }
