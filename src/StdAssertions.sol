@@ -33,6 +33,21 @@ abstract contract StdAssertions {
     event log_named_array(string key, int256[] val);
     event log_named_array(string key, address[] val);
 
+    bool private _failed;
+
+    function failed() public view returns (bool) {
+        if (_failed) {
+            return _failed;
+        } else {
+            return vm.load(address(vm), bytes32("failed")) != bytes32(0);
+        }
+    }
+
+    function fail() internal virtual {
+        vm.store(address(vm), bytes32("failed"), bytes32(uint256(1)));
+        _failed = true;
+    }
+
     function assertTrue(bool data) internal pure virtual {
         vm.assertTrue(data);
     }
