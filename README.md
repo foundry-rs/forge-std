@@ -217,7 +217,7 @@ contract Bar {
 
 ### Std Assertions
 
-Contains various assertions.
+Expand upon the assertion functions from the `DSTest` library.
 
 ### `console.log`
 
