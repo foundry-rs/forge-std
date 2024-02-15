@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/Test.sol";
+import "../src/StdAssertions.sol";
+import {Vm} from "../src/Vm.sol";
 
-contract StdAssertionsTest is Test {
-    string constant CUSTOM_ERROR = "guh!";
+interface VmInternal is Vm {
+    function _expectCheatcodeRevert(bytes memory message) external;
+}
 
-    bool constant EXPECT_PASS = false;
-    bool constant EXPECT_FAIL = true;
+contract StdAssertionsTest is StdAssertions {
+    string constant errorMessage = "User provided message";
+    uint256 constant maxDecimals = 77;
 
     bool constant SHOULD_REVERT = true;
     bool constant SHOULD_RETURN = false;
@@ -15,624 +18,819 @@ contract StdAssertionsTest is Test {
     bool constant STRICT_REVERT_DATA = true;
     bool constant NON_STRICT_REVERT_DATA = false;
 
-    TestTest t = new TestTest();
+    VmInternal constant vm = VmInternal(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    FAIL(STRING)
-    //////////////////////////////////////////////////////////////////////////*/
+    function _abs(int256 a) internal pure returns (uint256) {
+        // Required or it will fail when `a = type(int256).min`
+        if (a == type(int256).min) {
+            return uint256(type(int256).max) + 1;
+        }
 
-    function test_ShouldFail() external {
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._fail(CUSTOM_ERROR);
+        return uint256(a > 0 ? a : -a);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_FALSE
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function test_AssertFalse_Pass() external {
-        t._assertFalse(false, EXPECT_PASS);
+    function _getDelta(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a > b ? a - b : b - a;
     }
 
-    function test_AssertFalse_Fail() external {
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: Assertion Failed");
-        t._assertFalse(true, EXPECT_FAIL);
+    function _getDelta(int256 a, int256 b) internal pure returns (uint256) {
+        // a and b are of the same sign
+        // this works thanks to two's complement, the left-most bit is the sign bit
+        if ((a ^ b) > -1) {
+            return _getDelta(_abs(a), _abs(b));
+        }
+
+        // a and b are of opposite signs
+        return _abs(a) + _abs(b);
     }
 
-    function test_AssertFalse_Err_Pass() external {
-        t._assertFalse(false, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function test_AssertFalse_Err_Fail() external {
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertFalse(true, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_EQ(BOOL)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertEq_Bool_Pass(bool a) external {
-        t._assertEq(a, a, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_Bool_Fail(bool a, bool b) external {
-        vm.assume(a != b);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [bool]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_BoolErr_Pass(bool a) external {
-        t._assertEq(a, a, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_BoolErr_Fail(bool a, bool b) external {
-        vm.assume(a != b);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_EQ(BYTES)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertEq_Bytes_Pass(bytes calldata a) external {
-        t._assertEq(a, a, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_Bytes_Fail(bytes calldata a, bytes calldata b) external {
-        vm.assume(keccak256(a) != keccak256(b));
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [bytes]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_BytesErr_Pass(bytes calldata a) external {
-        t._assertEq(a, a, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_BytesErr_Fail(bytes calldata a, bytes calldata b) external {
-        vm.assume(keccak256(a) != keccak256(b));
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_EQ(ARRAY)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertEq_UintArr_Pass(uint256 e0, uint256 e1, uint256 e2) public {
-        uint256[] memory a = new uint256[](3);
-        a[0] = e0;
-        a[1] = e1;
-        a[2] = e2;
-        uint256[] memory b = new uint256[](3);
-        b[0] = e0;
-        b[1] = e1;
-        b[2] = e2;
-
-        t._assertEq(a, b, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_IntArr_Pass(int256 e0, int256 e1, int256 e2) public {
-        int256[] memory a = new int256[](3);
-        a[0] = e0;
-        a[1] = e1;
-        a[2] = e2;
-        int256[] memory b = new int256[](3);
-        b[0] = e0;
-        b[1] = e1;
-        b[2] = e2;
-
-        t._assertEq(a, b, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_AddressArr_Pass(address e0, address e1, address e2) public {
-        address[] memory a = new address[](3);
-        a[0] = e0;
-        a[1] = e1;
-        a[2] = e2;
-        address[] memory b = new address[](3);
-        b[0] = e0;
-        b[1] = e1;
-        b[2] = e2;
-
-        t._assertEq(a, b, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertEq_UintArr_FailEl(uint256 e1) public {
-        vm.assume(e1 != 0);
-        uint256[] memory a = new uint256[](3);
-        uint256[] memory b = new uint256[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [uint[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_IntArr_FailEl(int256 e1) public {
-        vm.assume(e1 != 0);
-        int256[] memory a = new int256[](3);
-        int256[] memory b = new int256[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [int[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_AddressArr_FailEl(address e1) public {
-        vm.assume(e1 != address(0));
-        address[] memory a = new address[](3);
-        address[] memory b = new address[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [address[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_UintArrErr_FailEl(uint256 e1) public {
-        vm.assume(e1 != 0);
-        uint256[] memory a = new uint256[](3);
-        uint256[] memory b = new uint256[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [uint[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_IntArrErr_FailEl(int256 e1) public {
-        vm.assume(e1 != 0);
-        int256[] memory a = new int256[](3);
-        int256[] memory b = new int256[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [int[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_AddressArrErr_FailEl(address e1) public {
-        vm.assume(e1 != address(0));
-        address[] memory a = new address[](3);
-        address[] memory b = new address[](3);
-        b[1] = e1;
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [address[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_UintArr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        uint256[] memory a = new uint256[](lenA);
-        uint256[] memory b = new uint256[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [uint[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_IntArr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        int256[] memory a = new int256[](lenA);
-        int256[] memory b = new int256[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [int[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_AddressArr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        address[] memory a = new address[](lenA);
-        address[] memory b = new address[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [address[]]");
-        t._assertEq(a, b, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_UintArrErr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        uint256[] memory a = new uint256[](lenA);
-        uint256[] memory b = new uint256[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [uint[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_IntArrErr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        int256[] memory a = new int256[](lenA);
-        int256[] memory b = new int256[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [int[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertEq_AddressArrErr_FailLen(uint256 lenA, uint256 lenB) public {
-        vm.assume(lenA != lenB);
-        vm.assume(lenA <= 10000);
-        vm.assume(lenB <= 10000);
-        address[] memory a = new address[](lenA);
-        address[] memory b = new address[](lenB);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a == b not satisfied [address[]]");
-        t._assertEq(a, b, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_EQ(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function test_AssertEqUint() public {
-        assertEqUint(uint8(1), uint128(1));
-        assertEqUint(uint64(2), uint64(2));
-    }
-
-    function testFail_AssertEqUint() public {
-        assertEqUint(uint64(1), uint96(2));
-        assertEqUint(uint160(3), uint160(4));
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_ABS(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertApproxEqAbs_Uint_Pass(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
-
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertApproxEqAbs_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [uint]");
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertApproxEqAbs_UintErr_Pass(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
-
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertApproxEqAbs_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_ABS_DECIMAL(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertApproxEqAbsDecimal_Uint_Pass(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
-        external
+    function _prefixDecWithZeroes(string memory intPart, string memory decimalPart, uint256 decimals)
+        internal
+        pure
+        returns (string memory)
     {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        while (bytes(decimalPart).length < decimals) {
+            decimalPart = string.concat("0", decimalPart);
+        }
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
+        return string.concat(intPart, ".", decimalPart);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_Uint_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function _formatWithDecimals(uint256 value, uint256 decimals) internal pure returns (string memory) {
+        string memory intPart = vm.toString(value / (10 ** decimals));
+        string memory decimalPart = vm.toString(value % (10 ** decimals));
 
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [uint]");
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_FAIL);
+        return _prefixDecWithZeroes(intPart, decimalPart, decimals);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_UintErr_Pass(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+    function _formatWithDecimals(int256 value, uint256 decimals) internal pure returns (string memory) {
+        string memory intPart = vm.toString(value / int256(10 ** decimals));
+        int256 mod = value % int256(10 ** decimals);
+        string memory decimalPart = vm.toString(mod > 0 ? mod : -mod);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
+        // Add - if we have something like 0.123
+        if ((value < 0) && keccak256(abi.encode(intPart)) == keccak256(abi.encode("0"))) {
+            intPart = string.concat("-", intPart);
+        }
+
+        return _prefixDecWithZeroes(intPart, decimalPart, decimals);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_UintErr_Fail(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function testFuzzAssertEqNotEq(uint256 left, uint256 right, uint256 decimals) public {
+        vm.assume(left != right);
+        vm.assume(decimals <= maxDecimals);
 
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " != ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertEqDecimal(left, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " == ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertNotEqDecimal(left, left, decimals);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_ABS(INT)
-    //////////////////////////////////////////////////////////////////////////*/
+    function testFuzzAssertEqNotEq(int256 left, int256 right, uint256 decimals) public {
+        vm.assume(left != right);
+        vm.assume(decimals <= maxDecimals);
 
-    function testFuzz_AssertApproxEqAbs_Int_Pass(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
 
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_PASS);
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    errorMessage,
+                    ": ",
+                    _formatWithDecimals(left, decimals),
+                    " != ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertEqDecimal(left, right, decimals, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    errorMessage, ": ", _formatWithDecimals(left, decimals), " == ", _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertNotEqDecimal(left, left, decimals, errorMessage);
     }
 
-    function testFuzz_AssertApproxEqAbs_Int_Fail(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function testFuzzAssertEqNotEq(bool left, bool right) public {
+        vm.assume(left != right);
 
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [int]");
-        t._assertApproxEqAbs(a, b, maxDelta, EXPECT_FAIL);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
     }
 
-    function testFuzz_AssertApproxEqAbs_IntErr_Pass(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+    function testFuzzAssertEqNotEq(address left, address right) public {
+        vm.assume(left != right);
 
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_PASS);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
     }
 
-    function testFuzz_AssertApproxEqAbs_IntErr_Fail(int256 a, int256 b, uint256 maxDelta) external {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function testFuzzAssertEqNotEq(bytes32 left, bytes32 right) public {
+        vm.assume(left != right);
 
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqAbs(a, b, maxDelta, CUSTOM_ERROR, EXPECT_FAIL);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_ABS_DECIMAL(INT)
-    //////////////////////////////////////////////////////////////////////////*/
+    function testFuzzAssertEqNotEq(string memory left, string memory right) public {
+        vm.assume(keccak256(abi.encodePacked(left)) != keccak256(abi.encodePacked(right)));
 
-    function testFuzz_AssertApproxEqAbsDecimal_Int_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_PASS);
+        vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": ", left, " != ", right)));
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": ", left, " == ", left)));
+        assertNotEq(left, left, errorMessage);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_Int_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function testFuzzAssertEqNotEq(bytes memory left, bytes memory right) public {
+        vm.assume(keccak256(left) != keccak256(right));
 
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [int]");
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, EXPECT_FAIL);
+        assertEq(left, left);
+        assertEq(right, right);
+        assertNotEq(left, right);
+        assertNotEq(right, left);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " != ", vm.toString(right)))
+        );
+        assertEq(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " == ", vm.toString(left)))
+        );
+        assertNotEq(left, left, errorMessage);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_IntErr_Pass(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) <= maxDelta);
+    function testFuzzAssertGtLt(uint256 left, uint256 right, uint256 decimals) public {
+        vm.assume(left < right);
+        vm.assume(decimals <= maxDecimals);
 
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
+        assertGt(right, left);
+        assertLt(left, right);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " <= ", vm.toString(right)))
+        );
+        assertGt(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " <= ", vm.toString(right)))
+        );
+        assertGt(right, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " >= ", vm.toString(left)))
+        );
+        assertLt(left, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " >= ", vm.toString(left)))
+        );
+        assertLt(right, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " <= ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGtDecimal(left, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " <= ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGtDecimal(right, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " >= ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLtDecimal(left, left, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " >= ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLtDecimal(right, left, decimals);
     }
 
-    function testFuzz_AssertApproxEqAbsDecimal_IntErr_Fail(int256 a, int256 b, uint256 maxDelta, uint256 decimals)
-        external
-    {
-        vm.assume(stdMath.delta(a, b) > maxDelta);
+    function testFuzzAssertGtLt(int256 left, int256 right, uint256 decimals) public {
+        vm.assume(left < right);
+        vm.assume(decimals <= maxDecimals);
 
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqAbsDecimal(a, b, maxDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
+        assertGt(right, left);
+        assertLt(left, right);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " <= ", vm.toString(right)))
+        );
+        assertGt(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " <= ", vm.toString(right)))
+        );
+        assertGt(right, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " >= ", vm.toString(left)))
+        );
+        assertLt(left, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " >= ", vm.toString(left)))
+        );
+        assertLt(right, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " <= ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGtDecimal(left, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " <= ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGtDecimal(right, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " >= ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLtDecimal(left, left, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " >= ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLtDecimal(right, left, decimals);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_REL(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
+    function testFuzzAssertGeLe(uint256 left, uint256 right, uint256 decimals) public {
+        vm.assume(left < right);
+        vm.assume(decimals <= maxDecimals);
 
-    function testFuzz_AssertApproxEqRel_Uint_Pass(uint256 a, uint256 b, uint256 maxPercentDelta) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        assertGe(left, left);
+        assertLe(left, left);
+        assertGe(right, right);
+        assertLe(right, right);
+        assertGe(right, left);
+        assertLe(left, right);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " < ", vm.toString(right)))
+        );
+        assertGe(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " > ", vm.toString(left)))
+        );
+        assertLe(right, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " < ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGeDecimal(left, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " > ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLeDecimal(right, left, decimals);
     }
 
-    function testFuzz_AssertApproxEqRel_Uint_Fail(uint256 a, uint256 b, uint256 maxPercentDelta) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+    function testFuzzAssertGeLe(int256 left, int256 right, uint256 decimals) public {
+        vm.assume(left < right);
+        vm.assume(decimals <= maxDecimals);
 
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [uint]");
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_FAIL);
+        assertGe(left, left);
+        assertLe(left, left);
+        assertGe(right, right);
+        assertLe(right, right);
+        assertGe(right, left);
+        assertLe(left, right);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(left), " < ", vm.toString(right)))
+        );
+        assertGe(left, right, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(string.concat(errorMessage, ": ", vm.toString(right), " > ", vm.toString(left)))
+        );
+        assertLe(right, left, errorMessage);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(left, decimals),
+                    " < ",
+                    _formatWithDecimals(right, decimals)
+                )
+            )
+        );
+        assertGeDecimal(left, right, decimals);
+
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "assertion failed: ",
+                    _formatWithDecimals(right, decimals),
+                    " > ",
+                    _formatWithDecimals(left, decimals)
+                )
+            )
+        );
+        assertLeDecimal(right, left, decimals);
     }
 
-    function testFuzz_AssertApproxEqRel_UintErr_Pass(uint256 a, uint256 b, uint256 maxPercentDelta) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+    function testFuzzAssertApproxEqAbs(uint256 left, uint256 right, uint256 decimals) public {
+        uint256 delta = _getDelta(right, left);
+        vm.assume(decimals <= maxDecimals);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
+        assertApproxEqAbs(left, right, delta);
+
+        if (delta > 0) {
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        errorMessage,
+                        ": ",
+                        vm.toString(left),
+                        " !~= ",
+                        vm.toString(right),
+                        " (max delta: ",
+                        vm.toString(delta - 1),
+                        ", real delta: ",
+                        vm.toString(delta),
+                        ")"
+                    )
+                )
+            );
+            assertApproxEqAbs(left, right, delta - 1, errorMessage);
+
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        "assertion failed: ",
+                        _formatWithDecimals(left, decimals),
+                        " !~= ",
+                        _formatWithDecimals(right, decimals),
+                        " (max delta: ",
+                        _formatWithDecimals(delta - 1, decimals),
+                        ", real delta: ",
+                        _formatWithDecimals(delta, decimals),
+                        ")"
+                    )
+                )
+            );
+            assertApproxEqAbsDecimal(left, right, delta - 1, decimals);
+        }
     }
 
-    function testFuzz_AssertApproxEqRel_UintErr_Fail(uint256 a, uint256 b, uint256 maxPercentDelta) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+    function testFuzzAssertApproxEqAbs(int256 left, int256 right, uint256 decimals) public {
+        uint256 delta = _getDelta(right, left);
+        vm.assume(decimals <= maxDecimals);
 
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_FAIL);
+        assertApproxEqAbs(left, right, delta);
+
+        if (delta > 0) {
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        errorMessage,
+                        ": ",
+                        vm.toString(left),
+                        " !~= ",
+                        vm.toString(right),
+                        " (max delta: ",
+                        vm.toString(delta - 1),
+                        ", real delta: ",
+                        vm.toString(delta),
+                        ")"
+                    )
+                )
+            );
+            assertApproxEqAbs(left, right, delta - 1, errorMessage);
+
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        "assertion failed: ",
+                        _formatWithDecimals(left, decimals),
+                        " !~= ",
+                        _formatWithDecimals(right, decimals),
+                        " (max delta: ",
+                        _formatWithDecimals(delta - 1, decimals),
+                        ", real delta: ",
+                        _formatWithDecimals(delta, decimals),
+                        ")"
+                    )
+                )
+            );
+            assertApproxEqAbsDecimal(left, right, delta - 1, decimals);
+        }
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_REL_DECIMAL(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
+    function testFuzzAssertApproxEqRel(uint256 left, uint256 right, uint256 decimals) public {
+        vm.assume(right != 0);
+        uint256 delta = _getDelta(right, left);
+        vm.assume(delta < type(uint256).max / (10 ** 18));
+        vm.assume(decimals <= maxDecimals);
 
-    function testFuzz_AssertApproxEqRelDecimal_Uint_Pass(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals
-    ) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        uint256 percentDelta = delta * (10 ** 18) / right;
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_PASS);
+        assertApproxEqRel(left, right, percentDelta);
+
+        if (percentDelta > 0) {
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        errorMessage,
+                        ": ",
+                        vm.toString(left),
+                        " !~= ",
+                        vm.toString(right),
+                        " (max delta: ",
+                        _formatWithDecimals(percentDelta - 1, 16),
+                        "%, real delta: ",
+                        _formatWithDecimals(percentDelta, 16),
+                        "%)"
+                    )
+                )
+            );
+            assertApproxEqRel(left, right, percentDelta - 1, errorMessage);
+
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        "assertion failed: ",
+                        _formatWithDecimals(left, decimals),
+                        " !~= ",
+                        _formatWithDecimals(right, decimals),
+                        " (max delta: ",
+                        _formatWithDecimals(percentDelta - 1, 16),
+                        "%, real delta: ",
+                        _formatWithDecimals(percentDelta, 16),
+                        "%)"
+                    )
+                )
+            );
+            assertApproxEqRelDecimal(left, right, percentDelta - 1, decimals);
+        }
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_Uint_Fail(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals
-    ) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+    function testFuzzAssertApproxEqRel(int256 left, int256 right, uint256 decimals) public {
+        vm.assume(left < right);
+        vm.assume(right != 0);
+        uint256 delta = _getDelta(right, left);
+        vm.assume(delta < type(uint256).max / (10 ** 18));
+        vm.assume(decimals <= maxDecimals);
 
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [uint]");
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_FAIL);
+        uint256 percentDelta = delta * (10 ** 18) / _abs(right);
+
+        assertApproxEqRel(left, right, percentDelta);
+
+        if (percentDelta > 0) {
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        errorMessage,
+                        ": ",
+                        vm.toString(left),
+                        " !~= ",
+                        vm.toString(right),
+                        " (max delta: ",
+                        _formatWithDecimals(percentDelta - 1, 16),
+                        "%, real delta: ",
+                        _formatWithDecimals(percentDelta, 16),
+                        "%)"
+                    )
+                )
+            );
+            assertApproxEqRel(left, right, percentDelta - 1, errorMessage);
+
+            vm._expectCheatcodeRevert(
+                bytes(
+                    string.concat(
+                        "assertion failed: ",
+                        _formatWithDecimals(left, decimals),
+                        " !~= ",
+                        _formatWithDecimals(right, decimals),
+                        " (max delta: ",
+                        _formatWithDecimals(percentDelta - 1, 16),
+                        "%, real delta: ",
+                        _formatWithDecimals(percentDelta, 16),
+                        "%)"
+                    )
+                )
+            );
+            assertApproxEqRelDecimal(left, right, percentDelta - 1, decimals);
+        }
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_UintErr_Pass(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals
-    ) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+    function testAssertEqNotEqArrays() public {
+        {
+            uint256[] memory arr1 = new uint256[](1);
+            arr1[0] = 1;
+            uint256[] memory arr2 = new uint256[](2);
+            arr2[0] = 1;
+            arr2[1] = 2;
 
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes("assertion failed: [1] != [1, 2]"));
+            assertEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat("assertion failed: [1, 2] == [1, 2]")));
+            assertNotEq(arr2, arr2);
+        }
+        {
+            int256[] memory arr1 = new int256[](2);
+            int256[] memory arr2 = new int256[](1);
+            arr1[0] = 5;
+            arr2[0] = type(int256).max;
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": [5, 0] != [", vm.toString(arr2[0]), "]")));
+            assertEq(arr1, arr2, errorMessage);
+
+            vm._expectCheatcodeRevert(bytes(string.concat("assertion failed: [5, 0] == [5, 0]")));
+            assertNotEq(arr1, arr1);
+        }
+        {
+            bool[] memory arr1 = new bool[](2);
+            bool[] memory arr2 = new bool[](2);
+            arr1[0] = true;
+            arr2[1] = true;
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": [true, false] != [false, true]")));
+            assertEq(arr1, arr2, errorMessage);
+
+            vm._expectCheatcodeRevert(bytes(string("assertion failed: [true, false] == [true, false]")));
+            assertNotEq(arr1, arr1);
+        }
+        {
+            address[] memory arr1 = new address[](1);
+            address[] memory arr2 = new address[](0);
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": [", vm.toString(arr1[0]), "] != []")));
+            assertEq(arr1, arr2, errorMessage);
+
+            vm._expectCheatcodeRevert(bytes(string("assertion failed: [] == []")));
+            assertNotEq(arr2, arr2);
+        }
+        {
+            bytes32[] memory arr1 = new bytes32[](1);
+            bytes32[] memory arr2 = new bytes32[](1);
+            arr1[0] = bytes32(uint256(1));
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(
+                bytes(string.concat(errorMessage, ": [", vm.toString(arr1[0]), "] != [", vm.toString(arr2[0]), "]"))
+            );
+            assertEq(arr1, arr2, errorMessage);
+
+            vm._expectCheatcodeRevert(
+                bytes(string.concat("assertion failed: [", vm.toString(arr2[0]), "] == [", vm.toString(arr2[0]), "]"))
+            );
+            assertNotEq(arr2, arr2);
+        }
+        {
+            string[] memory arr1 = new string[](1);
+            string[] memory arr2 = new string[](3);
+
+            arr1[0] = "foo";
+            arr2[2] = "bar";
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes("assertion failed: [foo] != [, , bar]"));
+            assertEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": [foo] == [foo]")));
+            assertNotEq(arr1, arr1, errorMessage);
+        }
+        {
+            bytes[] memory arr1 = new bytes[](1);
+            bytes[] memory arr2 = new bytes[](2);
+
+            arr1[0] = hex"1111";
+            arr2[1] = hex"1234";
+
+            assertEq(arr1, arr1);
+            assertEq(arr2, arr2);
+            assertNotEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes("assertion failed: [0x1111] != [0x, 0x1234]"));
+            assertEq(arr1, arr2);
+
+            vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": [0x1111] == [0x1111]")));
+            assertNotEq(arr1, arr1, errorMessage);
+        }
     }
 
-    function testFuzz_AssertApproxEqRelDecimal_UintErr_Fail(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals
-    ) external {
-        vm.assume(a < type(uint128).max && b < type(uint128).max && b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
+    function testAssertBool() public {
+        assertTrue(true);
+        assertFalse(false);
 
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
+        vm._expectCheatcodeRevert(bytes("assertion failed"));
+        assertTrue(false);
+
+        vm._expectCheatcodeRevert(bytes(errorMessage));
+        assertTrue(false, errorMessage);
+
+        vm._expectCheatcodeRevert(bytes("assertion failed"));
+        assertFalse(true);
+
+        vm._expectCheatcodeRevert(bytes(errorMessage));
+        assertFalse(true, errorMessage);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_REL(INT)
-    //////////////////////////////////////////////////////////////////////////*/
+    function testAssertApproxEqRel() public {
+        vm._expectCheatcodeRevert(bytes("assertion failed: overflow in delta calculation"));
+        assertApproxEqRel(type(int256).min, type(int256).max, 0);
 
-    function testFuzz_AssertApproxEqRel_Int_Pass(int128 a, int128 b, uint128 maxPercentDelta) external {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
+        vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": overflow in delta calculation")));
+        assertApproxEqRel(int256(1), int256(0), 0, errorMessage);
 
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_PASS);
+        vm._expectCheatcodeRevert(bytes(string.concat(errorMessage, ": overflow in delta calculation")));
+        assertApproxEqRel(uint256(0), type(uint256).max, 0, errorMessage);
+
+        vm._expectCheatcodeRevert(bytes("assertion failed: overflow in delta calculation"));
+        assertApproxEqRel(uint256(1), uint256(0), uint256(0));
     }
-
-    function testFuzz_AssertApproxEqRel_Int_Fail(int128 a, int128 b, uint128 maxPercentDelta) external {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [int]");
-        t._assertApproxEqRel(a, b, maxPercentDelta, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertApproxEqRel_IntErr_Pass(int128 a, int128 b, uint128 maxPercentDelta) external {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
-
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertApproxEqRel_IntErr_Fail(int128 a, int128 b, uint128 maxPercentDelta) external {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqRel(a, b, maxPercentDelta, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    APPROX_EQ_REL_DECIMAL(INT)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testAssertApproxEqRelDecimal_Int_Pass(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
-        external
-    {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
-
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_PASS);
-    }
-
-    function testAssertApproxEqRelDecimal_Int_Fail(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
-        external
-    {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a ~= b not satisfied [int]");
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, EXPECT_FAIL);
-    }
-
-    function testAssertApproxEqRelDecimal_IntErr_Pass(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
-        external
-    {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) <= maxPercentDelta);
-
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testAssertApproxEqRelDecimal_IntErr_Fail(int128 a, int128 b, uint128 maxPercentDelta, uint128 decimals)
-        external
-    {
-        vm.assume(b != 0);
-        vm.assume(stdMath.percentDelta(a, b) > maxPercentDelta);
-
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    ASSERT_EQ_CALL
-    //////////////////////////////////////////////////////////////////////////*/
 
     function testFuzz_AssertEqCall_Return_Pass(
         bytes memory callDataA,
@@ -643,7 +841,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnData, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnData, SHOULD_RETURN));
 
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_PASS);
+        assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData);
     }
 
     function testFuzz_RevertWhenCalled_AssertEqCall_Return_Fail(
@@ -658,9 +856,14 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_RETURN));
 
-        vm.expectEmit(true, true, true, true);
-        emit log_named_string("Error", "Call return data does not match");
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_FAIL);
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "Call return data does not match: ", vm.toString(returnDataA), " != ", vm.toString(returnDataB)
+                )
+            )
+        );
+        assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData);
     }
 
     function testFuzz_AssertEqCall_Revert_Pass(
@@ -672,7 +875,7 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(revertDataA, SHOULD_REVERT));
         address targetB = address(new TestMockCall(revertDataB, SHOULD_REVERT));
 
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, NON_STRICT_REVERT_DATA, EXPECT_PASS);
+        assertEqCall(targetA, callDataA, targetB, callDataB, NON_STRICT_REVERT_DATA);
     }
 
     function testFuzz_RevertWhenCalled_AssertEqCall_Revert_Fail(
@@ -686,9 +889,14 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(revertDataA, SHOULD_REVERT));
         address targetB = address(new TestMockCall(revertDataB, SHOULD_REVERT));
 
-        vm.expectEmit(true, true, true, true);
-        emit log_named_string("Error", "Call revert data does not match");
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, STRICT_REVERT_DATA, EXPECT_FAIL);
+        vm._expectCheatcodeRevert(
+            bytes(
+                string.concat(
+                    "Call revert data does not match: ", vm.toString(revertDataA), " != ", vm.toString(revertDataB)
+                )
+            )
+        );
+        assertEqCall(targetA, callDataA, targetB, callDataB, STRICT_REVERT_DATA);
     }
 
     function testFuzz_RevertWhenCalled_AssertEqCall_Fail(
@@ -701,292 +909,26 @@ contract StdAssertionsTest is Test {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_REVERT));
 
-        vm.expectEmit(true, true, true, true);
-        emit log_named_bytes("  Left call return data", returnDataA);
-        vm.expectEmit(true, true, true, true);
-        emit log_named_bytes(" Right call revert data", returnDataB);
-        t._assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData, EXPECT_FAIL);
+        vm.expectRevert(bytes("assertion failed"));
+        this.assertEqCallExternal(targetA, callDataA, targetB, callDataB, strictRevertData);
 
-        vm.expectEmit(true, true, true, true);
-        emit log_named_bytes("  Left call revert data", returnDataB);
-        vm.expectEmit(true, true, true, true);
-        emit log_named_bytes(" Right call return data", returnDataA);
-        t._assertEqCall(targetB, callDataB, targetA, callDataA, strictRevertData, EXPECT_FAIL);
+        vm.expectRevert(bytes("assertion failed"));
+        this.assertEqCallExternal(targetB, callDataB, targetA, callDataA, strictRevertData);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                ASSERT_NOT_EQ(BYTES)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function testFuzz_AssertNotEq_Bytes_Pass(bytes32 a, bytes32 b) external {
-        vm.assume(a != b);
-        t._assertNotEq(a, b, EXPECT_PASS);
-    }
-
-    function testFuzz_AssertNotEq_Bytes_Fail(bytes32 a) external {
-        vm.expectEmit(false, false, false, true);
-        emit log("Error: a != b not satisfied [bytes32]");
-        t._assertNotEq(a, a, EXPECT_FAIL);
-    }
-
-    function testFuzz_AssertNotEq_BytesErr_Pass(bytes32 a, bytes32 b) external {
-        vm.assume(a != b);
-        t._assertNotEq(a, b, CUSTOM_ERROR, EXPECT_PASS);
-    }
-
-    function testFuzz_AsserNottEq_BytesErr_Fail(bytes32 a) external {
-        vm.expectEmit(false, false, false, true);
-        emit log_named_string("Error", CUSTOM_ERROR);
-        t._assertNotEq(a, a, CUSTOM_ERROR, EXPECT_FAIL);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                ASSERT_NOT_EQ(UINT)
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function test_AssertNotEqUint() public {
-        assertNotEq(uint8(1), uint128(2));
-        assertNotEq(uint64(3), uint64(4));
-    }
-
-    function testFail_AssertNotEqUint() public {
-        assertNotEq(uint64(1), uint96(1));
-        assertNotEq(uint160(2), uint160(2));
-    }
-}
-
-contract TestTest is Test {
-    modifier expectFailure(bool expectFail) {
-        bool preState = vm.load(HEVM_ADDRESS, bytes32("failed")) != bytes32(0x00);
-        _;
-        bool postState = vm.load(HEVM_ADDRESS, bytes32("failed")) != bytes32(0x00);
-
-        if (preState == true) {
-            return;
-        }
-
-        if (expectFail) {
-            require(postState == true, "expected failure not triggered");
-
-            // unwind the expected failure
-            vm.store(HEVM_ADDRESS, bytes32("failed"), bytes32(uint256(0x00)));
-        } else {
-            require(postState == false, "unexpected failure was triggered");
-        }
-    }
-
-    function _fail(string memory err) external expectFailure(true) {
-        fail(err);
-    }
-
-    function _assertFalse(bool data, bool expectFail) external expectFailure(expectFail) {
-        assertFalse(data);
-    }
-
-    function _assertFalse(bool data, string memory err, bool expectFail) external expectFailure(expectFail) {
-        assertFalse(data, err);
-    }
-
-    function _assertEq(bool a, bool b, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b);
-    }
-
-    function _assertEq(bool a, bool b, string memory err, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b, err);
-    }
-
-    function _assertEq(bytes memory a, bytes memory b, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b);
-    }
-
-    function _assertEq(bytes memory a, bytes memory b, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertEq(a, b, err);
-    }
-
-    function _assertEq(uint256[] memory a, uint256[] memory b, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b);
-    }
-
-    function _assertEq(int256[] memory a, int256[] memory b, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b);
-    }
-
-    function _assertEq(address[] memory a, address[] memory b, bool expectFail) external expectFailure(expectFail) {
-        assertEq(a, b);
-    }
-
-    function _assertEq(uint256[] memory a, uint256[] memory b, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertEq(a, b, err);
-    }
-
-    function _assertEq(int256[] memory a, int256[] memory b, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertEq(a, b, err);
-    }
-
-    function _assertEq(address[] memory a, address[] memory b, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertEq(a, b, err);
-    }
-
-    function _assertNotEq(bytes32 a, bytes32 b, bool expectFail) external expectFailure(expectFail) {
-        assertNotEq32(a, b);
-    }
-
-    function _assertNotEq(bytes32 a, bytes32 b, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertNotEq32(a, b, err);
-    }
-
-    function _assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbs(a, b, maxDelta);
-    }
-
-    function _assertApproxEqAbs(uint256 a, uint256 b, uint256 maxDelta, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbs(a, b, maxDelta, err);
-    }
-
-    function _assertApproxEqAbsDecimal(uint256 a, uint256 b, uint256 maxDelta, uint256 decimals, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
-    }
-
-    function _assertApproxEqAbsDecimal(
-        uint256 a,
-        uint256 b,
-        uint256 maxDelta,
-        uint256 decimals,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
-        assertApproxEqAbsDecimal(a, b, maxDelta, decimals, err);
-    }
-
-    function _assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbs(a, b, maxDelta);
-    }
-
-    function _assertApproxEqAbs(int256 a, int256 b, uint256 maxDelta, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbs(a, b, maxDelta, err);
-    }
-
-    function _assertApproxEqAbsDecimal(int256 a, int256 b, uint256 maxDelta, uint256 decimals, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqAbsDecimal(a, b, maxDelta, decimals);
-    }
-
-    function _assertApproxEqAbsDecimal(
-        int256 a,
-        int256 b,
-        uint256 maxDelta,
-        uint256 decimals,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
-        assertApproxEqAbsDecimal(a, b, maxDelta, decimals, err);
-    }
-
-    function _assertApproxEqRel(uint256 a, uint256 b, uint256 maxPercentDelta, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRel(a, b, maxPercentDelta);
-    }
-
-    function _assertApproxEqRel(uint256 a, uint256 b, uint256 maxPercentDelta, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRel(a, b, maxPercentDelta, err);
-    }
-
-    function _assertApproxEqRelDecimal(uint256 a, uint256 b, uint256 maxPercentDelta, uint256 decimals, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals);
-    }
-
-    function _assertApproxEqRelDecimal(
-        uint256 a,
-        uint256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
-        assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, err);
-    }
-
-    function _assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRel(a, b, maxPercentDelta);
-    }
-
-    function _assertApproxEqRel(int256 a, int256 b, uint256 maxPercentDelta, string memory err, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRel(a, b, maxPercentDelta, err);
-    }
-
-    function _assertApproxEqRelDecimal(int256 a, int256 b, uint256 maxPercentDelta, uint256 decimals, bool expectFail)
-        external
-        expectFailure(expectFail)
-    {
-        assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals);
-    }
-
-    function _assertApproxEqRelDecimal(
-        int256 a,
-        int256 b,
-        uint256 maxPercentDelta,
-        uint256 decimals,
-        string memory err,
-        bool expectFail
-    ) external expectFailure(expectFail) {
-        assertApproxEqRelDecimal(a, b, maxPercentDelta, decimals, err);
-    }
-
-    function _assertEqCall(
+    // Helper function to test outcome of assertEqCall via `expect` cheatcodes
+    function assertEqCallExternal(
         address targetA,
         bytes memory callDataA,
         address targetB,
         bytes memory callDataB,
-        bool strictRevertData,
-        bool expectFail
-    ) external expectFailure(expectFail) {
+        bool strictRevertData
+    ) public {
         assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData);
+    }
+
+    function testFailFail() public {
+        fail();
     }
 }
 

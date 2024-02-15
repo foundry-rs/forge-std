@@ -24,10 +24,6 @@ import {Vm} from "./Vm.sol";
 
 // 📦 BOILERPLATE
 import {TestBase} from "./Base.sol";
-import {DSTest} from "ds-test/test.sol";
 
 // ⭐️ TEST
-abstract contract Test is TestBase, DSTest, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {
-// Note: IS_TEST() must return true.
-// Note: Must have failure system, https://github.com/dapphub/ds-test/blob/cd98eff28324bfac652e63a239a60632a761790b/src/test.sol#L39-L76.
-}
+abstract contract Test is TestBase, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {}

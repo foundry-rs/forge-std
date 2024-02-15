@@ -71,7 +71,7 @@ contract MockERC721Test is StdCheats, Test {
         token = new Token_ERC721("Token", "TKN");
     }
 
-    function invariantMetadata() public {
+    function invariantMetadata() public view {
         assertEq(token.name(), "Token");
         assertEq(token.symbol(), "TKN");
     }
