@@ -43,11 +43,6 @@ contract StdChainsTest is Test {
         assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001");
     }
 
-    function testFuzz_Rpc(string memory rpcAlias) internal {
-        string memory rpcUrl = getChain(rpcAlias).rpcUrl;
-        vm.createSelectFork(rpcUrl);
-    }
-
     // Ensure we can connect to the default RPC URL for each chain.
     // function testRpcs() public {
     //     testRpc("mainnet");
