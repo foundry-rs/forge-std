@@ -24,12 +24,17 @@ abstract contract CommonBase {
     uint256 internal constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
+    // Reference to Vm contract instance.
     Vm internal constant vm = Vm(VM_ADDRESS);
+    // Reference to StdStorage contract instance.
     StdStorage internal stdstore;
 }
 
+// Abstract contract for testing purposes.
 abstract contract TestBase is CommonBase {}
 
+// Abstract contract for scripts execution.
 abstract contract ScriptBase is CommonBase {
+    // Reference to VmSafe contract instance.
     VmSafe internal constant vmSafe = VmSafe(VM_ADDRESS);
 }
