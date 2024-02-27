@@ -4,27 +4,27 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 abstract contract StdInvariant {
+    // Struct to represent a set of function selectors for a specific contract address.
     struct FuzzSelector {
         address addr;
         bytes4[] selectors;
     }
 
+    // Struct to represent a set of artifacts for a specific contract address.
     struct FuzzInterface {
         address addr;
         string[] artifacts;
     }
 
+    // Arrays to store addresses, strings, and structs for excluded and targeted contracts, senders, artifacts, and selectors.
     address[] private _excludedContracts;
     address[] private _excludedSenders;
     address[] private _targetedContracts;
     address[] private _targetedSenders;
-
     string[] private _excludedArtifacts;
     string[] private _targetedArtifacts;
-
     FuzzSelector[] private _targetedArtifactSelectors;
     FuzzSelector[] private _targetedSelectors;
-
     FuzzInterface[] private _targetedInterfaces;
 
     // Functions for users:
