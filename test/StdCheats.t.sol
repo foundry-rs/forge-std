@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
+import "../src/interfaces/IERC20.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -506,6 +507,15 @@ contract StdCheatsForkTest is Test {
     function testFuzz_AssumeNotBlacklisted_USDT(address addr) external {
         assumeNotBlacklisted(USDT, addr);
         assertFalse(USDTLike(USDT).isBlackListed(addr));
+    }
+
+    function test_dealUSDC() external {
+        // roll fork to the point when USDC contract updated to store balance in packed slots
+        vm.rollFork(19279215);
+
+        uint256 balance = 100e6;
+        deal(USDC, address(this), balance);
+        assertEq(IERC20(USDC).balanceOf(address(this)), balance);
     }
 }
 

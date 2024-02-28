@@ -178,13 +178,17 @@ contract StdStorageTest is Test {
         assertTrue(test.map_bool(address(this)));
     }
 
-    function testFail_StorageCheckedWriteMapPacked() public {
-        // expect PackedSlot error but not external call so cant expectRevert
-        stdstore.target(address(test)).sig(test.read_struct_lower.selector).with_key(address(uint160(1337)))
-            .checked_write(100);
+    function testFuzz_StorageCheckedWriteMapPacked(address addr, uint128 value) public {
+        stdstore.enable_packed_slots().target(address(test)).sig(test.read_struct_lower.selector).with_key(addr)
+            .checked_write(value);
+        assertEq(test.read_struct_lower(addr), value);
+
+        stdstore.enable_packed_slots().target(address(test)).sig(test.read_struct_upper.selector).with_key(addr)
+            .checked_write(value);
+        assertEq(test.read_struct_upper(addr), value);
     }
 
-    function test_StorageCheckedWriteMapPackedSuccess() public {
+    function test_StorageCheckedWriteMapPackedFullSuccess() public {
         uint256 full = test.map_packed(address(1337));
         // keep upper 128, set lower 128 to 1337
         full = (full & (uint256((1 << 128) - 1) << 128)) | 1337;
@@ -199,13 +203,16 @@ contract StdStorageTest is Test {
         stdstore.target(address(test)).sig("const()").find();
     }
 
-    function testFail_StorageNativePack() public {
-        stdstore.target(address(test)).sig(test.tA.selector).find();
-        stdstore.target(address(test)).sig(test.tB.selector).find();
+    function testFuzz_StorageNativePack(uint248 val1, uint248 val2, bool boolVal1, bool boolVal2) public {
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tA.selector).checked_write(val1);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tB.selector).checked_write(boolVal1);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tC.selector).checked_write(boolVal2);
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tD.selector).checked_write(val2);
 
-        // these both would fail
-        stdstore.target(address(test)).sig(test.tC.selector).find();
-        stdstore.target(address(test)).sig(test.tD.selector).find();
+        assertEq(test.tA(), val1);
+        assertEq(test.tB(), boolVal1);
+        assertEq(test.tC(), boolVal2);
+        assertEq(test.tD(), val2);
     }
 
     function test_StorageReadBytes32() public {
@@ -246,6 +253,98 @@ contract StdStorageTest is Test {
         int256 val = stdstore.target(address(test)).sig(test.tG.selector).read_int();
         assertEq(val, type(int256).min);
     }
+
+    function testFuzzPacked(uint256 val, uint8 elemToGet) public {
+        // This function tries an assortment of packed slots, shifts meaning number of elements
+        // that are packed. Shiftsizes are the size of each element, i.e. 8 means a data type that is 8 bits, 16 == 16 bits, etc.
+        // Combined, these determine how a slot is packed. Making it random is too hard to avoid global rejection limit
+        // and make it performant.
+
+        // change the number of shifts
+        for (uint256 i = 1; i < 5; i++) {
+            uint256 shifts = i;
+
+            elemToGet = uint8(bound(elemToGet, 0, shifts - 1));
+
+            uint256[] memory shiftSizes = new uint256[](shifts);
+            for (uint256 j; j < shifts; j++) {
+                shiftSizes[j] = 8 * (j + 1);
+            }
+
+            test.setRandomPacking(val);
+
+            uint256 leftBits;
+            uint256 rightBits;
+            for (uint256 j; j < shiftSizes.length; j++) {
+                if (j < elemToGet) {
+                    leftBits += shiftSizes[j];
+                } else if (elemToGet != j) {
+                    rightBits += shiftSizes[j];
+                }
+            }
+
+            // we may have some right bits unaccounted for
+            leftBits += 256 - (leftBits + shiftSizes[elemToGet] + rightBits);
+            // clear left bits, then clear right bits and realign
+            uint256 expectedValToRead = (val << leftBits) >> (leftBits + rightBits);
+
+            uint256 readVal = stdstore.target(address(test)).enable_packed_slots().sig(
+                "getRandomPacked(uint8,uint8[],uint8)"
+            ).with_calldata(abi.encode(shifts, shiftSizes, elemToGet)).read_uint();
+
+            assertEq(readVal, expectedValToRead);
+        }
+    }
+
+    function testFuzzPacked2(uint256 nvars, uint256 seed) public {
+        // Number of random variables to generate.
+        nvars = bound(nvars, 1, 20);
+
+        // This will decrease as we generate values in the below loop.
+        uint256 bitsRemaining = 256;
+
+        // Generate a random value and size for each variable.
+        uint256[] memory vals = new uint256[](nvars);
+        uint256[] memory sizes = new uint256[](nvars);
+        uint256[] memory offsets = new uint256[](nvars);
+
+        for (uint256 i = 0; i < nvars; i++) {
+            // Generate a random value and size.
+            offsets[i] = i == 0 ? 0 : offsets[i - 1] + sizes[i - 1];
+
+            uint256 nvarsRemaining = nvars - i;
+            uint256 maxVarSize = bitsRemaining - nvarsRemaining + 1;
+            sizes[i] = bound(uint256(keccak256(abi.encodePacked(seed, i + 256))), 1, maxVarSize);
+            bitsRemaining -= sizes[i];
+
+            uint256 maxVal;
+            uint256 varSize = sizes[i];
+            assembly {
+                // mask = (1 << varSize) - 1
+                maxVal := sub(shl(varSize, 1), 1)
+            }
+            vals[i] = bound(uint256(keccak256(abi.encodePacked(seed, i))), 0, maxVal);
+        }
+
+        // Pack all values into the slot.
+        for (uint256 i = 0; i < nvars; i++) {
+            stdstore.enable_packed_slots().target(address(test)).sig("getRandomPacked(uint256,uint256)").with_key(
+                sizes[i]
+            ).with_key(offsets[i]).checked_write(vals[i]);
+        }
+
+        // Verify the read data matches.
+        for (uint256 i = 0; i < nvars; i++) {
+            uint256 readVal = stdstore.enable_packed_slots().target(address(test)).sig(
+                "getRandomPacked(uint256,uint256)"
+            ).with_key(sizes[i]).with_key(offsets[i]).read_uint();
+
+            uint256 retVal = test.getRandomPacked(sizes[i], offsets[i]);
+
+            assertEq(readVal, vals[i]);
+            assertEq(retVal, vals[i]);
+        }
+    }
 }
 
 contract StorageTest {
@@ -276,6 +375,8 @@ contract StorageTest {
     int256 public tG = type(int256).min;
     bool public tH = true;
     bytes32 private tI = ~bytes32(hex"1337");
+
+    uint256 randomPacking;
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});
@@ -311,5 +412,52 @@ contract StorageTest {
             pop(staticcall(gas(), sload(tE.slot), 0, 0, 0, 0))
         }
         t = tI;
+    }
+
+    function setRandomPacking(uint256 val) public {
+        randomPacking = val;
+    }
+
+    function _getMask(uint256 size) internal pure returns (uint256 mask) {
+        assembly {
+            // mask = (1 << size) - 1
+            mask := sub(shl(size, 1), 1)
+        }
+    }
+
+    function setRandomPacking(uint256 val, uint256 size, uint256 offset) public {
+        // Generate mask based on the size of the value
+        uint256 mask = _getMask(size);
+        // Zero out all bits for the word we're about to set
+        uint256 cleanedWord = randomPacking & ~(mask << offset);
+        // Place val in the correct spot of the cleaned word
+        randomPacking = cleanedWord | val << offset;
+    }
+
+    function getRandomPacked(uint256 size, uint256 offset) public view returns (uint256) {
+        // Generate mask based on the size of the value
+        uint256 mask = _getMask(size);
+        // Shift to place the bits in the correct position, and use mask to zero out remaining bits
+        return (randomPacking >> offset) & mask;
+    }
+
+    function getRandomPacked(uint8 shifts, uint8[] memory shiftSizes, uint8 elem) public view returns (uint256) {
+        require(elem < shifts, "!elem");
+        uint256 leftBits;
+        uint256 rightBits;
+
+        for (uint256 i; i < shiftSizes.length; i++) {
+            if (i < elem) {
+                leftBits += shiftSizes[i];
+            } else if (elem != i) {
+                rightBits += shiftSizes[i];
+            }
+        }
+
+        // we may have some right bits unaccounted for
+        leftBits += 256 - (leftBits + shiftSizes[elem] + rightBits);
+
+        // clear left bits, then clear right bits and realign
+        return (randomPacking << leftBits) >> (leftBits + rightBits);
     }
 }
