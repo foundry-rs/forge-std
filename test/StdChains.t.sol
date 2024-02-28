@@ -70,6 +70,8 @@ contract StdChainsTest is Test {
     //     testRpc("moonbase");
     //     testRpc("base_goerli");
     //     testRpc("base");
+    //     testRpc("fraxtal");
+    //     testRpc("fraxtal_testnet");
     // }
 
     function test_ChainNoDefault() public {
