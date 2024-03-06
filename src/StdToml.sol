@@ -20,7 +20,7 @@ import {VmSafe} from "./Vm.sol";
 // toml.write("<some_path>");
 // ```
 
-library stdJson {
+library stdToml {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function parseRaw(string memory toml, string memory key) internal pure returns (bytes memory) {
