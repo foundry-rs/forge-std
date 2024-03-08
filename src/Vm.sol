@@ -187,6 +187,8 @@ interface VmSafe {
         bool reverted;
         // An ordered list of storage accesses made during an account access operation.
         StorageAccess[] storageAccesses;
+        // Call depth traversed during the recording of state differences
+        uint64 depth;
     }
 
     /// The storage accessed during an `AccountAccess`.
@@ -546,8 +548,12 @@ interface VmSafe {
 
     // ======== JSON ========
 
-    /// Checks if `key` exists in a JSON object.
+    /// Checks if `key` exists in a JSON object
+    /// `keyExists` is being deprecated in favor of `keyExistsJson`. It will be removed in future versions.
     function keyExists(string calldata json, string calldata key) external view returns (bool);
+
+    /// Checks if `key` exists in a JSON object.
+    function keyExistsJson(string calldata json, string calldata key) external view returns (bool);
 
     /// Parses a string of JSON data at `key` and coerces it to `address`.
     function parseJsonAddress(string calldata json, string calldata key) external pure returns (address);
@@ -736,6 +742,18 @@ interface VmSafe {
     /// Parses the given `string` into a `uint256`.
     function parseUint(string calldata stringifiedValue) external pure returns (uint256 parsedValue);
 
+    /// Replaces occurrences of `from` in the given `string` with `to`.
+    function replace(string calldata input, string calldata from, string calldata to)
+        external
+        pure
+        returns (string memory output);
+
+    /// Splits the given `string` into an array of strings divided by the `delimiter`.
+    function split(string calldata input, string calldata delimiter) external pure returns (string[] memory outputs);
+
+    /// Converts the given `string` value to Lowercase.
+    function toLowercase(string calldata input) external pure returns (string memory output);
+
     /// Converts the given value to a `string`.
     function toString(address value) external pure returns (string memory stringifiedValue);
 
@@ -754,7 +772,441 @@ interface VmSafe {
     /// Converts the given value to a `string`.
     function toString(int256 value) external pure returns (string memory stringifiedValue);
 
+    /// Converts the given `string` value to Uppercase.
+    function toUppercase(string calldata input) external pure returns (string memory output);
+
+    /// Trims leading and trailing whitespace from the given `string` value.
+    function trim(string calldata input) external pure returns (string memory output);
+
     // ======== Testing ========
+
+    /// Compares two `uint256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Formats values with decimals in failure message.
+    function assertApproxEqAbsDecimal(uint256 left, uint256 right, uint256 maxDelta, uint256 decimals) external pure;
+
+    /// Compares two `uint256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertApproxEqAbsDecimal(
+        uint256 left,
+        uint256 right,
+        uint256 maxDelta,
+        uint256 decimals,
+        string calldata error
+    ) external pure;
+
+    /// Compares two `int256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Formats values with decimals in failure message.
+    function assertApproxEqAbsDecimal(int256 left, int256 right, uint256 maxDelta, uint256 decimals) external pure;
+
+    /// Compares two `int256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertApproxEqAbsDecimal(
+        int256 left,
+        int256 right,
+        uint256 maxDelta,
+        uint256 decimals,
+        string calldata error
+    ) external pure;
+
+    /// Compares two `uint256` values. Expects difference to be less than or equal to `maxDelta`.
+    function assertApproxEqAbs(uint256 left, uint256 right, uint256 maxDelta) external pure;
+
+    /// Compares two `uint256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Includes error message into revert string on failure.
+    function assertApproxEqAbs(uint256 left, uint256 right, uint256 maxDelta, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects difference to be less than or equal to `maxDelta`.
+    function assertApproxEqAbs(int256 left, int256 right, uint256 maxDelta) external pure;
+
+    /// Compares two `int256` values. Expects difference to be less than or equal to `maxDelta`.
+    /// Includes error message into revert string on failure.
+    function assertApproxEqAbs(int256 left, int256 right, uint256 maxDelta, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Formats values with decimals in failure message.
+    function assertApproxEqRelDecimal(uint256 left, uint256 right, uint256 maxPercentDelta, uint256 decimals)
+        external
+        pure;
+
+    /// Compares two `uint256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertApproxEqRelDecimal(
+        uint256 left,
+        uint256 right,
+        uint256 maxPercentDelta,
+        uint256 decimals,
+        string calldata error
+    ) external pure;
+
+    /// Compares two `int256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Formats values with decimals in failure message.
+    function assertApproxEqRelDecimal(int256 left, int256 right, uint256 maxPercentDelta, uint256 decimals)
+        external
+        pure;
+
+    /// Compares two `int256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertApproxEqRelDecimal(
+        int256 left,
+        int256 right,
+        uint256 maxPercentDelta,
+        uint256 decimals,
+        string calldata error
+    ) external pure;
+
+    /// Compares two `uint256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    function assertApproxEqRel(uint256 left, uint256 right, uint256 maxPercentDelta) external pure;
+
+    /// Compares two `uint256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Includes error message into revert string on failure.
+    function assertApproxEqRel(uint256 left, uint256 right, uint256 maxPercentDelta, string calldata error)
+        external
+        pure;
+
+    /// Compares two `int256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    function assertApproxEqRel(int256 left, int256 right, uint256 maxPercentDelta) external pure;
+
+    /// Compares two `int256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
+    /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
+    /// Includes error message into revert string on failure.
+    function assertApproxEqRel(int256 left, int256 right, uint256 maxPercentDelta, string calldata error)
+        external
+        pure;
+
+    /// Asserts that two `uint256` values are equal, formatting them with decimals in failure message.
+    function assertEqDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Asserts that two `uint256` values are equal, formatting them with decimals in failure message.
+    /// Includes error message into revert string on failure.
+    function assertEqDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Asserts that two `int256` values are equal, formatting them with decimals in failure message.
+    function assertEqDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Asserts that two `int256` values are equal, formatting them with decimals in failure message.
+    /// Includes error message into revert string on failure.
+    function assertEqDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Asserts that two `bool` values are equal.
+    function assertEq(bool left, bool right) external pure;
+
+    /// Asserts that two `bool` values are equal and includes error message into revert string on failure.
+    function assertEq(bool left, bool right, string calldata error) external pure;
+
+    /// Asserts that two `string` values are equal.
+    function assertEq(string calldata left, string calldata right) external pure;
+
+    /// Asserts that two `string` values are equal and includes error message into revert string on failure.
+    function assertEq(string calldata left, string calldata right, string calldata error) external pure;
+
+    /// Asserts that two `bytes` values are equal.
+    function assertEq(bytes calldata left, bytes calldata right) external pure;
+
+    /// Asserts that two `bytes` values are equal and includes error message into revert string on failure.
+    function assertEq(bytes calldata left, bytes calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bool` values are equal.
+    function assertEq(bool[] calldata left, bool[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bool` values are equal and includes error message into revert string on failure.
+    function assertEq(bool[] calldata left, bool[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `uint256 values are equal.
+    function assertEq(uint256[] calldata left, uint256[] calldata right) external pure;
+
+    /// Asserts that two arrays of `uint256` values are equal and includes error message into revert string on failure.
+    function assertEq(uint256[] calldata left, uint256[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `int256` values are equal.
+    function assertEq(int256[] calldata left, int256[] calldata right) external pure;
+
+    /// Asserts that two arrays of `int256` values are equal and includes error message into revert string on failure.
+    function assertEq(int256[] calldata left, int256[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two `uint256` values are equal.
+    function assertEq(uint256 left, uint256 right) external pure;
+
+    /// Asserts that two arrays of `address` values are equal.
+    function assertEq(address[] calldata left, address[] calldata right) external pure;
+
+    /// Asserts that two arrays of `address` values are equal and includes error message into revert string on failure.
+    function assertEq(address[] calldata left, address[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bytes32` values are equal.
+    function assertEq(bytes32[] calldata left, bytes32[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bytes32` values are equal and includes error message into revert string on failure.
+    function assertEq(bytes32[] calldata left, bytes32[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `string` values are equal.
+    function assertEq(string[] calldata left, string[] calldata right) external pure;
+
+    /// Asserts that two arrays of `string` values are equal and includes error message into revert string on failure.
+    function assertEq(string[] calldata left, string[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bytes` values are equal.
+    function assertEq(bytes[] calldata left, bytes[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bytes` values are equal and includes error message into revert string on failure.
+    function assertEq(bytes[] calldata left, bytes[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two `uint256` values are equal and includes error message into revert string on failure.
+    function assertEq(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Asserts that two `int256` values are equal.
+    function assertEq(int256 left, int256 right) external pure;
+
+    /// Asserts that two `int256` values are equal and includes error message into revert string on failure.
+    function assertEq(int256 left, int256 right, string calldata error) external pure;
+
+    /// Asserts that two `address` values are equal.
+    function assertEq(address left, address right) external pure;
+
+    /// Asserts that two `address` values are equal and includes error message into revert string on failure.
+    function assertEq(address left, address right, string calldata error) external pure;
+
+    /// Asserts that two `bytes32` values are equal.
+    function assertEq(bytes32 left, bytes32 right) external pure;
+
+    /// Asserts that two `bytes32` values are equal and includes error message into revert string on failure.
+    function assertEq(bytes32 left, bytes32 right, string calldata error) external pure;
+
+    /// Asserts that the given condition is false.
+    function assertFalse(bool condition) external pure;
+
+    /// Asserts that the given condition is false and includes error message into revert string on failure.
+    function assertFalse(bool condition, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than or equal to second.
+    /// Formats values with decimals in failure message.
+    function assertGeDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than or equal to second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertGeDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than or equal to second.
+    /// Formats values with decimals in failure message.
+    function assertGeDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than or equal to second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertGeDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than or equal to second.
+    function assertGe(uint256 left, uint256 right) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than or equal to second.
+    /// Includes error message into revert string on failure.
+    function assertGe(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than or equal to second.
+    function assertGe(int256 left, int256 right) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than or equal to second.
+    /// Includes error message into revert string on failure.
+    function assertGe(int256 left, int256 right, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than second.
+    /// Formats values with decimals in failure message.
+    function assertGtDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertGtDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than second.
+    /// Formats values with decimals in failure message.
+    function assertGtDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertGtDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than second.
+    function assertGt(uint256 left, uint256 right) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be greater than second.
+    /// Includes error message into revert string on failure.
+    function assertGt(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than second.
+    function assertGt(int256 left, int256 right) external pure;
+
+    /// Compares two `int256` values. Expects first value to be greater than second.
+    /// Includes error message into revert string on failure.
+    function assertGt(int256 left, int256 right, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than or equal to second.
+    /// Formats values with decimals in failure message.
+    function assertLeDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than or equal to second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertLeDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than or equal to second.
+    /// Formats values with decimals in failure message.
+    function assertLeDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than or equal to second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertLeDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than or equal to second.
+    function assertLe(uint256 left, uint256 right) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than or equal to second.
+    /// Includes error message into revert string on failure.
+    function assertLe(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than or equal to second.
+    function assertLe(int256 left, int256 right) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than or equal to second.
+    /// Includes error message into revert string on failure.
+    function assertLe(int256 left, int256 right, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than second.
+    /// Formats values with decimals in failure message.
+    function assertLtDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertLtDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than second.
+    /// Formats values with decimals in failure message.
+    function assertLtDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than second.
+    /// Formats values with decimals in failure message. Includes error message into revert string on failure.
+    function assertLtDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than second.
+    function assertLt(uint256 left, uint256 right) external pure;
+
+    /// Compares two `uint256` values. Expects first value to be less than second.
+    /// Includes error message into revert string on failure.
+    function assertLt(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than second.
+    function assertLt(int256 left, int256 right) external pure;
+
+    /// Compares two `int256` values. Expects first value to be less than second.
+    /// Includes error message into revert string on failure.
+    function assertLt(int256 left, int256 right, string calldata error) external pure;
+
+    /// Asserts that two `uint256` values are not equal, formatting them with decimals in failure message.
+    function assertNotEqDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
+
+    /// Asserts that two `uint256` values are not equal, formatting them with decimals in failure message.
+    /// Includes error message into revert string on failure.
+    function assertNotEqDecimal(uint256 left, uint256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Asserts that two `int256` values are not equal, formatting them with decimals in failure message.
+    function assertNotEqDecimal(int256 left, int256 right, uint256 decimals) external pure;
+
+    /// Asserts that two `int256` values are not equal, formatting them with decimals in failure message.
+    /// Includes error message into revert string on failure.
+    function assertNotEqDecimal(int256 left, int256 right, uint256 decimals, string calldata error) external pure;
+
+    /// Asserts that two `bool` values are not equal.
+    function assertNotEq(bool left, bool right) external pure;
+
+    /// Asserts that two `bool` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bool left, bool right, string calldata error) external pure;
+
+    /// Asserts that two `string` values are not equal.
+    function assertNotEq(string calldata left, string calldata right) external pure;
+
+    /// Asserts that two `string` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(string calldata left, string calldata right, string calldata error) external pure;
+
+    /// Asserts that two `bytes` values are not equal.
+    function assertNotEq(bytes calldata left, bytes calldata right) external pure;
+
+    /// Asserts that two `bytes` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bytes calldata left, bytes calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bool` values are not equal.
+    function assertNotEq(bool[] calldata left, bool[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bool` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bool[] calldata left, bool[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `uint256` values are not equal.
+    function assertNotEq(uint256[] calldata left, uint256[] calldata right) external pure;
+
+    /// Asserts that two arrays of `uint256` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(uint256[] calldata left, uint256[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `int256` values are not equal.
+    function assertNotEq(int256[] calldata left, int256[] calldata right) external pure;
+
+    /// Asserts that two arrays of `int256` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(int256[] calldata left, int256[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two `uint256` values are not equal.
+    function assertNotEq(uint256 left, uint256 right) external pure;
+
+    /// Asserts that two arrays of `address` values are not equal.
+    function assertNotEq(address[] calldata left, address[] calldata right) external pure;
+
+    /// Asserts that two arrays of `address` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(address[] calldata left, address[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bytes32` values are not equal.
+    function assertNotEq(bytes32[] calldata left, bytes32[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bytes32` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bytes32[] calldata left, bytes32[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `string` values are not equal.
+    function assertNotEq(string[] calldata left, string[] calldata right) external pure;
+
+    /// Asserts that two arrays of `string` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(string[] calldata left, string[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two arrays of `bytes` values are not equal.
+    function assertNotEq(bytes[] calldata left, bytes[] calldata right) external pure;
+
+    /// Asserts that two arrays of `bytes` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bytes[] calldata left, bytes[] calldata right, string calldata error) external pure;
+
+    /// Asserts that two `uint256` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(uint256 left, uint256 right, string calldata error) external pure;
+
+    /// Asserts that two `int256` values are not equal.
+    function assertNotEq(int256 left, int256 right) external pure;
+
+    /// Asserts that two `int256` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(int256 left, int256 right, string calldata error) external pure;
+
+    /// Asserts that two `address` values are not equal.
+    function assertNotEq(address left, address right) external pure;
+
+    /// Asserts that two `address` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(address left, address right, string calldata error) external pure;
+
+    /// Asserts that two `bytes32` values are not equal.
+    function assertNotEq(bytes32 left, bytes32 right) external pure;
+
+    /// Asserts that two `bytes32` values are not equal and includes error message into revert string on failure.
+    function assertNotEq(bytes32 left, bytes32 right, string calldata error) external pure;
+
+    /// Asserts that the given condition is true.
+    function assertTrue(bool condition) external pure;
+
+    /// Asserts that the given condition is true and includes error message into revert string on failure.
+    function assertTrue(bool condition, string calldata error) external pure;
 
     /// If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool condition) external pure;
@@ -776,6 +1228,75 @@ interface VmSafe {
 
     /// Suspends execution of the main thread for `duration` milliseconds.
     function sleep(uint256 duration) external;
+
+    // ======== Toml ========
+
+    /// Checks if `key` exists in a TOML table.
+    function keyExistsToml(string calldata toml, string calldata key) external view returns (bool);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address`.
+    function parseTomlAddress(string calldata toml, string calldata key) external pure returns (address);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address[]`.
+    function parseTomlAddressArray(string calldata toml, string calldata key)
+        external
+        pure
+        returns (address[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bool`.
+    function parseTomlBool(string calldata toml, string calldata key) external pure returns (bool);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bool[]`.
+    function parseTomlBoolArray(string calldata toml, string calldata key) external pure returns (bool[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes`.
+    function parseTomlBytes(string calldata toml, string calldata key) external pure returns (bytes memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32`.
+    function parseTomlBytes32(string calldata toml, string calldata key) external pure returns (bytes32);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32[]`.
+    function parseTomlBytes32Array(string calldata toml, string calldata key)
+        external
+        pure
+        returns (bytes32[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes[]`.
+    function parseTomlBytesArray(string calldata toml, string calldata key) external pure returns (bytes[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256`.
+    function parseTomlInt(string calldata toml, string calldata key) external pure returns (int256);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256[]`.
+    function parseTomlIntArray(string calldata toml, string calldata key) external pure returns (int256[] memory);
+
+    /// Returns an array of all the keys in a TOML table.
+    function parseTomlKeys(string calldata toml, string calldata key) external pure returns (string[] memory keys);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string`.
+    function parseTomlString(string calldata toml, string calldata key) external pure returns (string memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string[]`.
+    function parseTomlStringArray(string calldata toml, string calldata key) external pure returns (string[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `uint256`.
+    function parseTomlUint(string calldata toml, string calldata key) external pure returns (uint256);
+
+    /// Parses a string of TOML data at `key` and coerces it to `uint256[]`.
+    function parseTomlUintArray(string calldata toml, string calldata key) external pure returns (uint256[] memory);
+
+    /// ABI-encodes a TOML table.
+    function parseToml(string calldata toml) external pure returns (bytes memory abiEncodedData);
+
+    /// ABI-encodes a TOML table at `key`.
+    function parseToml(string calldata toml, string calldata key) external pure returns (bytes memory abiEncodedData);
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML to a file.
+    function writeToml(string calldata json, string calldata path) external;
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
 
