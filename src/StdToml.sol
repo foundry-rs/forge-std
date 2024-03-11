@@ -5,16 +5,16 @@ pragma experimental ABIEncoderV2;
 
 import {VmSafe} from "./Vm.sol";
 
-// Helpers for parsing and writing JSON files
+// Helpers for parsing and writing TOML files
 // To parse:
 // ```
-// using stdJson for string;
-// string memory json = vm.readFile("<some_path>");
-// json.readUint("<json_path>");
+// using stdToml for string;
+// string memory toml = vm.readFile("<some_path>");
+// toml.readUint("<json_path>");
 // ```
 // To write:
 // ```
-// using stdJson for string;
+// using stdToml for string;
 // string memory json = "json";
 // json.serialize("a", uint256(123));
 // string memory semiFinal = json.serialize("b", string("test"));
@@ -22,67 +22,67 @@ import {VmSafe} from "./Vm.sol";
 // finalJson.write("<some_path>");
 // ```
 
-library stdJson {
+library stdToml {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    function parseRaw(string memory json, string memory key) internal pure returns (bytes memory) {
-        return vm.parseJson(json, key);
+    function parseRaw(string memory toml, string memory key) internal pure returns (bytes memory) {
+        return vm.parseToml(toml, key);
     }
 
-    function readUint(string memory json, string memory key) internal pure returns (uint256) {
-        return vm.parseJsonUint(json, key);
+    function readUint(string memory toml, string memory key) internal pure returns (uint256) {
+        return vm.parseTomlUint(toml, key);
     }
 
-    function readUintArray(string memory json, string memory key) internal pure returns (uint256[] memory) {
-        return vm.parseJsonUintArray(json, key);
+    function readUintArray(string memory toml, string memory key) internal pure returns (uint256[] memory) {
+        return vm.parseTomlUintArray(toml, key);
     }
 
-    function readInt(string memory json, string memory key) internal pure returns (int256) {
-        return vm.parseJsonInt(json, key);
+    function readInt(string memory toml, string memory key) internal pure returns (int256) {
+        return vm.parseTomlInt(toml, key);
     }
 
-    function readIntArray(string memory json, string memory key) internal pure returns (int256[] memory) {
-        return vm.parseJsonIntArray(json, key);
+    function readIntArray(string memory toml, string memory key) internal pure returns (int256[] memory) {
+        return vm.parseTomlIntArray(toml, key);
     }
 
-    function readBytes32(string memory json, string memory key) internal pure returns (bytes32) {
-        return vm.parseJsonBytes32(json, key);
+    function readBytes32(string memory toml, string memory key) internal pure returns (bytes32) {
+        return vm.parseTomlBytes32(toml, key);
     }
 
-    function readBytes32Array(string memory json, string memory key) internal pure returns (bytes32[] memory) {
-        return vm.parseJsonBytes32Array(json, key);
+    function readBytes32Array(string memory toml, string memory key) internal pure returns (bytes32[] memory) {
+        return vm.parseTomlBytes32Array(toml, key);
     }
 
-    function readString(string memory json, string memory key) internal pure returns (string memory) {
-        return vm.parseJsonString(json, key);
+    function readString(string memory toml, string memory key) internal pure returns (string memory) {
+        return vm.parseTomlString(toml, key);
     }
 
-    function readStringArray(string memory json, string memory key) internal pure returns (string[] memory) {
-        return vm.parseJsonStringArray(json, key);
+    function readStringArray(string memory toml, string memory key) internal pure returns (string[] memory) {
+        return vm.parseTomlStringArray(toml, key);
     }
 
-    function readAddress(string memory json, string memory key) internal pure returns (address) {
-        return vm.parseJsonAddress(json, key);
+    function readAddress(string memory toml, string memory key) internal pure returns (address) {
+        return vm.parseTomlAddress(toml, key);
     }
 
-    function readAddressArray(string memory json, string memory key) internal pure returns (address[] memory) {
-        return vm.parseJsonAddressArray(json, key);
+    function readAddressArray(string memory toml, string memory key) internal pure returns (address[] memory) {
+        return vm.parseTomlAddressArray(toml, key);
     }
 
-    function readBool(string memory json, string memory key) internal pure returns (bool) {
-        return vm.parseJsonBool(json, key);
+    function readBool(string memory toml, string memory key) internal pure returns (bool) {
+        return vm.parseTomlBool(toml, key);
     }
 
-    function readBoolArray(string memory json, string memory key) internal pure returns (bool[] memory) {
-        return vm.parseJsonBoolArray(json, key);
+    function readBoolArray(string memory toml, string memory key) internal pure returns (bool[] memory) {
+        return vm.parseTomlBoolArray(toml, key);
     }
 
-    function readBytes(string memory json, string memory key) internal pure returns (bytes memory) {
-        return vm.parseJsonBytes(json, key);
+    function readBytes(string memory toml, string memory key) internal pure returns (bytes memory) {
+        return vm.parseTomlBytes(toml, key);
     }
 
-    function readBytesArray(string memory json, string memory key) internal pure returns (bytes[] memory) {
-        return vm.parseJsonBytesArray(json, key);
+    function readBytesArray(string memory toml, string memory key) internal pure returns (bytes[] memory) {
+        return vm.parseTomlBytesArray(toml, key);
     }
 
     function serialize(string memory jsonKey, string memory rootObject) internal returns (string memory) {
@@ -170,10 +170,10 @@ library stdJson {
     }
 
     function write(string memory jsonKey, string memory path) internal {
-        vm.writeJson(jsonKey, path);
+        vm.writeToml(jsonKey, path);
     }
 
     function write(string memory jsonKey, string memory path, string memory valueKey) internal {
-        vm.writeJson(jsonKey, path, valueKey);
+        vm.writeToml(jsonKey, path, valueKey);
     }
 }

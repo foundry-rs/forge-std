@@ -187,6 +187,8 @@ interface VmSafe {
         bool reverted;
         // An ordered list of storage accesses made during an account access operation.
         StorageAccess[] storageAccesses;
+        // Call depth traversed during the recording of state differences
+        uint64 depth;
     }
 
     /// The storage accessed during an `AccountAccess`.
@@ -546,8 +548,12 @@ interface VmSafe {
 
     // ======== JSON ========
 
-    /// Checks if `key` exists in a JSON object.
+    /// Checks if `key` exists in a JSON object
+    /// `keyExists` is being deprecated in favor of `keyExistsJson`. It will be removed in future versions.
     function keyExists(string calldata json, string calldata key) external view returns (bool);
+
+    /// Checks if `key` exists in a JSON object.
+    function keyExistsJson(string calldata json, string calldata key) external view returns (bool);
 
     /// Parses a string of JSON data at `key` and coerces it to `address`.
     function parseJsonAddress(string calldata json, string calldata key) external pure returns (address);
@@ -1222,6 +1228,75 @@ interface VmSafe {
 
     /// Suspends execution of the main thread for `duration` milliseconds.
     function sleep(uint256 duration) external;
+
+    // ======== Toml ========
+
+    /// Checks if `key` exists in a TOML table.
+    function keyExistsToml(string calldata toml, string calldata key) external view returns (bool);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address`.
+    function parseTomlAddress(string calldata toml, string calldata key) external pure returns (address);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address[]`.
+    function parseTomlAddressArray(string calldata toml, string calldata key)
+        external
+        pure
+        returns (address[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bool`.
+    function parseTomlBool(string calldata toml, string calldata key) external pure returns (bool);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bool[]`.
+    function parseTomlBoolArray(string calldata toml, string calldata key) external pure returns (bool[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes`.
+    function parseTomlBytes(string calldata toml, string calldata key) external pure returns (bytes memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32`.
+    function parseTomlBytes32(string calldata toml, string calldata key) external pure returns (bytes32);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32[]`.
+    function parseTomlBytes32Array(string calldata toml, string calldata key)
+        external
+        pure
+        returns (bytes32[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes[]`.
+    function parseTomlBytesArray(string calldata toml, string calldata key) external pure returns (bytes[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256`.
+    function parseTomlInt(string calldata toml, string calldata key) external pure returns (int256);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256[]`.
+    function parseTomlIntArray(string calldata toml, string calldata key) external pure returns (int256[] memory);
+
+    /// Returns an array of all the keys in a TOML table.
+    function parseTomlKeys(string calldata toml, string calldata key) external pure returns (string[] memory keys);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string`.
+    function parseTomlString(string calldata toml, string calldata key) external pure returns (string memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string[]`.
+    function parseTomlStringArray(string calldata toml, string calldata key) external pure returns (string[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `uint256`.
+    function parseTomlUint(string calldata toml, string calldata key) external pure returns (uint256);
+
+    /// Parses a string of TOML data at `key` and coerces it to `uint256[]`.
+    function parseTomlUintArray(string calldata toml, string calldata key) external pure returns (uint256[] memory);
+
+    /// ABI-encodes a TOML table.
+    function parseToml(string calldata toml) external pure returns (bytes memory abiEncodedData);
+
+    /// ABI-encodes a TOML table at `key`.
+    function parseToml(string calldata toml, string calldata key) external pure returns (bytes memory abiEncodedData);
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML to a file.
+    function writeToml(string calldata json, string calldata path) external;
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
 
