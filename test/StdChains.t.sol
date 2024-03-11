@@ -43,35 +43,38 @@ contract StdChainsTest is Test {
         assertEq(getChain("sepolia").rpcUrl, "https://sepolia.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001");
     }
 
-    function testFuzz_Rpc(string memory rpcAlias) internal {
+    // Named with a leading underscore to clarify this is not intended to be run as a normal test,
+    // and is intended to be used in the below `test_Rpcs` test.
+    function _testRpc(string memory rpcAlias) internal {
         string memory rpcUrl = getChain(rpcAlias).rpcUrl;
         vm.createSelectFork(rpcUrl);
     }
 
     // Ensure we can connect to the default RPC URL for each chain.
-    // function testRpcs() public {
-    //     testRpc("mainnet");
-    //     testRpc("goerli");
-    //     testRpc("sepolia");
-    //     testRpc("optimism");
-    //     testRpc("optimism_goerli");
-    //     testRpc("arbitrum_one");
-    //     testRpc("arbitrum_one_goerli");
-    //     testRpc("arbitrum_nova");
-    //     testRpc("polygon");
-    //     testRpc("polygon_mumbai");
-    //     testRpc("avalanche");
-    //     testRpc("avalanche_fuji");
-    //     testRpc("bnb_smart_chain");
-    //     testRpc("bnb_smart_chain_testnet");
-    //     testRpc("gnosis_chain");
-    //     testRpc("moonbeam");
-    //     testRpc("moonriver");
-    //     testRpc("moonbase");
-    //     testRpc("base_goerli");
-    //     testRpc("base");
-    //     testRpc("fraxtal");
-    //     testRpc("fraxtal_testnet");
+    // Currently commented out since this is slow and public RPCs are flaky, often resulting in failing CI.
+    // function test_Rpcs() public {
+    //     _testRpc("mainnet");
+    //     _testRpc("goerli");
+    //     _testRpc("sepolia");
+    //     _testRpc("optimism");
+    //     _testRpc("optimism_goerli");
+    //     _testRpc("arbitrum_one");
+    //     _testRpc("arbitrum_one_goerli");
+    //     _testRpc("arbitrum_nova");
+    //     _testRpc("polygon");
+    //     _testRpc("polygon_mumbai");
+    //     _testRpc("avalanche");
+    //     _testRpc("avalanche_fuji");
+    //     _testRpc("bnb_smart_chain");
+    //     _testRpc("bnb_smart_chain_testnet");
+    //     _testRpc("gnosis_chain");
+    //     _testRpc("moonbeam");
+    //     _testRpc("moonriver");
+    //     _testRpc("moonbase");
+    //     _testRpc("base_goerli");
+    //     _testRpc("base");
+    //     _testRpc("fraxtal");
+    //     _testRpc("fraxtal_testnet");
     // }
 
     function test_ChainNoDefault() public {
