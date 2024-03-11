@@ -14,15 +14,15 @@ contract StdJsonTest is Test {
         path = string.concat(root, "/test/fixtures/test.json");
     }
 
-    struct simpleJson {
+    struct SimpleJson {
         uint256 a;
         string b;
     }
 
-    struct notSimpleJson {
+    struct NestedJson {
         uint256 a;
         string b;
-        simpleJson c;
+        SimpleJson c;
     }
 
     function test_readJson() public {
@@ -39,7 +39,7 @@ contract StdJsonTest is Test {
 
         string memory json_ = vm.readFile(path);
         bytes memory data = json_.parseRaw("$");
-        notSimpleJson memory decodedData = abi.decode(data, (notSimpleJson));
+        NestedJson memory decodedData = abi.decode(data, (NestedJson));
 
         assertEq(decodedData.a, 123);
         assertEq(decodedData.b, "test");

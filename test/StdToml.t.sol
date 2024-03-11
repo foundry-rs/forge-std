@@ -14,15 +14,15 @@ contract StdTomlTest is Test {
         path = string.concat(root, "/test/fixtures/test.toml");
     }
 
-    struct simpleJson {
+    struct SimpleToml {
         uint256 a;
         string b;
     }
 
-    struct notSimpleJson {
+    struct NestedToml {
         uint256 a;
         string b;
-        simpleJson c;
+        SimpleToml c;
     }
 
     function test_readToml() public {
@@ -39,7 +39,7 @@ contract StdTomlTest is Test {
 
         string memory toml = vm.readFile(path);
         bytes memory data = toml.parseRaw("$");
-        notSimpleJson memory decodedData = abi.decode(data, (notSimpleJson));
+        NestedToml memory decodedData = abi.decode(data, (NestedToml));
 
         assertEq(decodedData.a, 123);
         assertEq(decodedData.b, "test");
