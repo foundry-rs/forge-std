@@ -25,7 +25,7 @@ contract StdJsonTest is Test {
         SimpleJson c;
     }
 
-    function test_readJson() public {
+    function test_readJson() public view {
         string memory json = vm.readFile(path);
         assertEq(json.readUint(".a"), 123);
     }

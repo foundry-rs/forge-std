@@ -25,7 +25,7 @@ contract StdTomlTest is Test {
         SimpleToml c;
     }
 
-    function test_readToml() public {
+    function test_readToml() public view {
         string memory json = vm.readFile(path);
         assertEq(json.readUint(".a"), 123);
     }
