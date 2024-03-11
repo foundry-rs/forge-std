@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../src/StdCheats.sol";
 import "../src/Test.sol";
 import "../src/StdJson.sol";
+import "../src/StdToml.sol";
 import "../src/interfaces/IERC20.sol";
 
 contract StdCheatsTest is Test {
