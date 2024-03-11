@@ -29,7 +29,7 @@ contract MockERC20Test is StdCheats, Test {
         token = new Token_ERC20("Token", "TKN", 18);
     }
 
-    function invariantMetadata() public {
+    function invariantMetadata() public view {
         assertEq(token.name(), "Token");
         assertEq(token.symbol(), "TKN");
         assertEq(token.decimals(), 18);

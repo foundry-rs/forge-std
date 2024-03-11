@@ -234,14 +234,14 @@ contract StdCheatsTest is Test {
         assertEq(privateKey, 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80);
     }
 
-    function test_BytesToUint() public {
+    function test_BytesToUint() public pure {
         assertEq(3, bytesToUint_test(hex"03"));
         assertEq(2, bytesToUint_test(hex"02"));
         assertEq(255, bytesToUint_test(hex"ff"));
         assertEq(29625, bytesToUint_test(hex"73b9"));
     }
 
-    function test_ParseJsonTxDetail() public {
+    function test_ParseJsonTxDetail() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         string memory json = vm.readFile(path);
@@ -275,7 +275,7 @@ contract StdCheatsTest is Test {
         transactions;
     }
 
-    function test_ReadReceipt() public {
+    function test_ReadReceipt() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
         uint256 index = 5;
@@ -306,9 +306,6 @@ contract StdCheatsTest is Test {
         addInLoopNoGasNoGas();
         uint256 gas_used_double = gas_start_double - gasleft();
 
-        emit log_named_uint("Normal gas", gas_used_normal);
-        emit log_named_uint("Single modifier gas", gas_used_single);
-        emit log_named_uint("Double modifier  gas", gas_used_double);
         assertTrue(gas_used_double + gas_used_single < gas_used_normal);
     }
 
@@ -409,7 +406,7 @@ contract StdCheatsTest is Test {
         );
     }
 
-    function testFuzz_AssumeNotForgeAddress(address addr) external {
+    function testFuzz_AssumeNotForgeAddress(address addr) external pure {
         assumeNotForgeAddress(addr);
         assertTrue(
             addr != address(vm) && addr != 0x000000000000000000636F6e736F6c652e6c6f67
@@ -480,7 +477,7 @@ contract StdCheatsForkTest is Test {
         stdCheatsMock.exposed_assumeNotBlacklisted(eoa, address(0));
     }
 
-    function testFuzz_AssumeNotBlacklisted_TokenWithoutBlacklist(address addr) external {
+    function testFuzz_AssumeNotBlacklisted_TokenWithoutBlacklist(address addr) external view {
         assumeNotBlacklisted(SHIB, addr);
         assertTrue(true);
     }
@@ -492,7 +489,7 @@ contract StdCheatsForkTest is Test {
         stdCheatsMock.exposed_assumeNotBlacklisted(USDC, USDC_BLACKLISTED_USER);
     }
 
-    function testFuzz_AssumeNotBlacklisted_USDC(address addr) external {
+    function testFuzz_AssumeNotBlacklisted_USDC(address addr) external view {
         assumeNotBlacklisted(USDC, addr);
         assertFalse(USDCLike(USDC).isBlacklisted(addr));
     }
@@ -504,7 +501,7 @@ contract StdCheatsForkTest is Test {
         stdCheatsMock.exposed_assumeNotBlacklisted(USDT, USDT_BLACKLISTED_USER);
     }
 
-    function testFuzz_AssumeNotBlacklisted_USDT(address addr) external {
+    function testFuzz_AssumeNotBlacklisted_USDT(address addr) external view {
         assumeNotBlacklisted(USDT, addr);
         assertFalse(USDTLike(USDT).isBlackListed(addr));
     }
