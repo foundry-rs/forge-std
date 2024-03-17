@@ -24,7 +24,7 @@ contract StdChainsMock is Test {
 contract StdChainsTest is Test {
     function test_ChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
-        assertEq(getChain(1).rpcUrl, "https://mainnet.infura.io/v3/b1d3925804e74152b316ca7da97060d3");
+        assertEq(getChain(1).rpcUrl, "https://eth-mainnet.alchemyapi.io/v2/WV407BEiBmjNJfKo9Uo_55u0z0ITyCOX");
         assertEq(getChain("optimism_goerli").rpcUrl, "https://goerli.optimism.io/");
         assertEq(getChain("arbitrum_one_goerli").rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
 
@@ -36,7 +36,7 @@ contract StdChainsTest is Test {
 
         // Cannot override RPCs defined in `foundry.toml`
         vm.setEnv("MAINNET_RPC_URL", "myoverride2");
-        assertEq(getChain("mainnet").rpcUrl, "https://mainnet.infura.io/v3/b1d3925804e74152b316ca7da97060d3");
+        assertEq(getChain("mainnet").rpcUrl, "https://eth-mainnet.alchemyapi.io/v2/WV407BEiBmjNJfKo9Uo_55u0z0ITyCOX");
 
         // Other RPCs should remain unchanged.
         assertEq(getChain(31337).rpcUrl, "http://127.0.0.1:8545");
