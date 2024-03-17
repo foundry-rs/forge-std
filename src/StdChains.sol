@@ -197,7 +197,7 @@ abstract contract StdChains {
         // If adding an RPC here, make sure to test the default RPC URL in `testRpcs`
         setChainWithDefaultRpcUrl("anvil", ChainData("Anvil", 31337, "http://127.0.0.1:8545"));
         setChainWithDefaultRpcUrl(
-            "mainnet", ChainData("Mainnet", 1, "https://mainnet.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001")
+            "mainnet", ChainData("Mainnet", 1, "https://eth-mainnet.alchemyapi.io/v2/pwc5rmJhrdoaSEfimoKEmsvOjKSmPDrP")
         );
         setChainWithDefaultRpcUrl(
             "goerli", ChainData("Goerli", 5, "https://goerli.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001")
