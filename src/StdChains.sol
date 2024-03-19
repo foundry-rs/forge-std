@@ -199,12 +199,20 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "mainnet", ChainData("Mainnet", 1, "https://eth-mainnet.alchemyapi.io/v2/pwc5rmJhrdoaSEfimoKEmsvOjKSmPDrP")
         );
+        // @notice Goerli is to be sunset by April 3, 2024
+        // @depreciated goerli
         setChainWithDefaultRpcUrl(
             "goerli", ChainData("Goerli", 5, "https://goerli.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001")
         );
         setChainWithDefaultRpcUrl(
             "sepolia", ChainData("Sepolia", 11155111, "https://sepolia.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001")
         );
+        setChainWithDefaultRpcUrl(
+            "holesky", ChainData("Holesky", 17000, "https://rpc.holesky.ethpandaops.io")
+        );
+
+
+
         setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
         setChainWithDefaultRpcUrl("optimism_goerli", ChainData("Optimism Goerli", 420, "https://goerli.optimism.io"));
         setChainWithDefaultRpcUrl("arbitrum_one", ChainData("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
