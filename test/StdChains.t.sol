@@ -54,8 +54,8 @@ contract StdChainsTest is Test {
     // Currently commented out since this is slow and public RPCs are flaky, often resulting in failing CI.
     // function test_Rpcs() public {
     //     _testRpc("mainnet");
-    //     _testRpc("goerli");
     //     _testRpc("sepolia");
+    //     _testRpc("holesky");
     //     _testRpc("optimism");
     //     _testRpc("optimism_goerli");
     //     _testRpc("arbitrum_one");
