@@ -464,6 +464,12 @@ interface VmSafe {
     /// Performs a foreign function call via the terminal.
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
 
+    /// Prompts the user for a string value in the terminal.
+    function prompt(string calldata promptText) external returns (string memory input);
+
+    /// Prompts the user for a hidden string value in the terminal.
+    function promptSecret(string calldata promptText) external returns (string memory input);
+
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
 
