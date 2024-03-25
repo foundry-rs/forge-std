@@ -11,10 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
 
@@ -35,7 +35,6 @@ jobs:
           fi
 
       - name: Check compatibility with 0.8.0
-        id: 0.8.0
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.8.0)
@@ -46,7 +45,6 @@ jobs:
           fi
 
       - name: Check compatibility with 0.7.6
-        id: 0.7.6
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.7.6)
@@ -57,7 +55,6 @@ jobs:
           fi
 
       - name: Check compatibility with 0.7.0
-        id: 0.7.0
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.7.0)
@@ -68,7 +65,6 @@ jobs:
           fi
 
       - name: Check compatibility with 0.6.12
-        id: 0.6.12
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.6.12)
@@ -79,7 +75,6 @@ jobs:
           fi
 
       - name: Check compatibility with 0.6.2
-        id: 0.6.2
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.6.2)
@@ -109,10 +104,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
 
@@ -125,10 +120,10 @@ jobs:
   fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
 
