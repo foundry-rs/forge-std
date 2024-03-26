@@ -482,6 +482,12 @@ interface VmSafe {
     /// Get the path of the current project root.
     function projectRoot() external view returns (string memory path);
 
+    /// Prompts the user for a string value in the terminal.
+    function prompt(string calldata promptText) external returns (string memory input);
+
+    /// Prompts the user for a hidden string value in the terminal.
+    function promptSecret(string calldata promptText) external returns (string memory input);
+
     /// Reads the directory at the given path recursively, up to `maxDepth`.
     /// `maxDepth` defaults to 1, meaning only the direct children of the given directory will be returned.
     /// Follows symbolic links if `followLinks` is true.
