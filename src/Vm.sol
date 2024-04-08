@@ -426,6 +426,17 @@ interface VmSafe {
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// If `--sender` is provided, the signer with provided address is used, otherwise,
+    /// if exactly one signer is provided to the script, that signer is used.
+    /// Raises error if signer passed through `--sender` does not match any unlocked signers or
+    /// if `--sender` is not provided and not exactly one signer is passed to the script.
+    function sign(bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// Raises error if none of the signers passed into the script have provided address.
+    function sign(address signer, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
     /// Starts recording all map SSTOREs for later retrieval.
     function startMappingRecording() external;
 
@@ -467,10 +478,12 @@ interface VmSafe {
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
 
-    /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file.
+    /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     function getCode(string calldata artifactPath) external view returns (bytes memory creationBytecode);
 
-    /// Gets the deployed bytecode from an artifact file. Takes in the relative path to the json file.
+    /// Gets the deployed bytecode from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     function getDeployedCode(string calldata artifactPath) external view returns (bytes memory runtimeBytecode);
 
     /// Returns true if the path exists on disk and is pointing at a directory, else returns false.
@@ -701,8 +714,11 @@ interface VmSafe {
 
     // ======== Scripting ========
 
-    /// Using the address that calls the test contract, has the next call (at this call depth only)
-    /// create a transaction that can later be signed and sent onchain.
+    /// Has the next call (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Broadcasting address is determined by checking the following in order:
+    /// 1. If `--sender` argument was provided, that address is used.
+    /// 2. If exactly one signer (e.g. private key, hw wallet, keystore) is set when `forge broadcast` is invoked, that signer is used.
+    /// 3. Otherwise, default foundry sender (1804c8AB1F12E6bbf3894d4083f33e07309d1f38) is used.
     function broadcast() external;
 
     /// Has the next call (at this call depth only) create a transaction with the address provided
@@ -713,8 +729,11 @@ interface VmSafe {
     /// provided as the sender that can later be signed and sent onchain.
     function broadcast(uint256 privateKey) external;
 
-    /// Using the address that calls the test contract, has all subsequent calls
-    /// (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Broadcasting address is determined by checking the following in order:
+    /// 1. If `--sender` argument was provided, that address is used.
+    /// 2. If exactly one signer (e.g. private key, hw wallet, keystore) is set when `forge broadcast` is invoked, that signer is used.
+    /// 3. Otherwise, default foundry sender (1804c8AB1F12E6bbf3894d4083f33e07309d1f38) is used.
     function startBroadcast() external;
 
     /// Has all subsequent calls (at this call depth only) create transactions with the address
@@ -729,6 +748,11 @@ interface VmSafe {
     function stopBroadcast() external;
 
     // ======== String ========
+
+    /// Returns the index of the first occurrence of a `key` in an `input` string.
+    /// Returns `NOT_FOUND` (i.e. `type(uint256).max`) if the `key` is not found.
+    /// Returns 0 in case of an empty `key`.
+    function indexOf(string calldata input, string memory key) external pure returns (uint256);
 
     /// Parses the given `string` into an `address`.
     function parseAddress(string calldata stringifiedValue) external pure returns (address parsedValue);
