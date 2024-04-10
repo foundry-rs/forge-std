@@ -48,6 +48,28 @@ interface VmSafe {
         Extcodecopy
     }
 
+    /// Forge execution contexts.
+    enum ForgeContext {
+        // Test group execution context (test, coverage or snapshot).
+        TestGroup,
+        // `forge test` execution context.
+        Test,
+        // `forge coverage` execution context.
+        Coverage,
+        // `forge snapshot` execution context.
+        Snapshot,
+        // Script group execution context (dry run, broadcast or resume).
+        ScriptGroup,
+        // `forge script` execution context.
+        ScriptDryRun,
+        // `forge script --broadcast` execution context.
+        ScriptBroadcast,
+        // `forge script --resume` execution context.
+        ScriptResume,
+        // Unknown `forge` execution context.
+        Unknown
+    }
+
     /// An Ethereum log. Returned by `getRecordedLogs`.
     struct Log {
         // The topics of the log, including the signature, if any.
@@ -207,6 +229,20 @@ interface VmSafe {
         bool reverted;
     }
 
+    /// Gas used. Returned by `lastCallGas`.
+    struct Gas {
+        // The gas limit of the call.
+        uint64 gasLimit;
+        // The total gas used.
+        uint64 gasTotalUsed;
+        // The amount of gas used for memory expansion.
+        uint64 gasMemoryUsed;
+        // The amount of gas refunded.
+        int64 gasRefunded;
+        // The amount of gas remaining.
+        uint64 gasRemaining;
+    }
+
     // ======== Environment ========
 
     /// Gets the environment variable `name` and parses it as `address`.
@@ -356,6 +392,9 @@ interface VmSafe {
     /// Reverts if the variable was not found or could not be parsed.
     function envUint(string calldata name, string calldata delim) external view returns (uint256[] memory value);
 
+    /// Returns true if `forge` command was executed in given context.
+    function isContext(ForgeContext context) external view returns (bool isContext);
+
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
@@ -371,6 +410,12 @@ interface VmSafe {
     function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
         returns (EthGetLogs[] memory logs);
+
+    /// Gets the current `block.blobbasefee`.
+    /// You should use this instead of `block.blobbasefee` if you use `vm.blobBaseFee`, as `block.blobbasefee` is assumed to be constant across a transaction,
+    /// and as a result will get optimized out by the compiler.
+    /// See https://github.com/foundry-rs/foundry/issues/6180
+    function getBlobBaseFee() external view returns (uint256 blobBaseFee);
 
     /// Gets the current `block.number`.
     /// You should use this instead of `block.number` if you use `vm.roll`, as `block.number` is assumed to be constant across a transaction,
@@ -401,6 +446,9 @@ interface VmSafe {
 
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
+
+    /// Gets the gas used in the last call.
+    function lastCallGas() external view returns (Gas memory gas);
 
     /// Loads a storage slot from an address.
     function load(address target, bytes32 slot) external view returns (bytes32 data);
@@ -498,8 +546,14 @@ interface VmSafe {
     /// Prompts the user for a string value in the terminal.
     function prompt(string calldata promptText) external returns (string memory input);
 
+    /// Prompts the user for an address in the terminal.
+    function promptAddress(string calldata promptText) external returns (address);
+
     /// Prompts the user for a hidden string value in the terminal.
     function promptSecret(string calldata promptText) external returns (string memory input);
+
+    /// Prompts the user for uint256 in the terminal.
+    function promptUint(string calldata promptText) external returns (uint256);
 
     /// Reads the directory at the given path recursively, up to `maxDepth`.
     /// `maxDepth` defaults to 1, meaning only the direct children of the given directory will be returned.
@@ -1414,6 +1468,9 @@ interface Vm is VmSafe {
 
     /// In forking mode, explicitly grant the given address cheatcode access.
     function allowCheatcodes(address account) external;
+
+    /// Sets `block.blobbasefee`
+    function blobBaseFee(uint256 newBlobBaseFee) external;
 
     /// Sets `block.chainid`.
     function chainId(uint256 newChainId) external;
