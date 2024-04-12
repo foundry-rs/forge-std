@@ -216,6 +216,9 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "polygon_mumbai", ChainData("Polygon Mumbai", 80001, "https://rpc-mumbai.maticvigil.com")
         );
+        setChainWithDefaultRpcUrl(
+            "polygon_amoy", ChainData("Polygon Amoy", 80002, "https://rpc-amoy.polygon.technology")
+        );
         setChainWithDefaultRpcUrl("avalanche", ChainData("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
         setChainWithDefaultRpcUrl(
             "avalanche_fuji", ChainData("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc")
