@@ -595,7 +595,7 @@ abstract contract StdAssertions {
         vm.assertApproxEqRelDecimal(left, right, maxPercentDelta, decimals, err);
     }
 
-    // Inhertied from DSTest, not used but kept for backwards-compatibility
+    // Inherited from DSTest, not used but kept for backwards-compatibility
     function checkEq0(bytes memory left, bytes memory right) internal pure returns (bool) {
         return keccak256(left) == keccak256(right);
     }
