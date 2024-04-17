@@ -400,7 +400,7 @@ contract StdCheatsTest is Test {
     }
 
     function testFuzz_AssumeNotPrecompile(address addr) external {
-        assumeNotPrecompile(addr, getChain("optimism_goerli").chainId);
+        assumeNotPrecompile(addr, getChain("optimism_sepolia").chainId);
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
                 || addr > address(0x4200000000000000000000000000000000000800)
