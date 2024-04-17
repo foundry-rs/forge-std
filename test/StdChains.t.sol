@@ -25,8 +25,8 @@ contract StdChainsTest is Test {
     function test_ChainRpcInitialization() public {
         // RPCs specified in `foundry.toml` should be updated.
         assertEq(getChain(1).rpcUrl, "https://eth-mainnet.alchemyapi.io/v2/WV407BEiBmjNJfKo9Uo_55u0z0ITyCOX");
-        assertEq(getChain("optimism_goerli").rpcUrl, "https://goerli.optimism.io/");
-        assertEq(getChain("arbitrum_one_goerli").rpcUrl, "https://goerli-rollup.arbitrum.io/rpc/");
+        assertEq(getChain("optimism_sepolia").rpcUrl, "https://sepolia.optimism.io/");
+        assertEq(getChain("arbitrum_one_sepolia").rpcUrl, "https://sepolia-rollup.arbitrum.io/rpc/");
 
         // Environment variables should be the next fallback
         assertEq(getChain("arbitrum_nova").rpcUrl, "https://nova.arbitrum.io/rpc");
@@ -54,12 +54,12 @@ contract StdChainsTest is Test {
     // Currently commented out since this is slow and public RPCs are flaky, often resulting in failing CI.
     // function test_Rpcs() public {
     //     _testRpc("mainnet");
-    //     _testRpc("goerli");
     //     _testRpc("sepolia");
+    //     _testRpc("holesky");
     //     _testRpc("optimism");
-    //     _testRpc("optimism_goerli");
+    //     _testRpc("optimism_sepolia");
     //     _testRpc("arbitrum_one");
-    //     _testRpc("arbitrum_one_goerli");
+    //     _testRpc("arbitrum_one_sepolia");
     //     _testRpc("arbitrum_nova");
     //     _testRpc("polygon");
     //     _testRpc("polygon_mumbai");
@@ -71,7 +71,7 @@ contract StdChainsTest is Test {
     //     _testRpc("moonbeam");
     //     _testRpc("moonriver");
     //     _testRpc("moonbase");
-    //     _testRpc("base_goerli");
+    //     _testRpc("base_sepolia");
     //     _testRpc("base");
     //     _testRpc("fraxtal");
     //     _testRpc("fraxtal_testnet");
