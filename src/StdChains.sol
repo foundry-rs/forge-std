@@ -204,7 +204,9 @@ abstract contract StdChains {
         );
         setChainWithDefaultRpcUrl("holesky", ChainData("Holesky", 17000, "https://rpc.holesky.ethpandaops.io"));
         setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
-        setChainWithDefaultRpcUrl("optimism_sepolia", ChainData("Optimism Sepolia", 11155420, "https://sepolia.optimism.io"));
+        setChainWithDefaultRpcUrl(
+            "optimism_sepolia", ChainData("Optimism Sepolia", 11155420, "https://sepolia.optimism.io")
+        );
         setChainWithDefaultRpcUrl("arbitrum_one", ChainData("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
         setChainWithDefaultRpcUrl(
             "arbitrum_one_sepolia", ChainData("Arbitrum One Sepolia", 421614, "https://sepolia-rollup.arbitrum.io/rpc")
