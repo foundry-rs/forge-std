@@ -359,6 +359,9 @@ interface VmSafe {
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
+    /// Gets the environment variable `name` and returns true if it exists, else returns false.
+    function envExists(string calldata name) external view returns (bool);
+
     // ======== EVM ========
 
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
