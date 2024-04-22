@@ -48,6 +48,28 @@ interface VmSafe {
         Extcodecopy
     }
 
+    /// Forge execution contexts.
+    enum ForgeContext {
+        /// Test group execution context (test, coverage or snapshot).
+        TestGroup,
+        /// `forge test` execution context.
+        Test,
+        /// `forge coverage` execution context.
+        Coverage,
+        /// `forge snapshot` execution context.
+        Snapshot,
+        /// Script group execution context (dry run, broadcast or resume).
+        ScriptGroup,
+        /// `forge script` execution context.
+        ScriptDryRun,
+        /// `forge script --broadcast` execution context.
+        ScriptBroadcast,
+        /// `forge script --resume` execution context.
+        ScriptResume,
+        /// Unknown `forge` execution context.
+        Unknown
+    }
+
     /// An Ethereum log. Returned by `getRecordedLogs`.
     struct Log {
         // The topics of the log, including the signature, if any.
@@ -1357,6 +1379,9 @@ interface VmSafe {
 
     /// Get a `Wallet`'s nonce.
     function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
+
+    /// Returns true if `forge` command was executed in given context.
+    function isContext(ForgeContext context) external view returns (bool isContext);
 
     /// Labels an address in call traces.
     function label(address account, string calldata newLabel) external;
