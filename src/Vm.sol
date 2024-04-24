@@ -48,6 +48,28 @@ interface VmSafe {
         Extcodecopy
     }
 
+    /// Forge execution contexts.
+    enum ForgeContext {
+        // Test group execution context (test, coverage or snapshot).
+        TestGroup,
+        // `forge test` execution context.
+        Test,
+        // `forge coverage` execution context.
+        Coverage,
+        // `forge snapshot` execution context.
+        Snapshot,
+        // Script group execution context (dry run, broadcast or resume).
+        ScriptGroup,
+        // `forge script` execution context.
+        ScriptDryRun,
+        // `forge script --broadcast` execution context.
+        ScriptBroadcast,
+        // `forge script --resume` execution context.
+        ScriptResume,
+        // Unknown `forge` execution context.
+        Unknown
+    }
+
     /// An Ethereum log. Returned by `getRecordedLogs`.
     struct Log {
         // The topics of the log, including the signature, if any.
@@ -207,6 +229,20 @@ interface VmSafe {
         bool reverted;
     }
 
+    /// Gas used. Returned by `lastCallGas`.
+    struct Gas {
+        // The gas limit of the call.
+        uint64 gasLimit;
+        // The total gas used.
+        uint64 gasTotalUsed;
+        // The amount of gas used for memory expansion.
+        uint64 gasMemoryUsed;
+        // The amount of gas refunded.
+        int64 gasRefunded;
+        // The amount of gas remaining.
+        uint64 gasRemaining;
+    }
+
     // ======== Environment ========
 
     /// Gets the environment variable `name` and parses it as `address`.
@@ -240,6 +276,9 @@ interface VmSafe {
     /// Gets the environment variable `name` and parses it as an array of `bytes`, delimited by `delim`.
     /// Reverts if the variable was not found or could not be parsed.
     function envBytes(string calldata name, string calldata delim) external view returns (bytes[] memory value);
+
+    /// Gets the environment variable `name` and returns true if it exists, else returns false.
+    function envExists(string calldata name) external view returns (bool result);
 
     /// Gets the environment variable `name` and parses it as `int256`.
     /// Reverts if the variable was not found or could not be parsed.
@@ -356,6 +395,9 @@ interface VmSafe {
     /// Reverts if the variable was not found or could not be parsed.
     function envUint(string calldata name, string calldata delim) external view returns (uint256[] memory value);
 
+    /// Returns true if `forge` command was executed in given context.
+    function isContext(ForgeContext context) external view returns (bool result);
+
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
@@ -371,6 +413,12 @@ interface VmSafe {
     function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
         returns (EthGetLogs[] memory logs);
+
+    /// Gets the current `block.blobbasefee`.
+    /// You should use this instead of `block.blobbasefee` if you use `vm.blobBaseFee`, as `block.blobbasefee` is assumed to be constant across a transaction,
+    /// and as a result will get optimized out by the compiler.
+    /// See https://github.com/foundry-rs/foundry/issues/6180
+    function getBlobBaseFee() external view returns (uint256 blobBaseFee);
 
     /// Gets the current `block.number`.
     /// You should use this instead of `block.number` if you use `vm.roll`, as `block.number` is assumed to be constant across a transaction,
@@ -402,6 +450,9 @@ interface VmSafe {
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
 
+    /// Gets the gas used in the last call.
+    function lastCallGas() external view returns (Gas memory gas);
+
     /// Loads a storage slot from an address.
     function load(address target, bytes32 slot) external view returns (bytes32 data);
 
@@ -425,6 +476,17 @@ interface VmSafe {
 
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// If `--sender` is provided, the signer with provided address is used, otherwise,
+    /// if exactly one signer is provided to the script, that signer is used.
+    /// Raises error if signer passed through `--sender` does not match any unlocked signers or
+    /// if `--sender` is not provided and not exactly one signer is passed to the script.
+    function sign(bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// Raises error if none of the signers passed into the script have provided address.
+    function sign(address signer, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Starts recording all map SSTOREs for later retrieval.
     function startMappingRecording() external;
@@ -467,10 +529,12 @@ interface VmSafe {
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
 
-    /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file.
+    /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     function getCode(string calldata artifactPath) external view returns (bytes memory creationBytecode);
 
-    /// Gets the deployed bytecode from an artifact file. Takes in the relative path to the json file.
+    /// Gets the deployed bytecode from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     function getDeployedCode(string calldata artifactPath) external view returns (bytes memory runtimeBytecode);
 
     /// Returns true if the path exists on disk and is pointing at a directory, else returns false.
@@ -485,8 +549,14 @@ interface VmSafe {
     /// Prompts the user for a string value in the terminal.
     function prompt(string calldata promptText) external returns (string memory input);
 
+    /// Prompts the user for an address in the terminal.
+    function promptAddress(string calldata promptText) external returns (address);
+
     /// Prompts the user for a hidden string value in the terminal.
     function promptSecret(string calldata promptText) external returns (string memory input);
+
+    /// Prompts the user for uint256 in the terminal.
+    function promptUint(string calldata promptText) external returns (uint256);
 
     /// Reads the directory at the given path recursively, up to `maxDepth`.
     /// `maxDepth` defaults to 1, meaning only the direct children of the given directory will be returned.
@@ -683,6 +753,11 @@ interface VmSafe {
         returns (string memory json);
 
     /// See `serializeJson`.
+    function serializeUintToHex(string calldata objectKey, string calldata valueKey, uint256 value)
+        external
+        returns (string memory json);
+
+    /// See `serializeJson`.
     function serializeUint(string calldata objectKey, string calldata valueKey, uint256 value)
         external
         returns (string memory json);
@@ -701,8 +776,11 @@ interface VmSafe {
 
     // ======== Scripting ========
 
-    /// Using the address that calls the test contract, has the next call (at this call depth only)
-    /// create a transaction that can later be signed and sent onchain.
+    /// Has the next call (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Broadcasting address is determined by checking the following in order:
+    /// 1. If `--sender` argument was provided, that address is used.
+    /// 2. If exactly one signer (e.g. private key, hw wallet, keystore) is set when `forge broadcast` is invoked, that signer is used.
+    /// 3. Otherwise, default foundry sender (1804c8AB1F12E6bbf3894d4083f33e07309d1f38) is used.
     function broadcast() external;
 
     /// Has the next call (at this call depth only) create a transaction with the address provided
@@ -713,8 +791,11 @@ interface VmSafe {
     /// provided as the sender that can later be signed and sent onchain.
     function broadcast(uint256 privateKey) external;
 
-    /// Using the address that calls the test contract, has all subsequent calls
-    /// (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain.
+    /// Broadcasting address is determined by checking the following in order:
+    /// 1. If `--sender` argument was provided, that address is used.
+    /// 2. If exactly one signer (e.g. private key, hw wallet, keystore) is set when `forge broadcast` is invoked, that signer is used.
+    /// 3. Otherwise, default foundry sender (1804c8AB1F12E6bbf3894d4083f33e07309d1f38) is used.
     function startBroadcast() external;
 
     /// Has all subsequent calls (at this call depth only) create transactions with the address
@@ -729,6 +810,11 @@ interface VmSafe {
     function stopBroadcast() external;
 
     // ======== String ========
+
+    /// Returns the index of the first occurrence of a `key` in an `input` string.
+    /// Returns `NOT_FOUND` (i.e. `type(uint256).max`) if the `key` is not found.
+    /// Returns 0 in case of an empty `key`.
+    function indexOf(string calldata input, string calldata key) external pure returns (uint256);
 
     /// Parses the given `string` into an `address`.
     function parseAddress(string calldata stringifiedValue) external pure returns (address parsedValue);
@@ -1391,6 +1477,9 @@ interface Vm is VmSafe {
     /// In forking mode, explicitly grant the given address cheatcode access.
     function allowCheatcodes(address account) external;
 
+    /// Sets `block.blobbasefee`
+    function blobBaseFee(uint256 newBlobBaseFee) external;
+
     /// Sets `block.chainid`.
     function chainId(uint256 newChainId) external;
 
@@ -1492,6 +1581,11 @@ interface Vm is VmSafe {
     /// Not available on EVM versions before Paris. Use `difficulty` instead.
     /// If used on unsupported EVM versions it will revert.
     function prevrandao(bytes32 newPrevrandao) external;
+
+    /// Sets `block.prevrandao`.
+    /// Not available on EVM versions before Paris. Use `difficulty` instead.
+    /// If used on unsupported EVM versions it will revert.
+    function prevrandao(uint256 newPrevrandao) external;
 
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
     function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
