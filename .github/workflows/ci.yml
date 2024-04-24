@@ -11,10 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
@@ -28,7 +28,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -38,7 +37,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.8.0)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -48,7 +46,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.7.6)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -58,7 +55,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.7.0)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -68,7 +64,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.6.12)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -78,7 +73,6 @@ jobs:
         if: always()
         run: |
           output=$(forge build --skip test --use solc:0.6.2)
-
           if echo "$output" | grep -q "Warning"; then
             echo "$output"
             exit 1
@@ -104,10 +98,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
@@ -120,10 +114,10 @@ jobs:
   fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 

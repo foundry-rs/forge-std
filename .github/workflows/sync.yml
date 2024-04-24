@@ -11,11 +11,13 @@ jobs:
     if: startsWith(github.event.release.tag_name, 'v1')
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: v1
 
+      # The email is derived from the bots user id,
+      # found here: https://api.github.com/users/github-actions%5Bbot%5D
       - name: Configure Git
         run: |
           git config user.name github-actions[bot]
