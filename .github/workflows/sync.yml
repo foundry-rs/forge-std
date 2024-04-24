@@ -8,7 +8,7 @@ on:
 jobs:
   sync-release-branch:
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'foundry-rs' && startsWith(github.event.release.tag_name, 'v1') }}
+    if: startsWith(github.event.release.tag_name, 'v1')
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
           ref: v1
 
-      # the email is derived from the bots user id
+      # The email is derived from the bots user id,
       # found here: https://api.github.com/users/github-actions%5Bbot%5D
       - name: Configure Git
         run: |
