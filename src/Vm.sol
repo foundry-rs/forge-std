@@ -1587,6 +1587,16 @@ interface Vm is VmSafe {
     /// If used on unsupported EVM versions it will revert.
     function prevrandao(uint256 newPrevrandao) external;
 
+    /// Sets the blobhashes in the transaction.
+    /// Not available on EVM versions before Cancun.
+    /// If used on unsupported EVM versions it will revert.
+    function blobhashes(bytes32[] calldata hashes) external;
+
+    /// Gets the blockhashes from the current transaction.
+    /// Not available on EVM versions before Cancun.
+    /// If used on unsupported EVM versions it will revert.
+    function getBlobhashes() external view returns (bytes32[] memory hashes);
+
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
     function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
 
