@@ -1438,6 +1438,9 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
 
+    /// Returns ENS namehash for provided string.
+    function ensNamehash(string calldata name) external pure returns (bytes32);
+
     /// Gets the label for the specified address.
     function getLabel(address account) external view returns (string memory currentLabel);
 
