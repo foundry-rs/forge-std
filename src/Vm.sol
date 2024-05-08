@@ -1438,6 +1438,9 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
 
+    /// Returns ENS namehash for provided string.
+    function ensNamehash(string calldata name) external pure returns (bytes32);
+
     /// Gets the label for the specified address.
     function getLabel(address account) external view returns (string memory currentLabel);
 
@@ -1479,6 +1482,11 @@ interface Vm is VmSafe {
 
     /// Sets `block.blobbasefee`
     function blobBaseFee(uint256 newBlobBaseFee) external;
+
+    /// Sets the blobhashes in the transaction.
+    /// Not available on EVM versions before Cancun.
+    /// If used on unsupported EVM versions it will revert.
+    function blobhashes(bytes32[] calldata hashes) external;
 
     /// Sets `block.chainid`.
     function chainId(uint256 newChainId) external;
@@ -1535,6 +1543,11 @@ interface Vm is VmSafe {
     /// Sets `block.basefee`.
     function fee(uint256 newBasefee) external;
 
+    /// Gets the blockhashes from the current transaction.
+    /// Not available on EVM versions before Cancun.
+    /// If used on unsupported EVM versions it will revert.
+    function getBlobhashes() external view returns (bytes32[] memory hashes);
+
     /// Returns true if the account is marked as persistent.
     function isPersistent(address account) external view returns (bool persistent);
 
@@ -1586,16 +1599,6 @@ interface Vm is VmSafe {
     /// Not available on EVM versions before Paris. Use `difficulty` instead.
     /// If used on unsupported EVM versions it will revert.
     function prevrandao(uint256 newPrevrandao) external;
-
-    /// Sets the blobhashes in the transaction.
-    /// Not available on EVM versions before Cancun.
-    /// If used on unsupported EVM versions it will revert.
-    function blobhashes(bytes32[] calldata hashes) external;
-
-    /// Gets the blockhashes from the current transaction.
-    /// Not available on EVM versions before Cancun.
-    /// If used on unsupported EVM versions it will revert.
-    function getBlobhashes() external view returns (bytes32[] memory hashes);
 
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
     function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
