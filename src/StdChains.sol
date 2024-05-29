@@ -239,6 +239,7 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl("blast", ChainData("Blast", 81457, "https://rpc.blast.io"));
         setChainWithDefaultRpcUrl("fraxtal", ChainData("Fraxtal", 252, "https://rpc.frax.com"));
         setChainWithDefaultRpcUrl("fraxtal_testnet", ChainData("Fraxtal Testnet", 2522, "https://rpc.testnet.frax.com"));
+        setChainWithDefaultRpcUrl("defi_oracle_meta_mainnet", ChainData("Defi Oracle Meta Mainnet", 138, "https://rpc.defi-oracle.io"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
