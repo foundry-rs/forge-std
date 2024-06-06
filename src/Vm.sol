@@ -555,6 +555,9 @@ interface VmSafe {
     /// Prompts the user for a hidden string value in the terminal.
     function promptSecret(string calldata promptText) external returns (string memory input);
 
+    /// Prompts the user for hidden uint256 in the terminal (usually pk).
+    function promptSecretUint(string calldata promptText) external returns (uint256);
+
     /// Prompts the user for uint256 in the terminal.
     function promptUint(string calldata promptText) external returns (uint256);
 
