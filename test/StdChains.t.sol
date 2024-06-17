@@ -75,6 +75,8 @@ contract StdChainsTest is Test {
     //     _testRpc("base");
     //     _testRpc("blast_sepolia");
     //     _testRpc("blast");
+    //     _testRpc("fantom_opera");
+    //     _testRpc("fantom_opera_testnet");
     //     _testRpc("fraxtal");
     //     _testRpc("fraxtal_testnet");
     // }
