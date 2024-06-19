@@ -52,7 +52,7 @@ contract StdChainsTest is Test {
 
     // Ensure we can connect to the default RPC URL for each chain.
     // Currently commented out since this is slow and public RPCs are flaky, often resulting in failing CI.
-    // function test_Rpcs() public {
+    function test_Rpcs() public {
     //     _testRpc("mainnet");
     //     _testRpc("sepolia");
     //     _testRpc("holesky");
@@ -79,7 +79,8 @@ contract StdChainsTest is Test {
     //     _testRpc("fantom_opera_testnet");
     //     _testRpc("fraxtal");
     //     _testRpc("fraxtal_testnet");
-    // }
+    // _testRpc("berachain_bartio_testnet");
+    }
 
     function test_ChainNoDefault() public {
         // We deploy a mock to properly test the revert.
