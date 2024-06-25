@@ -79,6 +79,7 @@ contract StdChainsTest is Test {
     //     _testRpc("fantom_opera_testnet");
     //     _testRpc("fraxtal");
     //     _testRpc("fraxtal_testnet");
+    //     _testRpc("berachain_bartio_testnet");
     // }
 
     function test_ChainNoDefault() public {
