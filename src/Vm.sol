@@ -235,7 +235,7 @@ interface VmSafe {
         uint64 gasLimit;
         // The total gas used.
         uint64 gasTotalUsed;
-        // The amount of gas used for memory expansion.
+        // DEPRECATED: The amount of gas used for memory expansion. Ref: <https://github.com/foundry-rs/foundry/pull/7934#pullrequestreview-2069236939>
         uint64 gasMemoryUsed;
         // The amount of gas refunded.
         int64 gasRefunded;
@@ -1452,6 +1452,15 @@ interface VmSafe {
 
     /// Labels an address in call traces.
     function label(address account, string calldata newLabel) external;
+
+    /// Returns a random `address`.
+    function randomAddress() external returns (address);
+
+    /// Returns a random uint256 value.
+    function randomUint() external returns (uint256);
+
+    /// Returns random uin256 value between the provided range (=min..=max).
+    function randomUint(uint256 min, uint256 max) external returns (uint256);
 
     /// Adds a private key to the local forge wallet and returns the address.
     function rememberKey(uint256 privateKey) external returns (address keyAddr);
