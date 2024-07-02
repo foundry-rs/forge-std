@@ -186,6 +186,10 @@ library console {
         _sendLogPayload(abi.encodeWithSignature("log(uint)", p0));
     }
 
+    function log(int p0) internal pure {
+        _sendLogPayload(abi.encodeWithSignature("log(int)", p0));
+    }
+
     function log(string memory p0) internal pure {
         _sendLogPayload(abi.encodeWithSignature("log(string)", p0));
     }
@@ -216,6 +220,10 @@ library console {
 
     function log(string memory p0, uint p1) internal pure {
         _sendLogPayload(abi.encodeWithSignature("log(string,uint)", p0, p1));
+    }
+
+    function log(string memory p0, int p1) internal pure {
+        _sendLogPayload(abi.encodeWithSignature("log(string,int)", p0, p1));
     }
 
     function log(string memory p0, string memory p1) internal pure {
