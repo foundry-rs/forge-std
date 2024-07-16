@@ -345,6 +345,11 @@ contract StdStorageTest is Test {
             assertEq(retVal, vals[i]);
         }
     }
+
+    function testEdgeCaseArray() public {
+        stdstore.target(address(test)).sig("edgeCaseArray(uint256)").with_key(uint256(0)).checked_write(1);
+        assertEq(test.edgeCaseArray(0), 1);
+    }
 }
 
 contract StorageTest {
@@ -377,6 +382,9 @@ contract StorageTest {
     bytes32 private tI = ~bytes32(hex"1337");
 
     uint256 randomPacking;
+
+    // Array with length matching values of elements.
+    uint256[] public edgeCaseArray = [3, 3, 3];
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});
