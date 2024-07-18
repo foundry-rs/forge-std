@@ -471,6 +471,11 @@ interface VmSafe {
     /// Performs an Ethereum JSON-RPC request to the current fork URL.
     function rpc(string calldata method, string calldata params) external returns (bytes memory data);
 
+    /// Performs an Ethereum JSON-RPC request to the given endpoint.
+    function rpc(string calldata urlOrAlias, string calldata method, string calldata params)
+        external
+        returns (bytes memory data);
+
     /// Signs `digest` with `privateKey` using the secp256r1 curve.
     function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
 
@@ -519,6 +524,17 @@ interface VmSafe {
     /// - `path` already exists and `recursive` is false.
     /// `path` is relative to the project root.
     function createDir(string calldata path, bool recursive) external;
+
+    /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    function deployCode(string calldata artifactPath) external returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionaly accepts abi-encoded constructor arguments.
+    function deployCode(string calldata artifactPath, bytes calldata constructorArgs)
+        external
+        returns (address deployedAddress);
 
     /// Returns true if the given path points to an existing entity, else returns false.
     function exists(string calldata path) external returns (bool result);
@@ -679,6 +695,24 @@ interface VmSafe {
     /// Parses a string of JSON data at `key` and coerces it to `string[]`.
     function parseJsonStringArray(string calldata json, string calldata key) external pure returns (string[] memory);
 
+    /// Parses a string of JSON data at `key` and coerces it to type array corresponding to `typeDescription`.
+    function parseJsonTypeArray(string calldata json, string calldata key, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
+    /// Parses a string of JSON data and coerces it to type corresponding to `typeDescription`.
+    function parseJsonType(string calldata json, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to type corresponding to `typeDescription`.
+    function parseJsonType(string calldata json, string calldata key, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
     /// Parses a string of JSON data at `key` and coerces it to `uint256`.
     function parseJsonUint(string calldata json, string calldata key) external pure returns (uint256);
 
@@ -744,6 +778,20 @@ interface VmSafe {
     /// Serializes a key and value to a JSON object stored in-memory that can be later written to a file.
     /// Returns the stringified version of the specific JSON file up to that moment.
     function serializeJson(string calldata objectKey, string calldata value) external returns (string memory json);
+
+    /// See `serializeJson`.
+    function serializeJsonType(string calldata typeDescription, bytes calldata value)
+        external
+        pure
+        returns (string memory json);
+
+    /// See `serializeJson`.
+    function serializeJsonType(
+        string calldata objectKey,
+        string calldata valueKey,
+        string calldata typeDescription,
+        bytes calldata value
+    ) external returns (string memory json);
 
     /// See `serializeJson`.
     function serializeString(string calldata objectKey, string calldata valueKey, string calldata value)
@@ -1657,6 +1705,10 @@ interface Vm is VmSafe {
     /// Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256 forkId) external;
 
+    /// Set blockhash for the current block.
+    /// It only sets the blockhash for blocks where `block.number - 256 <= number < block.number`.
+    function setBlockhash(uint256 blockNumber, bytes32 blockHash) external;
+
     /// Sets the nonce of an account. Must be higher than the current nonce of the account.
     function setNonce(address account, uint64 newNonce) external;
 
@@ -1719,6 +1771,30 @@ interface Vm is VmSafe {
 
     /// Expects given number of calls to an address with the specified `msg.value`, gas, and calldata.
     function expectCall(address callee, uint256 msgValue, uint64 gas, bytes calldata data, uint64 count) external;
+
+    /// Prepare an expected anonymous log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData.).
+    /// Call this function, then emit an anonymous event, then call a function. Internally after the call, we check if
+    /// logs were emitted in the expected order with the expected topics and data (as specified by the booleans).
+    function expectEmitAnonymous(bool checkTopic0, bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData)
+        external;
+
+    /// Same as the previous method, but also checks supplied address against emitting contract.
+    function expectEmitAnonymous(
+        bool checkTopic0,
+        bool checkTopic1,
+        bool checkTopic2,
+        bool checkTopic3,
+        bool checkData,
+        address emitter
+    ) external;
+
+    /// Prepare an expected anonymous log with all topic and data checks enabled.
+    /// Call this function, then emit an anonymous event, then call a function. Internally after the call, we check if
+    /// logs were emitted in the expected order with the expected topics and data.
+    function expectEmitAnonymous() external;
+
+    /// Same as the previous method, but also checks supplied address against emitting contract.
+    function expectEmitAnonymous(address emitter) external;
 
     /// Prepare an expected log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData.).
     /// Call this function, then emit an event, then call a function. Internally after the call, we check if
