@@ -87,6 +87,27 @@ abstract contract StdUtils {
         console2_log_StdUtils("Bound result", vm.toString(result));
     }
 
+    function _boundLog(uint256 x, uint8 min, uint8 max) internal pure virtual returns (uint256 result) {
+        require(min <= max, "StdUtils boundLog(uint256,uint8,uint8): Max is less than min.");
+
+        // If x is between min and max, DO NOT return x directly. This is to ensure that the sampling remains uniform in log space
+
+        // select an exponent between [min, max]
+        uint256 range = uint256(max) - uint256(min) + 1;
+        uint256 m0 = min + (x % range);
+
+        // randomize the input value, use it to generate a number between 2 ** m0 and 2 **(m0+1)-1
+        x = uint256(keccak256(abi.encode(x)));
+        uint256 m1 = x % 2 ** max;
+        result = 2 ** m0 + (m1 >> (max - m0));
+
+    }
+
+    function boundLog(uint256 x, uint8 min, uint8 max) internal pure virtual returns (uint256 result) {
+        result = _boundLog(x, min, max);
+        console2_log_StdUtils("Bound (Log) result", result);
+    }
+
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
         result = _bound(privateKey, 1, SECP256K1_ORDER - 1);
     }
