@@ -409,9 +409,6 @@ interface VmSafe {
     /// Gets the address for a given private key.
     function addr(uint256 privateKey) external pure returns (address keyAddr);
 
-    /// Takes a signed transaction and broadcasts it to the network.
-    function broadcastRawTransaction(bytes calldata data) external;
-
     /// Gets all the logs according to specified filter.
     function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
@@ -829,6 +826,9 @@ interface VmSafe {
     function writeJson(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Scripting ========
+
+    /// Takes a signed transaction and broadcasts it to the network.
+    function broadcastRawTransaction(bytes calldata data) external;
 
     /// Has the next call (at this call depth only) create transactions that can later be signed and sent onchain.
     /// Broadcasting address is determined by checking the following in order:
