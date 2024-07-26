@@ -827,6 +827,9 @@ interface VmSafe {
 
     // ======== Scripting ========
 
+    /// Takes a signed transaction and broadcasts it to the network.
+    function broadcastRawTransaction(bytes calldata data) external;
+
     /// Has the next call (at this call depth only) create transactions that can later be signed and sent onchain.
     /// Broadcasting address is determined by checking the following in order:
     /// 1. If `--sender` argument was provided, that address is used.
