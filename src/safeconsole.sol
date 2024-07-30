@@ -48,8 +48,8 @@ library safeconsole {
                 m0 := mload(sub(offset, 0x60))
                 m1 := mload(sub(offset, 0x40))
                 m2 := mload(sub(offset, 0x20))
-                // Selector of `logBytes(bytes)`.
-                mstore(sub(offset, 0x60), 0xe17bf956)
+                // Selector of `log(bytes)`.
+                mstore(sub(offset, 0x60), 0x0be77f56)
                 mstore(sub(offset, 0x40), 0x20)
                 mstore(sub(offset, 0x20), length)
             }
@@ -72,8 +72,8 @@ library safeconsole {
             }
             _memcopy(offset, offset + 0x60, length);
             assembly {
-                // Selector of `logBytes(bytes)`.
-                mstore(add(offset, 0x00), 0xe17bf956)
+                // Selector of `log(bytes)`.
+                mstore(add(offset, 0x00), 0x0be77f56)
                 mstore(add(offset, 0x20), 0x20)
                 mstore(add(offset, 0x40), length)
             }
