@@ -243,6 +243,94 @@ interface VmSafe {
         uint64 gasRemaining;
     }
 
+    // ======== Crypto ========
+
+    /// Derives a private key from the name, labels the account with that name, and returns the wallet.
+    function createWallet(string calldata walletLabel) external returns (Wallet memory wallet);
+
+    /// Generates a wallet from the private key and returns the wallet.
+    function createWallet(uint256 privateKey) external returns (Wallet memory wallet);
+
+    /// Generates a wallet from the private key, labels the account with that name, and returns the wallet.
+    function createWallet(uint256 privateKey, string calldata walletLabel) external returns (Wallet memory wallet);
+
+    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// at the derivation path `m/44'/60'/0'/0/{index}`.
+    function deriveKey(string calldata mnemonic, uint32 index) external pure returns (uint256 privateKey);
+
+    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// at `{derivationPath}{index}`.
+    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index)
+        external
+        pure
+        returns (uint256 privateKey);
+
+    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// at the derivation path `m/44'/60'/0'/0/{index}`.
+    function deriveKey(string calldata mnemonic, uint32 index, string calldata language)
+        external
+        pure
+        returns (uint256 privateKey);
+
+    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// at `{derivationPath}{index}`.
+    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index, string calldata language)
+        external
+        pure
+        returns (uint256 privateKey);
+
+    /// Adds a private key to the local forge wallet and returns the address.
+    function rememberKey(uint256 privateKey) external returns (address keyAddr);
+
+    /// Signs data with a `Wallet`.
+    /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
+    /// signature's `s` value, and the recovery id `v` in a single bytes32.
+    /// This format reduces the signature size from 65 to 64 bytes.
+    function signCompact(Wallet calldata wallet, bytes32 digest) external returns (bytes32 r, bytes32 vs);
+
+    /// Signs `digest` with `privateKey` using the secp256k1 curve.
+    /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
+    /// signature's `s` value, and the recovery id `v` in a single bytes32.
+    /// This format reduces the signature size from 65 to 64 bytes.
+    function signCompact(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
+    /// signature's `s` value, and the recovery id `v` in a single bytes32.
+    /// This format reduces the signature size from 65 to 64 bytes.
+    /// If `--sender` is provided, the signer with provided address is used, otherwise,
+    /// if exactly one signer is provided to the script, that signer is used.
+    /// Raises error if signer passed through `--sender` does not match any unlocked signers or
+    /// if `--sender` is not provided and not exactly one signer is passed to the script.
+    function signCompact(bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
+    /// signature's `s` value, and the recovery id `v` in a single bytes32.
+    /// This format reduces the signature size from 65 to 64 bytes.
+    /// Raises error if none of the signers passed into the script have provided address.
+    function signCompact(address signer, bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
+
+    /// Signs `digest` with `privateKey` using the secp256r1 curve.
+    function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
+
+    /// Signs data with a `Wallet`.
+    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with `privateKey` using the secp256k1 curve.
+    function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// If `--sender` is provided, the signer with provided address is used, otherwise,
+    /// if exactly one signer is provided to the script, that signer is used.
+    /// Raises error if signer passed through `--sender` does not match any unlocked signers or
+    /// if `--sender` is not provided and not exactly one signer is passed to the script.
+    function sign(bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Signs `digest` with signer provided to script using the secp256k1 curve.
+    /// Raises error if none of the signers passed into the script have provided address.
+    function sign(address signer, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
     // ======== Environment ========
 
     /// Gets the environment variable `name` and parses it as `address`.
@@ -447,6 +535,9 @@ interface VmSafe {
     /// Gets the nonce of an account.
     function getNonce(address account) external view returns (uint64 nonce);
 
+    /// Get the nonce of a `Wallet`.
+    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
+
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
 
@@ -475,23 +566,6 @@ interface VmSafe {
     function rpc(string calldata urlOrAlias, string calldata method, string calldata params)
         external
         returns (bytes memory data);
-
-    /// Signs `digest` with `privateKey` using the secp256r1 curve.
-    function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
-
-    /// Signs `digest` with `privateKey` using the secp256k1 curve.
-    function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
-
-    /// Signs `digest` with signer provided to script using the secp256k1 curve.
-    /// If `--sender` is provided, the signer with provided address is used, otherwise,
-    /// if exactly one signer is provided to the script, that signer is used.
-    /// Raises error if signer passed through `--sender` does not match any unlocked signers or
-    /// if `--sender` is not provided and not exactly one signer is passed to the script.
-    function sign(bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
-
-    /// Signs `digest` with signer provided to script using the secp256k1 curve.
-    /// Raises error if none of the signers passed into the script have provided address.
-    function sign(address signer, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Starts recording all map SSTOREs for later retrieval.
     function startMappingRecording() external;
@@ -1363,6 +1437,14 @@ interface VmSafe {
     /// Writes a conditional breakpoint to jump to in the debugger.
     function breakpoint(string calldata char, bool value) external;
 
+    /// Returns the Foundry version.
+    /// Format: <cargo_version>+<git_sha>+<build_timestamp>
+    /// Sample output: 0.2.0+faa94c384+202407110019
+    /// Note: Build timestamps may vary slightly across platforms due to separate CI jobs.
+    /// For reliable version comparisons, use YYYYMMDD0000 format (e.g., >= 202407110000)
+    /// to compare timestamps while ignoring minor time differences.
+    function getFoundryVersion() external view returns (string memory version);
+
     /// Returns the RPC url for the given alias.
     function rpcUrl(string calldata rpcAlias) external view returns (string memory json);
 
@@ -1458,48 +1540,11 @@ interface VmSafe {
     /// Compute the address a contract will be deployed at for a given deployer address and nonce.
     function computeCreateAddress(address deployer, uint256 nonce) external pure returns (address);
 
-    /// Derives a private key from the name, labels the account with that name, and returns the wallet.
-    function createWallet(string calldata walletLabel) external returns (Wallet memory wallet);
-
-    /// Generates a wallet from the private key and returns the wallet.
-    function createWallet(uint256 privateKey) external returns (Wallet memory wallet);
-
-    /// Generates a wallet from the private key, labels the account with that name, and returns the wallet.
-    function createWallet(uint256 privateKey, string calldata walletLabel) external returns (Wallet memory wallet);
-
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
-    /// at the derivation path `m/44'/60'/0'/0/{index}`.
-    function deriveKey(string calldata mnemonic, uint32 index) external pure returns (uint256 privateKey);
-
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
-    /// at `{derivationPath}{index}`.
-    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index)
-        external
-        pure
-        returns (uint256 privateKey);
-
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
-    /// at the derivation path `m/44'/60'/0'/0/{index}`.
-    function deriveKey(string calldata mnemonic, uint32 index, string calldata language)
-        external
-        pure
-        returns (uint256 privateKey);
-
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
-    /// at `{derivationPath}{index}`.
-    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index, string calldata language)
-        external
-        pure
-        returns (uint256 privateKey);
-
     /// Returns ENS namehash for provided string.
     function ensNamehash(string calldata name) external pure returns (bytes32);
 
     /// Gets the label for the specified address.
     function getLabel(address account) external view returns (string memory currentLabel);
-
-    /// Get a `Wallet`'s nonce.
-    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
 
     /// Labels an address in call traces.
     function label(address account, string calldata newLabel) external;
@@ -1512,12 +1557,6 @@ interface VmSafe {
 
     /// Returns random uin256 value between the provided range (=min..=max).
     function randomUint(uint256 min, uint256 max) external returns (uint256);
-
-    /// Adds a private key to the local forge wallet and returns the address.
-    function rememberKey(uint256 privateKey) external returns (address keyAddr);
-
-    /// Signs data with a `Wallet`.
-    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Encodes a `bytes` value to a base64url string.
     function toBase64URL(bytes calldata data) external pure returns (string memory);
