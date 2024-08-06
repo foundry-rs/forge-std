@@ -322,8 +322,8 @@ abstract contract StdCheatsSafe {
         // Note: For some chains like Optimism these are technically predeploys (i.e. bytecode placed at a specific
         // address), but the same rationale for excluding them applies so we include those too.
 
-        // These should be present on all EVM-compatible chains.
-        vm.assume(addr < address(0x1) || addr > address(0x9));
+        // These are reserved by Ethereum and may be on all EVM-compatible chains.
+        vm.assume(addr < address(0x1) || addr > address(0xff));
 
         // forgefmt: disable-start
         if (chainId == 10 || chainId == 420) {
