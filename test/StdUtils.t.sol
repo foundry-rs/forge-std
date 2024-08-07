@@ -201,6 +201,37 @@ contract StdUtilsTest is Test {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                                     BOUND LOG
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function test_boundLog() public {
+
+        for (uint256 i = 0; i <= 255; ++i) {
+            assertEq(boundLog(0, uint8(0), uint8(i)), 2**0 + ((uint256(keccak256(abi.encode(uint256(0)))) % 2**i) >> i));
+            assertEq(boundLog(i, uint8(0), uint8(i)), 2**i + ((uint256(keccak256(abi.encode(uint256(i)))) % 2**i)));
+
+            assertEq(boundLog(0, uint8(i), uint8(255)), 2**i + ((uint256(keccak256(abi.encode(uint256(0)))) % 2**255) >> (255 - i)));
+
+            assertEq(boundLog(0, uint8(i), uint8(i)), 2**i + (uint256(keccak256(abi.encode(uint256(0)))) % 2**i));
+
+        }
+
+    }
+
+
+    function test_boundLog(uint256 x, uint8 min, uint8 max) public {
+
+        if (min > max) (min, max) = (max, min);
+
+        uint256 result = boundLog(x, min, max);
+
+        assertGe(result, 2 ** min);
+        assertLe(result, max == 255 ? type(uint256).max : 2 ** (max + 1) - 1);
+        assertEq(result, boundLog(x, min, max));
+    }
+
+
+    /*//////////////////////////////////////////////////////////////////////////
                                 BOUND PRIVATE KEY
     //////////////////////////////////////////////////////////////////////////*/
 
