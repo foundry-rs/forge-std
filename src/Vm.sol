@@ -279,6 +279,9 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
 
+    /// Derives secp256r1 public key from the provided `privateKey`.
+    function publicKeyP256(uint256 privateKey) external pure returns (uint256 publicKeyX, uint256 publicKeyY);
+
     /// Adds a private key to the local forge wallet and returns the address.
     function rememberKey(uint256 privateKey) external returns (address keyAddr);
 
