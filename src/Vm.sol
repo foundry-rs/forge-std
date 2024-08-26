@@ -279,6 +279,9 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
 
+    /// Derives secp256r1 public key from the provided `privateKey`.
+    function publicKeyP256(uint256 privateKey) external pure returns (uint256 publicKeyX, uint256 publicKeyY);
+
     /// Adds a private key to the local forge wallet and returns the address.
     function rememberKey(uint256 privateKey) external returns (address keyAddr);
 
@@ -1549,6 +1552,10 @@ interface VmSafe {
     /// Labels an address in call traces.
     function label(address account, string calldata newLabel) external;
 
+    /// Pauses collection of call traces. Useful in cases when you want to skip tracing of
+    /// complex calls which are not useful for debugging.
+    function pauseTracing() external view;
+
     /// Returns a random `address`.
     function randomAddress() external returns (address);
 
@@ -1557,6 +1564,9 @@ interface VmSafe {
 
     /// Returns random uin256 value between the provided range (=min..=max).
     function randomUint(uint256 min, uint256 max) external returns (uint256);
+
+    /// Unpauses collection of call traces.
+    function resumeTracing() external view;
 
     /// Encodes a `bytes` value to a base64url string.
     function toBase64URL(bytes calldata data) external pure returns (string memory);
