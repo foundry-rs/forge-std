@@ -559,6 +559,9 @@ interface VmSafe {
     /// Record all the transaction logs.
     function recordLogs() external;
 
+    /// Reset gas metering (i.e. gas usage is set to gas limit).
+    function resetGasMetering() external;
+
     /// Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
 
