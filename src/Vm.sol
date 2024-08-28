@@ -1868,10 +1868,13 @@ interface Vm is VmSafe {
     /// Same as the previous method, but also checks supplied address against emitting contract.
     function expectEmit(address emitter) external;
 
+    /// Expects an error on next call that starts with the revert data.
+    function expectPartialRevert(bytes4 revertData) external;
+
     /// Expects an error on next call with any revert data.
     function expectRevert() external;
 
-    /// Expects an error on next call that starts with the revert data.
+    /// Expects an error on next call that exactly matches the revert data.
     function expectRevert(bytes4 revertData) external;
 
     /// Expects an error on next call that exactly matches the revert data.
