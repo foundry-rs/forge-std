@@ -246,6 +246,10 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "berachain_bartio_testnet", ChainData("Berachain bArtio Testnet", 80084, "https://bartio.rpc.berachain.com")
         );
+        setChainWithDefaultRpcUrl("flare", ChainData("Flare", 14, "https://flare-api.flare.network/ext/C/rpc"));
+        setChainWithDefaultRpcUrl(
+            "flare_coston2", ChainData("Flare Coston2", 114, "https://coston2-api.flare.network/ext/C/rpc")
+        );
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml

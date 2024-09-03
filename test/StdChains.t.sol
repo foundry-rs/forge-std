@@ -80,6 +80,8 @@ contract StdChainsTest is Test {
     //     _testRpc("fraxtal");
     //     _testRpc("fraxtal_testnet");
     //     _testRpc("berachain_bartio_testnet");
+    //     _testRpc("flare");
+    //     _testRpc("flare_coston2");
     // }
 
     function test_ChainNoDefault() public {
