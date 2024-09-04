@@ -84,7 +84,7 @@ contract StdChainsTest is Test {
     //     _testRpc("flare_coston2");
     // }
 
-    function test_ChainNoDefault() public {
+    function test_RevertIf_ChainNoDefault() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -92,7 +92,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("does_not_exist");
     }
 
-    function test_SetChainFirstFails() public {
+    function test_RevertIf_SetChainFirstFails() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -100,7 +100,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_setChain("anvil2", ChainData("Anvil", 31337, "URL"));
     }
 
-    function test_ChainBubbleUp() public {
+    function test_RevertIf_ChainBubbleUp() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -111,7 +111,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("needs_undefined_env_var");
     }
 
-    function test_CannotSetChain_ChainIdExists() public {
+    function test_RevertIf_CannotSetChain_ChainIdExists() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -148,7 +148,7 @@ contract StdChainsTest is Test {
         assertEq(chainById.chainId, 123456789);
     }
 
-    function test_SetNoEmptyAlias() public {
+    function test_RevertIf_SetNoEmptyAlias() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -156,7 +156,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_setChain("", ChainData("", 123456789, ""));
     }
 
-    function test_SetNoChainId0() public {
+    function test_RevertIf_SetNoChainId0() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -164,7 +164,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_setChain("alias", ChainData("", 0, ""));
     }
 
-    function test_GetNoChainId0() public {
+    function test_RevertIf_GetNoChainId0() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -172,7 +172,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain(0);
     }
 
-    function test_GetNoEmptyAlias() public {
+    function test_RevertIf_GetNoEmptyAlias() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -180,7 +180,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("");
     }
 
-    function test_ChainIdNotFound() public {
+    function test_RevertIf_ChainIdNotFound() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -188,7 +188,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("no_such_alias");
     }
 
-    function test_ChainAliasNotFound() public {
+    function test_RevertIf_ChainAliasNotFound() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -197,6 +197,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain(321);
     }
 
+    // TODO -> Split this test in two
     function test_SetChain_ExistingOne() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
@@ -214,7 +215,7 @@ contract StdChainsTest is Test {
         assertEq(modifiedChain.rpcUrl, "https://modified.chain/");
     }
 
-    function test_DontUseDefaultRpcUrl() public {
+    function test_RevertIf_DontUseDefaultRpcUrl() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
