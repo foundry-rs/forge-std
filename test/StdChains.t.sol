@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/Test.sol";
+import {Test} from "../src/Test.sol";
 
 contract StdChainsMock is Test {
     function exposed_getChain(string memory chainAlias) public returns (Chain memory) {
@@ -84,7 +84,7 @@ contract StdChainsTest is Test {
     //     _testRpc("flare_coston2");
     // }
 
-    function test_RevertIf_ChainNoDefault() public {
+    function test_RevertIf_ChainNotFound() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -92,7 +92,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("does_not_exist");
     }
 
-    function test_RevertIf_SetChainFirstFails() public {
+    function test_RevertIf_SetChain_ChainIdExist_FirstTest() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -111,7 +111,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("needs_undefined_env_var");
     }
 
-    function test_RevertIf_CannotSetChain_ChainIdExists() public {
+    function test_RevertIf_SetChain_ChainIdExists_SecondTest() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -148,7 +148,7 @@ contract StdChainsTest is Test {
         assertEq(chainById.chainId, 123456789);
     }
 
-    function test_RevertIf_SetNoEmptyAlias() public {
+    function test_RevertIf_SetEmptyAlias() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 
@@ -197,7 +197,6 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain(321);
     }
 
-    // TODO -> Split this test in two
     function test_SetChain_ExistingOne() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
