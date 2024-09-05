@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/Test.sol";
+import {Test, stdJson} from "../src/Test.sol";
 
 contract StdJsonTest is Test {
     using stdJson for string;
