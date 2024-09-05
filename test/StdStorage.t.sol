@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/StdStorage.sol";
-import "../src/Test.sol";
+import {stdStorage, StdStorage} from "../src/StdStorage.sol";
+import {Test} from "../src/Test.sol";
 
 contract StdStorageTest is Test {
     using stdStorage for StdStorage;
@@ -230,7 +230,7 @@ contract StdStorageTest is Test {
         assertEq(val, true);
     }
 
-    function test_StorageReadBool_Revert() public {
+    function test_RevertIf_ReadingNonBoolValue() public {
         vm.expectRevert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
         this.readNonBoolValue();
     }
@@ -254,7 +254,7 @@ contract StdStorageTest is Test {
         assertEq(val, type(int256).min);
     }
 
-    function testFuzzPacked(uint256 val, uint8 elemToGet) public {
+    function testFuzz_Packed(uint256 val, uint8 elemToGet) public {
         // This function tries an assortment of packed slots, shifts meaning number of elements
         // that are packed. Shiftsizes are the size of each element, i.e. 8 means a data type that is 8 bits, 16 == 16 bits, etc.
         // Combined, these determine how a slot is packed. Making it random is too hard to avoid global rejection limit
@@ -296,7 +296,7 @@ contract StdStorageTest is Test {
         }
     }
 
-    function testFuzzPacked2(uint256 nvars, uint256 seed) public {
+    function testFuzz_Packed2(uint256 nvars, uint256 seed) public {
         // Number of random variables to generate.
         nvars = bound(nvars, 1, 20);
 
