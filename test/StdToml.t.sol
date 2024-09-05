@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/Test.sol";
+import {Test, stdToml} from "../src/Test.sol";
 
 contract StdTomlTest is Test {
     using stdToml for string;
