@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/Test.sol";
+import {Test, console2, StdStyle} from "../src/Test.sol";
 
 contract StdStyleTest is Test {
     function test_StyleColor() public pure {
