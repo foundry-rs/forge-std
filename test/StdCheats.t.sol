@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../src/StdCheats.sol";
-import "../src/Test.sol";
-import "../src/StdJson.sol";
-import "../src/StdToml.sol";
-import "../src/interfaces/IERC20.sol";
+import {StdCheats} from "../src/StdCheats.sol";
+import {Test} from "../src/Test.sol";
+import {stdJson} from "../src/StdJson.sol";
+import {stdToml} from "../src/StdToml.sol";
+import {IERC20} from "../src/interfaces/IERC20.sol";
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -205,7 +205,7 @@ contract StdCheatsTest is Test {
         deployCode(what);
     }
 
-    function test_DeployCodeFail() public {
+    function test_RevertIf_DeployCodeFail() public {
         vm.expectRevert(bytes("StdCheats deployCode(string): Deployment failed."));
         this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
     }
@@ -415,7 +415,7 @@ contract StdCheatsTest is Test {
         );
     }
 
-    function test_CannotDeployCodeTo() external {
+    function test_RevertIf_CannotDeployCodeTo() external {
         vm.expectRevert("StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
         this._revertDeployCodeTo();
     }
@@ -470,7 +470,7 @@ contract StdCheatsForkTest is Test {
         vm.createSelectFork({urlOrAlias: "mainnet", blockNumber: 16_428_900});
     }
 
-    function test_CannotAssumeNoBlacklisted_EOA() external {
+    function test_RevertIf_CannotAssumeNoBlacklisted_EOA() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         address eoa = vm.addr({privateKey: 1});
@@ -483,7 +483,7 @@ contract StdCheatsForkTest is Test {
         assertTrue(true);
     }
 
-    function test_AssumeNoBlacklisted_USDC() external {
+    function test_RevertIf_AssumeNoBlacklisted_USDC() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
@@ -495,7 +495,7 @@ contract StdCheatsForkTest is Test {
         assertFalse(USDCLike(USDC).isBlacklisted(addr));
     }
 
-    function test_AssumeNoBlacklisted_USDT() external {
+    function test_RevertIf_AssumeNoBlacklisted_USDT() external {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         vm.expectRevert();
