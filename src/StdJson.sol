@@ -25,6 +25,10 @@ import {VmSafe} from "./Vm.sol";
 library stdJson {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    function keyExists(string memory json, string memory key) internal view returns (bool) {
+        return vm.keyExistsJson(json, key);
+    }
+
     function parseRaw(string memory json, string memory key) internal pure returns (bytes memory) {
         return vm.parseJson(json, key);
     }

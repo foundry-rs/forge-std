@@ -25,6 +25,10 @@ import {VmSafe} from "./Vm.sol";
 library stdToml {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    function keyExists(string memory toml, string memory key) internal view returns (bool) {
+        return vm.keyExistsToml(toml, key);
+    }
+
     function parseRaw(string memory toml, string memory key) internal pure returns (bytes memory) {
         return vm.parseToml(toml, key);
     }
