@@ -2,28 +2,36 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 library console {
-    address constant CONSOLE_ADDRESS = address(0x000000000000000000636F6e736F6c652e6c6f67);
+    address constant CONSOLE_ADDRESS =
+        0x000000000000000000636F6e736F6c652e6c6f67;
 
-    function _castLogPayloadViewToPure(
-        function(bytes memory) internal view fnIn
-    ) internal pure returns (function(bytes memory) internal pure fnOut) {
+    function _sendLogPayloadImplementation(bytes memory payload) internal view {
+        address consoleAddress = CONSOLE_ADDRESS;
+        /// @solidity memory-safe-assembly
+        assembly {
+            pop(
+                staticcall(
+                    gas(),
+                    consoleAddress,
+                    add(payload, 32),
+                    mload(payload),
+                    0,
+                    0
+                )
+            )
+        }
+    }
+
+    function _castToPure(
+      function(bytes memory) internal view fnIn
+    ) internal pure returns (function(bytes memory) pure fnOut) {
         assembly {
             fnOut := fnIn
         }
     }
 
     function _sendLogPayload(bytes memory payload) internal pure {
-        _castLogPayloadViewToPure(_sendLogPayloadView)(payload);
-    }
-
-    function _sendLogPayloadView(bytes memory payload) private view {
-        uint256 payloadLength = payload.length;
-        address consoleAddress = CONSOLE_ADDRESS;
-        /// @solidity memory-safe-assembly
-        assembly {
-            let payloadStart := add(payload, 32)
-            let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
-        }
+        _castToPure(_sendLogPayloadImplementation)(payload);
     }
 
     function log() internal pure {
