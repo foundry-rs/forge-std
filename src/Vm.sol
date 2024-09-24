@@ -625,6 +625,9 @@ interface VmSafe {
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
 
+    /// Gets the artifact path from the creation code.
+    function getArtifactPath(bytes calldata creationCode) external view returns (string memory path);
+
     /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     function getCode(string calldata artifactPath) external view returns (bytes memory creationBytecode);
