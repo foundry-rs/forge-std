@@ -228,7 +228,7 @@ abstract contract StdCheatsSafe {
 
     // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
     // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
-    // backwards compatibility, since this name was used in the original PR which has already has
+    // backwards compatibility, since this name was used in the original PR which already has
     // a release. This function can be removed in a future release once we want a breaking change.
     function assumeNoBlacklisted(address token, address addr) internal view virtual {
         assumeNotBlacklisted(token, addr);
