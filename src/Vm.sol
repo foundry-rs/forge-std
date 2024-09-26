@@ -611,7 +611,7 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
-    /// Additionaly accepts abi-encoded constructor arguments.
+    /// Additionally accepts abi-encoded constructor arguments.
     function deployCode(string calldata artifactPath, bytes calldata constructorArgs)
         external
         returns (address deployedAddress);
@@ -624,6 +624,12 @@ interface VmSafe {
 
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
+
+    /// Gets the artifact path from code (aka. creation code).
+    function getArtifactPathByCode(bytes calldata code) external view returns (string memory path);
+
+    /// Gets the artifact path from deployed code (aka. runtime code).
+    function getArtifactPathByDeployedCode(bytes calldata deployedCode) external view returns (string memory path);
 
     /// Gets the creation bytecode from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
@@ -722,10 +728,6 @@ interface VmSafe {
     function writeLine(string calldata path, string calldata data) external;
 
     // ======== JSON ========
-
-    /// Checks if `key` exists in a JSON object
-    /// `keyExists` is being deprecated in favor of `keyExistsJson`. It will be removed in future versions.
-    function keyExists(string calldata json, string calldata key) external view returns (bool);
 
     /// Checks if `key` exists in a JSON object.
     function keyExistsJson(string calldata json, string calldata key) external view returns (bool);
@@ -904,6 +906,10 @@ interface VmSafe {
     /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
     function writeJson(string calldata json, string calldata path, string calldata valueKey) external;
+
+    /// Checks if `key` exists in a JSON object
+    /// `keyExists` is being deprecated in favor of `keyExistsJson`. It will be removed in future versions.
+    function keyExists(string calldata json, string calldata key) external view returns (bool);
 
     // ======== Scripting ========
 
@@ -1516,6 +1522,24 @@ interface VmSafe {
     /// Parses a string of TOML data at `key` and coerces it to `string[]`.
     function parseTomlStringArray(string calldata toml, string calldata key) external pure returns (string[] memory);
 
+    /// Parses a string of TOML data at `key` and coerces it to type array corresponding to `typeDescription`.
+    function parseTomlTypeArray(string calldata toml, string calldata key, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
+    /// Parses a string of TOML data and coerces it to type corresponding to `typeDescription`.
+    function parseTomlType(string calldata toml, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to type corresponding to `typeDescription`.
+    function parseTomlType(string calldata toml, string calldata key, string calldata typeDescription)
+        external
+        pure
+        returns (bytes memory);
+
     /// Parses a string of TOML data at `key` and coerces it to `uint256`.
     function parseTomlUint(string calldata toml, string calldata key) external pure returns (uint256);
 
@@ -1568,11 +1592,26 @@ interface VmSafe {
     /// Returns a random `address`.
     function randomAddress() external returns (address);
 
+    /// Returns an random `bool`.
+    function randomBool() external view returns (bool);
+
+    /// Returns an random byte array value of the given length.
+    function randomBytes(uint256 len) external view returns (bytes memory);
+
+    /// Returns an random `int256` value.
+    function randomInt() external view returns (int256);
+
+    /// Returns an random `int256` value of given bits.
+    function randomInt(uint256 bits) external view returns (int256);
+
     /// Returns a random uint256 value.
     function randomUint() external returns (uint256);
 
-    /// Returns random uin256 value between the provided range (=min..=max).
+    /// Returns random uint256 value between the provided range (=min..=max).
     function randomUint(uint256 min, uint256 max) external returns (uint256);
+
+    /// Returns an random `uint256` value of given bits.
+    function randomUint(uint256 bits) external view returns (uint256);
 
     /// Unpauses collection of call traces.
     function resumeTracing() external view;
@@ -1888,6 +1927,9 @@ interface Vm is VmSafe {
     /// Expects an error on next call that starts with the revert data.
     function expectPartialRevert(bytes4 revertData) external;
 
+    /// Expects an error on next call to reverter address, that starts with the revert data.
+    function expectPartialRevert(bytes4 revertData, address reverter) external;
+
     /// Expects an error on next call with any revert data.
     function expectRevert() external;
 
@@ -1896,6 +1938,15 @@ interface Vm is VmSafe {
 
     /// Expects an error on next call that exactly matches the revert data.
     function expectRevert(bytes calldata revertData) external;
+
+    /// Expects an error with any revert data on next call to reverter address.
+    function expectRevert(address reverter) external;
+
+    /// Expects an error from reverter address on next call, with any revert data.
+    function expectRevert(bytes4 revertData, address reverter) external;
+
+    /// Expects an error from reverter address on next call, that exactly matches the revert data.
+    function expectRevert(bytes calldata revertData, address reverter) external;
 
     /// Only allows memory writes to offsets [0x00, 0x60) ∪ [min, max) in the current subcontext. If any other
     /// memory is written to, the test will fail. Can be called multiple times to add more ranges to the set.
@@ -1906,8 +1957,11 @@ interface Vm is VmSafe {
     /// to the set.
     function expectSafeMemoryCall(uint64 min, uint64 max) external;
 
-    /// Marks a test as skipped. Must be called at the top of the test.
+    /// Marks a test as skipped. Must be called at the top level of a test.
     function skip(bool skipTest) external;
+
+    /// Marks a test as skipped with a reason. Must be called at the top level of a test.
+    function skip(bool skipTest, string calldata reason) external;
 
     /// Stops all safe memory expectation in the current subcontext.
     function stopExpectSafeMemory() external;
