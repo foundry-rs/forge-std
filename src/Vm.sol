@@ -1687,10 +1687,10 @@ interface Vm is VmSafe {
     /// Takes the snapshot ID to delete.
     /// Returns `true` if the snapshot was successfully deleted.
     /// Returns `false` if the snapshot does not exist.
-    function deleteSnapshot(uint256 snapshotId) external returns (bool success);
+    function deleteStateSnapshot(uint256 snapshotId) external returns (bool success);
 
     /// Removes _all_ snapshots previously created by `snapshot`.
-    function deleteSnapshots() external;
+    function deleteStateSnapshots() external;
 
     /// Sets `block.difficulty`.
     /// Not available on EVM versions from Paris onwards. Use `prevrandao` instead.
@@ -1781,14 +1781,14 @@ interface Vm is VmSafe {
     /// Takes the snapshot ID to revert to.
     /// Returns `true` if the snapshot was successfully reverted.
     /// Returns `false` if the snapshot does not exist.
-    /// **Note:** This does not automatically delete the snapshot. To delete the snapshot use `deleteSnapshot`.
-    function revertTo(uint256 snapshotId) external returns (bool success);
+    /// **Note:** This does not automatically delete the snapshot. To delete the snapshot use `deleteStateSnapshot`.
+    function revertToState(uint256 snapshotId) external returns (bool success);
 
     /// Revert the state of the EVM to a previous snapshot and automatically deletes the snapshots
     /// Takes the snapshot ID to revert to.
     /// Returns `true` if the snapshot was successfully reverted and deleted.
     /// Returns `false` if the snapshot does not exist.
-    function revertToAndDelete(uint256 snapshotId) external returns (bool success);
+    function revertToStateAndDelete(uint256 snapshotId) external returns (bool success);
 
     /// Revokes persistent status from the address, previously added via `makePersistent`.
     function revokePersistent(address account) external;
@@ -1828,8 +1828,8 @@ interface Vm is VmSafe {
 
     /// Snapshot the current state of the evm.
     /// Returns the ID of the snapshot that was created.
-    /// To revert a snapshot use `revertTo`.
-    function snapshot() external returns (uint256 snapshotId);
+    /// To revert a snapshot use `revertToState`.
+    function snapshotState() external returns (uint256 snapshotId);
 
     /// Sets all subsequent calls' `msg.sender` to be the input address until `stopPrank` is called.
     function startPrank(address msgSender) external;
@@ -1854,6 +1854,21 @@ interface Vm is VmSafe {
 
     /// Sets `block.timestamp`.
     function warp(uint256 newTimestamp) external;
+
+    /// `deleteSnapshot` is being deprecated in favor of `deleteStateSnapshot`. It will be removed in future versions.
+    function deleteSnapshot(uint256 snapshotId) external returns (bool success);
+
+    /// `deleteSnapshots` is being deprecated in favor of `deleteStateSnapshots`. It will be removed in future versions.
+    function deleteSnapshots() external;
+
+    /// `revertToAndDelete` is being deprecated in favor of `revertToStateAndDelete`. It will be removed in future versions.
+    function revertToAndDelete(uint256 snapshotId) external returns (bool success);
+
+    /// `revertTo` is being deprecated in favor of `revertToState`. It will be removed in future versions.
+    function revertTo(uint256 snapshotId) external returns (bool success);
+
+    /// `snapshot` is being deprecated in favor of `snapshotState`. It will be removed in future versions.
+    function snapshot() external returns (uint256 snapshotId);
 
     // ======== Testing ========
 
