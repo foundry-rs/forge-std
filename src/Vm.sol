@@ -544,7 +544,7 @@ interface VmSafe {
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
 
-    /// Gets the gas used in the last call.
+    /// Gets the gas used in the last call from the callee perspective.
     function lastCallGas() external view returns (Gas memory gas);
 
     /// Loads a storage slot from an address.
@@ -1826,10 +1826,23 @@ interface Vm is VmSafe {
     /// Sets the nonce of an account to an arbitrary value.
     function setNonceUnsafe(address account, uint64 newNonce) external;
 
+    /// Snapshot capture the gas usage of the last call by name from the callee perspective.
+    function snapshotGasLastCall(string calldata name) external returns (uint256 gasUsed);
+
+    /// Snapshot capture the gas usage of the last call by name in a group from the callee perspective.
+    function snapshotGasLastCall(string calldata group, string calldata name) external returns (uint256 gasUsed);
+
     /// Snapshot the current state of the evm.
     /// Returns the ID of the snapshot that was created.
     /// To revert a snapshot use `revertToState`.
     function snapshotState() external returns (uint256 snapshotId);
+
+    /// Snapshot capture an arbitrary numerical value by name.
+    /// The group name is derived from the contract name.
+    function snapshotValue(string calldata name, uint256 value) external;
+
+    /// Snapshot capture an arbitrary numerical value by name in a group.
+    function snapshotValue(string calldata group, string calldata name, uint256 value) external;
 
     /// Sets all subsequent calls' `msg.sender` to be the input address until `stopPrank` is called.
     function startPrank(address msgSender) external;
@@ -1837,8 +1850,25 @@ interface Vm is VmSafe {
     /// Sets all subsequent calls' `msg.sender` to be the input address until `stopPrank` is called, and the `tx.origin` to be the second input.
     function startPrank(address msgSender, address txOrigin) external;
 
+    /// Start a snapshot capture of the current gas usage by name.
+    /// The group name is derived from the contract name.
+    function startSnapshotGas(string calldata name) external;
+
+    /// Start a snapshot capture of the current gas usage by name in a group.
+    function startSnapshotGas(string calldata group, string calldata name) external;
+
     /// Resets subsequent calls' `msg.sender` to be `address(this)`.
     function stopPrank() external;
+
+    /// Stop the snapshot capture of the current gas by latest snapshot name, capturing the gas used since the start.
+    function stopSnapshotGas() external returns (uint256 gasUsed);
+
+    /// Stop the snapshot capture of the current gas usage by name, capturing the gas used since the start.
+    /// The group name is derived from the contract name.
+    function stopSnapshotGas(string calldata name) external returns (uint256 gasUsed);
+
+    /// Stop the snapshot capture of the current gas usage by name in a group, capturing the gas used since the start.
+    function stopSnapshotGas(string calldata group, string calldata name) external returns (uint256 gasUsed);
 
     /// Stores a value to an address' storage slot.
     function store(address target, bytes32 slot, bytes32 value) external;
