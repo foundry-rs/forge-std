@@ -89,7 +89,11 @@ forge test -vvv
 
 #### Adding cheatcodes
 
+Please follow the guide outlined in the [cheatcodes](https://github.com/foundry-rs/foundry/blob/master/docs/dev/cheatcodes.md#adding-a-new-cheatcode) documentation of Foundry.
+
 When making modifications to the native cheatcodes or adding new ones, please make sure to run [`./scripts/vm.py`](./scripts/vm.py) to update the cheatcodes in the [`src/Vm.sol`](./src/Vm.sol) file. This script will automatically generate the cheatcodes from the [`cheatcodes.json`](https://raw.githubusercontent.com/foundry-rs/foundry/master/crates/cheatcodes/assets/cheatcodes.json) file.
+
+It is possible that the resulting [`src/Vm.sol`](./src/Vm.sol) file will have some changes that are not directly related to your changes, this is not a problem.
 
 #### Commits
 
