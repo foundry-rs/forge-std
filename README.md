@@ -251,7 +251,7 @@ See our [contributing guidelines](./CONTRIBUTING.md).
 
 ## Getting Help
 
-First, see if the answer to your question can be found in [book](https://book.getfoundry.sh), or in the relevant crate.
+First, see if the answer to your question can be found in [book](https://book.getfoundry.sh).
 
 If the answer is not there:
 
