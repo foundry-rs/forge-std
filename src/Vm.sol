@@ -949,6 +949,9 @@ interface VmSafe {
     /// Stops collecting onchain transactions.
     function stopBroadcast() external;
 
+    /// Returns addresses of available unlocked wallets in the script environment.
+    function getScriptWallets() external returns (address[] memory wallets);
+
     // ======== String ========
 
     /// Returns the index of the first occurrence of a `key` in an `input` string.
