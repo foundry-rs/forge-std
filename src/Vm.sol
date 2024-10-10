@@ -1592,16 +1592,22 @@ interface VmSafe {
     /// Returns a random `address`.
     function randomAddress() external returns (address);
 
-    /// Returns an random `bool`.
+    /// Returns a random `bool`.
     function randomBool() external view returns (bool);
 
-    /// Returns an random byte array value of the given length.
+    /// Returns a random byte array value of the given length.
     function randomBytes(uint256 len) external view returns (bytes memory);
 
-    /// Returns an random `int256` value.
+    /// Returns a random fixed-size byte array of length 4.
+    function randomBytes4() external view returns (bytes4);
+
+    /// Returns a random fixed-size byte array of length 8.
+    function randomBytes8() external view returns (bytes8);
+
+    /// Returns a random `int256` value.
     function randomInt() external view returns (int256);
 
-    /// Returns an random `int256` value of given bits.
+    /// Returns a random `int256` value of given bits.
     function randomInt(uint256 bits) external view returns (int256);
 
     /// Returns a random uint256 value.
@@ -1610,7 +1616,7 @@ interface VmSafe {
     /// Returns random uint256 value between the provided range (=min..=max).
     function randomUint(uint256 min, uint256 max) external returns (uint256);
 
-    /// Returns an random `uint256` value of given bits.
+    /// Returns a random `uint256` value of given bits.
     function randomUint(uint256 bits) external view returns (uint256);
 
     /// Unpauses collection of call traces.
@@ -1746,6 +1752,12 @@ interface Vm is VmSafe {
     /// Mocks a call to an address with a specific `msg.value`, returning specified data.
     /// Calldata match takes precedence over `msg.value` in case of ambiguity.
     function mockCall(address callee, uint256 msgValue, bytes calldata data, bytes calldata returnData) external;
+
+    /// Mocks multiple calls to an address, returning specified data for each call.
+    function mockCalls(address callee, bytes calldata data, bytes[] calldata returnData) external;
+
+    /// Mocks multiple calls to an address with a specific `msg.value`, returning specified data for each call.
+    function mockCalls(address callee, uint256 msgValue, bytes calldata data, bytes[] calldata returnData) external;
 
     /// Whenever a call is made to `callee` with calldata `data`, this cheatcode instead calls
     /// `target` with the same calldata. This functionality is similar to a delegate call made to
