@@ -9,10 +9,10 @@ import {Vm, VmSafe} from "../src/Vm.sol";
 // added to or removed from Vm or VmSafe.
 contract VmTest is Test {
     function test_VmInterfaceId() public pure {
-        assertEq(type(Vm).interfaceId, bytes4(0x61a5f010), "Vm");
+        assertEq(type(Vm).interfaceId, bytes4(0x329891d9), "Vm");
     }
 
     function test_VmSafeInterfaceId() public pure {
-        assertEq(type(VmSafe).interfaceId, bytes4(0xf7f67508), "VmSafe");
+        assertEq(type(VmSafe).interfaceId, bytes4(0x04f0cf87), "VmSafe");
     }
 }

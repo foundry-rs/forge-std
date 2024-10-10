@@ -243,6 +243,27 @@ interface VmSafe {
         uint64 gasRemaining;
     }
 
+    /// The result of the `stopDebugTraceRecording` call
+    struct DebugStep {
+        // The stack before executing the step of the run.
+        // stack\[0\] represents the top of the stack.
+        // and only stack data relevant to the opcode execution is contained.
+        uint256[] stack;
+        // The memory input data before executing the step of the run.
+        // only input data relevant to the opcode execution is contained.
+        // e.g. for MLOAD, it will have memory\[offset:offset+32\] copied here.
+        // the offset value can be get by the stack data.
+        bytes memoryInput;
+        // The opcode that was accessed.
+        uint8 opcode;
+        // The call depth of the step.
+        uint64 depth;
+        // Whether the call end up with out of gas error.
+        bool isOutOfGas;
+        // The contract address where the opcode is running
+        address contractAddr;
+    }
+
     // ======== Crypto ========
 
     /// Derives a private key from the name, labels the account with that name, and returns the wallet.
@@ -573,12 +594,18 @@ interface VmSafe {
         external
         returns (bytes memory data);
 
+    /// Records the debug trace during the run.
+    function startDebugTraceRecording() external;
+
     /// Starts recording all map SSTOREs for later retrieval.
     function startMappingRecording() external;
 
     /// Record all account accesses as part of CREATE, CALL or SELFDESTRUCT opcodes in order,
     /// along with the context of the calls
     function startStateDiffRecording() external;
+
+    /// Stop debug trace recording and returns the recorded debug trace.
+    function stopAndReturnDebugTraceRecording() external returns (DebugStep[] memory step);
 
     /// Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
     function stopAndReturnStateDiff() external returns (AccountAccess[] memory accountAccesses);
@@ -930,6 +957,9 @@ interface VmSafe {
     /// Has the next call (at this call depth only) create a transaction with the private key
     /// provided as the sender that can later be signed and sent onchain.
     function broadcast(uint256 privateKey) external;
+
+    /// Returns addresses of available unlocked wallets in the script environment.
+    function getScriptWallets() external returns (address[] memory wallets);
 
     /// Has all subsequent calls (at this call depth only) create transactions that can later be signed and sent onchain.
     /// Broadcasting address is determined by checking the following in order:
@@ -1447,10 +1477,10 @@ interface VmSafe {
     function assumeNoRevert() external pure;
 
     /// Writes a breakpoint to jump to in the debugger.
-    function breakpoint(string calldata char) external;
+    function breakpoint(string calldata char) external pure;
 
     /// Writes a conditional breakpoint to jump to in the debugger.
-    function breakpoint(string calldata char, bool value) external;
+    function breakpoint(string calldata char, bool value) external pure;
 
     /// Returns the Foundry version.
     /// Format: <cargo_version>+<git_sha>+<build_timestamp>
@@ -1663,6 +1693,9 @@ interface Vm is VmSafe {
     /// Clears all mocked calls.
     function clearMockedCalls() external;
 
+    /// Clones a source account code, state, balance and nonce to a target account and updates in-memory EVM state.
+    function cloneAccount(address source, address target) external;
+
     /// Sets `block.coinbase`.
     function coinbase(address newCoinbase) external;
 
@@ -1720,7 +1753,7 @@ interface Vm is VmSafe {
     /// Returns true if the account is marked as persistent.
     function isPersistent(address account) external view returns (bool persistent);
 
-    /// Load a genesis JSON file's `allocs` into the in-memory revm state.
+    /// Load a genesis JSON file's `allocs` into the in-memory EVM state.
     function loadAllocs(string calldata pathToAllocsJson) external;
 
     /// Marks that the account(s) should use persistent storage across fork swaps in a multifork setup
