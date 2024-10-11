@@ -80,7 +80,7 @@ Even minor pull requests, such as those fixing wording, are greatly appreciated.
 a good idea to first open an issue describing the change to solicit feedback and guidance. This will increase
 the likelihood of the PR getting merged.
 
-Please also make sure that the following commands pass if you have changed the code:
+Please make sure that the following commands pass if you have changed the code:
 
 ```sh
 forge fmt --check
@@ -96,6 +96,8 @@ forge build --skip test --use solc:0.7.0
 forge build --skip test --use solc:0.7.6
 forge build --skip test --use solc:0.8.0
 ```
+
+The CI will also ensure that the code is formatted correctly and that the tests are passing across all compiler version targets.
 
 #### Adding cheatcodes
 
