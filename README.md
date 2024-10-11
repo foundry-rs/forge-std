@@ -256,8 +256,8 @@ First, see if the answer to your question can be found in [book](https://book.ge
 If the answer is not there:
 
 -   Join the [support Telegram](https://t.me/foundry_support) to get help, or
--   Open a [discussion](https://github.com/foundry-rs/foundry/discussions/new) with your question, or
--   Open an issue with [the bug](https://github.com/foundry-rs/foundry/issues/new)
+-   Open a [discussion](https://github.com/foundry-rs/foundry/discussions/new/choose) with your question, or
+-   Open an issue with [the bug](https://github.com/foundry-rs/foundry/issues/new/choose)
 
 If you want to contribute, or follow along with contributor discussion, you can use our [main telegram](https://t.me/foundry_rs) to chat with us about the development of Foundry!
 

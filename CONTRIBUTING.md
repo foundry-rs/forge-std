@@ -87,6 +87,16 @@ forge fmt --check
 forge test -vvv
 ```
 
+To make sure your changes are compatible with all compiler version targets, run the following commands:
+
+```sh
+forge build --skip test --use solc:0.6.2
+forge build --skip test --use solc:0.6.12
+forge build --skip test --use solc:0.7.0
+forge build --skip test --use solc:0.7.6
+forge build --skip test --use solc:0.8.0
+```
+
 #### Adding cheatcodes
 
 Please follow the guide outlined in the [cheatcodes](https://github.com/foundry-rs/foundry/blob/master/docs/dev/cheatcodes.md#adding-a-new-cheatcode) documentation of Foundry.
