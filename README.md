@@ -245,6 +245,22 @@ import "forge-std/console.sol";
 console.log(someValue);
 ```
 
+## Contributing
+
+See our [contributing guidelines](./CONTRIBUTING.md).
+
+## Getting Help
+
+First, see if the answer to your question can be found in [book](https://book.getfoundry.sh).
+
+If the answer is not there:
+
+-   Join the [support Telegram](https://t.me/foundry_support) to get help, or
+-   Open a [discussion](https://github.com/foundry-rs/foundry/discussions/new/choose) with your question, or
+-   Open an issue with [the bug](https://github.com/foundry-rs/foundry/issues/new/choose)
+
+If you want to contribute, or follow along with contributor discussion, you can use our [main telegram](https://t.me/foundry_rs) to chat with us about the development of Foundry!
+
 ## License
 
 Forge Standard Library is offered under either [MIT](LICENSE-MIT) or [Apache 2.0](LICENSE-APACHE) license.
