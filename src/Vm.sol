@@ -950,7 +950,7 @@ interface VmSafe {
     function stopBroadcast() external;
 
     /// Returns addresses of available unlocked wallets in the script environment.
-    function getScriptWallets() external returns (address[] memory wallets);
+    function getWallets() external returns (address[] memory wallets);
 
     // ======== String ========
 
