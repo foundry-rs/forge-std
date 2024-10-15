@@ -306,6 +306,23 @@ interface VmSafe {
     /// Adds a private key to the local forge wallet and returns the address.
     function rememberKey(uint256 privateKey) external returns (address keyAddr);
 
+    /// Derive a set number of wallets from a mnemonic at the derivation path `m/44'/60'/0'/0/{0..count}`.
+    ///
+    /// The respective private keys are saved to the local forge wallet for later use and their addresses are returned.
+    function rememberKeys(string calldata mnemonic, string calldata derivationPath, uint32 count)
+        external
+        returns (address[] memory keyAddrs);
+
+    /// Derive a set number of wallets from a mnemonic in the specified language at the derivation path `m/44'/60'/0'/0/{0..count}`.
+    ///
+    /// The respective private keys are saved to the local forge wallet for later use and their addresses are returned.
+    function rememberKeys(
+        string calldata mnemonic,
+        string calldata derivationPath,
+        string calldata language,
+        uint32 count
+    ) external returns (address[] memory keyAddrs);
+
     /// Signs data with a `Wallet`.
     /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
     /// signature's `s` value, and the recovery id `v` in a single bytes32.
