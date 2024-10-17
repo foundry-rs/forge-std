@@ -1,5 +1,6 @@
 [profile.default]
 fs_permissions = [{ access = "read-write", path = "./"}]
+skip = ["src/Vm.vy"]
 
 [rpc_endpoints]
 # The RPC URLs are modified versions of the default for testing initialization.
