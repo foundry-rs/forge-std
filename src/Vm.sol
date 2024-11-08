@@ -709,10 +709,10 @@ interface VmSafe {
     function getDeployedCode(string calldata artifactPath) external view returns (bytes memory runtimeBytecode);
 
     /// Returns true if the path exists on disk and is pointing at a directory, else returns false.
-    function isDir(string calldata path) external returns (bool result);
+    function isDir(string calldata path) external view returns (bool result);
 
     /// Returns true if the path exists on disk and is pointing at a regular file, else returns false.
-    function isFile(string calldata path) external returns (bool result);
+    function isFile(string calldata path) external view returns (bool result);
 
     /// Get the path of the current project root.
     function projectRoot() external view returns (string memory path);
