@@ -686,7 +686,7 @@ interface VmSafe {
         returns (address deployedAddress);
 
     /// Returns true if the given path points to an existing entity, else returns false.
-    function exists(string calldata path) external returns (bool result);
+    function exists(string calldata path) external view returns (bool result);
 
     /// Performs a foreign function call via the terminal.
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
@@ -782,7 +782,7 @@ interface VmSafe {
     function tryFfi(string[] calldata commandInput) external returns (FfiResult memory result);
 
     /// Returns the time since unix epoch in milliseconds.
-    function unixTime() external returns (uint256 milliseconds);
+    function unixTime() external view returns (uint256 milliseconds);
 
     /// Writes data to file, creating a file if it does not exist, and entirely replacing its contents if it does.
     /// `path` is relative to the project root.
@@ -805,6 +805,7 @@ interface VmSafe {
     /// The most recent call can be fetched by passing `txType` as `CALL`.
     function getBroadcast(string calldata contractName, uint64 chainId, BroadcastTxType txType)
         external
+        view
         returns (BroadcastTxSummary memory);
 
     /// Returns all broadcasts for the given contract on `chainId` with the specified `txType`.
@@ -812,6 +813,7 @@ interface VmSafe {
     /// Sorted such that the most recent broadcast is the first element, and the oldest is the last. i.e descending order of BroadcastTxSummary.blockNumber.
     function getBroadcasts(string calldata contractName, uint64 chainId, BroadcastTxType txType)
         external
+        view
         returns (BroadcastTxSummary[] memory);
 
     /// Returns all broadcasts for the given contract on `chainId`.
@@ -819,13 +821,14 @@ interface VmSafe {
     /// Sorted such that the most recent broadcast is the first element, and the oldest is the last. i.e descending order of BroadcastTxSummary.blockNumber.
     function getBroadcasts(string calldata contractName, uint64 chainId)
         external
+        view
         returns (BroadcastTxSummary[] memory);
 
     /// Returns the most recent deployment for the current `chainId`.
-    function getDeployment(string calldata contractName) external returns (address deployedAddress);
+    function getDeployment(string calldata contractName) external view returns (address deployedAddress);
 
     /// Returns the most recent deployment for the given contract on `chainId`
-    function getDeployment(string calldata contractName, uint64 chainId) external returns (address deployedAddress);
+    function getDeployment(string calldata contractName, uint64 chainId) external view returns (address deployedAddress);
 
     /// Returns all deployments for the given contract on `chainId`
     ///
