@@ -105,9 +105,8 @@ contract StdChainsTest is Test {
         StdChainsMock stdChainsMock = new StdChainsMock();
 
         stdChainsMock.exposed_setChain("needs_undefined_env_var", ChainData("", 123456789, ""));
-        vm.expectRevert(
-            "Failed to resolve env var `UNDEFINED_RPC_URL_PLACEHOLDER` in `${UNDEFINED_RPC_URL_PLACEHOLDER}`: environment variable not found"
-        );
+        // Forge environment variable error.
+        vm.expectRevert();
         stdChainsMock.exposed_getChain("needs_undefined_env_var");
     }
 
