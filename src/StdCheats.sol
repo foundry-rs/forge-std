@@ -645,11 +645,11 @@ abstract contract StdCheats is StdCheatsSafe {
 
     // Skip forward or rewind time by the specified number of seconds
     function skip(uint256 time) internal virtual {
-        vm.warp(block.timestamp + time);
+        vm.warp(vm.getBlockTimestamp() + time);
     }
 
     function rewind(uint256 time) internal virtual {
-        vm.warp(block.timestamp - time);
+        vm.warp(vm.getBlockTimestamp() - time);
     }
 
     // Setup a prank from an address that has some ether
