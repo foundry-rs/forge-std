@@ -349,6 +349,13 @@ abstract contract StdCheatsSafe {
         );
     }
 
+    function assumeEmptyAddress(address addr) internal pure virtual {
+        vm.assume(addr.code.length == 0);
+        assumeNotPrecompile(addr);
+        assumeNotZeroAddress(addr);
+        assumeNotForgeAddress(addr);
+    }
+
     function readEIP1559ScriptArtifact(string memory path)
         internal
         view
