@@ -349,7 +349,7 @@ abstract contract StdCheatsSafe {
         );
     }
 
-    function assumeEmptyAddress(address addr) internal pure virtual {
+    function assumeEmptyAddress(address addr) internal view virtual {
         vm.assume(addr.code.length == 0);
         assumeNotPrecompile(addr);
         assumeNotZeroAddress(addr);
