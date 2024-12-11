@@ -350,7 +350,12 @@ abstract contract StdCheatsSafe {
     }
 
     function assumeEmptyAddress(address addr) internal view virtual {
-        vm.assume(addr.code.length == 0);
+        uint256 size;
+        assembly ("memory-safe") {
+            size := extcodesize(addr)
+        }
+        vm.assume(size == 0);
+
         assumeNotPrecompile(addr);
         assumeNotZeroAddress(addr);
         assumeNotForgeAddress(addr);
