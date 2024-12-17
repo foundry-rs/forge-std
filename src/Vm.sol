@@ -2158,6 +2158,25 @@ interface Vm is VmSafe {
     /// Same as the previous method, but also checks supplied address against emitting contract.
     function expectEmit(address emitter) external;
 
+    /// Expect a given number of logs with the provided topics.
+    function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, uint64 count) external;
+
+    /// Expect a given number of logs from a specific emitter with the provided topics.
+    function expectEmit(
+        bool checkTopic1,
+        bool checkTopic2,
+        bool checkTopic3,
+        bool checkData,
+        address emitter,
+        uint64 count
+    ) external;
+
+    /// Expect a given number of logs with all topic and data checks enabled.
+    function expectEmit(uint64 count) external;
+
+    /// Expect a given number of logs from a specific emitter with all topic and data checks enabled.
+    function expectEmit(address emitter, uint64 count) external;
+
     /// Expects an error on next call that starts with the revert data.
     function expectPartialRevert(bytes4 revertData) external;
 
