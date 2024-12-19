@@ -349,6 +349,18 @@ abstract contract StdCheatsSafe {
         );
     }
 
+    function assumeUnusedAddress(address addr) internal view virtual {
+        uint256 size;
+        assembly {
+            size := extcodesize(addr)
+        }
+        vm.assume(size == 0);
+
+        assumeNotPrecompile(addr);
+        assumeNotZeroAddress(addr);
+        assumeNotForgeAddress(addr);
+    }
+
     function readEIP1559ScriptArtifact(string memory path)
         internal
         view
