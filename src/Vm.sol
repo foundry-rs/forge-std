@@ -621,6 +621,12 @@ interface VmSafe {
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
 
+    /// Returns state diffs from current `vm.startStateDiffRecording` session.
+    function getStateDiff() external view returns (string memory diff);
+
+    /// Returns state diffs from current `vm.startStateDiffRecording` session, in json format.
+    function getStateDiffJson() external view returns (string memory diff);
+
     /// Gets the gas used in the last call from the callee perspective.
     function lastCallGas() external view returns (Gas memory gas);
 
@@ -2189,6 +2195,12 @@ interface Vm is VmSafe {
     /// Expects an error on next call that exactly matches the revert data.
     function expectRevert(bytes4 revertData) external;
 
+    /// Expects a `count` number of reverts from the upcoming calls from the reverter address that match the revert data.
+    function expectRevert(bytes4 revertData, address reverter, uint64 count) external;
+
+    /// Expects a `count` number of reverts from the upcoming calls from the reverter address that exactly match the revert data.
+    function expectRevert(bytes calldata revertData, address reverter, uint64 count) external;
+
     /// Expects an error on next call that exactly matches the revert data.
     function expectRevert(bytes calldata revertData) external;
 
@@ -2201,23 +2213,17 @@ interface Vm is VmSafe {
     /// Expects an error from reverter address on next call, that exactly matches the revert data.
     function expectRevert(bytes calldata revertData, address reverter) external;
 
-    /// Expects `count` number of reverts from the upcoming calls with any revert data or reverter.
+    /// Expects a `count` number of reverts from the upcoming calls with any revert data or reverter.
     function expectRevert(uint64 count) external;
 
-    /// Expects `count` number of reverts from the upcoming calls that match the revert data.
+    /// Expects a `count` number of reverts from the upcoming calls that match the revert data.
     function expectRevert(bytes4 revertData, uint64 count) external;
 
-    /// Expects `count` number of reverts from the upcoming calls that exactly match the revert data.
+    /// Expects a `count` number of reverts from the upcoming calls that exactly match the revert data.
     function expectRevert(bytes calldata revertData, uint64 count) external;
 
-    /// Expects `count` number of reverts from the upcoming calls from the reverter address.
+    /// Expects a `count` number of reverts from the upcoming calls from the reverter address.
     function expectRevert(address reverter, uint64 count) external;
-
-    /// Expects `count` number of reverts from the upcoming calls from the reverter address that match the revert data.
-    function expectRevert(bytes4 revertData, address reverter, uint64 count) external;
-
-    /// Expects `count` number of reverts from the upcoming calls from the reverter address that exactly match the revert data.
-    function expectRevert(bytes calldata revertData, address reverter, uint64 count) external;
 
     /// Only allows memory writes to offsets [0x00, 0x60) ∪ [min, max) in the current subcontext. If any other
     /// memory is written to, the test will fail. Can be called multiple times to add more ranges to the set.
