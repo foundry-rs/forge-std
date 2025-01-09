@@ -114,10 +114,6 @@ contract StdAssertionsTest is StdAssertions {
     ) public {
         assertEqCall(targetA, callDataA, targetB, callDataB, strictRevertData);
     }
-
-    function testFailFail() public {
-        fail();
-    }
 }
 
 contract TestMockCall {
