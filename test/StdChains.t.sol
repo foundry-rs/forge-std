@@ -203,13 +203,13 @@ contract StdChainsTest is Test {
         setChain("custom_chain", ChainData("Custom Chain", 123456789, "https://custom.chain/"));
         assertEq(getChain(123456789).chainId, 123456789);
 
-        setChain("custom_chain", ChainData("Modified Chain", 999999999, "https://modified.chain/"));
+        setChain("custom_chain", ChainData("Modified Chain", 9999999999999999999, "https://modified.chain/"));
         vm.expectRevert("StdChains getChain(uint256): Chain with ID 123456789 not found.");
         stdChainsMock.exposed_getChain(123456789);
 
-        Chain memory modifiedChain = getChain(999999999);
+        Chain memory modifiedChain = getChain(9999999999999999999);
         assertEq(modifiedChain.name, "Modified Chain");
-        assertEq(modifiedChain.chainId, 999999999);
+        assertEq(modifiedChain.chainId, 9999999999999999999);
         assertEq(modifiedChain.rpcUrl, "https://modified.chain/");
     }
 
