@@ -1,5 +1,7 @@
 [profile.default]
 fs_permissions = [{ access = "read-write", path = "./"}]
+optimizer = true
+optimizer_runs = 200
 
 [rpc_endpoints]
 # The RPC URLs are modified versions of the default for testing initialization.
