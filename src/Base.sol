@@ -14,7 +14,7 @@ abstract contract CommonBase {
     // Default address for tx.origin and msg.sender, 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38.
     address internal constant DEFAULT_SENDER = address(uint160(uint256(keccak256("foundry default caller"))));
     // Address of the test contract, deployed by the DEFAULT_SENDER.
-    address internal constant DEFAULT_TEST_CONTRACT = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
+    address internal constant DEFAULT_TEST_CONTRACT = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
     // Deterministic deployment address of the Multicall3 contract.
     address internal constant MULTICALL3_ADDRESS = 0xcA11bde05977b3631167028862bE2a173976CA11;
     // The order of the secp256k1 curve.
