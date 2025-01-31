@@ -198,9 +198,11 @@ contract StdStorageTest is Test {
         assertEq(1337, test.read_struct_lower(address(1337)));
     }
 
-    function testFail_StorageConst() public {
-        // vm.expectRevert(abi.encodeWithSignature("NotStorage(bytes4)", bytes4(keccak256("const()"))));
-        stdstore.target(address(test)).sig("const()").find();
+    function test_RevertStorageConst() public {
+        StorageTestTarget target = new StorageTestTarget(test);
+
+        vm.expectRevert("stdStorage find(StdStorage): No storage use detected for target.");
+        target.expectRevertStorageConst();
     }
 
     function testFuzz_StorageNativePack(uint248 val1, uint248 val2, bool boolVal1, bool boolVal2) public {
@@ -349,6 +351,21 @@ contract StdStorageTest is Test {
     function testEdgeCaseArray() public {
         stdstore.target(address(test)).sig("edgeCaseArray(uint256)").with_key(uint256(0)).checked_write(1);
         assertEq(test.edgeCaseArray(0), 1);
+    }
+}
+
+contract StorageTestTarget {
+    using stdStorage for StdStorage;
+
+    StdStorage internal stdstore;
+    StorageTest internal test;
+
+    constructor(StorageTest test_) {
+        test = test_;
+    }
+
+    function expectRevertStorageConst() public {
+        stdstore.target(address(test)).sig("const()").find();
     }
 }
 
