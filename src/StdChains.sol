@@ -38,6 +38,7 @@ import {VmSafe} from "./Vm.sol";
 abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    /// @dev Chain data for a chain.
     struct ChainData {
         // The chain name.
         string name;
@@ -47,6 +48,7 @@ abstract contract StdChains {
         string rpcUrl;
     }
 
+    /// @dev Chain data for a chain with an alias.
     struct Chain {
         // The chain name.
         string name;
@@ -61,19 +63,19 @@ abstract contract StdChains {
         string rpcUrl;
     }
 
-    // Maps from the chain's alias (matching the alias in the `foundry.toml` file) to chain data.
+    /// @dev Maps from the chain's alias (matching the alias in the `foundry.toml` file) to chain data.
     mapping(string => Chain) private _chains;
 
-    // Maps from the chain's alias to it's default RPC URL.
+    /// @dev Maps from the chain's alias to it's default RPC URL.
     mapping(string => string) private _defaultRpcUrls;
 
-    // Maps from a chain ID to it's alias.
+    /// @dev Maps from a chain ID to it's alias.
     mapping(uint256 => string) private _idToAlias;
 
-    // Whether the standard chains have been initialized for caching purposes.
+    /// @dev Whether the standard chains have been initialized for caching purposes.
     bool private _stdChainsInitialized;
 
-    // Whether to fallback to default RPC URLs if the chain's RPC URL is not found.
+    /// @dev Whether to fallback to default RPC URLs if the chain's RPC URL is not found.
     bool private _fallbackToDefaultRpcUrls = true;
 
     /// @dev Returns the chain data for the chain with the given alias.
@@ -155,52 +157,6 @@ abstract contract StdChains {
     /// @dev The argument's rpcUrl field will take priority over the chainAlias' rpcUrl in `foundry.toml`.
     function setChain(string memory chainAlias, Chain memory chain) internal virtual {
         setChain(chainAlias, ChainData({name: chain.name, chainId: chain.chainId, rpcUrl: chain.rpcUrl}));
-    }
-
-    /// @dev Returns the chain data for the chain with the given alias, updating the RPC URL if needed.
-    /// @param chainAlias The alias of the chain to retrieve.
-    /// @param chain The chain data for the chain with the given alias.
-    /// @return _ The chain data for the chain with the given alias and updated RPC URL if needed.
-    /// @dev The RPC URL will be fetched in the following order:
-    /// 1. If the chain's RPC URL is set, it will be returned.
-    /// 2. If the chain's RPC URL is not set, the RPC URL from the config (foundry.toml) will be returned.
-    /// 3. If the chain's RPC URL is not set in the config, the RPC URL from the environment variable will be returned.
-    /// 4. If the chain's RPC URL is not set in the environment variable, the default RPC URL will be returned.
-    function _getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
-        private
-        view
-        returns (Chain memory)
-    {
-        if (bytes(chain.rpcUrl).length == 0) {
-            try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
-                chain.rpcUrl = configRpcUrl;
-            } catch (bytes memory err) {
-                string memory envName = string(abi.encodePacked(vm.toUppercase(chainAlias), "_RPC_URL"));
-                if (_fallbackToDefaultRpcUrls) {
-                    chain.rpcUrl = vm.envOr(envName, _defaultRpcUrls[chainAlias]);
-                } else {
-                    chain.rpcUrl = vm.envString(envName);
-                }
-                // Distinguish 'not found' from 'cannot read'
-                // The upstream error thrown by forge for failing cheats changed so we check both the old and new versions
-                bytes memory oldNotFoundError =
-                    abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
-                bytes memory newNotFoundError = abi.encodeWithSignature(
-                    "CheatcodeError(string)", string(abi.encodePacked("invalid rpc url: ", chainAlias))
-                );
-                bytes32 errHash = keccak256(err);
-                if (
-                    (errHash != keccak256(oldNotFoundError) && errHash != keccak256(newNotFoundError))
-                        || bytes(chain.rpcUrl).length == 0
-                ) {
-                    /// @solidity memory-safe-assembly
-                    assembly {
-                        revert(add(32, err), mload(err))
-                    }
-                }
-            }
-        }
-        return chain;
     }
 
     /// @dev Sets whether to fallback to default RPC URLs if the chain's RPC URL is not found.
@@ -307,5 +263,51 @@ abstract contract StdChains {
         chain.rpcUrl = "";
         setChain(chainAlias, chain);
         chain.rpcUrl = rpcUrl; // restore argument
+    }
+
+    /// @dev Returns the chain data for the chain with the given alias, updating the RPC URL if needed.
+    /// @param chainAlias The alias of the chain to retrieve.
+    /// @param chain The chain data for the chain with the given alias.
+    /// @return _ The chain data for the chain with the given alias and updated RPC URL if needed.
+    /// @dev The RPC URL will be fetched in the following order:
+    /// 1. If the chain's RPC URL is set, it will be returned.
+    /// 2. If the chain's RPC URL is not set, the RPC URL from the config (foundry.toml) will be returned.
+    /// 3. If the chain's RPC URL is not set in the config, the RPC URL from the environment variable will be returned.
+    /// 4. If the chain's RPC URL is not set in the environment variable, the default RPC URL will be returned.
+    function _getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
+        private
+        view
+        returns (Chain memory)
+    {
+        if (bytes(chain.rpcUrl).length == 0) {
+            try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
+                chain.rpcUrl = configRpcUrl;
+            } catch (bytes memory err) {
+                string memory envName = string(abi.encodePacked(vm.toUppercase(chainAlias), "_RPC_URL"));
+                if (_fallbackToDefaultRpcUrls) {
+                    chain.rpcUrl = vm.envOr(envName, _defaultRpcUrls[chainAlias]);
+                } else {
+                    chain.rpcUrl = vm.envString(envName);
+                }
+                // Distinguish 'not found' from 'cannot read'
+                // The upstream error thrown by forge for failing cheats changed so we check both the old and new versions
+                bytes memory oldNotFoundError =
+                    abi.encodeWithSignature("CheatCodeError", string(abi.encodePacked("invalid rpc url ", chainAlias)));
+                bytes memory newNotFoundError = abi.encodeWithSignature(
+                    "CheatcodeError(string)", string(abi.encodePacked("invalid rpc url: ", chainAlias))
+                );
+                bytes32 errHash = keccak256(err);
+                if (
+                    (errHash != keccak256(oldNotFoundError) && errHash != keccak256(newNotFoundError))
+                        || bytes(chain.rpcUrl).length == 0
+                ) {
+                    /// @solidity memory-safe-assembly
+                    assembly {
+                        revert(add(32, err), mload(err))
+                    }
+                }
+            }
+        }
+        return chain;
     }
 }
