@@ -5,7 +5,7 @@ import {VmSafe} from "./Vm.sol";
 
 /// @title StdChains
 /// @notice Provides information about EVM compatible chains that can be used in scripts/tests.
-/// @dev For each chain, the chain's name, chain ID, and a default RPC URL are provided. Chains are
+/// For each chain, the chain's name, chain ID, and a default RPC URL are provided. Chains are
 /// identified by their alias, which is the same as the alias in the `[rpc_endpoints]` section of
 /// the `foundry.toml` file. For best UX, ensure the alias in the `foundry.toml` file match the
 /// alias used in this contract, which can be found as the first argument to the
@@ -30,33 +30,32 @@ import {VmSafe} from "./Vm.sol";
 ///   - If neither of the above conditions is met, the default data is returned.
 ///
 /// Summarizing the above, the prioritization hierarchy is:
-///
-/// 1. `setChain`
-/// 2. `foundry.toml`
-/// 3. Environment variable
-/// 4. Default RPC URL
+///   1. `setChain`
+///   2. `foundry.toml`
+///   3. Environment variable
+///   4. Default RPC URL
 abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     /// @dev Chain data for a chain.
+    /// @param name The chain name.
+    /// @param chainId The chain's Chain ID.
+    /// @param rpcUrl The chain's RPC URL.
     struct ChainData {
-        // The chain name.
         string name;
-        // The chain's Chain ID.
         uint256 chainId;
-        /// The chain's RPC URL.
         string rpcUrl;
     }
 
     /// @dev Chain data for a chain with an alias.
+    /// @param name The chain name.
+    /// @param chainId The chain's Chain ID.
+    /// @param chainAlias The chain's alias. (i.e. what gets specified in `foundry.toml`).
+    /// @param rpcUrl The chain's default RPC URL.
     struct Chain {
-        // The chain name.
         string name;
-        // The chain's Chain ID.
         uint256 chainId;
-        // The chain's alias. (i.e. what gets specified in `foundry.toml`).
         string chainAlias;
-        // A default RPC endpoint for this chain.
         // NOTE: This default RPC URL is included for convenience to facilitate quick tests and
         // experimentation. Do not use this RPC URL for production test suites, CI, or other heavy
         // usage as you will be throttled and this is a disservice to others who need this endpoint.
