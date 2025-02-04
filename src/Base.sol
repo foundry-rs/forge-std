@@ -13,7 +13,8 @@ abstract contract CommonBase {
     address internal constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
     // Default address for tx.origin and msg.sender, 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38.
     address internal constant DEFAULT_SENDER = address(uint160(uint256(keccak256("foundry default caller"))));
-    // Address of the test contract, deployed by the DEFAULT_SENDER.
+    // The address of the first contract `CREATE`d by a running test contract.
+    // When running tests, each test contract is `CREATE`d by `DEFAULT_SENDER` with nonce 1.
     address internal constant DEFAULT_TEST_CONTRACT = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
     // Deterministic deployment address of the Multicall3 contract.
     address internal constant MULTICALL3_ADDRESS = 0xcA11bde05977b3631167028862bE2a173976CA11;
