@@ -3,42 +3,47 @@ pragma solidity >=0.6.2 <0.9.0;
 
 import {VmSafe} from "./Vm.sol";
 
-/**
- * StdChains provides information about EVM compatible chains that can be used in scripts/tests.
- * For each chain, the chain's name, chain ID, and a default RPC URL are provided. Chains are
- * identified by their alias, which is the same as the alias in the `[rpc_endpoints]` section of
- * the `foundry.toml` file. For best UX, ensure the alias in the `foundry.toml` file match the
- * alias used in this contract, which can be found as the first argument to the
- * `setChainWithDefaultRpcUrl` call in the `initializeStdChains` function.
- *
- * There are two main ways to use this contract:
- *   1. Set a chain with `setChain(string memory chainAlias, ChainData memory chain)` or
- *      `setChain(string memory chainAlias, Chain memory chain)`
- *   2. Get a chain with `getChain(string memory chainAlias)` or `getChain(uint256 chainId)`.
- *
- * The first time either of those are used, chains are initialized with the default set of RPC URLs.
- * This is done in `initializeStdChains`, which uses `setChainWithDefaultRpcUrl`. Defaults are recorded in
- * `defaultRpcUrls`.
- *
- * The `setChain` function is straightforward, and it simply saves off the given chain data.
- *
- * The `getChain` methods use `getChainWithUpdatedRpcUrl` to return a chain. For example, let's say
- * we want to retrieve the RPC URL for `mainnet`:
- *   - If you have specified data with `setChain`, it will return that.
- *   - If you have configured a mainnet RPC URL in `foundry.toml`, it will return the URL, provided it
- *     is valid (e.g. a URL is specified, or an environment variable is given and exists).
- *   - If neither of the above conditions is met, the default data is returned.
- *
- * Summarizing the above, the prioritization hierarchy is `setChain` -> `foundry.toml` -> environment variable -> defaults.
- */
+/// @title StdChains
+/// @notice Provides information about EVM compatible chains that can be used in scripts/tests.
+/// @dev For each chain, the chain's name, chain ID, and a default RPC URL are provided. Chains are
+/// identified by their alias, which is the same as the alias in the `[rpc_endpoints]` section of
+/// the `foundry.toml` file. For best UX, ensure the alias in the `foundry.toml` file match the
+/// alias used in this contract, which can be found as the first argument to the
+/// `_setChainWithDefaultRpcUrl` call in the `_initializeStdChains` function.
+///
+/// There are two main ways to use this contract:
+///   1. Set a chain with `setChain(string memory chainAlias, ChainData memory chain)` or
+///      `setChain(string memory chainAlias, Chain memory chain)`
+///   2. Get a chain with `getChain(string memory chainAlias)` or `getChain(uint256 chainId)`.
+///
+/// The first time either of those are used, chains are initialized with the default set of RPC URLs.
+/// This is done in `_initializeStdChains`, which uses `_setChainWithDefaultRpcUrl`. Defaults are recorded in
+/// `defaultRpcUrls`.
+///
+/// The `setChain` function is straightforward, and it simply saves off the given chain data.
+///
+/// The `getChain` methods use `_getChainWithUpdatedRpcUrl` to return a chain. For example, let's say
+/// we want to retrieve the RPC URL for `mainnet`:
+///   - If you have specified data with `setChain`, it will return that.
+///   - If you have configured a mainnet RPC URL in `foundry.toml`, it will return the URL, provided it
+///     is valid (e.g. a URL is specified, or an environment variable is given and exists).
+///   - If neither of the above conditions is met, the default data is returned.
+///
+/// Summarizing the above, the prioritization hierarchy is:
+///
+/// 1. `setChain`
+/// 2. `foundry.toml`
+/// 3. Environment variable
+/// 4. Default RPC URL
 abstract contract StdChains {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    bool private stdChainsInitialized;
-
     struct ChainData {
+        // The chain name.
         string name;
+        // The chain's Chain ID.
         uint256 chainId;
+        /// The chain's RPC URL.
         string rpcUrl;
     }
 
@@ -57,54 +62,71 @@ abstract contract StdChains {
     }
 
     // Maps from the chain's alias (matching the alias in the `foundry.toml` file) to chain data.
-    mapping(string => Chain) private chains;
+    mapping(string => Chain) private _chains;
+
     // Maps from the chain's alias to it's default RPC URL.
-    mapping(string => string) private defaultRpcUrls;
+    mapping(string => string) private _defaultRpcUrls;
+
     // Maps from a chain ID to it's alias.
-    mapping(uint256 => string) private idToAlias;
+    mapping(uint256 => string) private _idToAlias;
 
-    bool private fallbackToDefaultRpcUrls = true;
+    // Whether the standard chains have been initialized for caching purposes.
+    bool private _stdChainsInitialized;
 
-    // The RPC URL will be fetched from config or defaultRpcUrls if possible.
+    // Whether to fallback to default RPC URLs if the chain's RPC URL is not found.
+    bool private _fallbackToDefaultRpcUrls = true;
+
+    /// @dev Returns the chain data for the chain with the given alias.
+    /// @param chainAlias The alias of the chain to retrieve.
+    /// @return chain The chain data for the chain with the given alias.
+    /// @dev The RPC URL will be fetched from config or defaultRpcUrls if possible.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
         require(bytes(chainAlias).length != 0, "StdChains getChain(string): Chain alias cannot be the empty string.");
 
-        initializeStdChains();
-        chain = chains[chainAlias];
+        _initializeStdChains();
+        chain = _chains[chainAlias];
         require(
             chain.chainId != 0,
             string(abi.encodePacked("StdChains getChain(string): Chain with alias \"", chainAlias, "\" not found."))
         );
 
-        chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
+        chain = _getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
+    /// @dev Returns the chain data for the chain with the given chain ID.
+    /// @param chainId The chain ID of the chain to retrieve.
+    /// @return chain The chain data for the chain with the given chain ID.
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
         require(chainId != 0, "StdChains getChain(uint256): Chain ID cannot be 0.");
-        initializeStdChains();
-        string memory chainAlias = idToAlias[chainId];
 
-        chain = chains[chainAlias];
+        _initializeStdChains();
+
+        string memory chainAlias = _idToAlias[chainId];
+
+        chain = _chains[chainAlias];
 
         require(
             chain.chainId != 0,
             string(abi.encodePacked("StdChains getChain(uint256): Chain with ID ", vm.toString(chainId), " not found."))
         );
 
-        chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
+        chain = _getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
-    // set chain info, with priority to argument's rpcUrl field.
+    /// @dev Sets the chain data for the chain with the given alias.
+    /// @param chainAlias The alias of the chain to set.
+    /// @param chain The chain data to set.
+    /// @dev The argument's rpcUrl field will take priority over the chainAlias' rpcUrl in `foundry.toml`.
     function setChain(string memory chainAlias, ChainData memory chain) internal virtual {
         require(
             bytes(chainAlias).length != 0,
             "StdChains setChain(string,ChainData): Chain alias cannot be the empty string."
         );
-
         require(chain.chainId != 0, "StdChains setChain(string,ChainData): Chain ID cannot be 0.");
 
-        initializeStdChains();
-        string memory foundAlias = idToAlias[chain.chainId];
+        _initializeStdChains();
+
+        string memory foundAlias = _idToAlias[chain.chainId];
 
         require(
             bytes(foundAlias).length == 0 || keccak256(bytes(foundAlias)) == keccak256(bytes(chainAlias)),
@@ -119,36 +141,32 @@ abstract contract StdChains {
             )
         );
 
-        uint256 oldChainId = chains[chainAlias].chainId;
-        delete idToAlias[oldChainId];
+        uint256 oldChainId = _chains[chainAlias].chainId;
+        delete _idToAlias[oldChainId];
 
-        chains[chainAlias] =
+        _chains[chainAlias] =
             Chain({name: chain.name, chainId: chain.chainId, chainAlias: chainAlias, rpcUrl: chain.rpcUrl});
-        idToAlias[chain.chainId] = chainAlias;
+        _idToAlias[chain.chainId] = chainAlias;
     }
 
-    // set chain info, with priority to argument's rpcUrl field.
+    /// @dev Sets the chain data for the chain with the given alias.
+    /// @param chainAlias The alias of the chain to set.
+    /// @param chain The chain data to set.
+    /// @dev The argument's rpcUrl field will take priority over the chainAlias' rpcUrl in `foundry.toml`.
     function setChain(string memory chainAlias, Chain memory chain) internal virtual {
         setChain(chainAlias, ChainData({name: chain.name, chainId: chain.chainId, rpcUrl: chain.rpcUrl}));
     }
 
-    function _toUpper(string memory str) private pure returns (string memory) {
-        bytes memory strb = bytes(str);
-        bytes memory copy = new bytes(strb.length);
-        for (uint256 i = 0; i < strb.length; i++) {
-            bytes1 b = strb[i];
-            if (b >= 0x61 && b <= 0x7A) {
-                copy[i] = bytes1(uint8(b) - 32);
-            } else {
-                copy[i] = b;
-            }
-        }
-        return string(copy);
-    }
-
-    // lookup rpcUrl, in descending order of priority:
-    // current -> config (foundry.toml) -> environment variable -> default
-    function getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
+    /// @dev Returns the chain data for the chain with the given alias, updating the RPC URL if needed.
+    /// @param chainAlias The alias of the chain to retrieve.
+    /// @param chain The chain data for the chain with the given alias.
+    /// @return _ The chain data for the chain with the given alias and updated RPC URL if needed.
+    /// @dev The RPC URL will be fetched in the following order:
+    /// 1. If the chain's RPC URL is set, it will be returned.
+    /// 2. If the chain's RPC URL is not set, the RPC URL from the config (foundry.toml) will be returned.
+    /// 3. If the chain's RPC URL is not set in the config, the RPC URL from the environment variable will be returned.
+    /// 4. If the chain's RPC URL is not set in the environment variable, the default RPC URL will be returned.
+    function _getChainWithUpdatedRpcUrl(string memory chainAlias, Chain memory chain)
         private
         view
         returns (Chain memory)
@@ -157,9 +175,9 @@ abstract contract StdChains {
             try vm.rpcUrl(chainAlias) returns (string memory configRpcUrl) {
                 chain.rpcUrl = configRpcUrl;
             } catch (bytes memory err) {
-                string memory envName = string(abi.encodePacked(_toUpper(chainAlias), "_RPC_URL"));
-                if (fallbackToDefaultRpcUrls) {
-                    chain.rpcUrl = vm.envOr(envName, defaultRpcUrls[chainAlias]);
+                string memory envName = string(abi.encodePacked(vm.toUppercase(chainAlias), "_RPC_URL"));
+                if (_fallbackToDefaultRpcUrls) {
+                    chain.rpcUrl = vm.envOr(envName, _defaultRpcUrls[chainAlias]);
                 } else {
                     chain.rpcUrl = vm.envString(envName);
                 }
@@ -185,101 +203,107 @@ abstract contract StdChains {
         return chain;
     }
 
+    /// @dev Sets whether to fallback to default RPC URLs if the chain's RPC URL is not found.
     function setFallbackToDefaultRpcUrls(bool useDefault) internal {
-        fallbackToDefaultRpcUrls = useDefault;
+        _fallbackToDefaultRpcUrls = useDefault;
     }
 
-    function initializeStdChains() private {
-        if (stdChainsInitialized) return;
+    /// @dev Initializes the standard chains with the default set of chains.
+    function _initializeStdChains() private {
+        if (_stdChainsInitialized) return;
 
-        stdChainsInitialized = true;
+        _stdChainsInitialized = true;
 
         // If adding an RPC here, make sure to test the default RPC URL in `test_Rpcs` in `StdChains.t.sol`
-        setChainWithDefaultRpcUrl("anvil", ChainData("Anvil", 31337, "http://127.0.0.1:8545"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("anvil", ChainData("Anvil", 31337, "http://127.0.0.1:8545"));
+        _setChainWithDefaultRpcUrl(
             "mainnet", ChainData("Mainnet", 1, "https://eth-mainnet.alchemyapi.io/v2/pwc5rmJhrdoaSEfimoKEmsvOjKSmPDrP")
         );
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl(
             "sepolia", ChainData("Sepolia", 11155111, "https://sepolia.infura.io/v3/b9794ad1ddf84dfb8c34d6bb5dca2001")
         );
-        setChainWithDefaultRpcUrl("holesky", ChainData("Holesky", 17000, "https://rpc.holesky.ethpandaops.io"));
-        setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("holesky", ChainData("Holesky", 17000, "https://rpc.holesky.ethpandaops.io"));
+        _setChainWithDefaultRpcUrl("optimism", ChainData("Optimism", 10, "https://mainnet.optimism.io"));
+        _setChainWithDefaultRpcUrl(
             "optimism_sepolia", ChainData("Optimism Sepolia", 11155420, "https://sepolia.optimism.io")
         );
-        setChainWithDefaultRpcUrl("arbitrum_one", ChainData("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("arbitrum_one", ChainData("Arbitrum One", 42161, "https://arb1.arbitrum.io/rpc"));
+        _setChainWithDefaultRpcUrl(
             "arbitrum_one_sepolia", ChainData("Arbitrum One Sepolia", 421614, "https://sepolia-rollup.arbitrum.io/rpc")
         );
-        setChainWithDefaultRpcUrl("arbitrum_nova", ChainData("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc"));
-        setChainWithDefaultRpcUrl("polygon", ChainData("Polygon", 137, "https://polygon-rpc.com"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("arbitrum_nova", ChainData("Arbitrum Nova", 42170, "https://nova.arbitrum.io/rpc"));
+        _setChainWithDefaultRpcUrl("polygon", ChainData("Polygon", 137, "https://polygon-rpc.com"));
+        _setChainWithDefaultRpcUrl(
             "polygon_amoy", ChainData("Polygon Amoy", 80002, "https://rpc-amoy.polygon.technology")
         );
-        setChainWithDefaultRpcUrl("avalanche", ChainData("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("avalanche", ChainData("Avalanche", 43114, "https://api.avax.network/ext/bc/C/rpc"));
+        _setChainWithDefaultRpcUrl(
             "avalanche_fuji", ChainData("Avalanche Fuji", 43113, "https://api.avax-test.network/ext/bc/C/rpc")
         );
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl(
             "bnb_smart_chain", ChainData("BNB Smart Chain", 56, "https://bsc-dataseed1.binance.org")
         );
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl(
             "bnb_smart_chain_testnet",
             ChainData("BNB Smart Chain Testnet", 97, "https://rpc.ankr.com/bsc_testnet_chapel")
         );
-        setChainWithDefaultRpcUrl("gnosis_chain", ChainData("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
-        setChainWithDefaultRpcUrl("moonbeam", ChainData("Moonbeam", 1284, "https://rpc.api.moonbeam.network"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("gnosis_chain", ChainData("Gnosis Chain", 100, "https://rpc.gnosischain.com"));
+        _setChainWithDefaultRpcUrl("moonbeam", ChainData("Moonbeam", 1284, "https://rpc.api.moonbeam.network"));
+        _setChainWithDefaultRpcUrl(
             "moonriver", ChainData("Moonriver", 1285, "https://rpc.api.moonriver.moonbeam.network")
         );
-        setChainWithDefaultRpcUrl("moonbase", ChainData("Moonbase", 1287, "https://rpc.testnet.moonbeam.network"));
-        setChainWithDefaultRpcUrl("base_sepolia", ChainData("Base Sepolia", 84532, "https://sepolia.base.org"));
-        setChainWithDefaultRpcUrl("base", ChainData("Base", 8453, "https://mainnet.base.org"));
-        setChainWithDefaultRpcUrl("blast_sepolia", ChainData("Blast Sepolia", 168587773, "https://sepolia.blast.io"));
-        setChainWithDefaultRpcUrl("blast", ChainData("Blast", 81457, "https://rpc.blast.io"));
-        setChainWithDefaultRpcUrl("fantom_opera", ChainData("Fantom Opera", 250, "https://rpc.ankr.com/fantom/"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("moonbase", ChainData("Moonbase", 1287, "https://rpc.testnet.moonbeam.network"));
+        _setChainWithDefaultRpcUrl("base_sepolia", ChainData("Base Sepolia", 84532, "https://sepolia.base.org"));
+        _setChainWithDefaultRpcUrl("base", ChainData("Base", 8453, "https://mainnet.base.org"));
+        _setChainWithDefaultRpcUrl("blast_sepolia", ChainData("Blast Sepolia", 168587773, "https://sepolia.blast.io"));
+        _setChainWithDefaultRpcUrl("blast", ChainData("Blast", 81457, "https://rpc.blast.io"));
+        _setChainWithDefaultRpcUrl("fantom_opera", ChainData("Fantom Opera", 250, "https://rpc.ankr.com/fantom/"));
+        _setChainWithDefaultRpcUrl(
             "fantom_opera_testnet", ChainData("Fantom Opera Testnet", 4002, "https://rpc.ankr.com/fantom_testnet/")
         );
-        setChainWithDefaultRpcUrl("fraxtal", ChainData("Fraxtal", 252, "https://rpc.frax.com"));
-        setChainWithDefaultRpcUrl("fraxtal_testnet", ChainData("Fraxtal Testnet", 2522, "https://rpc.testnet.frax.com"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("fraxtal", ChainData("Fraxtal", 252, "https://rpc.frax.com"));
+        _setChainWithDefaultRpcUrl(
+            "fraxtal_testnet", ChainData("Fraxtal Testnet", 2522, "https://rpc.testnet.frax.com")
+        );
+        _setChainWithDefaultRpcUrl(
             "berachain_bartio_testnet", ChainData("Berachain bArtio Testnet", 80084, "https://bartio.rpc.berachain.com")
         );
-        setChainWithDefaultRpcUrl("flare", ChainData("Flare", 14, "https://flare-api.flare.network/ext/C/rpc"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("flare", ChainData("Flare", 14, "https://flare-api.flare.network/ext/C/rpc"));
+        _setChainWithDefaultRpcUrl(
             "flare_coston2", ChainData("Flare Coston2", 114, "https://coston2-api.flare.network/ext/C/rpc")
         );
 
-        setChainWithDefaultRpcUrl("mode", ChainData("Mode", 34443, "https://mode.drpc.org"));
-        setChainWithDefaultRpcUrl("mode_sepolia", ChainData("Mode Sepolia", 919, "https://sepolia.mode.network"));
+        _setChainWithDefaultRpcUrl("mode", ChainData("Mode", 34443, "https://mode.drpc.org"));
+        _setChainWithDefaultRpcUrl("mode_sepolia", ChainData("Mode Sepolia", 919, "https://sepolia.mode.network"));
 
-        setChainWithDefaultRpcUrl("zora", ChainData("Zora", 7777777, "https://zora.drpc.org"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("zora", ChainData("Zora", 7777777, "https://zora.drpc.org"));
+        _setChainWithDefaultRpcUrl(
             "zora_sepolia", ChainData("Zora Sepolia", 999999999, "https://sepolia.rpc.zora.energy")
         );
 
-        setChainWithDefaultRpcUrl("race", ChainData("Race", 6805, "https://racemainnet.io"));
-        setChainWithDefaultRpcUrl("race_sepolia", ChainData("Race Sepolia", 6806, "https://racemainnet.io"));
+        _setChainWithDefaultRpcUrl("race", ChainData("Race", 6805, "https://racemainnet.io"));
+        _setChainWithDefaultRpcUrl("race_sepolia", ChainData("Race Sepolia", 6806, "https://racemainnet.io"));
 
-        setChainWithDefaultRpcUrl("metal", ChainData("Metal", 1750, "https://metall2.drpc.org"));
-        setChainWithDefaultRpcUrl("metal_sepolia", ChainData("Metal Sepolia", 1740, "https://testnet.rpc.metall2.com"));
+        _setChainWithDefaultRpcUrl("metal", ChainData("Metal", 1750, "https://metall2.drpc.org"));
+        _setChainWithDefaultRpcUrl("metal_sepolia", ChainData("Metal Sepolia", 1740, "https://testnet.rpc.metall2.com"));
 
-        setChainWithDefaultRpcUrl("binary", ChainData("Binary", 624, "https://rpc.zero.thebinaryholdings.com"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("binary", ChainData("Binary", 624, "https://rpc.zero.thebinaryholdings.com"));
+        _setChainWithDefaultRpcUrl(
             "binary_sepolia", ChainData("Binary Sepolia", 625, "https://rpc.zero.thebinaryholdings.com")
         );
 
-        setChainWithDefaultRpcUrl("orderly", ChainData("Orderly", 291, "https://rpc.orderly.network"));
-        setChainWithDefaultRpcUrl(
+        _setChainWithDefaultRpcUrl("orderly", ChainData("Orderly", 291, "https://rpc.orderly.network"));
+        _setChainWithDefaultRpcUrl(
             "orderly_sepolia", ChainData("Orderly Sepolia", 4460, "https://testnet-rpc.orderly.org")
         );
     }
 
-    // set chain info, with priority to chainAlias' rpc url in foundry.toml
-    function setChainWithDefaultRpcUrl(string memory chainAlias, ChainData memory chain) private {
+    /// @dev Sets the chain data for the chain with the given alias, with priority to the chainAlias' RPC URL in `foundry.toml`.
+    /// @param chainAlias The alias of the chain to set.
+    /// @param chain The chain data to set.
+    function _setChainWithDefaultRpcUrl(string memory chainAlias, ChainData memory chain) private {
         string memory rpcUrl = chain.rpcUrl;
-        defaultRpcUrls[chainAlias] = rpcUrl;
+        _defaultRpcUrls[chainAlias] = rpcUrl;
         chain.rpcUrl = "";
         setChain(chainAlias, chain);
         chain.rpcUrl = rpcUrl; // restore argument
