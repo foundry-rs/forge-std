@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import "./IERC165.sol";
+import {IERC165} from "./IERC165.sol";
 
 /// @dev Interface of the ERC7575 "Multi-Asset ERC-4626 Vaults", as defined in
 /// https://eips.ethereum.org/EIPS/eip-7575

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import "./IERC7575.sol";
+import {IERC7575} from "./IERC7575.sol";
 
 /// @dev Interface of the base operator logic of ERC7540, as defined in
 /// https://eips.ethereum.org/EIPS/eip-7540
