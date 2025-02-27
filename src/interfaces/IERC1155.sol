@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import "./IERC165.sol";
+import {IERC165} from "./IERC165.sol";
 
 /// @title ERC-1155 Multi Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/eip-1155
