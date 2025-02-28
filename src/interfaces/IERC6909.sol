@@ -13,11 +13,7 @@ interface IERC6909 is IERC165 {
 
     /// @dev Emitted when `amount` tokens of type `id` are moved from `sender` to `receiver` initiated by `caller`.
     event Transfer(
-        address caller,
-        address indexed sender,
-        address indexed receiver,
-        uint256 indexed id,
-        uint256 amount
+        address caller, address indexed sender, address indexed receiver, uint256 indexed id, uint256 amount
     );
 
     ///@dev Returns the amount of tokens of type `id` owned by `owner`.
@@ -46,7 +42,6 @@ interface IERC6909 is IERC165 {
     /// Must return true.
     function transferFrom(address sender, address receiver, uint256 id, uint256 amount) external returns (bool);
 }
-
 
 /// @dev Optional extension of {IERC6909} that adds metadata functions.
 interface IERC6909Metadata is IERC6909 {
