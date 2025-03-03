@@ -19,10 +19,6 @@ library StdStyle {
     string constant INVERSE = "\u001b[7m";
     string constant RESET = "\u001b[0m";
 
-    function styleConcat(string memory style, string memory self) private pure returns (string memory) {
-        return string(abi.encodePacked(style, self, RESET));
-    }
-
     function red(string memory self) internal pure returns (string memory) {
         return styleConcat(RED, self);
     }
@@ -329,5 +325,9 @@ library StdStyle {
 
     function inverseBytes32(bytes32 self) internal pure returns (string memory) {
         return inverse(vm.toString(self));
+    }
+
+    function styleConcat(string memory style, string memory self) private pure returns (string memory) {
+        return string(abi.encodePacked(style, self, RESET));
     }
 }

@@ -34,49 +34,6 @@ abstract contract StdInvariant {
 
     FuzzInterface[] private _targetedInterfaces;
 
-    // Functions for users:
-    // These are intended to be called in tests.
-
-    function excludeContract(address newExcludedContract_) internal {
-        _excludedContracts.push(newExcludedContract_);
-    }
-
-    function excludeSelector(FuzzSelector memory newExcludedSelector_) internal {
-        _excludedSelectors.push(newExcludedSelector_);
-    }
-
-    function excludeSender(address newExcludedSender_) internal {
-        _excludedSenders.push(newExcludedSender_);
-    }
-
-    function excludeArtifact(string memory newExcludedArtifact_) internal {
-        _excludedArtifacts.push(newExcludedArtifact_);
-    }
-
-    function targetArtifact(string memory newTargetedArtifact_) internal {
-        _targetedArtifacts.push(newTargetedArtifact_);
-    }
-
-    function targetArtifactSelector(FuzzArtifactSelector memory newTargetedArtifactSelector_) internal {
-        _targetedArtifactSelectors.push(newTargetedArtifactSelector_);
-    }
-
-    function targetContract(address newTargetedContract_) internal {
-        _targetedContracts.push(newTargetedContract_);
-    }
-
-    function targetSelector(FuzzSelector memory newTargetedSelector_) internal {
-        _targetedSelectors.push(newTargetedSelector_);
-    }
-
-    function targetSender(address newTargetedSender_) internal {
-        _targetedSenders.push(newTargetedSender_);
-    }
-
-    function targetInterface(FuzzInterface memory newTargetedInterface_) internal {
-        _targetedInterfaces.push(newTargetedInterface_);
-    }
-
     // Functions for forge:
     // These are called by forge to run invariant tests and don't need to be called in tests.
 
@@ -118,5 +75,48 @@ abstract contract StdInvariant {
 
     function targetInterfaces() public view returns (FuzzInterface[] memory targetedInterfaces_) {
         targetedInterfaces_ = _targetedInterfaces;
+    }
+
+    // Functions for users:
+    // These are intended to be called in tests.
+
+    function excludeContract(address newExcludedContract_) internal {
+        _excludedContracts.push(newExcludedContract_);
+    }
+
+    function excludeSelector(FuzzSelector memory newExcludedSelector_) internal {
+        _excludedSelectors.push(newExcludedSelector_);
+    }
+
+    function excludeSender(address newExcludedSender_) internal {
+        _excludedSenders.push(newExcludedSender_);
+    }
+
+    function excludeArtifact(string memory newExcludedArtifact_) internal {
+        _excludedArtifacts.push(newExcludedArtifact_);
+    }
+
+    function targetArtifact(string memory newTargetedArtifact_) internal {
+        _targetedArtifacts.push(newTargetedArtifact_);
+    }
+
+    function targetArtifactSelector(FuzzArtifactSelector memory newTargetedArtifactSelector_) internal {
+        _targetedArtifactSelectors.push(newTargetedArtifactSelector_);
+    }
+
+    function targetContract(address newTargetedContract_) internal {
+        _targetedContracts.push(newTargetedContract_);
+    }
+
+    function targetSelector(FuzzSelector memory newTargetedSelector_) internal {
+        _targetedSelectors.push(newTargetedSelector_);
+    }
+
+    function targetSender(address newTargetedSender_) internal {
+        _targetedSenders.push(newTargetedSender_);
+    }
+
+    function targetInterface(FuzzInterface memory newTargetedInterface_) internal {
+        _targetedInterfaces.push(newTargetedInterface_);
     }
 }
