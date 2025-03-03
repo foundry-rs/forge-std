@@ -3,7 +3,8 @@ pragma solidity >=0.6.2;
 
 import {IERC165} from "./IERC165.sol";
 
-/// @dev Required interface of an ERC-6909 compliant contract, as defined in the
+/// @dev Required interface of an ERC-6909 compliant contract, as defined in
+/// https://eips.ethereum.org/EIPS/eip-6909
 interface IERC6909 is IERC165 {
     /// @dev Emitted when the allowance of a `spender` for an `owner` is set for a token of type `id`.
     event Approval(address indexed owner, address indexed spender, uint256 indexed id, uint256 amount);
