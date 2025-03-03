@@ -5,6 +5,7 @@ import {IERC165} from "./IERC165.sol";
 
 /// @title ERC-6909: Minimal Multi-Token Interface
 /// @dev SEE: https://eips.ethereum.org/EIPS/eip-6909
+/// NOTE: The ERC-165 identifier for this interface is 0x0f632fb3.
 interface IERC6909 is IERC165 {
     /// @notice Emitted when the allowance of a `spender` for an `owner` is set for a token of type `id`.
     event Approval(address indexed owner, address indexed spender, uint256 indexed id, uint256 amount);
