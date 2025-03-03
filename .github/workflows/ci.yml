@@ -23,8 +23,8 @@ jobs:
 
       # Backwards compatibility checks:
       # - the oldest and newest version of each supported minor version
-      # - versions with specific issues
-      - name: Check compatibility with latest
+      # - version with specific issues
+      - name: Check compatibility with the latest
         if: always()
         run: |
           output=$(forge build --skip test)
