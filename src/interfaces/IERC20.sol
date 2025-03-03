@@ -21,7 +21,7 @@ interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
 
     /// @notice Returns the remaining number of tokens that `spender` is allowed
-    /// to spend on behalf of `owner`
+    /// to spend on behalf the of `owner`
     function allowance(address owner, address spender) external view returns (uint256);
 
     /// @notice Sets `amount` as the allowance of `spender` over the caller's tokens.
