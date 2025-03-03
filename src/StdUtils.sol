@@ -160,14 +160,6 @@ abstract contract StdUtils {
         }
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                 PRIVATE FUNCTIONS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
-        return address(uint160(uint256(bytesValue)));
-    }
-
     // This section is used to prevent the compilation of console, which shortens the compilation time when console is
     // not used elsewhere. We also trick the compiler into letting us make the console log methods as `pure` to avoid
     // any breaking changes to function signatures.
@@ -183,6 +175,14 @@ abstract contract StdUtils {
 
     function _sendLogPayload(bytes memory payload) internal pure {
         _castLogPayloadViewToPure(_sendLogPayloadView)(payload);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                 PRIVATE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function addressFromLast20Bytes(bytes32 bytesValue) private pure returns (address) {
+        return address(uint160(uint256(bytesValue)));
     }
 
     function _sendLogPayloadView(bytes memory payload) private view {

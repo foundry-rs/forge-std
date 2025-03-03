@@ -277,28 +277,6 @@ abstract contract StdCheatsSafe {
         assumeAddressIsNot(addr, addressType4);
     }
 
-    // This function checks whether an address, `addr`, is payable. It works by sending 1 wei to
-    // `addr` and checking the `success` return value.
-    // NOTE: This function may result in state changes depending on the fallback/receive logic
-    // implemented by `addr`, which should be taken into account when this function is used.
-    function _isPayable(address addr) private returns (bool) {
-        require(
-            addr.balance < UINT256_MAX,
-            "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
-        );
-        uint256 origBalanceTest = address(this).balance;
-        uint256 origBalanceAddr = address(addr).balance;
-
-        vm.deal(address(this), 1);
-        (bool success,) = payable(addr).call{value: 1}("");
-
-        // reset balances
-        vm.deal(address(this), origBalanceTest);
-        vm.deal(addr, origBalanceAddr);
-
-        return success;
-    }
-
     // NOTE: This function may result in state changes depending on the fallback/receive logic
     // implemented by `addr`, which should be taken into account when this function is used. See the
     // `_isPayable` method for more information.
@@ -580,15 +558,59 @@ abstract contract StdCheatsSafe {
         who = vm.rememberKey(privateKey);
     }
 
+    function isFork() internal view virtual returns (bool status) {
+        try vm.activeFork() {
+            status = true;
+        } catch (bytes memory) {}
+    }
+
+    // This function checks whether an address, `addr`, is payable. It works by sending 1 wei to
+    // `addr` and checking the `success` return value.
+    // NOTE: This function may result in state changes depending on the fallback/receive logic
+    // implemented by `addr`, which should be taken into account when this function is used.
+    function _isPayable(address addr) private returns (bool) {
+        require(
+            addr.balance < UINT256_MAX,
+            "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
+        );
+        uint256 origBalanceTest = address(this).balance;
+        uint256 origBalanceAddr = address(addr).balance;
+
+        vm.deal(address(this), 1);
+        (bool success,) = payable(addr).call{value: 1}("");
+
+        // reset balances
+        vm.deal(address(this), origBalanceTest);
+        vm.deal(addr, origBalanceAddr);
+
+        return success;
+    }
+
     function _bytesToUint(bytes memory b) private pure returns (uint256) {
         require(b.length <= 32, "StdCheats _bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 
-    function isFork() internal view virtual returns (bool status) {
-        try vm.activeFork() {
-            status = true;
-        } catch (bytes memory) {}
+    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
+    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
+    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
+    // Checker changed `chainid` from pure to view in 0.8.0.
+    function _viewChainId() private view returns (uint256 chainId) {
+        // Assembly required since `block.chainid` was introduced in 0.8.0.
+        assembly {
+            chainId := chainid()
+        }
+
+        address(this); // Silence warnings in older Solc versions.
+    }
+
+    function _pureChainId() private pure returns (uint256 chainId) {
+        function() internal view returns (uint256) fnIn = _viewChainId;
+        function() internal pure returns (uint256) pureChainId;
+        assembly {
+            pureChainId := fnIn
+        }
+        chainId = pureChainId();
     }
 
     modifier skipWhenForking() {
@@ -622,28 +644,6 @@ abstract contract StdCheatsSafe {
             gasMeteringOff = false;
             vm.resumeGasMetering();
         }
-    }
-
-    // We use this complex approach of `_viewChainId` and `_pureChainId` to ensure there are no
-    // compiler warnings when accessing chain ID in any solidity version supported by forge-std. We
-    // can't simply access the chain ID in a normal view or pure function because the solc View Pure
-    // Checker changed `chainid` from pure to view in 0.8.0.
-    function _viewChainId() private view returns (uint256 chainId) {
-        // Assembly required since `block.chainid` was introduced in 0.8.0.
-        assembly {
-            chainId := chainid()
-        }
-
-        address(this); // Silence warnings in older Solc versions.
-    }
-
-    function _pureChainId() private pure returns (uint256 chainId) {
-        function() internal view returns (uint256) fnIn = _viewChainId;
-        function() internal pure returns (uint256) pureChainId;
-        assembly {
-            pureChainId := fnIn
-        }
-        chainId = pureChainId();
     }
 }
 

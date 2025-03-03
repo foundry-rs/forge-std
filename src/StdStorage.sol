@@ -213,14 +213,6 @@ library stdStorageSafe {
         return self;
     }
 
-    function read(StdStorage storage self) private returns (bytes memory) {
-        FindData storage data = find(self, false);
-        uint256 mask = getMaskByOffsets(data.offsetLeft, data.offsetRight);
-        uint256 value = (uint256(vm.load(self._target, bytes32(data.slot))) & mask) >> data.offsetRight;
-        clear(self);
-        return abi.encode(value);
-    }
-
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
         return abi.decode(read(self), (bytes32));
     }
@@ -279,29 +271,6 @@ library stdStorageSafe {
         return uint256(root_slot);
     }
 
-    function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
-        bytes32 out;
-
-        uint256 max = b.length > 32 ? 32 : b.length;
-        for (uint256 i = 0; i < max; i++) {
-            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
-        }
-        return out;
-    }
-
-    function flatten(bytes32[] memory b) private pure returns (bytes memory) {
-        bytes memory result = new bytes(b.length * 32);
-        for (uint256 i = 0; i < b.length; i++) {
-            bytes32 k = b[i];
-            /// @solidity memory-safe-assembly
-            assembly {
-                mstore(add(result, add(32, mul(32, i))), k)
-            }
-        }
-
-        return result;
-    }
-
     function clear(StdStorage storage self) internal {
         delete self._target;
         delete self._sig;
@@ -328,6 +297,37 @@ library stdStorageSafe {
         returns (bytes32 newValue)
     {
         return bytes32((uint256(curValue) & ~getMaskByOffsets(offsetLeft, offsetRight)) | (varValue << offsetRight));
+    }
+
+    function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
+        bytes32 out;
+
+        uint256 max = b.length > 32 ? 32 : b.length;
+        for (uint256 i = 0; i < max; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+        return out;
+    }
+
+    function flatten(bytes32[] memory b) private pure returns (bytes memory) {
+        bytes memory result = new bytes(b.length * 32);
+        for (uint256 i = 0; i < b.length; i++) {
+            bytes32 k = b[i];
+            /// @solidity memory-safe-assembly
+            assembly {
+                mstore(add(result, add(32, mul(32, i))), k)
+            }
+        }
+
+        return result;
+    }
+
+    function read(StdStorage storage self) private returns (bytes memory) {
+        FindData storage data = find(self, false);
+        uint256 mask = getMaskByOffsets(data.offsetLeft, data.offsetRight);
+        uint256 value = (uint256(vm.load(self._target, bytes32(data.slot))) & mask) >> data.offsetRight;
+        clear(self);
+        return abi.encode(value);
     }
 }
 

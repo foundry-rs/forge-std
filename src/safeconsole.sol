@@ -6,42 +6,6 @@ pragma solidity >=0.6.2 <0.9.0;
 library safeconsole {
     uint256 constant CONSOLE_ADDR = 0x000000000000000000000000000000000000000000636F6e736F6c652e6c6f67;
 
-    // Credit to [0age](https://twitter.com/z0age/status/1654922202930888704) and [0xdapper](https://github.com/foundry-rs/forge-std/pull/374)
-    // for the view-to-pure log trick.
-    function _sendLogPayload(uint256 offset, uint256 size) private pure {
-        function(uint256, uint256) internal view fnIn = _sendLogPayloadView;
-        function(uint256, uint256) internal pure pureSendLogPayload;
-        /// @solidity memory-safe-assembly
-        assembly {
-            pureSendLogPayload := fnIn
-        }
-        pureSendLogPayload(offset, size);
-    }
-
-    function _sendLogPayloadView(uint256 offset, uint256 size) private view {
-        /// @solidity memory-safe-assembly
-        assembly {
-            pop(staticcall(gas(), CONSOLE_ADDR, offset, size, 0x0, 0x0))
-        }
-    }
-
-    function _memcopy(uint256 fromOffset, uint256 toOffset, uint256 length) private pure {
-        function(uint256, uint256, uint256) internal view fnIn = _memcopyView;
-        function(uint256, uint256, uint256) internal pure pureMemcopy;
-        /// @solidity memory-safe-assembly
-        assembly {
-            pureMemcopy := fnIn
-        }
-        pureMemcopy(fromOffset, toOffset, length);
-    }
-
-    function _memcopyView(uint256 fromOffset, uint256 toOffset, uint256 length) private view {
-        /// @solidity memory-safe-assembly
-        assembly {
-            pop(staticcall(gas(), 0x4, fromOffset, length, toOffset, length))
-        }
-    }
-
     function logMemory(uint256 offset, uint256 length) internal pure {
         if (offset >= 0x60) {
             // Sufficient memory before slice to prepare call header.
@@ -13932,6 +13896,42 @@ library safeconsole {
             mstore(0x140, m10)
             mstore(0x160, m11)
             mstore(0x180, m12)
+        }
+    }
+
+    // Credit to [0age](https://twitter.com/z0age/status/1654922202930888704) and [0xdapper](https://github.com/foundry-rs/forge-std/pull/374)
+    // for the view-to-pure log trick.
+    function _sendLogPayload(uint256 offset, uint256 size) private pure {
+        function(uint256, uint256) internal view fnIn = _sendLogPayloadView;
+        function(uint256, uint256) internal pure pureSendLogPayload;
+        /// @solidity memory-safe-assembly
+        assembly {
+            pureSendLogPayload := fnIn
+        }
+        pureSendLogPayload(offset, size);
+    }
+
+    function _sendLogPayloadView(uint256 offset, uint256 size) private view {
+        /// @solidity memory-safe-assembly
+        assembly {
+            pop(staticcall(gas(), CONSOLE_ADDR, offset, size, 0x0, 0x0))
+        }
+    }
+
+    function _memcopy(uint256 fromOffset, uint256 toOffset, uint256 length) private pure {
+        function(uint256, uint256, uint256) internal view fnIn = _memcopyView;
+        function(uint256, uint256, uint256) internal pure pureMemcopy;
+        /// @solidity memory-safe-assembly
+        assembly {
+            pureMemcopy := fnIn
+        }
+        pureMemcopy(fromOffset, toOffset, length);
+    }
+
+    function _memcopyView(uint256 fromOffset, uint256 toOffset, uint256 length) private view {
+        /// @solidity memory-safe-assembly
+        assembly {
+            pop(staticcall(gas(), 0x4, fromOffset, length, toOffset, length))
         }
     }
 }

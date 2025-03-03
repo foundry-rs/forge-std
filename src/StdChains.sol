@@ -132,6 +132,10 @@ abstract contract StdChains {
         setChain(chainAlias, ChainData({name: chain.name, chainId: chain.chainId, rpcUrl: chain.rpcUrl}));
     }
 
+    function setFallbackToDefaultRpcUrls(bool useDefault) internal {
+        fallbackToDefaultRpcUrls = useDefault;
+    }
+
     function _toUpper(string memory str) private pure returns (string memory) {
         bytes memory strb = bytes(str);
         bytes memory copy = new bytes(strb.length);
@@ -183,10 +187,6 @@ abstract contract StdChains {
             }
         }
         return chain;
-    }
-
-    function setFallbackToDefaultRpcUrls(bool useDefault) internal {
-        fallbackToDefaultRpcUrls = useDefault;
     }
 
     function initializeStdChains() private {
