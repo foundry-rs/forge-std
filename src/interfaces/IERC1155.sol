@@ -51,32 +51,29 @@ interface IERC1155 is IERC165 {
 
     /// @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with
     /// safety call).
-    /// @param _from Source address
-    /// @param _to Target address
-    /// @param _id ID of the token type
-    /// @param _value Transfer amount
-    /// @param _data Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on
-    /// `_to`
-    /// @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval"
-    /// section of the standard).
+    /// @param _from Source address.
+    /// @param _to Target address.
+    /// @param _id ID of the token type.
+    /// @param _value Transfer amount.
+    /// @param _data Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`.
+    /// @dev
+    /// - Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
     /// - MUST revert if `_to` is the zero address.
     /// - MUST revert if balance of holder for token `_id` is lower than the `_value` sent.
     /// - MUST revert on any other error.
     /// - MUST emit the `TransferSingle` event to reflect the balance change (see "Safe Transfer Rules" section of the
     /// standard).
-    /// - After the above conditions are met, this function MUST check if `_to` is a smart contract (e.g. code size >
-    /// 0). If so, it MUST call `onERC1155Received` on `_to` and act appropriately (see "Safe Transfer Rules" section of
-    /// the standard).
+    /// After the above conditions are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0).
+    /// If so, it MUST call `onERC1155Received` on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external;
 
     /// @notice Transfers `_values` amount(s) of `_ids` from the `_from` address to the `_to` address specified (with
     /// safety call).
-    /// @param _from Source address
-    /// @param _to Target address
-    /// @param _ids IDs of each token type (order and length must match _values array)
-    /// @param _values Transfer amounts per token type (order and length must match _ids array)
-    /// @param _data Additional data with no specified format, MUST be sent unaltered in call to the
-    /// `ERC1155TokenReceiver` hook(s) on `_to`
+    /// @param _from Source address.
+    /// @param _to Target address.
+    /// @param _ids IDs of each token type (order and length must match _values array).
+    /// @param _values Transfer amounts per token type (order and length must match _ids array).
+    /// @param _data Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`.
     /// @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval"
     /// section of the standard).
     /// - MUST revert if `_to` is the zero address.
@@ -88,9 +85,8 @@ interface IERC1155 is IERC165 {
     /// "Safe Transfer Rules" section of the standard).
     /// - Balance changes and events MUST follow the ordering of the arrays (_ids[0]/_values[0] before
     /// _ids[1]/_values[1], etc).
-    /// - After the above conditions for the transfer(s) in the batch are met, this function MUST check if `_to` is a
-    /// smart contract (e.g. code size > 0). If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `_to`
-    /// and act appropriately (see "Safe Transfer Rules" section of the standard).
+    /// After the above conditions for the transfer(s) in the batch are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0).
+    /// If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).
     function safeBatchTransferFrom(
         address _from,
         address _to,
@@ -100,15 +96,15 @@ interface IERC1155 is IERC165 {
     ) external;
 
     /// @notice Get the balance of an account's tokens.
-    /// @param _owner The address of the token holder
-    /// @param _id ID of the token
-    /// @return The _owner's balance of the token type requested
+    /// @param _owner The address of the token holder.
+    /// @param _id ID of the token.
+    /// @return The _owner's balance of the token type requested.
     function balanceOf(address _owner, uint256 _id) external view returns (uint256);
 
-    /// @notice Get the balance of multiple account/token pairs
-    /// @param _owners The addresses of the token holders
-    /// @param _ids ID of the tokens
-    /// @return The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
+    /// @notice Get the balance of multiple account/token pairs.
+    /// @param _owners The addresses of the token holders.
+    /// @param _ids ID of the tokens.
+    /// @return The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair).
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids)
         external
         view
@@ -116,13 +112,13 @@ interface IERC1155 is IERC165 {
 
     /// @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
     /// @dev MUST emit the ApprovalForAll event on success.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
+    /// @param _operator Address to add to the set of authorized operators.
+    /// @param _approved True if the operator is approved, false to revoke approval.
     function setApprovalForAll(address _operator, bool _approved) external;
 
     /// @notice Queries the approval status of an operator for a given owner.
-    /// @param _owner The owner of the tokens
-    /// @param _operator Address of authorized operator
-    /// @return True if the operator is approved, false if not
+    /// @param _owner The owner of the tokens.
+    /// @param _operator Address of authorized operator.
+    /// @return True if the operator is approved, false if not.
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }
