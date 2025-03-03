@@ -17,7 +17,7 @@ OUT_PATH = "src/Vm.sol"
 
 VM_SAFE_DOC = """\
 /// The `VmSafe` interface does not allow manipulation of the EVM state or other actions that may
-/// result in Script simulations differing from on-chain execution. It is recommended to only use
+/// result in Script simulations differing from on-chain execution. It is recommended to use only
 /// these cheats in scripts.
 """
 
