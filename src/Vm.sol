@@ -725,6 +725,43 @@ interface VmSafe {
         external
         returns (address deployedAddress);
 
+    /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionally accepts `msg.value`.
+    function deployCode(string calldata artifactPath, uint256 value) external returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionally accepts abi-encoded constructor arguments and `msg.value`.
+    function deployCode(string calldata artifactPath, bytes calldata constructorArgs, uint256 value)
+        external
+        returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    function deployCode(string calldata artifactPath, bytes32 salt) external returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionally accepts abi-encoded constructor arguments.
+    function deployCode(string calldata artifactPath, bytes calldata constructorArgs, bytes32 salt)
+        external
+        returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionally accepts `msg.value`.
+    function deployCode(string calldata artifactPath, uint256 value, bytes32 salt)
+        external
+        returns (address deployedAddress);
+
+    /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Additionally accepts abi-encoded constructor arguments and `msg.value`.
+    function deployCode(string calldata artifactPath, bytes calldata constructorArgs, uint256 value, bytes32 salt)
+        external
+        returns (address deployedAddress);
+
     /// Returns true if the given path points to an existing entity, else returns false.
     function exists(string calldata path) external view returns (bool result);
 
@@ -1091,8 +1128,18 @@ interface VmSafe {
         external
         returns (SignedDelegation memory signedDelegation);
 
+    /// Sign an EIP-7702 authorization and designate the next call as an EIP-7702 transaction for specific nonce
+    function signAndAttachDelegation(address implementation, uint256 privateKey, uint64 nonce)
+        external
+        returns (SignedDelegation memory signedDelegation);
+
     /// Sign an EIP-7702 authorization for delegation
     function signDelegation(address implementation, uint256 privateKey)
+        external
+        returns (SignedDelegation memory signedDelegation);
+
+    /// Sign an EIP-7702 authorization for delegation for specific nonce
+    function signDelegation(address implementation, uint256 privateKey, uint64 nonce)
         external
         returns (SignedDelegation memory signedDelegation);
 
@@ -1814,6 +1861,16 @@ interface VmSafe {
 
     /// Utility cheatcode to set arbitrary storage for given target address.
     function setArbitraryStorage(address target) external;
+
+    /// Utility cheatcode to set arbitrary storage for given target address and overwrite
+    /// any storage slots that have been previously set.
+    function setArbitraryStorage(address target, bool overwrite) external;
+
+    /// Randomly shuffles an array.
+    function shuffle(uint256[] calldata array) external returns (uint256[] memory);
+
+    /// Sorts an array in ascending order.
+    function sort(uint256[] calldata array) external returns (uint256[] memory);
 
     /// Encodes a `bytes` value to a base64url string.
     function toBase64URL(bytes calldata data) external pure returns (string memory);
