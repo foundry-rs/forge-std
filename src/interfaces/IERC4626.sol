@@ -3,16 +3,22 @@ pragma solidity >=0.6.2;
 
 import {IERC20} from "./IERC20.sol";
 
-/// @dev Interface of the ERC4626 "Tokenized Vault Standard", as defined in
-/// https://eips.ethereum.org/EIPS/eip-4626
+/// @title ERC-4626: Tokenized Vaults
+/// @dev SEE: https://eips.ethereum.org/EIPS/eip-4626
 interface IERC4626 is IERC20 {
+    /// @notice The `sender` has exchanged `assets` for `shares`, and transferred those `shares` to `owner`.
+    /// - MUST be emitted when tokens are deposited into the Vault via the mint and deposit methods.
     event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares);
 
+    /// @notice The `sender` has exchanged `shares`, owned by `owner`, for `assets`, and transferred those `assets` to
+    /// `receiver`.
+    /// - MUST be emitted when shares are withdrawn from the Vault in `redeem` or `withdraw` methods.
     event Withdraw(
         address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
     );
 
-    /// @notice Returns the address of the underlying token used for the Vault for accounting, depositing, and withdrawing.
+    /// @notice Returns the address of the underlying token used for the Vault for accounting, depositing, and
+    /// withdrawing.
     /// @dev
     /// - MUST be an ERC-20 token contract.
     /// - MUST NOT revert.
@@ -25,8 +31,8 @@ interface IERC4626 is IERC20 {
     /// - MUST NOT revert.
     function totalAssets() external view returns (uint256 totalManagedAssets);
 
-    /// @notice Returns the amount of shares that the Vault would exchange for the amount of assets provided, in an ideal
-    /// scenario where all the conditions are met.
+    /// @notice Returns the amount of shares that the Vault would exchange for the amount of assets provided, in an
+    /// ideal scenario where all the conditions are met.
     /// @dev
     /// - MUST NOT be inclusive of any fees that are charged against assets in the Vault.
     /// - MUST NOT show any variations depending on the caller.
@@ -38,8 +44,8 @@ interface IERC4626 is IERC20 {
     /// from.
     function convertToShares(uint256 assets) external view returns (uint256 shares);
 
-    /// @notice Returns the amount of assets that the Vault would exchange for the amount of shares provided, in an ideal
-    /// scenario where all the conditions are met.
+    /// @notice Returns the amount of assets that the Vault would exchange for the amount of shares provided, in an
+    /// ideal scenario where all the conditions are met.
     /// @dev
     /// - MUST NOT be inclusive of any fees that are charged against assets in the Vault.
     /// - MUST NOT show any variations depending on the caller.
@@ -51,16 +57,16 @@ interface IERC4626 is IERC20 {
     /// from.
     function convertToAssets(uint256 shares) external view returns (uint256 assets);
 
-    /// @notice Returns the maximum amount of the underlying asset that can be deposited into the Vault for the receiver,
-    /// through a deposit call.
+    /// @notice Returns the maximum amount of the underlying asset that can be deposited into the Vault for the
+    /// receiver, through a deposit call.
     /// @dev
     /// - MUST return a limited value if receiver is subject to some deposit limit.
     /// - MUST return 2 ** 256 - 1 if there is no limit on the maximum amount of assets that may be deposited.
     /// - MUST NOT revert.
     function maxDeposit(address receiver) external view returns (uint256 maxAssets);
 
-    /// @notice Allows an on-chain or off-chain user to simulate the effects of their deposit at the current block, given
-    /// current on-chain conditions.
+    /// @notice Allows an on-chain or off-chain user to simulate the effects of their deposit at the current block,
+    /// given current on-chain conditions.
     /// @dev
     /// - MUST return as close to and no more than the exact amount of Vault shares that would be minted in a deposit
     ///   call in the same transaction. I.e. deposit should return the same or more shares as previewDeposit if called
