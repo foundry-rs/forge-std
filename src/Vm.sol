@@ -185,6 +185,18 @@ interface VmSafe {
         uint256 chainId;
     }
 
+    /// Information about a blockchain.
+    struct Chain {
+        // The chain name.
+        string name;
+        // The chain's Chain ID.
+        uint256 chainId;
+        // The chain's alias. (i.e. what gets specified in `foundry.toml`).
+        string chainAlias;
+        // A default RPC endpoint for this chain.
+        string rpcUrl;
+    }
+
     /// The result of a `stopAndReturnStateDiff` call.
     struct AccountAccess {
         // The chain and fork the access occurred.
@@ -1099,6 +1111,9 @@ interface VmSafe {
 
     // ======== Scripting ========
 
+    /// Attach an EIP-4844 blob to the next call
+    function attachBlob(bytes calldata blob) external;
+
     /// Designate the next call as an EIP-7702 transaction
     function attachDelegation(SignedDelegation calldata signedDelegation) external;
 
@@ -1688,6 +1703,12 @@ interface VmSafe {
     /// For example, to check if the current Foundry version is greater than or equal to `1.0.0`:
     /// `if (foundryVersionCmp("1.0.0") >= 0) { ... }`
     function foundryVersionCmp(string calldata version) external view returns (int256);
+
+    /// Returns a Chain struct for specific alias
+    function getChain(string calldata chainAlias) external view returns (Chain memory chain);
+
+    /// Returns a Chain struct for specific chainId
+    function getChain(uint256 chainId) external view returns (Chain memory chain);
 
     /// Returns the Foundry version.
     /// Format: <cargo_version>-<tag>+<git_sha_short>.<unix_build_timestamp>.<profile>
