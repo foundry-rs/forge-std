@@ -668,7 +668,8 @@ interface VmSafe {
     /// Pauses gas metering (i.e. gas usage is not counted). Noop if already paused.
     function pauseGasMetering() external;
 
-    /// Records all storage reads and writes.
+    /// Records all storage reads and writes. Use `accesses` to get the recorded data.
+    /// Subsequent calls to `record` will clear the previous data.
     function record() external;
 
     /// Record all the transaction logs.
@@ -706,6 +707,9 @@ interface VmSafe {
 
     /// Stops recording all map SSTOREs for later retrieval and clears the recorded data.
     function stopMappingRecording() external;
+
+    /// Stops recording storage reads and writes.
+    function stopRecord() external;
 
     // ======== Filesystem ========
 
@@ -1117,6 +1121,9 @@ interface VmSafe {
     /// Designate the next call as an EIP-7702 transaction
     function attachDelegation(SignedDelegation calldata signedDelegation) external;
 
+    /// Designate the next call as an EIP-7702 transaction, with optional cross-chain validity.
+    function attachDelegation(SignedDelegation calldata signedDelegation, bool crossChain) external;
+
     /// Takes a signed transaction and broadcasts it to the network.
     function broadcastRawTransaction(bytes calldata data) external;
 
@@ -1148,6 +1155,11 @@ interface VmSafe {
         external
         returns (SignedDelegation memory signedDelegation);
 
+    /// Sign an EIP-7702 authorization and designate the next call as an EIP-7702 transaction, with optional cross-chain validity.
+    function signAndAttachDelegation(address implementation, uint256 privateKey, bool crossChain)
+        external
+        returns (SignedDelegation memory signedDelegation);
+
     /// Sign an EIP-7702 authorization for delegation
     function signDelegation(address implementation, uint256 privateKey)
         external
@@ -1155,6 +1167,11 @@ interface VmSafe {
 
     /// Sign an EIP-7702 authorization for delegation for specific nonce
     function signDelegation(address implementation, uint256 privateKey, uint64 nonce)
+        external
+        returns (SignedDelegation memory signedDelegation);
+
+    /// Sign an EIP-7702 authorization for delegation, with optional cross-chain validity.
+    function signDelegation(address implementation, uint256 privateKey, bool crossChain)
         external
         returns (SignedDelegation memory signedDelegation);
 
