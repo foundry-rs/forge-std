@@ -388,7 +388,6 @@ class ItemOrder:
         assert len(list) <= len(Item), "list must not contain more items than Item"
         assert len(list) == len(set(list)), "list must not contain duplicates"
         self._list = list
-        pass
 
     def get_list(self) -> list[Item]:
         return self._list
