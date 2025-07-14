@@ -3,11 +3,12 @@ pragma solidity >=0.6.2 <0.9.0;
 
 library stdMath {
     int256 private constant INT256_MIN = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+    uint256 private constant INT256_MIN_ABS = 57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
     function abs(int256 a) internal pure returns (uint256) {
         // Required or it will fail when `a = type(int256).min`
         if (a == INT256_MIN) {
-            return 57896044618658097711785492504343953926634992332820282019728792003956564819968;
+            return INT256_MIN_ABS;
         }
 
         return uint256(a > 0 ? a : -a);
