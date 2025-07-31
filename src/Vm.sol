@@ -1916,7 +1916,7 @@ interface VmSafe {
     function pauseTracing() external view;
 
     /// Returns a random `address`.
-    function randomAddress() external returns (address);
+    function randomAddress() external view returns (address);
 
     /// Returns a random `bool`.
     function randomBool() external view returns (bool);
@@ -1937,10 +1937,10 @@ interface VmSafe {
     function randomInt(uint256 bits) external view returns (int256);
 
     /// Returns a random uint256 value.
-    function randomUint() external returns (uint256);
+    function randomUint() external view returns (uint256);
 
     /// Returns random uint256 value between the provided range (=min..=max).
-    function randomUint(uint256 min, uint256 max) external returns (uint256);
+    function randomUint(uint256 min, uint256 max) external view returns (uint256);
 
     /// Returns a random `uint256` value of given bits.
     function randomUint(uint256 bits) external view returns (uint256);
