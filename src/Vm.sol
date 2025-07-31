@@ -650,6 +650,10 @@ interface VmSafe {
     /// Get the nonce of a `Wallet`.
     function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
 
+    /// Gets the RLP encoded block header for a given block number.
+    /// Returns the block header in the same format as `cast block <block_number> --raw`.
+    function getRawBlockHeader(uint256 blockNumber) external view returns (bytes memory rlpHeader);
+
     /// Gets all the recorded logs.
     function getRecordedLogs() external returns (Log[] memory logs);
 
@@ -1851,6 +1855,53 @@ interface VmSafe {
     /// Utility cheatcode to copy storage of `from` contract to another `to` contract.
     function copyStorage(address from, address to) external;
 
+    /// Generates the struct hash of the canonical EIP-712 type representation and its abi-encoded data.
+    /// Supports 2 different inputs:
+    /// 1. Name of the type (i.e. "PermitSingle"):
+    /// * requires previous binding generation with `forge bind-json`.
+    /// * bindings will be retrieved from the path configured in `foundry.toml`.
+    /// 2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
+    /// * Note: the cheatcode will use the canonical type even if the input is malformated
+    /// with the wrong order of elements or with extra whitespaces.
+    function eip712HashStruct(string calldata typeNameOrDefinition, bytes calldata abiEncodedData)
+        external
+        pure
+        returns (bytes32 typeHash);
+
+    /// Generates the struct hash of the canonical EIP-712 type representation and its abi-encoded data.
+    /// Requires previous binding generation with `forge bind-json`.
+    /// Params:
+    /// * `bindingsPath`: path where the output of `forge bind-json` is stored.
+    /// * `typeName`: Name of the type (i.e. "PermitSingle").
+    /// * `abiEncodedData`: ABI-encoded data for the struct that is being hashed.
+    function eip712HashStruct(string calldata bindingsPath, string calldata typeName, bytes calldata abiEncodedData)
+        external
+        pure
+        returns (bytes32 typeHash);
+
+    /// Generates the hash of the canonical EIP-712 type representation.
+    /// Supports 2 different inputs:
+    /// 1. Name of the type (i.e. "Transaction"):
+    /// * requires previous binding generation with `forge bind-json`.
+    /// * bindings will be retrieved from the path configured in `foundry.toml`.
+    /// 2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
+    /// * Note: the cheatcode will output the canonical type even if the input is malformated
+    /// with the wrong order of elements or with extra whitespaces.
+    function eip712HashType(string calldata typeNameOrDefinition) external pure returns (bytes32 typeHash);
+
+    /// Generates the hash of the canonical EIP-712 type representation.
+    /// Requires previous binding generation with `forge bind-json`.
+    /// Params:
+    /// * `bindingsPath`: path where the output of `forge bind-json` is stored.
+    /// * `typeName`: Name of the type (i.e. "Transaction").
+    function eip712HashType(string calldata bindingsPath, string calldata typeName)
+        external
+        pure
+        returns (bytes32 typeHash);
+
+    /// Generates a ready-to-sign digest of human-readable typed data following the EIP-712 standard.
+    function eip712HashTypedData(string calldata jsonData) external pure returns (bytes32 digest);
+
     /// Returns ENS namehash for provided string.
     function ensNamehash(string calldata name) external pure returns (bytes32);
 
@@ -1904,6 +1955,9 @@ interface VmSafe {
     /// any storage slots that have been previously set.
     function setArbitraryStorage(address target, bool overwrite) external;
 
+    /// Set RNG seed.
+    function setSeed(uint256 seed) external;
+
     /// Randomly shuffles an array.
     function shuffle(uint256[] calldata array) external returns (uint256[] memory);
 
@@ -1921,59 +1975,6 @@ interface VmSafe {
 
     /// Encodes a `string` value to a base64 string.
     function toBase64(string calldata data) external pure returns (string memory);
-
-    // Generates the hash of the canonical EIP-712 type representation.
-    //
-    // Supports 2 different inputs:
-    //  1. Name of the type (i.e. "Transaction"):
-    //     * requires previous binding generation with `forge bind-json`.
-    //     * bindings will be retrieved from the path configured in `foundry.toml`.
-    //
-    //  2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
-    //     * Note: the cheatcode will output the canonical type even if the input is malformated
-    //             with the wrong order of elements or with extra whitespaces.
-    function eip712HashType(string calldata typeNameOrDefinition) external pure returns (bytes32 typeHash);
-
-    // Generates the hash of the canonical EIP-712 type representation.
-    // Requires previous binding generation with `forge bind-json`.
-    //
-    // Params:
-    //  * `bindingsPath`: path where the output of `forge bind-json` is stored.
-    //  * `typeName`: Name of the type (i.e. "Transaction").
-    function eip712HashType(string calldata bindingsPath, string calldata typeName)
-        external
-        pure
-        returns (bytes32 typeHash);
-
-    // Generates the struct hash of the canonical EIP-712 type representation and its abi-encoded data.
-    //
-    // Supports 2 different inputs:
-    //  1. Name of the type (i.e. "PermitSingle"):
-    //     * requires previous binding generation with `forge bind-json`.
-    //     * bindings will be retrieved from the path configured in `foundry.toml`.
-    //
-    //  2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
-    //     * Note: the cheatcode will use the canonical type even if the input is malformated
-    //             with the wrong order of elements or with extra whitespaces.
-    function eip712HashStruct(string calldata typeNameOrDefinition, bytes calldata abiEncodedData)
-        external
-        pure
-        returns (bytes32 typeHash);
-
-    // Generates the struct hash of the canonical EIP-712 type representation and its abi-encoded data.
-    // Requires previous binding generation with `forge bind-json`.
-    //
-    // Params:
-    //  * `bindingsPath`: path where the output of `forge bind-json` is stored.
-    //  * `typeName`: Name of the type (i.e. "PermitSingle").
-    //  * `abiEncodedData`: ABI-encoded data for the struct that is being hashed.
-    function eip712HashStruct(string calldata bindingsPath, string calldata typeName, bytes calldata abiEncodedData)
-        external
-        pure
-        returns (bytes32 typeHash);
-
-    // Generates a ready-to-sign digest of human-readable typed data following the EIP-712 standard.
-    function eip712HashTypedData(string calldata jsonData) external pure returns (bytes32 digest);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
