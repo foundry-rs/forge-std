@@ -402,13 +402,13 @@ abstract contract StdAssertions {
     }
 
     function assertLt(uint256 left, uint256 right) internal pure virtual {
-        if (!(left < right)) {
+        if (left >= right) {
             vm.assertLt(left, right);
         }
     }
 
     function assertLt(uint256 left, uint256 right, string memory err) internal pure virtual {
-        if (!(left < right)) {
+        if (left >= right) {
             vm.assertLt(left, right, err);
         }
     }
@@ -422,13 +422,13 @@ abstract contract StdAssertions {
     }
 
     function assertLt(int256 left, int256 right) internal pure virtual {
-        if (!(left < right)) {
+        if (left >= right) {
             vm.assertLt(left, right);
         }
     }
 
     function assertLt(int256 left, int256 right, string memory err) internal pure virtual {
-        if (!(left < right)) {
+        if (left >= right) {
             vm.assertLt(left, right, err);
         }
     }
@@ -442,13 +442,13 @@ abstract contract StdAssertions {
     }
 
     function assertGt(uint256 left, uint256 right) internal pure virtual {
-        if (!(left > right)) {
+        if (left <= right) {
             vm.assertGt(left, right);
         }
     }
 
     function assertGt(uint256 left, uint256 right, string memory err) internal pure virtual {
-        if (!(left > right)) {
+        if (left <= right) {
             vm.assertGt(left, right, err);
         }
     }
@@ -462,13 +462,13 @@ abstract contract StdAssertions {
     }
 
     function assertGt(int256 left, int256 right) internal pure virtual {
-        if (!(left > right)) {
+        if (left <= right) {
             vm.assertGt(left, right);
         }
     }
 
     function assertGt(int256 left, int256 right, string memory err) internal pure virtual {
-        if (!(left > right)) {
+        if (left <= right) {
             vm.assertGt(left, right, err);
         }
     }
@@ -482,13 +482,13 @@ abstract contract StdAssertions {
     }
 
     function assertLe(uint256 left, uint256 right) internal pure virtual {
-        if (!(left <= right)) {
+        if (left > right) {
             vm.assertLe(left, right);
         }
     }
 
     function assertLe(uint256 left, uint256 right, string memory err) internal pure virtual {
-        if (!(left <= right)) {
+        if (left > right) {
             vm.assertLe(left, right, err);
         }
     }
@@ -502,13 +502,13 @@ abstract contract StdAssertions {
     }
 
     function assertLe(int256 left, int256 right) internal pure virtual {
-        if (!(left <= right)) {
+        if (left > right) {
             vm.assertLe(left, right);
         }
     }
 
     function assertLe(int256 left, int256 right, string memory err) internal pure virtual {
-        if (!(left <= right)) {
+        if (left > right) {
             vm.assertLe(left, right, err);
         }
     }
@@ -522,13 +522,13 @@ abstract contract StdAssertions {
     }
 
     function assertGe(uint256 left, uint256 right) internal pure virtual {
-        if (!(left >= right)) {
+        if (left < right) {
             vm.assertGe(left, right);
         }
     }
 
     function assertGe(uint256 left, uint256 right, string memory err) internal pure virtual {
-        if (!(left >= right)) {
+        if (left < right) {
             vm.assertGe(left, right, err);
         }
     }
@@ -542,13 +542,13 @@ abstract contract StdAssertions {
     }
 
     function assertGe(int256 left, int256 right) internal pure virtual {
-        if (!(left >= right)) {
+        if (left < right) {
             vm.assertGe(left, right);
         }
     }
 
     function assertGe(int256 left, int256 right, string memory err) internal pure virtual {
-        if (!(left >= right)) {
+        if (left < right) {
             vm.assertGe(left, right, err);
         }
     }
