@@ -398,7 +398,7 @@ interface VmSafe {
     /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
     /// signature's `s` value, and the recovery id `v` in a single bytes32.
     /// This format reduces the signature size from 65 to 64 bytes.
-    function signCompact(Wallet calldata wallet, bytes32 digest) external returns (bytes32 r, bytes32 vs);
+    function signCompact(Wallet calldata wallet, bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
 
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
@@ -427,7 +427,7 @@ interface VmSafe {
     function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
 
     /// Signs data with a `Wallet`.
-    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+    function sign(Wallet calldata wallet, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
