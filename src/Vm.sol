@@ -2466,7 +2466,7 @@ interface Vm is VmSafe {
     /// catch (bytes memory interceptedInitcode) { initcode = interceptedInitcode; }
     function interceptInitcode() external;
 
-    // ======== Forks ======== 
+    // ======== Forks ========
 
     /// Returns an array with the name of all the configured fork chains.
     ///
