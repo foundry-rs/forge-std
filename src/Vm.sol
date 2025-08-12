@@ -348,25 +348,25 @@ interface VmSafe {
     /// Generates a wallet from the private key, labels the account with that name, and returns the wallet.
     function createWallet(uint256 privateKey, string calldata walletLabel) external returns (Wallet memory wallet);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path)
     /// at the derivation path `m/44'/60'/0'/0/{index}`.
     function deriveKey(string calldata mnemonic, uint32 index) external pure returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path)
     /// at `{derivationPath}{index}`.
     function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index)
         external
         pure
         returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path) in the specified language
     /// at the derivation path `m/44'/60'/0'/0/{index}`.
     function deriveKey(string calldata mnemonic, uint32 index, string calldata language)
         external
         pure
         returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path) in the specified language
     /// at `{derivationPath}{index}`.
     function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index, string calldata language)
         external
@@ -2498,57 +2498,57 @@ interface Vm is VmSafe {
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `bool`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkBool(string memory key) external view returns (bool);
+    function forkBool(string calldata key) external view returns (bool);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bool`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainBool(uint256 chain, string memory key) external view returns (bool);
+    function forkChainBool(uint256 chain, string calldata key) external view returns (bool);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `int256`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkInt(string memory key) external view returns (int256);
+    function forkInt(string calldata key) external view returns (int256);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `int256`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainInt(uint256 chain, string memory key) external view returns (int256);
+    function forkChainInt(uint256 chain, string calldata key) external view returns (int256);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `uint256`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkUint(string memory key) external view returns (uint256);
+    function forkUint(string calldata key) external view returns (uint256);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `uint256`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainUint(uint256 chain, string memory key) external view returns (uint256);
+    function forkChainUint(uint256 chain, string calldata key) external view returns (uint256);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `address`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkAddress(string memory key) external view returns (address);
+    function forkAddress(string calldata key) external view returns (address);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `address`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainAddress(uint256 chain, string memory key) external view returns (address);
+    function forkChainAddress(uint256 chain, string calldata key) external view returns (address);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `bytes32`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkBytes32(string memory key) external view returns (bytes32);
+    function forkBytes32(string calldata key) external view returns (bytes32);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bytes32`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainBytes32(uint256 chain, string memory key) external view returns (bytes32);
+    function forkChainBytes32(uint256 chain, string calldata key) external view returns (bytes32);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `string`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkString(string memory key) external view returns (string memory);
+    function forkString(string calldata key) external view returns (string memory);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `string`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainString(uint256 chain, string memory key) external view returns (string memory);
+    function forkChainString(uint256 chain, string calldata key) external view returns (string memory);
 
     /// Gets the value for the key `key` from the currently active fork and parses it as `bytes`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkBytes(string memory key) external view returns (bytes memory);
+    function forkBytes(string calldata key) external view returns (bytes memory);
 
     /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bytes`.
     /// Reverts if the key was not found or the value could not be parsed.
-    function forkChainBytes(uint256 chain, string memory key) external view returns (bytes memory);
+    function forkChainBytes(uint256 chain, string calldata key) external view returns (bytes memory);
 }
