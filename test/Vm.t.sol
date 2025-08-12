@@ -13,6 +13,6 @@ contract VmTest is Test {
     }
 
     function test_VmSafeInterfaceId() public pure {
-        assertEq(type(VmSafe).interfaceId, bytes4(0xf4408204), "VmSafe");
+        assertEq(type(VmSafe).interfaceId, bytes4(0x347835a6), "VmSafe");
     }
 }
