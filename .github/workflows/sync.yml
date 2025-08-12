@@ -11,7 +11,7 @@ jobs:
     if: startsWith(github.event.release.tag_name, 'v1')
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: v1
