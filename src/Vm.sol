@@ -233,6 +233,10 @@ interface VmSafe {
         StorageAccess[] storageAccesses;
         // Call depth traversed during the recording of state differences
         uint64 depth;
+        // The previous nonce of the accessed account.
+        uint64 oldNonce;
+        // The new nonce of the accessed account.
+        uint64 newNonce;
     }
 
     /// The storage accessed during an `AccountAccess`.
@@ -932,6 +936,88 @@ interface VmSafe {
     /// Writes line to file, creating a file if it does not exist.
     /// `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
+
+    // ======== Forking ========
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `address`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkAddress(string calldata key) external view returns (address);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `bool`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkBool(string calldata key) external view returns (bool);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `bytes`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkBytes(string calldata key) external view returns (bytes memory);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `bytes32`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkBytes32(string calldata key) external view returns (bytes32);
+
+    /// Returns the chain name of the currently selected fork.
+    function forkChain() external view returns (string memory);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `address`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainAddress(uint256 chain, string calldata key) external view returns (address);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bool`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainBool(uint256 chain, string calldata key) external view returns (bool);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bytes`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainBytes(uint256 chain, string calldata key) external view returns (bytes memory);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `bytes32`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainBytes32(uint256 chain, string calldata key) external view returns (bytes32);
+
+    /// Returns the chain id of the currently selected fork.
+    function forkChainId() external view returns (uint256);
+
+    /// Returns an array with the ids of all the configured fork chains.
+    /// Note that the configured fork chains are subsections of the `[fork]` section of 'foundry.toml'.
+    function forkChainIds() external view returns (uint256[] memory);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `int256`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainInt(uint256 chain, string calldata key) external view returns (int256);
+
+    /// Returns the rpc url of the corresponding chain id.
+    /// By default, the rpc url of each fork is derived from the `[rpc_endpoints]`, unless
+    /// the rpc config is specifically informed in the fork config for that specific chain.
+    function forkChainRpcUrl(uint256 id) external view returns (string memory);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `string`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainString(uint256 chain, string calldata key) external view returns (string memory);
+
+    /// Gets the value for the key `key` from the fork config for chain `chain` and parses it as `uint256`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkChainUint(uint256 chain, string calldata key) external view returns (uint256);
+
+    /// Returns an array with the name of all the configured fork chains.
+    /// Note that the configured fork chains are subsections of the `[fork]` section of 'foundry.toml'.
+    function forkChains() external view returns (string[] memory);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `int256`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkInt(string calldata key) external view returns (int256);
+
+    /// Returns the rpc url of the currently selected fork.
+    /// By default, the rpc url of each fork is derived from the `[rpc_endpoints]`, unless
+    /// the rpc config is specifically informed in the fork config for that specific chain.
+    function forkRpcUrl() external view returns (string memory);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `string`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkString(string calldata key) external view returns (string memory);
+
+    /// Gets the value for the key `key` from the currently active fork and parses it as `uint256`.
+    /// Reverts if the key was not found or the value could not be parsed.
+    function forkUint(string calldata key) external view returns (uint256);
 
     // ======== JSON ========
 
