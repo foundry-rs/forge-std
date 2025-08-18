@@ -667,6 +667,9 @@ interface VmSafe {
     /// Returns state diffs from current `vm.startStateDiffRecording` session, in json format.
     function getStateDiffJson() external view returns (string memory diff);
 
+    /// Returns an array of `StorageAccess` from current `vm.stateStateDiffRecording` session
+    function getStorageAccesses() external view returns (StorageAccess[] memory accesses);
+
     /// Gets the gas used in the last call from the callee perspective.
     function lastCallGas() external view returns (Gas memory gas);
 
