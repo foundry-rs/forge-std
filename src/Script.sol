@@ -16,13 +16,14 @@ import {stdMath} from "./StdMath.sol";
 import {StdStorage, stdStorageSafe} from "./StdStorage.sol";
 import {StdStyle} from "./StdStyle.sol";
 import {StdUtils} from "./StdUtils.sol";
+import {ConfigSetup} form "./Config.sol";
 import {VmSafe} from "./Vm.sol";
 
 // 📦 BOILERPLATE
 import {ScriptBase} from "./Base.sol";
 
 // ⭐️ SCRIPT
-abstract contract Script is ScriptBase, StdChains, StdCheatsSafe, StdUtils {
+abstract contract Script is ConfigSetup, ScriptBase, StdChains, StdCheatsSafe, StdUtils {
     // Note: IS_SCRIPT() must return true.
     bool public IS_SCRIPT = true;
 }

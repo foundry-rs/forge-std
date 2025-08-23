@@ -449,6 +449,9 @@ interface VmSafe {
 
     // ======== Environment ========
 
+    /// Resolves all the env variable placeholders (`${ENV_VAR}`) of the input string.
+    function resolveEnv(string calldata input) external view returns (string memory);
+
     /// Gets the environment variable `name` and parses it as `address`.
     /// Reverts if the variable was not found or could not be parsed.
     function envAddress(string calldata name) external view returns (address value);
@@ -939,144 +942,6 @@ interface VmSafe {
     /// Writes line to file, creating a file if it does not exist.
     /// `path` is relative to the project root.
     function writeLine(string calldata path, string calldata data) external;
-
-    // ======== Forking ========
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `address`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkAddress(string calldata key) external view returns (address);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `address`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkAddressArray(string calldata key) external view returns (address[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `bool`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkBool(string calldata key) external view returns (bool);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `bool`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkBoolArray(string calldata key) external view returns (bool[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `bytes`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkBytes(string calldata key) external view returns (bytes memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `bytes32`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkBytes32(string calldata key) external view returns (bytes32);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `bytes32`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkBytes32Array(string calldata key) external view returns (bytes32[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `bytes`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkBytesArray(string calldata key) external view returns (bytes[] memory);
-
-    /// Returns the chain name of the currently selected fork.
-    function readForkChain() external view returns (string memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `address`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainAddress(uint256 chain, string calldata key) external view returns (address);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `address`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainAddressArray(uint256 chain, string calldata key) external view returns (address[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `bool`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainBool(uint256 chain, string calldata key) external view returns (bool);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `bool`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainBoolArray(uint256 chain, string calldata key) external view returns (bool[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `bytes`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainBytes(uint256 chain, string calldata key) external view returns (bytes memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `bytes32`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainBytes32(uint256 chain, string calldata key) external view returns (bytes32);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `bytes32`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainBytes32Array(uint256 chain, string calldata key) external view returns (bytes32[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `bytes`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainBytesArray(uint256 chain, string calldata key) external view returns (bytes[] memory);
-
-    /// Returns the chain id of the currently selected fork.
-    function readForkChainId() external view returns (uint256);
-
-    /// Returns an array with the ids of all the configured fork chains.
-    /// Note that the configured fork chains are subsections of the `[fork]` section of 'foundry.toml'.
-    function readForkChainIds() external view returns (uint256[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `int256`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainInt(uint256 chain, string calldata key) external view returns (int256);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `int256`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainIntArray(uint256 chain, string calldata key) external view returns (int256[] memory);
-
-    /// Returns the rpc url of the corresponding chain id.
-    /// By default, the rpc url of each fork is derived from the `[rpc_endpoints]`, unless
-    /// the rpc config is specifically informed in the fork config for that specific chain.
-    function readForkChainRpcUrl(uint256 id) external view returns (string memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `string`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainString(uint256 chain, string calldata key) external view returns (string memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `string`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainStringArray(uint256 chain, string calldata key) external view returns (string[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as `uint256`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkChainUint(uint256 chain, string calldata key) external view returns (uint256);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the specified chain and parses it as an array of `uint256`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkChainUintArray(uint256 chain, string calldata key) external view returns (uint256[] memory);
-
-    /// Returns an array with the name of all the configured fork chains.
-    /// Note that the configured fork chains are subsections of the `[fork]` section of 'foundry.toml'.
-    function readForkChains() external view returns (string[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `int256`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkInt(string calldata key) external view returns (int256);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `int256`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkIntArray(string calldata key) external view returns (int256[] memory);
-
-    /// Returns the rpc url of the currently selected fork.
-    /// By default, the rpc url of each fork is derived from the `[rpc_endpoints]`, unless
-    /// the rpc config is specifically informed in the fork config for that specific chain.
-    function readForkRpcUrl() external view returns (string memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `string`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkString(string calldata key) external view returns (string memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `string`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkStringArray(string calldata key) external view returns (string[] memory);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as `uint256`.
-    /// Reverts if the key was not found or the value could not be parsed.
-    function readForkUint(string calldata key) external view returns (uint256);
-
-    /// Gets the value for the key `key` from the `[fork.<chain>]` section of `foundry.toml` for the currently active fork and parses it as an array of `uint256`.
-    /// Reverts if a key was not found or any of the values could not be parsed.
-    function readForkUintArray(string calldata key) external view returns (uint256[] memory);
 
     // ======== JSON ========
 
@@ -2132,6 +1997,9 @@ interface Vm is VmSafe {
 
     /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
     function activeFork() external view returns (uint256 forkId);
+
+    /// Returns the chain id of the currently active fork. Reverts if no fork is currently active.
+    function activeChain() external view returns(uint256);
 
     /// In forking mode, explicitly grant the given address cheatcode access.
     function allowCheatcodes(address account) external;
