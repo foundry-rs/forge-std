@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -6,29 +7,27 @@ import {VmSafe} from "./Vm.sol";
 /// @notice  A contract that parses a toml configuration file and load its
 ///          variables into storage, automatically casting them, on deployment.
 ///
-/// @dev     This contract assumes a flat toml structure where top-level keys
-///          represent chain ids or profiles, and the keys under them are the
-///          configuration variables. Nested tables are ignored by this implementation.
+/// @dev     This contract assumes a toml structure where top-level keys
+///          represent chain ids or profiles. Under each chain key, variables are
+///          organized by type in separate sub-tables.
 ///
 ///          Supported format:
 ///          ```
 ///          [mainnet]
 ///          endpoint_url = "https://eth.llamarpc.com"
 ///
-///          [mainnet.vars]
+///          [mainnet.bool]
 ///          is_live = true
+///
+///          [mainnet.address]
 ///          weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 ///          whitelisted_admins = [
 ///             "0x0000000000000000000000000000000000000001",
 ///             "0x0000000000000000000000000000000000000002"
 ///          ]
 ///
-///          [optimism]
-///          endpoint_url = "https://mainnet.optimism.io"
-///
-///          [optimism.vars]
-///          is_live = false
-///          weth = "0x4200000000000000000000000000000000000006"
+///          [optimism.uint]
+///          important_number = 123
 ///          ```
 contract StdConfig {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -64,13 +63,12 @@ contract StdConfig {
 
     /// @notice Reads the TOML file and iterates through each top-level key, which is
     ///         assumed to be a chain name or ID. For each chain, it caches its RPC
-    ///         endpoint and all variables defined in its `vars` sub-table.
+    ///         endpoint and all variables defined in typed sub-tables like `[<chain>.<type>]`,
+    ///         where type must be: `bool`, `address`, `uint`, `bytes32`, `string`, or `bytes`.
     ///
-    ///         The constructor uses a series of try-catch blocks to determine the type
-    ///         of each variable. It attempts to parse array types (e.g., `address[]`)
-    ///         before their singular counterparts (`address`) to ensure correct type
-    ///         inference. If a variable cannot be parsed as any of the supported types,
-    ///         the constructor will revert with an error.
+    ///         The constructor attempts to parse each variable first as a single value,
+    ///         and if that fails, as an array of that type. If a variable cannot be
+    ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
     constructor(string memory configFilePath) {
@@ -78,9 +76,21 @@ contract StdConfig {
         string memory content = vm.resolveEnv(vm.readFile(configFilePath));
         string[] memory chain_keys = vm.parseTomlKeys(content, "$");
 
+        string[] memory types = new string[](6);
+        types[0] = "bool";
+        types[1] = "address";
+        types[2] = "uint";
+        types[3] = "bytes32";
+        types[4] = "string";
+        types[5] = "bytes";
+
         // Cache the entire configuration to storage
         for (uint i = 0; i < chain_keys.length; i++) {
             string memory chain_key = chain_keys[i];
+            // Top-level keys that are not tables should be ignored (e.g. `profile = "default"`).
+            if (vm.parseTomlKeys(content, string.concat("$.", chain_key)).length == 0) {
+                continue;
+            }
             uint256 chain_id = resolveChainId(chain_key);
             _chainKeys.push(chain_key);
 
@@ -92,92 +102,92 @@ contract StdConfig {
                 _rpcOf[chain_id] = vm.resolveEnv(vm.rpcUrl(chain_key));
             }
 
-            string memory path_to_chain = string.concat("$.", chain_key, ".vars");
-            string[] memory var_keys = vm.parseTomlKeys(content, path_to_chain);
+            for (uint t = 0; t < types.length; t++) {
+                string memory var_type = types[t];
+                string memory path_to_type = string.concat("$.", chain_key, ".", var_type);
 
-            // Parse and cache variables
-            for (uint j = 0; j < var_keys.length; j++) {
-                string memory var_key = var_keys[j];
-                string memory path_to_var = string.concat(path_to_chain, ".", var_key);
+                try vm.parseTomlKeys(content, path_to_type) returns (string[] memory var_keys) {
+                    for (uint j = 0; j < var_keys.length; j++) {
+                        string memory var_key = var_keys[j];
+                        string memory path_to_var = string.concat(path_to_type, ".", var_key);
+                        bool success = false;
 
-                // Attempt to parse as a boolean array
-                try vm.parseTomlBoolArray(content, path_to_var) returns (bool[] memory val) {
-                    _boolArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
+                        if (keccak256(bytes(var_type)) == keccak256(bytes("bool"))) {
+                            try vm.parseTomlBool(content, path_to_var) returns (bool val) {
+                                _boolsOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlBoolArray(content, path_to_var) returns (bool[] memory val) {
+                                    _boolArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        } else if (keccak256(bytes(var_type)) == keccak256(bytes("address"))) {
+                            try vm.parseTomlAddress(content, path_to_var) returns (address val) {
+                                _addressesOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlAddressArray(content, path_to_var) returns (address[] memory val) {
+                                    _addressArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        } else if (keccak256(bytes(var_type)) == keccak256(bytes("uint"))) {
+                            try vm.parseTomlUint(content, path_to_var) returns (uint256 val) {
+                                _uintsOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlUintArray(content, path_to_var) returns (uint256[] memory val) {
+                                    _uintArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        } else if (keccak256(bytes(var_type)) == keccak256(bytes("bytes32"))) {
+                            try vm.parseTomlBytes32(content, path_to_var) returns (bytes32 val) {
+                                _bytes32sOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlBytes32Array(content, path_to_var) returns (bytes32[] memory val) {
+                                    _bytes32ArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        } else if (keccak256(bytes(var_type)) == keccak256(bytes("bytes"))) {
+                            try vm.parseTomlBytes(content, path_to_var) returns (bytes memory val) {
+                                _bytesOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlBytesArray(content, path_to_var) returns (bytes[] memory val) {
+                                    _bytesArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        } else if (keccak256(bytes(var_type)) == keccak256(bytes("string"))) {
+                            try vm.parseTomlString(content, path_to_var) returns (string memory val) {
+                                _stringsOf[chain_id][var_key] = val;
+                                success = true;
+                            } catch {
+                                try vm.parseTomlStringArray(content, path_to_var) returns (string[] memory val) {
+                                    _stringArraysOf[chain_id][var_key] = val;
+                                    success = true;
+                                } catch {}
+                            }
+                        }
 
-                // Attempt to parse as a boolean
-                try vm.parseTomlBool(content, path_to_var) returns (bool val) {
-                    _boolsOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as an address array
-                try vm.parseTomlAddressArray(content, path_to_var) returns (address[] memory val) {
-                    _addressArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as an address
-                try vm.parseTomlAddress(content, path_to_var) returns (address val) {
-                    _addressesOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a uint256 array
-                try vm.parseTomlUintArray(content, path_to_var) returns (uint256[] memory val) {
-                    _uintArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a uint256
-                try vm.parseTomlUint(content, path_to_var) returns (uint256 val) {
-                    _uintsOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a bytes32 array
-                try vm.parseTomlBytes32Array(content, path_to_var) returns (bytes32[] memory val) {
-                    _bytes32ArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a bytes32
-                try vm.parseTomlBytes32(content, path_to_var) returns (bytes32 val) {
-                    _bytes32sOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a bytes array
-                try vm.parseTomlBytesArray(content, path_to_var) returns (bytes[] memory val) {
-                    _bytesArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as bytes
-                try vm.parseTomlBytes(content, path_to_var) returns (bytes memory val) {
-                    _bytesOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a string array
-                try vm.parseTomlStringArray(content, path_to_var) returns (string[] memory val) {
-                    _stringArraysOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                // Attempt to parse as a string (last, as it can be a fallback)
-                try vm.parseTomlString(content, path_to_var) returns (string memory val) {
-                    _stringsOf[chain_id][var_key] = val;
-                    continue;
-                } catch {}
-
-                revert(string.concat("unable to parse variable: '", var_key, "' from '[", chain_key, "']"));
+                        if (!success) {
+                            revert(
+                                string.concat(
+                                    "Unable to parse variable '", var_key, "' from '[", chain_key, ".", var_type, "]'"
+                                )
+                            );
+                        }
+                    }
+                } catch {} // Section does not exist, ignore.
             }
         }
     }
 
-    // -- HELPER FUNCTIONS -----------------------------------------------------
+    // -- HELPER FUNCTIONS -----------------------------------------------------\n
 
     function resolveChainId(string memory aliasOrId) public view returns (uint256) {
         try vm.parseUint(aliasOrId) returns (uint256 chainId) {
@@ -206,9 +216,9 @@ contract StdConfig {
     }
 
     /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
-    function _writeToToml(uint256 chainId, string memory key, string memory jsonValue) private {
+    function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
         string memory chainKey = _getChainKeyFromId(chainId);
-        string memory valueKey = string.concat("$.", chainKey, ".vars.", key);
+        string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
         vm.writeToml(jsonValue, _filePath, valueKey);
     }
 
@@ -333,68 +343,68 @@ contract StdConfig {
 
     function update(uint256 chainId, string memory key, bool value, bool write) public {
         _boolsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, vm.toString(value));
+        if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
 
     function update(string memory key, bool value, bool write) public {
         uint256 chainId = vm.activeChain();
         _boolsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, vm.toString(value));
+        if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
 
     function update(uint256 chainId, string memory key, uint256 value, bool write) public {
         _uintsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, vm.toString(value));
+        if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
 
     function update(string memory key, uint256 value, bool write) public {
         uint256 chainId = vm.activeChain();
         _uintsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, vm.toString(value));
+        if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
 
     function update(uint256 chainId, string memory key, address value, bool write) public {
         _addressesOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
 
     function update(string memory key, address value, bool write) public {
         uint256 chainId = vm.activeChain();
         _addressesOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
 
     function update(uint256 chainId, string memory key, bytes32 value, bool write) public {
         _bytes32sOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
 
     function update(string memory key, bytes32 value, bool write) public {
         uint256 chainId = vm.activeChain();
         _bytes32sOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
 
     function update(uint256 chainId, string memory key, string memory value, bool write) public {
         _stringsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(value));
+        if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
 
     function update(string memory key, string memory value, bool write) public {
         uint256 chainId = vm.activeChain();
         _stringsOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(value));
+        if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
 
     function update(uint256 chainId, string memory key, bytes memory value, bool write) public {
         _bytesOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
 
     function update(string memory key, bytes memory value, bool write) public {
         uint256 chainId = vm.activeChain();
         _bytesOf[chainId][key] = value;
-        if (write) _writeToToml(chainId, key, _quote(vm.toString(value)));
+        if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
 
     function update(uint256 chainId, string memory key, bool[] memory value, bool write) public {
@@ -406,22 +416,13 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "bool", key, json);
         }
     }
 
     function update(string memory key, bool[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _boolArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 
     function update(uint256 chainId, string memory key, uint256[] memory value, bool write) public {
@@ -433,22 +434,13 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "uint", key, json);
         }
     }
 
     function update(string memory key, uint256[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _uintArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 
     function update(uint256 chainId, string memory key, address[] memory value, bool write) public {
@@ -460,22 +452,13 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "address", key, json);
         }
     }
 
     function update(string memory key, address[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _addressArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 
     function update(uint256 chainId, string memory key, bytes32[] memory value, bool write) public {
@@ -487,22 +470,13 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "bytes32", key, json);
         }
     }
 
     function update(string memory key, bytes32[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _bytes32ArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 
     function update(uint256 chainId, string memory key, string[] memory value, bool write) public {
@@ -514,22 +488,13 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "string", key, json);
         }
     }
 
     function update(string memory key, string[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _stringArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 
     function update(uint256 chainId, string memory key, bytes[] memory value, bool write) public {
@@ -541,21 +506,12 @@ contract StdConfig {
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
+            _writeToToml(chainId, "bytes", key, json);
         }
     }
 
     function update(string memory key, bytes[] memory value, bool write) public {
         uint256 chainId = vm.activeChain();
-        _bytesArraysOf[chainId][key] = value;
-        if (write) {
-            string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, key, json);
-        }
+        update(chainId, key, value, write);
     }
 }
