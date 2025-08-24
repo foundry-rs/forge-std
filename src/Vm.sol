@@ -610,6 +610,12 @@ interface VmSafe {
 
     // ======== EVM ========
 
+    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
+    function activeFork() external view returns (uint256 forkId);
+
+    /// Returns the chain id of the currently active fork. Reverts if no fork is currently active.
+    function activeChain() external view returns(uint256);
+
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
     function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
 
@@ -1994,12 +2000,6 @@ interface Vm is VmSafe {
 
     /// Utility cheatcode to set an EIP-2930 access list for all subsequent transactions.
     function accessList(AccessListItem[] calldata access) external;
-
-    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
-    function activeFork() external view returns (uint256 forkId);
-
-    /// Returns the chain id of the currently active fork. Reverts if no fork is currently active.
-    function activeChain() external view returns(uint256);
 
     /// In forking mode, explicitly grant the given address cheatcode access.
     function allowCheatcodes(address account) external;

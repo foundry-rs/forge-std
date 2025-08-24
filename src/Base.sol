@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
+import {console} from "./console.sol";
 import {StdStorage} from "./StdStorage.sol";
 import {StdConfig} from "./StdConfig.sol";
 import {Vm, VmSafe} from "./Vm.sol";
@@ -60,8 +61,12 @@ abstract contract CommonConfig is CommonBase {
     ///
     /// @param   filePath: the path to the TOML configuration file.
     function _loadConfig(string memory filePath) internal {
+        console.log("----------");
+        console.log(string.concat("Loading config from '", filePath, "'"));
         config = new StdConfig(filePath);
         vm.makePersistent(address(config));
+        console.log("Config successfully loaded");
+        console.log("----------");
     }
 
     /// @notice  Loads configuration from a file and creates forks for each specified chain.
@@ -74,6 +79,7 @@ abstract contract CommonConfig is CommonBase {
     function _loadConfigAndForks(string memory filePath) internal {
         _loadConfig(filePath);
 
+        console.log("Setting up forks for the configured chains...");
         uint256[] memory chains = config.readChainIds();
         for (uint i = 0; i < chains.length; i++) {
             uint256 chainId = chains[i];
@@ -81,6 +87,8 @@ abstract contract CommonConfig is CommonBase {
             forkOf[chainId] = forkId;
             chainIds.push(chainId);
         }
+        console.log("Forks successfully created");
+        console.log("----------");
     }
 }
 

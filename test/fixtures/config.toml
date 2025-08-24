@@ -1,0 +1,21 @@
+[mainnet]
+endpoint_url = "${MAINNET_RPC}"
+
+[mainnet.vars]
+is_live = true
+weth = "${WETH_MAINNET}"
+deps = [
+    "0x0000000000000000000000000000000000000000",
+    "0x1111111111111111111111111111111111111111",
+]
+
+[optimism]
+endpoint_url = "${OPTIMISM_RPC}"
+
+[optimism.vars]
+is_live = false
+weth = "${WETH_OPTIMISM}"
+deps = [
+    "0x2222222222222222222222222222222222222222",
+    "0x3333333333333333333333333333333333333333",
+]

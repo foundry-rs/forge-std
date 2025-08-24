@@ -22,14 +22,13 @@ import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {StdStyle} from "./StdStyle.sol";
 import {stdToml} from "./StdToml.sol";
 import {StdUtils} from "./StdUtils.sol";
-import {ConfigSetup} form "./Config.sol";
 import {Vm} from "./Vm.sol";
 
 // 📦 BOILERPLATE
 import {TestBase} from "./Base.sol";
 
 // ⭐️ TEST
-abstract contract Test is ConfigSetup, TestBase, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {
+abstract contract Test is TestBase, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {
     // Note: IS_TEST() must return true.
     bool public IS_TEST = true;
 }
