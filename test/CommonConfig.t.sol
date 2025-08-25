@@ -97,11 +97,11 @@ contract CommonConfigTest is Test {
         // assert that the map of chain id and fork ids is created and that the chain ids actually match
         assertEq(forkOf[1], 0);
         vm.selectFork(forkOf[1]);
-        assertEq(vm.activeChain(), 1);
+        assertEq(vm.getChainId(), 1);
 
         assertEq(forkOf[10], 1);
         vm.selectFork(forkOf[10]);
-        assertEq(vm.activeChain(), 10);
+        assertEq(vm.getChainId(), 10);
     }
 
     function test_writeConfig() public {

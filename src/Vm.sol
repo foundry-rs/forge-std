@@ -645,6 +645,12 @@ interface VmSafe {
     /// See https://github.com/foundry-rs/foundry/issues/6180
     function getBlockTimestamp() external view returns (uint256 timestamp);
 
+    /// Gets the current `block.chainid` of the currently selected environment.
+    /// You should use this instead of `block.chainid` if you use `vm.selectFork` or `vm.createSelectFork`, as `block.chainid` could be assumed
+    /// to be constant across a transaction, and as a result will get optimized out by the compiler.
+    /// See https://github.com/foundry-rs/foundry/issues/6180
+    function getChainId() external view returns (uint256 blockChainId);
+
     /// Gets the map key and parent of a mapping at a given slot, for a given address.
     function getMappingKeyAndParentOf(address target, bytes32 elementSlot)
         external

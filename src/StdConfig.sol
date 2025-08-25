@@ -240,7 +240,7 @@ contract StdConfig {
     }
 
     function readRpcUrl() public view returns (string memory) {
-        return _rpcOf[vm.activeChain()];
+        return _rpcOf[vm.getChainId()];
     }
 
     function readBool(uint256 chain_id, string memory key) public view returns (bool) {
@@ -248,7 +248,7 @@ contract StdConfig {
     }
 
     function readBool(string memory key) public view returns (bool) {
-        return _boolsOf[vm.activeChain()][key];
+        return _boolsOf[vm.getChainId()][key];
     }
 
     function readUint(uint256 chain_id, string memory key) public view returns (uint256) {
@@ -256,7 +256,7 @@ contract StdConfig {
     }
 
     function readUint(string memory key) public view returns (uint256) {
-        return _uintsOf[vm.activeChain()][key];
+        return _uintsOf[vm.getChainId()][key];
     }
 
     function readAddress(uint256 chain_id, string memory key) public view returns (address) {
@@ -264,7 +264,7 @@ contract StdConfig {
     }
 
     function readAddress(string memory key) public view returns (address) {
-        return _addressesOf[vm.activeChain()][key];
+        return _addressesOf[vm.getChainId()][key];
     }
 
     function readBytes32(uint256 chain_id, string memory key) public view returns (bytes32) {
@@ -272,7 +272,7 @@ contract StdConfig {
     }
 
     function readBytes32(string memory key) public view returns (bytes32) {
-        return _bytes32sOf[vm.activeChain()][key];
+        return _bytes32sOf[vm.getChainId()][key];
     }
 
     function readString(uint256 chain_id, string memory key) public view returns (string memory) {
@@ -280,7 +280,7 @@ contract StdConfig {
     }
 
     function readString(string memory key) public view returns (string memory) {
-        return _stringsOf[vm.activeChain()][key];
+        return _stringsOf[vm.getChainId()][key];
     }
 
     function readBytes(uint256 chain_id, string memory key) public view returns (bytes memory) {
@@ -288,7 +288,7 @@ contract StdConfig {
     }
 
     function readBytes(string memory key) public view returns (bytes memory) {
-        return _bytesOf[vm.activeChain()][key];
+        return _bytesOf[vm.getChainId()][key];
     }
 
     function readBoolArray(uint256 chain_id, string memory key) public view returns (bool[] memory) {
@@ -296,7 +296,7 @@ contract StdConfig {
     }
 
     function readBoolArray(string memory key) public view returns (bool[] memory) {
-        return _boolArraysOf[vm.activeChain()][key];
+        return _boolArraysOf[vm.getChainId()][key];
     }
 
     function readUintArray(uint256 chain_id, string memory key) public view returns (uint256[] memory) {
@@ -304,7 +304,7 @@ contract StdConfig {
     }
 
     function readUintArray(string memory key) public view returns (uint256[] memory) {
-        return _uintArraysOf[vm.activeChain()][key];
+        return _uintArraysOf[vm.getChainId()][key];
     }
 
     function readAddressArray(uint256 chain_id, string memory key) public view returns (address[] memory) {
@@ -312,7 +312,7 @@ contract StdConfig {
     }
 
     function readAddressArray(string memory key) public view returns (address[] memory) {
-        return _addressArraysOf[vm.activeChain()][key];
+        return _addressArraysOf[vm.getChainId()][key];
     }
 
     function readBytes32Array(uint256 chain_id, string memory key) public view returns (bytes32[] memory) {
@@ -320,7 +320,7 @@ contract StdConfig {
     }
 
     function readBytes32Array(string memory key) public view returns (bytes32[] memory) {
-        return _bytes32ArraysOf[vm.activeChain()][key];
+        return _bytes32ArraysOf[vm.getChainId()][key];
     }
 
     function readStringArray(uint256 chain_id, string memory key) public view returns (string[] memory) {
@@ -328,7 +328,7 @@ contract StdConfig {
     }
 
     function readStringArray(string memory key) public view returns (string[] memory) {
-        return _stringArraysOf[vm.activeChain()][key];
+        return _stringArraysOf[vm.getChainId()][key];
     }
 
     function readBytesArray(uint256 chain_id, string memory key) public view returns (bytes[] memory) {
@@ -336,7 +336,7 @@ contract StdConfig {
     }
 
     function readBytesArray(string memory key) public view returns (bytes[] memory) {
-        return _bytesArraysOf[vm.activeChain()][key];
+        return _bytesArraysOf[vm.getChainId()][key];
     }
 
     // -- SETTER FUNCTIONS -----------------------------------------------------
@@ -347,7 +347,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bool value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _boolsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
@@ -358,7 +358,7 @@ contract StdConfig {
     }
 
     function update(string memory key, uint256 value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _uintsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
@@ -369,7 +369,7 @@ contract StdConfig {
     }
 
     function update(string memory key, address value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _addressesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
@@ -380,7 +380,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bytes32 value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _bytes32sOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
@@ -391,7 +391,7 @@ contract StdConfig {
     }
 
     function update(string memory key, string memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _stringsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
@@ -402,7 +402,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bytes memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         _bytesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
@@ -421,7 +421,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bool[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
@@ -439,7 +439,7 @@ contract StdConfig {
     }
 
     function update(string memory key, uint256[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
@@ -457,7 +457,7 @@ contract StdConfig {
     }
 
     function update(string memory key, address[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
@@ -475,7 +475,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bytes32[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
@@ -493,7 +493,7 @@ contract StdConfig {
     }
 
     function update(string memory key, string[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
@@ -511,7 +511,7 @@ contract StdConfig {
     }
 
     function update(string memory key, bytes[] memory value, bool write) public {
-        uint256 chainId = vm.activeChain();
+        uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 }
