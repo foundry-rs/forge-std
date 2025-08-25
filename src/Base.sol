@@ -80,10 +80,10 @@ abstract contract CommonConfig is CommonBase {
         _loadConfig(filePath);
 
         console.log("Setting up forks for the configured chains...");
-        uint256[] memory chains = config.readChainIds();
+        uint256[] memory chains = config.getChainIds();
         for (uint i = 0; i < chains.length; i++) {
             uint256 chainId = chains[i];
-            uint256 forkId = vm.createFork(config.readRpcUrl(chainId));
+            uint256 forkId = vm.createFork(config.getRpcUrl(chainId));
             forkOf[chainId] = forkId;
             chainIds.push(chainId);
         }
