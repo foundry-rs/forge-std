@@ -62,7 +62,7 @@ abstract contract CommonConfig is CommonBase {
     /// @param   filePath: the path to the TOML configuration file.
     function _loadConfig(string memory filePath) internal {
         console.log("----------");
-        console.log(string.concat("Loading config from '", filePath, "'"));
+        console.log(string(abi.encodePacked("Loading config from '", filePath, "'")));
         config = new StdConfig(filePath);
         vm.makePersistent(address(config));
         console.log("Config successfully loaded");

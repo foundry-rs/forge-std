@@ -93,7 +93,7 @@ contract StdConfig {
         for (uint i = 0; i < chain_keys.length; i++) {
             string memory chain_key = chain_keys[i];
             // Top-level keys that are not tables should be ignored (e.g. `profile = "default"`).
-            if (vm.parseTomlKeys(content, string.concat("$.", chain_key)).length == 0) {
+            if (vm.parseTomlKeys(content, _concat("$.", chain_key)).length == 0) {
                 continue;
             }
             uint256 chain_id = resolveChainId(chain_key);
@@ -101,7 +101,7 @@ contract StdConfig {
 
             // Cache the configure rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (string memory url) {
+            try vm.parseTomlString(content, _concat("$.", chain_key, ".endpoint_url")) returns (string memory url) {
                 _rpcOf[chain_id] = vm.resolveEnv(url);
             } catch {
                 _rpcOf[chain_id] = vm.resolveEnv(vm.rpcUrl(chain_key));
@@ -109,12 +109,12 @@ contract StdConfig {
 
             for (uint t = 0; t < types.length; t++) {
                 string memory var_type = types[t];
-                string memory path_to_type = string.concat("$.", chain_key, ".", var_type);
+                string memory path_to_type = _concat("$.", chain_key, ".", var_type);
 
                 try vm.parseTomlKeys(content, path_to_type) returns (string[] memory var_keys) {
                     for (uint j = 0; j < var_keys.length; j++) {
                         string memory var_key = var_keys[j];
-                        string memory path_to_var = string.concat(path_to_type, ".", var_key);
+                        string memory path_to_var = _concat(path_to_type, ".", var_key);
                         bool success = false;
 
                         if (keccak256(bytes(var_type)) == keccak256(bytes("bool"))) {
@@ -181,9 +181,7 @@ contract StdConfig {
 
                         if (!success) {
                             revert(
-                                string.concat(
-                                    "Unable to parse variable '", var_key, "' from '[", chain_key, ".", var_type, "]'"
-                                )
+                                _concat("Unable to parse variable '", var_key, "' from '[", _concat(chain_key, ".", var_type, "]'"))
                             );
                         }
                     }
@@ -206,7 +204,7 @@ contract StdConfig {
             try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
                 return chainInfo.chainId;
             } catch {
-                revert(string.concat("chain key: '", aliasOrId, "' is not a valid alias nor a number."));
+                revert(_concat("chain key: '", aliasOrId, "' is not a valid alias nor a number."));
             }
         }
     }
@@ -218,12 +216,27 @@ contract StdConfig {
                 return _chainKeys[i];
             }
         }
-        revert(string.concat("chain id: '", vm.toString(chainId), "' not found in configuration"));
+        revert(_concat("chain id: '", vm.toString(chainId), "' not found in configuration"));
+    }
+
+    /// @dev concatenates two strings
+    function _concat(string memory s1, string memory s2) private pure returns (string memory) {
+        return string(abi.encodePacked(s1, s2));
+    }
+
+    /// @dev concatenates three strings
+    function _concat(string memory s1, string memory s2, string memory s3) private pure returns (string memory) {
+        return string(abi.encodePacked(s1, s2, s3));
+    }
+
+    /// @dev concatenates four strings
+    function _concat(string memory s1, string memory s2, string memory s3, string memory s4) private pure returns (string memory) {
+        return string(abi.encodePacked(s1, s2, s3, s4));
     }
 
     /// @dev Wraps a string in double quotes for JSON compatibility.
     function _quote(string memory s) private pure returns (string memory) {
-        return string.concat('"', s, '"');
+        return _concat('"', s, '"');
     }
 
     /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
@@ -233,7 +246,7 @@ contract StdConfig {
     /// @param jsonValue The JSON-formatted value to write.
     function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
         string memory chainKey = _getChainKeyFromId(chainId);
-        string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
+        string memory valueKey = _concat("$.", chainKey, ".", _concat(ty, ".", key));
         vm.writeTomlUpsert(jsonValue, _filePath, valueKey);
     }
 
@@ -480,10 +493,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, vm.toString(value[i]));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "bool", key, json);
         }
     }
@@ -502,10 +515,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, vm.toString(value[i]));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "uint", key, json);
         }
     }
@@ -524,10 +537,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, _quote(vm.toString(value[i])));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "address", key, json);
         }
     }
@@ -546,10 +559,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, _quote(vm.toString(value[i])));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "bytes32", key, json);
         }
     }
@@ -568,10 +581,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, _quote(value[i]));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "string", key, json);
         }
     }
@@ -590,10 +603,10 @@ contract StdConfig {
         if (write) {
             string memory json = "[";
             for (uint i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                json = _concat(json, _quote(vm.toString(value[i])));
+                if (i < value.length - 1) json = _concat(json, ",");
             }
-            json = string.concat(json, "]");
+            json = _concat(json, "]");
             _writeToToml(chainId, "bytes", key, json);
         }
     }
