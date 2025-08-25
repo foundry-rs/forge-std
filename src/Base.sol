@@ -44,15 +44,13 @@ abstract contract CommonBase {
     StdStorage internal stdstore;
 }
 
-
 /// @notice Boilerplate to streamline the setup of multi-chain testing environments.
 abstract contract CommonConfig is CommonBase {
-
     // -- STORAGE (CONFIG + CHAINS + FORKS) ------------------------------------
 
     StdConfig internal config;
     uint256[] internal chainIds;
-    mapping(uint256 => uint256) internal forkOf;        // [chainId -> forkId]
+    mapping(uint256 => uint256) internal forkOf; // [chainId -> forkId]
 
     // -- HELPER FUNCTIONS -----------------------------------------------------
 
@@ -83,7 +81,7 @@ abstract contract CommonConfig is CommonBase {
 
         console.log("Setting up forks for the configured chains...");
         uint256[] memory chains = config.getChainIds();
-        for (uint i = 0; i < chains.length; i++) {
+        for (uint256 i = 0; i < chains.length; i++) {
             uint256 chainId = chains[i];
             uint256 forkId = vm.createFork(config.getRpcUrl(chainId));
             forkOf[chainId] = forkId;

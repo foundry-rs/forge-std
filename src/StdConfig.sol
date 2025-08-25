@@ -90,7 +90,7 @@ contract StdConfig {
         types[5] = "bytes";
 
         // Cache the entire configuration to storage
-        for (uint i = 0; i < chain_keys.length; i++) {
+        for (uint256 i = 0; i < chain_keys.length; i++) {
             string memory chain_key = chain_keys[i];
             // Top-level keys that are not tables should be ignored (e.g. `profile = "default"`).
             if (vm.parseTomlKeys(content, _concat("$.", chain_key)).length == 0) {
@@ -107,12 +107,12 @@ contract StdConfig {
                 _rpcOf[chain_id] = vm.resolveEnv(vm.rpcUrl(chain_key));
             }
 
-            for (uint t = 0; t < types.length; t++) {
+            for (uint256 t = 0; t < types.length; t++) {
                 string memory var_type = types[t];
                 string memory path_to_type = _concat("$.", chain_key, ".", var_type);
 
                 try vm.parseTomlKeys(content, path_to_type) returns (string[] memory var_keys) {
-                    for (uint j = 0; j < var_keys.length; j++) {
+                    for (uint256 j = 0; j < var_keys.length; j++) {
                         string memory var_key = var_keys[j];
                         string memory path_to_var = _concat(path_to_type, ".", var_key);
                         bool success = false;
@@ -181,7 +181,12 @@ contract StdConfig {
 
                         if (!success) {
                             revert(
-                                _concat("Unable to parse variable '", var_key, "' from '[", _concat(chain_key, ".", var_type, "]'"))
+                                _concat(
+                                    "Unable to parse variable '",
+                                    var_key,
+                                    "' from '[",
+                                    _concat(chain_key, ".", var_type, "]'")
+                                )
                             );
                         }
                     }
@@ -211,7 +216,7 @@ contract StdConfig {
 
     /// @dev Retrieves the chain key/alias from the configuration based on the chain ID.
     function _getChainKeyFromId(uint256 chainId) private view returns (string memory) {
-        for (uint i = 0; i < _chainKeys.length; i++) {
+        for (uint256 i = 0; i < _chainKeys.length; i++) {
             if (resolveChainId(_chainKeys[i]) == chainId) {
                 return _chainKeys[i];
             }
@@ -230,7 +235,11 @@ contract StdConfig {
     }
 
     /// @dev concatenates four strings
-    function _concat(string memory s1, string memory s2, string memory s3, string memory s4) private pure returns (string memory) {
+    function _concat(string memory s1, string memory s2, string memory s3, string memory s4)
+        private
+        pure
+        returns (string memory)
+    {
         return string(abi.encodePacked(s1, s2, s3, s4));
     }
 
@@ -257,7 +266,7 @@ contract StdConfig {
         string[] memory keys = _chainKeys;
 
         uint256[] memory ids = new uint256[](keys.length);
-        for (uint i = 0; i < keys.length; i++) {
+        for (uint256 i = 0; i < keys.length; i++) {
             ids[i] = resolveChainId(keys[i]);
         }
 
@@ -492,7 +501,7 @@ contract StdConfig {
         _boolArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, vm.toString(value[i]));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
@@ -514,7 +523,7 @@ contract StdConfig {
         _uintArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, vm.toString(value[i]));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
@@ -536,7 +545,7 @@ contract StdConfig {
         _addressArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, _quote(vm.toString(value[i])));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
@@ -558,7 +567,7 @@ contract StdConfig {
         _bytes32ArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, _quote(vm.toString(value[i])));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
@@ -580,7 +589,7 @@ contract StdConfig {
         _stringArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, _quote(value[i]));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
@@ -602,7 +611,7 @@ contract StdConfig {
         _bytesArraysOf[chainId][key] = value;
         if (write) {
             string memory json = "[";
-            for (uint i = 0; i < value.length; i++) {
+            for (uint256 i = 0; i < value.length; i++) {
                 json = _concat(json, _quote(vm.toString(value[i])));
                 if (i < value.length - 1) json = _concat(json, ",");
             }
