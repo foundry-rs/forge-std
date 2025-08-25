@@ -52,7 +52,7 @@ contract StdConfig {
     mapping(uint256 => mapping(string => bytes)) private _valuesOf;
     mapping(uint256 => mapping(string => bytes)) private _arraysOf;
 
-    // -- INITIALIZER ----------------------------------------------------------
+    // -- CONSTRUCTOR ----------------------------------------------------------
 
     /// @notice Reads the TOML file and iterates through each top-level key, which is
     ///         assumed to be a chain name or ID. For each chain, it caches its RPC
@@ -64,7 +64,7 @@ contract StdConfig {
     ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
-    function initialize(string memory configFilePath) public {
+    constructor(string memory configFilePath) public {
         _filePath = configFilePath;
         string memory content = vm.resolveEnv(vm.readFile(configFilePath));
         string[] memory chain_keys = vm.parseTomlKeys(content, "$");
