@@ -64,7 +64,8 @@ abstract contract CommonConfig is CommonBase {
     function _loadConfig(string memory filePath) internal {
         console.log("----------");
         console.log(string(abi.encodePacked("Loading config from '", filePath, "'")));
-        config = new StdConfig(filePath);
+        config = new StdConfig();
+        config.initialize(filePath);
         vm.makePersistent(address(config));
         console.log("Config successfully loaded");
         console.log("----------");
