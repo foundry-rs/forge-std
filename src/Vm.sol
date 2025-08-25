@@ -450,7 +450,7 @@ interface VmSafe {
     // ======== Environment ========
 
     /// Resolves all the env variable placeholders (`${ENV_VAR}`) of the input string.
-    function resolveEnv(string calldata input) external view returns (string memory);
+    function resolveEnv(string calldata input) external view returns (string memory resolvedInput);
 
     /// Gets the environment variable `name` and parses it as `address`.
     /// Reverts if the variable was not found or could not be parsed.
@@ -614,7 +614,7 @@ interface VmSafe {
     function activeFork() external view returns (uint256 forkId);
 
     /// Returns the chain id of the currently active fork. Reverts if no fork is currently active.
-    function activeChain() external view returns(uint256);
+    function activeChain() external view returns(uint256 chainId);
 
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
     function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
@@ -1853,6 +1853,11 @@ interface VmSafe {
     /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
     function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    /// Unlike `writeToml`, this cheatcode will create new keys if they do not already exist.
+    function writeTomlUpsert(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
 
