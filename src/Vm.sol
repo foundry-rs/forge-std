@@ -602,6 +602,9 @@ interface VmSafe {
     /// Returns true if `forge` command was executed in given context.
     function isContext(ForgeContext context) external view returns (bool result);
 
+    /// Resolves the env variable placeholders of a given input string.
+    function resolveEnv(string calldata input) external returns (string memory);
+
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
@@ -635,6 +638,12 @@ interface VmSafe {
     /// and as a result will get optimized out by the compiler.
     /// See https://github.com/foundry-rs/foundry/issues/6180
     function getBlockTimestamp() external view returns (uint256 timestamp);
+
+    /// Gets the current `block.chainid` of the currently selected environment.
+    /// You should use this instead of `block.chainid` if you use `vm.selectFork` or `vm.createSelectFork`, as `block.chainid` could be assumed
+    /// to be constant across a transaction, and as a result will get optimized out by the compiler.
+    /// See https://github.com/foundry-rs/foundry/issues/6180
+    function getChainId() external view returns (uint256 blockChainId);
 
     /// Gets the map key and parent of a mapping at a given slot, for a given address.
     function getMappingKeyAndParentOf(address target, bytes32 elementSlot)
@@ -1837,6 +1846,16 @@ interface VmSafe {
 
     /// ABI-encodes a TOML table at `key`.
     function parseToml(string calldata toml, string calldata key) external pure returns (bytes memory abiEncodedData);
+
+    /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
+    /// Unlike `writeJson`, this cheatcode will create new keys if they didn't previously exist.
+    function writeJsonUpsert(string calldata json, string calldata path, string calldata valueKey) external;
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    /// Unlike `writeToml`, this cheatcode will create new keys if they didn't previously exist.
+    function writeTomlUpsert(string calldata json, string calldata path, string calldata valueKey) external;
 
     /// Takes serialized JSON, converts to TOML and write a serialized TOML to a file.
     function writeToml(string calldata json, string calldata path) external;
