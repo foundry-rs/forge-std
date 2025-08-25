@@ -183,7 +183,7 @@ contract StdConfig {
         }
 
         if (!success) {
-            revert(string.concat("Unable to parse variable '", var_key, "'"));
+            revert(_concat("Unable to parse variable '", var_key, "'"));
         }
     }
 
