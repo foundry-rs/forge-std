@@ -8,7 +8,7 @@ import {VmSafe} from "./Vm.sol";
 ///          variables into storage, automatically casting them, on deployment.
 ///
 /// @dev     This contract assumes a toml structure where top-level keys
-///          represent chain ids or profiles. Under each chain key, variables are
+///          represent chain ids or aliases. Under each chain key, variables are
 ///          organized by type in separate sub-tables like `[<chain>.<type>]`, where
 ///          type must be: `bool`, `address`, `uint`, `bytes32`, `string`, or `bytes`.
 ///
