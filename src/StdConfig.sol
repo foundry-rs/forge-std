@@ -76,7 +76,7 @@ contract StdConfig {
     ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
-    constructor(string memory configFilePath) {
+    constructor(string memory configFilePath) public {
         _filePath = configFilePath;
         string memory content = vm.resolveEnv(vm.readFile(configFilePath));
         string[] memory chain_keys = vm.parseTomlKeys(content, "$");
