@@ -51,7 +51,7 @@ abstract contract CommonConfig is CommonBase {
 
     StdConfig internal config;
     uint256[] internal chainIds;
-    mapping(uint256 chainId => uint256 forkId) internal forkOf;
+    mapping(uint256 => uint256) internal forkOf;        // [chainId -> forkId]
 
     // -- HELPER FUNCTIONS -----------------------------------------------------
 
