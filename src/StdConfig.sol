@@ -9,12 +9,13 @@ import {VmSafe} from "./Vm.sol";
 ///
 /// @dev     This contract assumes a toml structure where top-level keys
 ///          represent chain ids or profiles. Under each chain key, variables are
-///          organized by type in separate sub-tables.
+///          organized by type in separate sub-tables like `[<chain>.<type>]`, where
+///          type must be: `bool`, `address`, `uint`, `bytes32`, `string`, or `bytes`.
 ///
 ///          Supported format:
 ///          ```
 ///          [mainnet]
-///          endpoint_url = "https://eth.llamarpc.com"
+///          endpoint_url = "${MAINNET_RPC}"
 ///
 ///          [mainnet.bool]
 ///          is_live = true
@@ -22,28 +23,32 @@ import {VmSafe} from "./Vm.sol";
 ///          [mainnet.address]
 ///          weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 ///          whitelisted_admins = [
-///             "0x0000000000000000000000000000000000000001",
-///             "0x0000000000000000000000000000000000000002"
+///             "${MAINNET_ADMIN}",
+///             "0x00000000000000000000000000000000deadbeef",
+///             "0x000000000000000000000000000000c0ffeebabe"
 ///          ]
 ///
-///          [optimism.uint]
+///          [mainnet.uint]
 ///          important_number = 123
 ///          ```
 contract StdConfig {
+    // -- CONSTANTS ------------------------------------------------------------
+
+    /// @dev Forge Standard Library VM interface for cheat codes.
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    // -- STORAGE (CACHE FROM CONFIG FILE) -------------------------------------
+    // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
-    // File path
+    // Path to the loaded TOML configuration file.
     string private _filePath;
 
-    // Keys of the configured chains.
+    // List of top-level keys found in the TOML file, assumed to be chain names/aliases.
     string[] private _chainKeys;
 
-    // Storage for the configured RPC url.
+    // Storage for the configured RPC URL for each chain.
     mapping(uint256 chainId => string url) private _rpcOf;
 
-    // Storage for variable types.
+    // Storage for single value types organized by chain ID and variable key.
     mapping(uint256 chainId => mapping(string key => bool value)) private _boolsOf;
     mapping(uint256 chainId => mapping(string key => uint256 value)) private _uintsOf;
     mapping(uint256 chainId => mapping(string key => address value)) private _addressesOf;
@@ -51,7 +56,7 @@ contract StdConfig {
     mapping(uint256 chainId => mapping(string key => string value)) private _stringsOf;
     mapping(uint256 chainId => mapping(string key => bytes value)) private _bytesOf;
 
-    // Storage for array variable types.
+    // Storage for array value types organized by chain ID and variable key.
     mapping(uint256 chainId => mapping(string key => bool[] value)) private _boolArraysOf;
     mapping(uint256 chainId => mapping(string key => uint256[] value)) private _uintArraysOf;
     mapping(uint256 chainId => mapping(string key => address[] value)) private _addressArraysOf;
@@ -189,6 +194,11 @@ contract StdConfig {
 
     // -- HELPER FUNCTIONS -----------------------------------------------------\n
 
+    /// @notice Resolves a chain alias or a chain id string to its numerical chain id.
+    /// @param aliasOrId The string representing the chain alias (i.e. "mainnet") or a numerical ID (i.e. "1").
+    /// @return The numerical chain ID.
+    /// @dev It first attempts to parse the input as a number. If that fails, it uses `vm.getChain` to resolve a named alias.
+    ///      Reverts if the alias is not valid or not a number.
     function resolveChainId(string memory aliasOrId) public view returns (uint256) {
         try vm.parseUint(aliasOrId) returns (uint256 chainId) {
             return chainId;
@@ -201,6 +211,7 @@ contract StdConfig {
         }
     }
 
+    /// @dev Retrieves the chain key/alias from the configuration based on the chain ID.
     function _getChainKeyFromId(uint256 chainId) private view returns (string memory) {
         for (uint i = 0; i < _chainKeys.length; i++) {
             if (resolveChainId(_chainKeys[i]) == chainId) {
@@ -216,6 +227,10 @@ contract StdConfig {
     }
 
     /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
+    /// @param chainId The chain id to write under.
+    /// @param ty The type category ('bool', 'address', 'uint', 'bytes32', 'string', or 'bytes').
+    /// @param key The variable key name.
+    /// @param jsonValue The JSON-formatted value to write.
     function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
         string memory chainKey = _getChainKeyFromId(chainId);
         string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
@@ -224,6 +239,7 @@ contract StdConfig {
 
     // -- GETTER FUNCTIONS -----------------------------------------------------
 
+    /// @notice Returns the numerical chain ids for all configured chains.
     function readChainIds() public view returns (uint256[] memory) {
         string[] memory keys = _chainKeys;
 
@@ -235,178 +251,230 @@ contract StdConfig {
         return ids;
     }
 
+    /// @notice Reads the RPC URL for a specific chain id.
     function readRpcUrl(uint256 chain_id) public view returns (string memory) {
         return _rpcOf[chain_id];
     }
 
+    /// @notice Reads the RPC URL for the current chain.
     function readRpcUrl() public view returns (string memory) {
         return _rpcOf[vm.getChainId()];
     }
 
+    /// @notice Reads a boolean value for a given key and chain ID.
     function readBool(uint256 chain_id, string memory key) public view returns (bool) {
         return _boolsOf[chain_id][key];
     }
 
+    /// @notice Reads a boolean value for a given key on the current chain.
     function readBool(string memory key) public view returns (bool) {
         return _boolsOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a uint256 value for a given key and chain ID.
     function readUint(uint256 chain_id, string memory key) public view returns (uint256) {
         return _uintsOf[chain_id][key];
     }
 
+    /// @notice Reads a uint256 value for a given key on the current chain.
     function readUint(string memory key) public view returns (uint256) {
         return _uintsOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads an address value for a given key and chain ID.
     function readAddress(uint256 chain_id, string memory key) public view returns (address) {
         return _addressesOf[chain_id][key];
     }
 
+    /// @notice Reads an address value for a given key on the current chain.
     function readAddress(string memory key) public view returns (address) {
         return _addressesOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a bytes32 value for a given key and chain ID.
     function readBytes32(uint256 chain_id, string memory key) public view returns (bytes32) {
         return _bytes32sOf[chain_id][key];
     }
 
+    /// @notice Reads a bytes32 value for a given key on the current chain.
     function readBytes32(string memory key) public view returns (bytes32) {
         return _bytes32sOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a string value for a given key and chain ID.
     function readString(uint256 chain_id, string memory key) public view returns (string memory) {
         return _stringsOf[chain_id][key];
     }
 
+    /// @notice Reads a string value for a given key on the current chain.
     function readString(string memory key) public view returns (string memory) {
         return _stringsOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a bytes value for a given key and chain ID.
     function readBytes(uint256 chain_id, string memory key) public view returns (bytes memory) {
         return _bytesOf[chain_id][key];
     }
 
+    /// @notice Reads a bytes value for a given key on the current chain.
     function readBytes(string memory key) public view returns (bytes memory) {
         return _bytesOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a boolean array for a given key and chain ID.
     function readBoolArray(uint256 chain_id, string memory key) public view returns (bool[] memory) {
         return _boolArraysOf[chain_id][key];
     }
 
+    /// @notice Reads a boolean array for a given key on the current chain.
     function readBoolArray(string memory key) public view returns (bool[] memory) {
         return _boolArraysOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a uint256 array for a given key and chain ID.
     function readUintArray(uint256 chain_id, string memory key) public view returns (uint256[] memory) {
         return _uintArraysOf[chain_id][key];
     }
 
+    /// @notice Reads a uint256 array for a given key on the current chain.
     function readUintArray(string memory key) public view returns (uint256[] memory) {
         return _uintArraysOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads an address array for a given key and chain ID.
     function readAddressArray(uint256 chain_id, string memory key) public view returns (address[] memory) {
         return _addressArraysOf[chain_id][key];
     }
 
+    /// @notice Reads an address array for a given key on the current chain.
     function readAddressArray(string memory key) public view returns (address[] memory) {
         return _addressArraysOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a bytes32 array for a given key and chain ID.
     function readBytes32Array(uint256 chain_id, string memory key) public view returns (bytes32[] memory) {
         return _bytes32ArraysOf[chain_id][key];
     }
 
+    /// @notice Reads a bytes32 array for a given key on the current chain.
     function readBytes32Array(string memory key) public view returns (bytes32[] memory) {
         return _bytes32ArraysOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a string array for a given key and chain ID.
     function readStringArray(uint256 chain_id, string memory key) public view returns (string[] memory) {
         return _stringArraysOf[chain_id][key];
     }
 
+    /// @notice Reads a string array for a given key on the current chain.
     function readStringArray(string memory key) public view returns (string[] memory) {
         return _stringArraysOf[vm.getChainId()][key];
     }
 
+    /// @notice Reads a bytes array for a given key and chain ID.
     function readBytesArray(uint256 chain_id, string memory key) public view returns (bytes[] memory) {
         return _bytesArraysOf[chain_id][key];
     }
 
+    /// @notice Reads a bytes array for a given key on the current chain.
     function readBytesArray(string memory key) public view returns (bytes[] memory) {
         return _bytesArraysOf[vm.getChainId()][key];
     }
 
     // -- SETTER FUNCTIONS -----------------------------------------------------
 
+    /// @notice Updates a boolean value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bool value, bool write) public {
         _boolsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
 
+    /// @notice Updates a boolean value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bool value, bool write) public {
         uint256 chainId = vm.getChainId();
         _boolsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
 
+    /// @notice Updates a uint256 value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, uint256 value, bool write) public {
         _uintsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
 
+    /// @notice Updates a uint256 value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, uint256 value, bool write) public {
         uint256 chainId = vm.getChainId();
         _uintsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
 
+    /// @notice Updates an address value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, address value, bool write) public {
         _addressesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates an address value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, address value, bool write) public {
         uint256 chainId = vm.getChainId();
         _addressesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates a bytes32 value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bytes32 value, bool write) public {
         _bytes32sOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates a bytes32 value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bytes32 value, bool write) public {
         uint256 chainId = vm.getChainId();
         _bytes32sOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates a string value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, string memory value, bool write) public {
         _stringsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
 
+    /// @notice Updates a string value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, string memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         _stringsOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
 
+    /// @notice Updates a bytes value for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bytes memory value, bool write) public {
         _bytesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates a bytes value for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bytes memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         _bytesOf[chainId][key] = value;
         if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
 
+    /// @notice Updates a boolean array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bool[] memory value, bool write) public {
         _boolArraysOf[chainId][key] = value;
         if (write) {
@@ -420,11 +488,15 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates a boolean array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bool[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
+    /// @notice Updates a uint256 array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, uint256[] memory value, bool write) public {
         _uintArraysOf[chainId][key] = value;
         if (write) {
@@ -438,11 +510,15 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates a uint256 array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, uint256[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
+    /// @notice Updates an address array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, address[] memory value, bool write) public {
         _addressArraysOf[chainId][key] = value;
         if (write) {
@@ -456,11 +532,15 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates an address array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, address[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
+    /// @notice Updates a bytes32 array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bytes32[] memory value, bool write) public {
         _bytes32ArraysOf[chainId][key] = value;
         if (write) {
@@ -474,11 +554,15 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates a bytes32 array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bytes32[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
+    /// @notice Updates a string array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, string[] memory value, bool write) public {
         _stringArraysOf[chainId][key] = value;
         if (write) {
@@ -492,11 +576,15 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates a string array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, string[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
     }
 
+    /// @notice Updates a bytes array for a given key and chain ID.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(uint256 chainId, string memory key, bytes[] memory value, bool write) public {
         _bytesArraysOf[chainId][key] = value;
         if (write) {
@@ -510,6 +598,8 @@ contract StdConfig {
         }
     }
 
+    /// @notice Updates a bytes array for a given key on the current chain.
+    /// @dev    Updates the cached value in storage and optionally writes the change back to the TOML file.
     function update(string memory key, bytes[] memory value, bool write) public {
         uint256 chainId = vm.getChainId();
         update(chainId, key, value, write);
