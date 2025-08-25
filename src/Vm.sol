@@ -449,9 +449,6 @@ interface VmSafe {
 
     // ======== Environment ========
 
-    /// Resolves all the env variable placeholders (`${ENV_VAR}`) of the input string.
-    function resolveEnv(string calldata input) external view returns (string memory resolvedInput);
-
     /// Gets the environment variable `name` and parses it as `address`.
     /// Reverts if the variable was not found or could not be parsed.
     function envAddress(string calldata name) external view returns (address value);
@@ -605,16 +602,13 @@ interface VmSafe {
     /// Returns true if `forge` command was executed in given context.
     function isContext(ForgeContext context) external view returns (bool result);
 
+    /// Resolves the env variable placeholders of a given input string.
+    function resolveEnv(string calldata input) external returns (string memory);
+
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
     // ======== EVM ========
-
-    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
-    function activeFork() external view returns (uint256 forkId);
-
-    /// Returns the chain id of the currently active fork. Reverts if no fork is currently active.
-    function activeChain() external view returns (uint256 chainId);
 
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
     function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
@@ -1853,17 +1847,22 @@ interface VmSafe {
     /// ABI-encodes a TOML table at `key`.
     function parseToml(string calldata toml, string calldata key) external pure returns (bytes memory abiEncodedData);
 
+    /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
+    /// Unlike `writeJson`, this cheatcode will create new keys if they didn't previously exist.
+    function writeJsonUpsert(string calldata json, string calldata path, string calldata valueKey) external;
+
+    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
+    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    /// Unlike `writeToml`, this cheatcode will create new keys if they didn't previously exist.
+    function writeTomlUpsert(string calldata json, string calldata path, string calldata valueKey) external;
+
     /// Takes serialized JSON, converts to TOML and write a serialized TOML to a file.
     function writeToml(string calldata json, string calldata path) external;
 
     /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
     function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
-
-    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
-    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
-    /// Unlike `writeToml`, this cheatcode will create new keys if they do not already exist.
-    function writeTomlUpsert(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
 
@@ -2011,6 +2010,9 @@ interface Vm is VmSafe {
 
     /// Utility cheatcode to set an EIP-2930 access list for all subsequent transactions.
     function accessList(AccessListItem[] calldata access) external;
+
+    /// Returns the identifier of the currently active fork. Reverts if no fork is currently active.
+    function activeFork() external view returns (uint256 forkId);
 
     /// In forking mode, explicitly grant the given address cheatcode access.
     function allowCheatcodes(address account) external;
