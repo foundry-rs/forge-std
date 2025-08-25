@@ -45,24 +45,24 @@ contract StdConfig {
     // List of top-level keys found in the TOML file, assumed to be chain names/aliases.
     string[] private _chainKeys;
 
-    // Storage for the configured RPC URL for each chain.
-    mapping(uint256 chainId => string url) private _rpcOf;
+    // Storage for the configured RPC URL for each chain [`chainId` -> `url`].
+    mapping(uint256 => string) private _rpcOf;
 
-    // Storage for single value types organized by chain ID and variable key.
-    mapping(uint256 chainId => mapping(string key => bool value)) private _boolsOf;
-    mapping(uint256 chainId => mapping(string key => uint256 value)) private _uintsOf;
-    mapping(uint256 chainId => mapping(string key => address value)) private _addressesOf;
-    mapping(uint256 chainId => mapping(string key => bytes32 value)) private _bytes32sOf;
-    mapping(uint256 chainId => mapping(string key => string value)) private _stringsOf;
-    mapping(uint256 chainId => mapping(string key => bytes value)) private _bytesOf;
+    // Storage for single value types organized by chain ID and variable key [`chainId` -> `key` -> `value`].
+    mapping(uint256 => mapping(string => bool)) private _boolsOf;
+    mapping(uint256 => mapping(string => uint256)) private _uintsOf;
+    mapping(uint256 => mapping(string => address)) private _addressesOf;
+    mapping(uint256 => mapping(string => bytes32)) private _bytes32sOf;
+    mapping(uint256 => mapping(string => string)) private _stringsOf;
+    mapping(uint256 => mapping(string => bytes)) private _bytesOf;
 
-    // Storage for array value types organized by chain ID and variable key.
-    mapping(uint256 chainId => mapping(string key => bool[] value)) private _boolArraysOf;
-    mapping(uint256 chainId => mapping(string key => uint256[] value)) private _uintArraysOf;
-    mapping(uint256 chainId => mapping(string key => address[] value)) private _addressArraysOf;
-    mapping(uint256 chainId => mapping(string key => bytes32[] value)) private _bytes32ArraysOf;
-    mapping(uint256 chainId => mapping(string key => string[] value)) private _stringArraysOf;
-    mapping(uint256 chainId => mapping(string key => bytes[] value)) private _bytesArraysOf;
+    // Storage for array value types organized by chain ID and variable key [`chainId` -> `key` -> `value`].
+    mapping(uint256 => mapping(string => bool[])) private _boolArraysOf;
+    mapping(uint256 => mapping(string => uint256[])) private _uintArraysOf;
+    mapping(uint256 => mapping(string => address[])) private _addressArraysOf;
+    mapping(uint256 => mapping(string => bytes32[])) private _bytes32ArraysOf;
+    mapping(uint256 => mapping(string => string[])) private _stringArraysOf;
+    mapping(uint256 => mapping(string => bytes[])) private _bytesArraysOf;
 
     // -- CONSTRUCTOR ----------------------------------------------------------
 
