@@ -32,10 +32,29 @@ import {VmSafe} from "./Vm.sol";
 ///          important_number = 123
 ///          ```
 contract StdConfig {
-    // -- CONSTANTS ------------------------------------------------------------
-
-    /// @dev Forge Standard Library VM interface for cheat codes.
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    // -- TYPE DEFINITIONS -----------------------------------------------------
+
+    enum Ty {
+        None,
+        Bool,
+        Address,
+        Uint256,
+        Bytes32,
+        String,
+        Bytes
+    }
+
+    struct Metadata {
+        Ty ty;
+        bool isArray;
+    }
+
+    // -- ERRORS ---------------------------------------------------------------
+
+    error ValueNotFound(string key);
+    error TypeMismatch(string key, string expected, string actual);
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
@@ -51,6 +70,9 @@ contract StdConfig {
     // Storage for values and arrays, organized by chain ID and variable key [`chainId` -> `key` -> `value`].
     mapping(uint256 => mapping(string => bytes)) private _valuesOf;
     mapping(uint256 => mapping(string => bytes)) private _arraysOf;
+
+    // Type metadata for runtime type checking [`chainId` -> `key` -> `metadata`]
+    mapping(uint256 => mapping(string => Metadata)) private _metaOf;
 
     // -- CONSTRUCTOR ----------------------------------------------------------
 
@@ -84,15 +106,15 @@ contract StdConfig {
             if (vm.parseTomlKeys(content, _concat("$.", chain_key)).length == 0) {
                 continue;
             }
-            uint256 chain_id = resolveChainId(chain_key);
+            uint256 chainId = resolveChainId(chain_key);
             _chainKeys.push(chain_key);
 
             // Cache the configure rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
             try vm.parseTomlString(content, _concat("$.", chain_key, ".endpoint_url")) returns (string memory url) {
-                _rpcOf[chain_id] = vm.resolveEnv(url);
+                _rpcOf[chainId] = vm.resolveEnv(url);
             } catch {
-                _rpcOf[chain_id] = vm.resolveEnv(vm.rpcUrl(chain_key));
+                _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(chain_key));
             }
 
             for (uint256 t = 0; t < types.length; t++) {
@@ -103,7 +125,7 @@ contract StdConfig {
                     for (uint256 j = 0; j < var_keys.length; j++) {
                         string memory var_key = var_keys[j];
                         string memory path_to_var = _concat(path_to_type, ".", var_key);
-                        _loadAndCacheValue(content, path_to_var, chain_id, var_key, var_type);
+                        _loadAndCacheValue(content, path_to_var, chainId, var_key, var_type);
                     }
                 } catch {} // Section does not exist, ignore.
             }
@@ -113,7 +135,7 @@ contract StdConfig {
     function _loadAndCacheValue(
         string memory content,
         string memory path_to_var,
-        uint256 chain_id,
+        uint256 chainId,
         string memory var_key,
         string memory var_type
     ) private {
@@ -122,61 +144,73 @@ contract StdConfig {
 
         if (typeHash == keccak256(bytes("bool"))) {
             try vm.parseTomlBool(content, path_to_var) returns (bool val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.Bool, false);
                 success = true;
             } catch {
                 try vm.parseTomlBoolArray(content, path_to_var) returns (bool[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.Bool, true);
                     success = true;
                 } catch {}
             }
         } else if (typeHash == keccak256(bytes("address"))) {
             try vm.parseTomlAddress(content, path_to_var) returns (address val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.Address, false);
                 success = true;
             } catch {
                 try vm.parseTomlAddressArray(content, path_to_var) returns (address[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.Address, true);
                     success = true;
                 } catch {}
             }
         } else if (typeHash == keccak256(bytes("uint"))) {
             try vm.parseTomlUint(content, path_to_var) returns (uint256 val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.Uint256, false);
                 success = true;
             } catch {
                 try vm.parseTomlUintArray(content, path_to_var) returns (uint256[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.Uint256, true);
                     success = true;
                 } catch {}
             }
         } else if (typeHash == keccak256(bytes("bytes32"))) {
             try vm.parseTomlBytes32(content, path_to_var) returns (bytes32 val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.Bytes32, false);
                 success = true;
             } catch {
                 try vm.parseTomlBytes32Array(content, path_to_var) returns (bytes32[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.Bytes32, true);
                     success = true;
                 } catch {}
             }
         } else if (typeHash == keccak256(bytes("bytes"))) {
             try vm.parseTomlBytes(content, path_to_var) returns (bytes memory val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.Bytes, false);
                 success = true;
             } catch {
                 try vm.parseTomlBytesArray(content, path_to_var) returns (bytes[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.Bytes, true);
                     success = true;
                 } catch {}
             }
         } else if (typeHash == keccak256(bytes("string"))) {
             try vm.parseTomlString(content, path_to_var) returns (string memory val) {
-                _valuesOf[chain_id][var_key] = abi.encode(val);
+                _valuesOf[chainId][var_key] = abi.encode(val);
+                _metaOf[chainId][var_key] = Metadata(Ty.String, false);
                 success = true;
             } catch {
                 try vm.parseTomlStringArray(content, path_to_var) returns (string[] memory val) {
-                    _arraysOf[chain_id][var_key] = abi.encode(val);
+                    _arraysOf[chainId][var_key] = abi.encode(val);
+                    _metaOf[chainId][var_key] = Metadata(Ty.String, true);
                     success = true;
                 } catch {}
             }
@@ -184,6 +218,52 @@ contract StdConfig {
 
         if (!success) {
             revert(_concat("Unable to parse variable '", var_key, "'"));
+        }
+    }
+
+    // -- TYPE CHECKING HELPERS ------------------------------------------------
+
+    /// @dev Checks that a variable exists and has the expected type.
+    function _requireType(uint256 chainId, string memory key, Ty expected, bool expectArray) private view {
+        Metadata memory actual = _metaOf[chainId][key];
+        if (actual.ty == Ty.None) {
+            revert ValueNotFound(key);
+        }
+        if (actual.ty != expected) {
+            revert TypeMismatch(key, _typeToString(expected, expectArray), _typeToString(actual.ty, actual.isArray));
+        }
+    }
+
+    /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.
+    ///      Updates metadata only when the previous type was `None`.
+    function _ensureTypeConsistency(uint256 chainId, string memory key, Ty newType, bool isArray) private {
+        Metadata memory actual = _metaOf[chainId][key];
+
+        if (actual.ty == Ty.None) {
+            _metaOf[chainId][key] = Metadata(newType, isArray);
+        } else if (actual.ty != newType || actual.isArray != isArray) {
+            revert TypeMismatch(key, _typeToString(newType, isArray), _typeToString(actual.ty, actual.isArray));
+        }
+    }
+
+    /// @dev Converts a Ty enum to its string representation.
+    function _typeToString(Ty ty) private pure returns (string memory) {
+        if (ty == Ty.Bool) return "bool";
+        if (ty == Ty.Address) return "address";
+        if (ty == Ty.Uint256) return "uint256";
+        if (ty == Ty.Bytes32) return "bytes32";
+        if (ty == Ty.String) return "string";
+        if (ty == Ty.Bytes) return "bytes";
+        return "none";
+    }
+
+    /// @dev Converts a Ty enum to its string representation. Includes the array brackets.
+    function _typeToString(Ty ty, bool isArray) private pure returns (string memory) {
+        string memory tyStr = _typeToString(ty);
+        if (!isArray || ty == Ty.None) {
+            return tyStr;
+        } else {
+            return _concat(tyStr, "[]");
         }
     }
 
@@ -266,8 +346,8 @@ contract StdConfig {
     }
 
     /// @notice Reads the RPC URL for a specific chain id.
-    function getRpcUrl(uint256 chain_id) public view returns (string memory) {
-        return _rpcOf[chain_id];
+    function getRpcUrl(uint256 chainId) public view returns (string memory) {
+        return _rpcOf[chainId];
     }
 
     /// @notice Reads the RPC URL for the current chain.
@@ -276,9 +356,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a boolean value for a given key and chain ID.
-    function getBool(uint256 chain_id, string memory key) public view returns (bool) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBool(uint256 chainId, string memory key) public view returns (bool) {
+        _requireType(chainId, key, Ty.Bool, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (bool));
     }
 
@@ -288,9 +368,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a uint256 value for a given key and chain ID.
-    function getUint(uint256 chain_id, string memory key) public view returns (uint256) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getUint(uint256 chainId, string memory key) public view returns (uint256) {
+        _requireType(chainId, key, Ty.Uint256, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (uint256));
     }
 
@@ -300,9 +380,9 @@ contract StdConfig {
     }
 
     /// @notice Reads an address value for a given key and chain ID.
-    function getAddress(uint256 chain_id, string memory key) public view returns (address) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getAddress(uint256 chainId, string memory key) public view returns (address) {
+        _requireType(chainId, key, Ty.Address, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (address));
     }
 
@@ -312,9 +392,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a bytes32 value for a given key and chain ID.
-    function getBytes32(uint256 chain_id, string memory key) public view returns (bytes32) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBytes32(uint256 chainId, string memory key) public view returns (bytes32) {
+        _requireType(chainId, key, Ty.Bytes32, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (bytes32));
     }
 
@@ -324,9 +404,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a string value for a given key and chain ID.
-    function getString(uint256 chain_id, string memory key) public view returns (string memory) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getString(uint256 chainId, string memory key) public view returns (string memory) {
+        _requireType(chainId, key, Ty.String, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (string));
     }
 
@@ -336,9 +416,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a bytes value for a given key and chain ID.
-    function getBytes(uint256 chain_id, string memory key) public view returns (bytes memory) {
-        bytes memory val = _valuesOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBytes(uint256 chainId, string memory key) public view returns (bytes memory) {
+        _requireType(chainId, key, Ty.Bytes, false);
+        bytes memory val = _valuesOf[chainId][key];
         return abi.decode(val, (bytes));
     }
 
@@ -348,9 +428,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a boolean array for a given key and chain ID.
-    function getBoolArray(uint256 chain_id, string memory key) public view returns (bool[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBoolArray(uint256 chainId, string memory key) public view returns (bool[] memory) {
+        _requireType(chainId, key, Ty.Bool, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (bool[]));
     }
 
@@ -360,9 +440,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a uint256 array for a given key and chain ID.
-    function getUintArray(uint256 chain_id, string memory key) public view returns (uint256[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getUintArray(uint256 chainId, string memory key) public view returns (uint256[] memory) {
+        _requireType(chainId, key, Ty.Uint256, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (uint256[]));
     }
 
@@ -372,9 +452,9 @@ contract StdConfig {
     }
 
     /// @notice Reads an address array for a given key and chain ID.
-    function getAddressArray(uint256 chain_id, string memory key) public view returns (address[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getAddressArray(uint256 chainId, string memory key) public view returns (address[] memory) {
+        _requireType(chainId, key, Ty.Address, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (address[]));
     }
 
@@ -384,9 +464,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a bytes32 array for a given key and chain ID.
-    function getBytes32Array(uint256 chain_id, string memory key) public view returns (bytes32[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBytes32Array(uint256 chainId, string memory key) public view returns (bytes32[] memory) {
+        _requireType(chainId, key, Ty.Bytes32, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (bytes32[]));
     }
 
@@ -396,9 +476,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a string array for a given key and chain ID.
-    function getStringArray(uint256 chain_id, string memory key) public view returns (string[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getStringArray(uint256 chainId, string memory key) public view returns (string[] memory) {
+        _requireType(chainId, key, Ty.String, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (string[]));
     }
 
@@ -408,9 +488,9 @@ contract StdConfig {
     }
 
     /// @notice Reads a bytes array for a given key and chain ID.
-    function getBytesArray(uint256 chain_id, string memory key) public view returns (bytes[] memory) {
-        bytes memory val = _arraysOf[chain_id][key];
-        require(val.length > 0, "Value not found");
+    function getBytesArray(uint256 chainId, string memory key) public view returns (bytes[] memory) {
+        _requireType(chainId, key, Ty.Bytes, true);
+        bytes memory val = _arraysOf[chainId][key];
         return abi.decode(val, (bytes[]));
     }
 
@@ -424,6 +504,7 @@ contract StdConfig {
     /// @notice Sets a boolean value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bool value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bool, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "bool", key, vm.toString(value));
     }
@@ -437,6 +518,7 @@ contract StdConfig {
     /// @notice Sets a uint256 value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, uint256 value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Uint256, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "uint", key, vm.toString(value));
     }
@@ -450,6 +532,7 @@ contract StdConfig {
     /// @notice Sets an address value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, address value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Address, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "address", key, _quote(vm.toString(value)));
     }
@@ -463,6 +546,7 @@ contract StdConfig {
     /// @notice Sets a bytes32 value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bytes32 value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bytes32, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "bytes32", key, _quote(vm.toString(value)));
     }
@@ -476,6 +560,7 @@ contract StdConfig {
     /// @notice Sets a string value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, string memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.String, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "string", key, _quote(value));
     }
@@ -489,6 +574,7 @@ contract StdConfig {
     /// @notice Sets a bytes value for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bytes memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bytes, false);
         _valuesOf[chainId][key] = abi.encode(value);
         if (write) _writeToToml(chainId, "bytes", key, _quote(vm.toString(value)));
     }
@@ -502,6 +588,7 @@ contract StdConfig {
     /// @notice Sets a boolean array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bool[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bool, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
@@ -523,6 +610,7 @@ contract StdConfig {
     /// @notice Sets a uint256 array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, uint256[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Uint256, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
@@ -544,6 +632,7 @@ contract StdConfig {
     /// @notice Sets an address array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, address[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Address, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
@@ -565,6 +654,7 @@ contract StdConfig {
     /// @notice Sets a bytes32 array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bytes32[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bytes32, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
@@ -586,6 +676,7 @@ contract StdConfig {
     /// @notice Sets a string array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, string[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.String, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
@@ -607,6 +698,7 @@ contract StdConfig {
     /// @notice Sets a bytes array for a given key and chain ID.
     /// @dev    Sets the cached value in storage and optionally writes the change back to the TOML file.
     function set(uint256 chainId, string memory key, bytes[] memory value, bool write) public {
+        _ensureTypeConsistency(chainId, key, Ty.Bytes, true);
         _arraysOf[chainId][key] = abi.encode(value);
         if (write) {
             string memory json = "[";
