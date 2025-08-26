@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-// Enable globaly.
+// Enable globally.
 using LibVariable for Variable global;
 
 struct Variable {
