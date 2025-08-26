@@ -32,7 +32,7 @@ jobs:
       - run: forge --version
       - run: |
           if [[ "${{ matrix.flags }}" =~ "solc:0\.(6|7|8\.([0-9]|1[0-2]))" ]]; then
-            forge build --skip test/Config.t.sol --skip src/StdConfig.sol --skip src/Config.sol --skip src/LibVariable.sol --deny-warnings ${{ matrix.flags }}
+            forge build --skip test --skip src/StdConfig.sol --skip src/Config.sol --skip src/LibVariable.sol --deny-warnings ${{ matrix.flags }}
           else
             forge build --skip test --deny-warnings ${{ matrix.flags }}
           fi
