@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import {Test} from "../src/Test.sol";
 import {Config} from "../src/Config.sol";
 import {StdConfig} from "../src/StdConfig.sol";
+import {Variable, LibVariable} from "../src/LibVariable.sol";
 
 contract ConfigTest is Test, Config {
     function test_loadConfig() public {
@@ -244,5 +245,160 @@ contract ConfigTest is Test, Config {
         vm.expectRevert(abi.encodeWithSelector(StdConfig.UnableToParseVariable.selector, "bad_value"));
         new StdConfig(badParseConfig);
         vm.removeFile(badParseConfig);
+    }
+}
+
+/// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
+///      as direct library calls are inlined by the compiler, causing call depth issues.
+contract LibVariableTest is Test, Config {
+    LibVariableHelper helper;
+
+    function setUp() public {
+        helper = new LibVariableHelper();
+        _loadConfig("./test/fixtures/config.toml");
+    }
+
+    function testRevert_NotInitialized() public {
+        // Try to read a non-existent variable
+        Variable memory notInit = config.get(1, "non_existent_key");
+
+        // Test single value types - should revert with NotInitialized
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBool(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toUint(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toAddress(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBytes32(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toString(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBytes(notInit);
+
+        // Test array types - should also revert with NotInitialized
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBoolArray(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toUintArray(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toAddressArray(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBytes32Array(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toStringArray(notInit);
+
+        vm.expectRevert(LibVariable.NotInitialized.selector);
+        helper.toBytesArray(notInit);
+    }
+
+    function testRevert_TypeMismatch() public {
+        // Get a boolean variable
+        Variable memory boolVar = config.get(1, "is_live");
+
+        // Try to coerce it to wrong single value types - should revert with TypeMismatch
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
+        helper.toUint(boolVar);
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "bool"));
+        helper.toAddress(boolVar);
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes32", "bool"));
+        helper.toBytes32(boolVar);
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "string", "bool"));
+        helper.toString(boolVar);
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes", "bool"));
+        helper.toBytes(boolVar);
+
+        // Get a uint variable
+        Variable memory uintVar = config.get(1, "number");
+
+        // Try to coerce it to wrong types
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "uint256"));
+        helper.toBool(uintVar);
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "uint256"));
+        helper.toAddress(uintVar);
+
+        // Get an array variable
+        Variable memory boolArrayVar = config.get(1, "bool_array");
+
+        // Try to coerce array to single value - should revert with TypeMismatch
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "bool[]"));
+        helper.toBool(boolArrayVar);
+
+        // Try to coerce array to wrong array type
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256[]", "bool[]"));
+        helper.toUintArray(boolArrayVar);
+
+        // Get a single value and try to coerce to array
+        Variable memory singleBoolVar = config.get(1, "is_live");
+
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool[]", "bool"));
+        helper.toBoolArray(singleBoolVar);
+    }
+}
+
+
+/// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
+///      as direct library calls are inlined by the compiler, causing call depth issues.
+contract LibVariableHelper {
+    function toBool(Variable memory v) external pure returns (bool) {
+        return v.toBool();
+    }
+
+    function toUint(Variable memory v) external pure returns (uint256) {
+        return v.toUint();
+    }
+
+    function toAddress(Variable memory v) external pure returns (address) {
+        return v.toAddress();
+    }
+
+    function toBytes32(Variable memory v) external pure returns (bytes32) {
+        return v.toBytes32();
+    }
+
+    function toString(Variable memory v) external pure returns (string memory) {
+        return v.toString();
+    }
+
+    function toBytes(Variable memory v) external pure returns (bytes memory) {
+        return v.toBytes();
+    }
+
+    function toBoolArray(Variable memory v) external pure returns (bool[] memory) {
+        return v.toBoolArray();
+    }
+
+    function toUintArray(Variable memory v) external pure returns (uint256[] memory) {
+        return v.toUintArray();
+    }
+
+    function toAddressArray(Variable memory v) external pure returns (address[] memory) {
+        return v.toAddressArray();
+    }
+
+    function toBytes32Array(Variable memory v) external pure returns (bytes32[] memory) {
+        return v.toBytes32Array();
+    }
+
+    function toStringArray(Variable memory v) external pure returns (string[] memory) {
+        return v.toStringArray();
+    }
+
+    function toBytesArray(Variable memory v) external pure returns (bytes[] memory) {
+        return v.toBytesArray();
     }
 }
