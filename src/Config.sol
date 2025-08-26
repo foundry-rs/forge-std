@@ -12,13 +12,13 @@ abstract contract Config is CommonBase {
 
     // -- STORAGE (CONFIG + CHAINS + FORKS) ------------------------------------
 
-    /// @notice Contract instance holding the data from the TOML config file.
+    /// @dev Contract instance holding the data from the TOML config file.
     StdConfig internal config;
 
-    /// @notice Array of chain IDs for which forks have been created.
+    /// @dev Array of chain IDs for which forks have been created.
     uint256[] internal chainIds;
 
-    /// @notice A mapping from a chain ID to its initialized fork ID.
+    /// @dev A mapping from a chain ID to its initialized fork ID.
     mapping(uint256 => uint256) internal forkOf;
 
     // -- HELPER FUNCTIONS -----------------------------------------------------
