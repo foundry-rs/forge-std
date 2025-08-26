@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.2 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.13;
+
+// Enable globaly.
+using LibVariable for Variable global;
 
 struct Variable {
     Type ty;
@@ -50,6 +52,9 @@ enum TypeKind {
 ///      }
 ///      ```
 library LibVariable {
+    error NotInitialized();
+    error TypeMismatch(string expected, string actual);
+
     // -- TYPE HELPERS ----------------------------------------------------
 
     /// @notice Compares two Type instances for equality.
@@ -60,7 +65,7 @@ library LibVariable {
     /// @notice Compares two Type instances for equality. Reverts if they are not equal.
     function assertEq(Type memory self, Type memory other) internal pure {
         if (!isEqual(self, other)) {
-            revert(_concat("type mismatch: expected '", toString(other), _concat("', got '", toString(self), "'")));
+            revert TypeMismatch(toString(other), toString(self));
         }
     }
 
@@ -108,7 +113,7 @@ library LibVariable {
     /// @dev Checks if a `Variable` has been initialized, reverting if not.
     function assertExists(Variable memory self) public pure {
         if (self.ty.kind == TypeKind.None) {
-            revert("variable not initialized");
+            revert NotInitialized();
         }
     }
 
@@ -224,17 +229,5 @@ library LibVariable {
         returns (bytes[] memory)
     {
         return abi.decode(self.data, (bytes[]));
-    }
-
-    // -- UTILITY HELPERS ------------------------------------------------------
-
-    /// @dev concatenates two strings
-    function _concat(string memory s1, string memory s2) private pure returns (string memory) {
-        return string(abi.encodePacked(s1, s2));
-    }
-
-    /// @dev concatenates three strings
-    function _concat(string memory s1, string memory s2, string memory s3) private pure returns (string memory) {
-        return string(abi.encodePacked(s1, s2, s3));
     }
 }

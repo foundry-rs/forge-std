@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.2 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.13;
 
 import {VmSafe} from "./Vm.sol";
 import {Variable, Type, TypeKind, LibVariable} from "./LibVariable.sol";
@@ -38,6 +37,13 @@ contract StdConfig {
 
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint8 private constant NUM_TYPES = 7;
+
+    // -- ERRORS ---------------------------------------------------------------
+
+    error AlreadyInitialized(string key);
+    error InvalidChainKey(string aliasOrId);
+    error ChainIdNotFound(uint256 chainId);
+    error UnableToParseVariable(string key);
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
@@ -105,7 +111,7 @@ contract StdConfig {
                         if (_typeOf[chainId][key].kind == TypeKind.None) {
                             _loadAndCacheValue(content, _concat(typePath, ".", key), chainId, key, ty);
                         } else {
-                            revert(_concat("already initialized: '", key, "'"));
+                            revert AlreadyInitialized(key);
                         }
                     }
                 } catch {} // Section does not exist, ignore.
@@ -196,7 +202,7 @@ contract StdConfig {
         }
 
         if (!success) {
-            revert(_concat("unable to parse variable: '", key, "'"));
+            revert UnableToParseVariable(key);
         }
     }
 
@@ -219,7 +225,7 @@ contract StdConfig {
             try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
                 return chainInfo.chainId;
             } catch {
-                revert(_concat("invalid chain key: '", aliasOrId, "' is not a valid alias nor a number"));
+                revert InvalidChainKey(aliasOrId);
             }
         }
     }
@@ -231,7 +237,7 @@ contract StdConfig {
                 return _chainKeys[i];
             }
         }
-        revert(_concat("chain id: '", vm.toString(chainId), "' not found in configuration"));
+        revert ChainIdNotFound(chainId);
     }
 
     /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.
