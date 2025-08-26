@@ -48,7 +48,12 @@ jobs:
         with:
           version: ${{ matrix.toolchain }}
       - run: forge --version
-      - run: forge test -vvv
+      - run: |
+          if [ "${{ matrix.toolchain }}" = "stable" ]; then
+            forge test -vvv --no-match-path "test/Config.t.sol"
+          else
+            forge test -vvv
+          fi
 
   fmt:
     runs-on: ubuntu-latest
