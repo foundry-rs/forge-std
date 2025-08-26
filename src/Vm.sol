@@ -611,7 +611,7 @@ interface VmSafe {
     // ======== EVM ========
 
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
-    function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
+    function accesses(address target) external view returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
 
     /// Gets the address for a given private key.
     function addr(uint256 privateKey) external pure returns (address keyAddr);
@@ -619,6 +619,7 @@ interface VmSafe {
     /// Gets all the logs according to specified filter.
     function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
+        view
         returns (EthGetLogs[] memory logs);
 
     /// Gets the current `block.blobbasefee`.
@@ -648,27 +649,28 @@ interface VmSafe {
     /// Gets the map key and parent of a mapping at a given slot, for a given address.
     function getMappingKeyAndParentOf(address target, bytes32 elementSlot)
         external
+        view
         returns (bool found, bytes32 key, bytes32 parent);
 
     /// Gets the number of elements in the mapping at the given slot, for a given address.
-    function getMappingLength(address target, bytes32 mappingSlot) external returns (uint256 length);
+    function getMappingLength(address target, bytes32 mappingSlot) external view returns (uint256 length);
 
     /// Gets the elements at index idx of the mapping at the given slot, for a given address. The
     /// index must be less than the length of the mapping (i.e. the number of keys in the mapping).
-    function getMappingSlotAt(address target, bytes32 mappingSlot, uint256 idx) external returns (bytes32 value);
+    function getMappingSlotAt(address target, bytes32 mappingSlot, uint256 idx) external view returns (bytes32 value);
 
     /// Gets the nonce of an account.
     function getNonce(address account) external view returns (uint64 nonce);
 
     /// Get the nonce of a `Wallet`.
-    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
+    function getNonce(Wallet calldata wallet) external view returns (uint64 nonce);
 
     /// Gets the RLP encoded block header for a given block number.
     /// Returns the block header in the same format as `cast block <block_number> --raw`.
     function getRawBlockHeader(uint256 blockNumber) external view returns (bytes memory rlpHeader);
 
     /// Gets all the recorded logs.
-    function getRecordedLogs() external returns (Log[] memory logs);
+    function getRecordedLogs() external view returns (Log[] memory logs);
 
     /// Returns state diffs from current `vm.startStateDiffRecording` session.
     function getStateDiff() external view returns (string memory diff);
@@ -1163,7 +1165,7 @@ interface VmSafe {
     function broadcast(uint256 privateKey) external;
 
     /// Returns addresses of available unlocked wallets in the script environment.
-    function getWallets() external returns (address[] memory wallets);
+    function getWallets() external view returns (address[] memory wallets);
 
     /// Sign an EIP-7702 authorization and designate the next call as an EIP-7702 transaction
     function signAndAttachDelegation(address implementation, uint256 privateKey)
@@ -1216,7 +1218,7 @@ interface VmSafe {
     // ======== String ========
 
     /// Returns true if `search` is found in `subject`, false otherwise.
-    function contains(string calldata subject, string calldata search) external returns (bool result);
+    function contains(string calldata subject, string calldata search) external pure returns (bool result);
 
     /// Returns the index of the first occurrence of a `key` in an `input` string.
     /// Returns `NOT_FOUND` (i.e. `type(uint256).max`) if the `key` is not found.
@@ -1866,6 +1868,12 @@ interface VmSafe {
 
     // ======== Utilities ========
 
+    /// Returns an uint256 value bounded in given range and different from the current one.
+    function bound(uint256 current, uint256 min, uint256 max) external view returns (uint256);
+
+    /// Returns an int256 value bounded in given range and different from the current one.
+    function bound(int256 current, int256 min, int256 max) external view returns (int256);
+
     /// Compute the address of a contract created with CREATE2 using the given CREATE2 deployer.
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash, address deployer)
         external
@@ -2190,7 +2198,7 @@ interface Vm is VmSafe {
     function prevrandao(uint256 newPrevrandao) external;
 
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
-    function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
+    function readCallers() external view returns (CallerMode callerMode, address msgSender, address txOrigin);
 
     /// Resets the nonce of an account to 0 for EOAs and 1 for contract accounts.
     function resetNonce(address account) external;
