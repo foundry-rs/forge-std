@@ -39,13 +39,6 @@ contract StdConfig {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint8 private constant NUM_TYPES = 7;
 
-    // -- ERRORS ---------------------------------------------------------------
-
-    error AlreadyInitialized(string key);
-    error InvalidChainKey(string aliasOrId);
-    error ChainIdNotFound(uint256 chainId);
-    error UnableToParseVariable(string key);
-
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
     /// @notice Path to the loaded TOML configuration file.
@@ -112,7 +105,7 @@ contract StdConfig {
                         if (_typeOf[chainId][key].kind == TypeKind.None) {
                             _loadAndCacheValue(content, _concat(typePath, ".", key), chainId, key, ty);
                         } else {
-                            revert AlreadyInitialized(key);
+                            revert(_concat("already initialized: '", key, "'"));
                         }
                     }
                 } catch {} // Section does not exist, ignore.
@@ -203,7 +196,7 @@ contract StdConfig {
         }
 
         if (!success) {
-            revert UnableToParseVariable(key);
+            revert(_concat("unable to parse variable: '", key, "'"));
         }
     }
 
@@ -226,7 +219,7 @@ contract StdConfig {
             try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
                 return chainInfo.chainId;
             } catch {
-                revert InvalidChainKey(aliasOrId);
+                revert(_concat("invalid chain key: '", aliasOrId, "' is not a valid alias nor a number"));
             }
         }
     }
@@ -238,7 +231,7 @@ contract StdConfig {
                 return _chainKeys[i];
             }
         }
-        revert ChainIdNotFound(chainId);
+        revert(_concat("chain id: '", vm.toString(chainId), "' not found in configuration"));
     }
 
     /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.

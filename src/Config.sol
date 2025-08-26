@@ -3,11 +3,13 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {console} from "./console.sol";
-import {StdConfig} from "./StdConfig.sol";
 import {CommonBase} from "./Base.sol";
+import {StdConfig, Variable, LibVariable} from "./StdConfig.sol";
 
 /// @notice Boilerplate to streamline the setup of multi-chain environments.
 abstract contract Config is CommonBase {
+    using LibVariable for Variable;
+
     // -- STORAGE (CONFIG + CHAINS + FORKS) ------------------------------------
 
     /// @notice Contract instance holding the data from the TOML config file.
