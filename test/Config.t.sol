@@ -9,7 +9,7 @@ import {Variable, LibVariable} from "../src/LibVariable.sol";
 contract ConfigTest is Test, Config {
     function test_loadConfig() public {
         // Deploy the config contract with the test fixture.
-        _loadConfig("./test/fixtures/config.toml");
+        _loadConfig("./test/fixtures/config.toml", false);
 
         // -- MAINNET --------------------------------------------------------------
 
@@ -95,7 +95,7 @@ contract ConfigTest is Test, Config {
     }
 
     function test_loadConfigAndForks() public {
-        _loadConfigAndForks("./test/fixtures/config.toml");
+        _loadConfigAndForks("./test/fixtures/config.toml", false);
 
         // assert that the map of chain id and fork ids is created and that the chain ids actually match
         assertEq(forkOf[1], 0);
@@ -114,10 +114,13 @@ contract ConfigTest is Test, Config {
         vm.copyFile(originalConfig, testConfig);
 
         // Deploy the config contract with the temporary fixture.
-        _loadConfig(testConfig);
+        _loadConfig(testConfig, true);
+
+        // Enable autoWrite so that changes are written to the file
+        config.setAutoWrite(true);
 
         // Update a single boolean value and verify the change.
-        config.set(1, "is_live", false, true);
+        config.set(1, "is_live", false);
 
         assertFalse(config.get(1, "is_live").toBool());
 
@@ -126,7 +129,7 @@ contract ConfigTest is Test, Config {
 
         // Update a single address value and verify the change.
         address new_addr = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
-        config.set(1, "weth", new_addr, true);
+        config.set(1, "weth", new_addr);
 
         assertEq(config.get(1, "weth").toAddress(), new_addr);
 
@@ -138,7 +141,7 @@ contract ConfigTest is Test, Config {
         new_numbers[0] = 1;
         new_numbers[1] = 2;
         new_numbers[2] = 3;
-        config.set(10, "number_array", new_numbers, true);
+        config.set(10, "number_array", new_numbers);
 
         uint256[] memory updated_numbers_mem = config.get(10, "number_array").toUintArray();
         assertEq(updated_numbers_mem.length, 3);
@@ -157,7 +160,7 @@ contract ConfigTest is Test, Config {
         string[] memory new_strings = new string[](2);
         new_strings[0] = "hello";
         new_strings[1] = "world";
-        config.set(1, "str_array", new_strings, true);
+        config.set(1, "str_array", new_strings);
 
         string[] memory updated_strings_mem = config.get(1, "str_array").toStringArray();
         assertEq(updated_strings_mem.length, 2);
@@ -171,7 +174,7 @@ contract ConfigTest is Test, Config {
         assertEq(updated_strings_disk[1], "world");
 
         // Create a new uint variable and verify the change.
-        config.set(1, "new_uint", 42, true);
+        config.set(1, "new_uint", 42);
 
         assertEq(config.get(1, "new_uint").toUint(), 42);
 
@@ -182,7 +185,7 @@ contract ConfigTest is Test, Config {
         bytes32[] memory new_words = new bytes32[](2);
         new_words[0] = bytes32(uint256(0xDEAD));
         new_words[1] = bytes32(uint256(0xBEEF));
-        config.set(10, "new_words", new_words, true);
+        config.set(10, "new_words", new_words);
 
         bytes32[] memory updated_words_mem = config.get(10, "new_words").toBytes32Array();
         assertEq(updated_words_mem.length, 2);
@@ -223,16 +226,16 @@ contract ConfigTest is Test, Config {
         );
 
         vm.expectRevert(abi.encodeWithSelector(StdConfig.InvalidChainKey.selector, "invalid_chain"));
-        new StdConfig(invalidChainConfig);
+        new StdConfig(invalidChainConfig, false);
         vm.removeFile(invalidChainConfig);
     }
 
-    function testRevert_ChainIdNotFound() public {
-        _loadConfig("./test/fixtures/config.toml");
+    function testRevert_ChainNotInitialized() public {
+        _loadConfig("./test/fixtures/config.toml", true);
 
         // Try to write a value for a non-existent chain ID
-        vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainIdNotFound.selector, uint256(999999)));
-        config.set(999999, "some_key", uint256(123), true);
+        vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainNotInitialized.selector, uint256(999999)));
+        config.set(999999, "some_key", uint256(123));
     }
 
     function testRevert_UnableToParseVariable() public {
@@ -252,7 +255,7 @@ contract ConfigTest is Test, Config {
         );
 
         vm.expectRevert(abi.encodeWithSelector(StdConfig.UnableToParseVariable.selector, "bad_value"));
-        new StdConfig(badParseConfig);
+        new StdConfig(badParseConfig, false);
         vm.removeFile(badParseConfig);
     }
 }
@@ -264,7 +267,7 @@ contract LibVariableTest is Test, Config {
 
     function setUp() public {
         helper = new LibVariableHelper();
-        _loadConfig("./test/fixtures/config.toml");
+        _loadConfig("./test/fixtures/config.toml", false);
     }
 
     function testRevert_NotInitialized() public {
