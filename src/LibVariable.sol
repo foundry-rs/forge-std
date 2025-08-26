@@ -50,7 +50,6 @@ enum TypeKind {
 ///      }
 ///      ```
 library LibVariable {
-
     // -- TYPE HELPERS ----------------------------------------------------
 
     /// @notice Compares two Type instances for equality.

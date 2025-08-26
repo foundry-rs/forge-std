@@ -41,22 +41,22 @@ contract StdConfig {
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
-    /// @notice Path to the loaded TOML configuration file.
+    /// @dev Path to the loaded TOML configuration file.
     string private _filePath;
 
-    /// @notice List of top-level keys found in the TOML file, assumed to be chain names/aliases.
+    /// @dev List of top-level keys found in the TOML file, assumed to be chain names/aliases.
     string[] private _chainKeys;
 
-    /// @notice Storage for the configured RPC URL for each chain.
+    /// @dev Storage for the configured RPC URL for each chain.
     mapping(uint256 => string) private _rpcOf;
 
-    /// @notice Storage for values, organized by chain ID and variable key.
+    /// @dev Storage for values, organized by chain ID and variable key.
     mapping(uint256 => mapping(string => bytes)) private _dataOf;
 
-    /// @notice Type cache for runtime checking when casting.
+    /// @dev Type cache for runtime checking when casting.
     mapping(uint256 => mapping(string => Type)) private _typeOf;
 
-    /// @notice When enabled, `set` will always write updates back to the configuration file.
+    /// @dev When enabled, `set` will always write updates back to the configuration file.
     bool private _autoWrite;
 
     // -- CONSTRUCTOR ----------------------------------------------------------

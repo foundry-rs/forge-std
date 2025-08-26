@@ -239,7 +239,7 @@ contract ConfigTest is Test, Config {
     }
 
     function testRevert_UnableToParseVariable() public {
-        // Create a temprorary fixture with an unparseable variable
+        // Create a temporary fixture with an unparsable variable
         string memory badParseConfig = "./test/fixtures/config_bad_parse.toml";
         vm.writeFile(
             badParseConfig,
@@ -266,6 +266,7 @@ contract ConfigTest is Test, Config {
 ///      as direct library calls are inlined by the compiler, causing call depth issues.
 contract LibVariableTest is Test, Config {
     using LibVariable for Variable;
+
     LibVariableHelper helper;
 
     function setUp() public {
