@@ -3,11 +3,11 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {Test} from "../src/Test.sol";
-import {Config} from "../src/Config.sol";
-import {StdConfig} from "../src/StdConfig.sol";
-import {Variable, LibVariable} from "../src/LibVariable.sol";
+import {Config, StdConfig, Variable, LibVariable} from "../src/Config.sol";
 
 contract ConfigTest is Test, Config {
+    using LibVariable for Variable;
+
     function test_loadConfig() public {
         // Deploy the config contract with the test fixture.
         _loadConfig("./test/fixtures/config.toml");
@@ -201,7 +201,7 @@ contract ConfigTest is Test, Config {
     }
 
     function testRevert_InvalidChainKey() public {
-        // Create a fixture with an invalid chain key
+        // Create a temporary fixture with an invalid chain key
         string memory invalidChainConfig = "./test/fixtures/config_invalid_chain.toml";
         vm.writeFile(
             invalidChainConfig,
@@ -223,8 +223,10 @@ contract ConfigTest is Test, Config {
             )
         );
 
-        vm.expectRevert(abi.encodeWithSelector(StdConfig.InvalidChainKey.selector, "invalid_chain"));
+        vm.expectRevert("invalid chain key: 'invalid_chain' is not a valid alias nor a number");
         new StdConfig(invalidChainConfig);
+
+        // Clean up the temporary file.
         vm.removeFile(invalidChainConfig);
     }
 
@@ -232,12 +234,12 @@ contract ConfigTest is Test, Config {
         _loadConfig("./test/fixtures/config.toml");
 
         // Try to write a value for a non-existent chain ID
-        vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainIdNotFound.selector, uint256(999999)));
+        vm.expectRevert("chain id: '999999' not found in configuration");
         config.set(999999, "some_key", uint256(123), true);
     }
 
     function testRevert_UnableToParseVariable() public {
-        // Create a fixture with an unparseable variable
+        // Create a temprorary fixture with an unparseable variable
         string memory badParseConfig = "./test/fixtures/config_bad_parse.toml";
         vm.writeFile(
             badParseConfig,
@@ -252,8 +254,10 @@ contract ConfigTest is Test, Config {
             )
         );
 
-        vm.expectRevert(abi.encodeWithSelector(StdConfig.UnableToParseVariable.selector, "bad_value"));
+        vm.expectRevert("unable to parse variable: 'bad_value'");
         new StdConfig(badParseConfig);
+
+        // Clean up the temporary file.
         vm.removeFile(badParseConfig);
     }
 }
@@ -261,6 +265,7 @@ contract ConfigTest is Test, Config {
 /// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
 ///      as direct library calls are inlined by the compiler, causing call depth issues.
 contract LibVariableTest is Test, Config {
+    using LibVariable for Variable;
     LibVariableHelper helper;
 
     function setUp() public {
@@ -273,41 +278,41 @@ contract LibVariableTest is Test, Config {
         Variable memory notInit = config.get(1, "non_existent_key");
 
         // Test single value types - should revert with NotInitialized
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBool(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toUint(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toAddress(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBytes32(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toString(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBytes(notInit);
 
         // Test array types - should also revert with NotInitialized
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBoolArray(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toUintArray(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toAddressArray(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBytes32Array(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toStringArray(notInit);
 
-        vm.expectRevert(LibVariable.NotInitialized.selector);
+        vm.expectRevert("variable not initialized");
         helper.toBytesArray(notInit);
     }
 
@@ -316,46 +321,46 @@ contract LibVariableTest is Test, Config {
         Variable memory boolVar = config.get(1, "is_live");
 
         // Try to coerce it to wrong single value types - should revert with TypeMismatch
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
+        vm.expectRevert("type mismatch: expected 'uint256', got 'bool'");
         helper.toUint(boolVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "bool"));
+        vm.expectRevert("type mismatch: expected 'address', got 'bool'");
         helper.toAddress(boolVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes32", "bool"));
+        vm.expectRevert("type mismatch: expected 'bytes32', got 'bool'");
         helper.toBytes32(boolVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "string", "bool"));
+        vm.expectRevert("type mismatch: expected 'string', got 'bool'");
         helper.toString(boolVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes", "bool"));
+        vm.expectRevert("type mismatch: expected 'bytes', got 'bool'");
         helper.toBytes(boolVar);
 
         // Get a uint variable
         Variable memory uintVar = config.get(1, "number");
 
         // Try to coerce it to wrong types
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "uint256"));
+        vm.expectRevert("type mismatch: expected 'bool', got 'uint256'");
         helper.toBool(uintVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "uint256"));
+        vm.expectRevert("type mismatch: expected 'address', got 'uint256'");
         helper.toAddress(uintVar);
 
         // Get an array variable
         Variable memory boolArrayVar = config.get(1, "bool_array");
 
         // Try to coerce array to single value - should revert with TypeMismatch
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "bool[]"));
+        vm.expectRevert("type mismatch: expected 'bool', got 'bool[]'");
         helper.toBool(boolArrayVar);
 
         // Try to coerce array to wrong array type
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256[]", "bool[]"));
+        vm.expectRevert("type mismatch: expected 'uint256[]', got 'bool[]'");
         helper.toUintArray(boolArrayVar);
 
         // Get a single value and try to coerce to array
         Variable memory singleBoolVar = config.get(1, "is_live");
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool[]", "bool"));
+        vm.expectRevert("type mismatch: expected 'bool[]', got 'bool'");
         helper.toBoolArray(singleBoolVar);
     }
 }
@@ -363,6 +368,8 @@ contract LibVariableTest is Test, Config {
 /// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
 ///      as direct library calls are inlined by the compiler, causing call depth issues.
 contract LibVariableHelper {
+    using LibVariable for Variable;
+
     function toBool(Variable memory v) external pure returns (bool) {
         return v.toBool();
     }
