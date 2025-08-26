@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import {Test} from "../src/Test.sol";
 import {Config} from "../src/Config.sol";
+import {StdConfig} from "../src/StdConfig.sol";
 
 contract ConfigTest is Test, Config {
     function test_loadConfig() public {
@@ -196,5 +197,52 @@ contract ConfigTest is Test, Config {
 
         // Clean up the temporary file.
         vm.removeFile(testConfig);
+    }
+
+    function testRevert_InvalidChainKey() public {
+        // Create a fixture with an invalid chain key
+        string memory invalidChainConfig = "./test/fixtures/config_invalid_chain.toml";
+        vm.writeFile(invalidChainConfig, string(abi.encodePacked(
+            "[mainnet]\n",
+            "endpoint_url = \"https://eth.llamarpc.com\"\n",
+            "\n",
+            "[mainnet.uint]\n",
+            "valid_number = 123\n",
+            "\n",
+            "# Invalid chain key (not a number and not a valid alias)\n",
+            "[invalid_chain]\n",
+            "endpoint_url = \"https://invalid.com\"\n",
+            "\n",
+            "[invalid_chain_9999.uint]\n",
+            "some_value = 456\n"
+        )));
+
+        vm.expectRevert(abi.encodeWithSelector(StdConfig.InvalidChainKey.selector, "invalid_chain"));
+        new StdConfig(invalidChainConfig);
+        vm.removeFile(invalidChainConfig);
+    }
+
+    function testRevert_ChainIdNotFound() public {
+        _loadConfig("./test/fixtures/config.toml");
+
+        // Try to write a value for a non-existent chain ID
+        vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainIdNotFound.selector, uint256(999999)));
+        config.set(999999, "some_key", uint256(123), true);
+    }
+
+    function testRevert_UnableToParseVariable() public {
+        // Create a fixture with an unparseable variable
+        string memory badParseConfig = "./test/fixtures/config_bad_parse.toml";
+        vm.writeFile(badParseConfig, string(abi.encodePacked(
+            "[mainnet]\n",
+            "endpoint_url = \"https://eth.llamarpc.com\"\n",
+            "\n",
+            "[mainnet.uint]\n",
+            "bad_value = \"not_a_number\"\n"
+        )));
+
+        vm.expectRevert(abi.encodeWithSelector(StdConfig.UnableToParseVariable.selector, "bad_value"));
+        new StdConfig(badParseConfig);
+        vm.removeFile(badParseConfig);
     }
 }

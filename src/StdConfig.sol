@@ -42,6 +42,9 @@ contract StdConfig {
     // -- ERRORS ---------------------------------------------------------------
 
     error AlreadyInitialized(string key);
+    error InvalidChainKey(string aliasOrId);
+    error ChainIdNotFound(uint256 chainId);
+    error UnableToParseVariable(string key);
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
@@ -200,7 +203,7 @@ contract StdConfig {
         }
 
         if (!success) {
-            revert(_concat("Unable to parse variable '", key, "'"));
+            revert UnableToParseVariable(key);
         }
     }
 
@@ -223,7 +226,7 @@ contract StdConfig {
             try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
                 return chainInfo.chainId;
             } catch {
-                revert(_concat("chain key: '", aliasOrId, "' is not a valid alias nor a number."));
+                revert InvalidChainKey(aliasOrId);
             }
         }
     }
@@ -235,7 +238,7 @@ contract StdConfig {
                 return _chainKeys[i];
             }
         }
-        revert(_concat("chain id: '", vm.toString(chainId), "' not found in configuration"));
+        revert ChainIdNotFound(chainId);
     }
 
     /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.
