@@ -41,7 +41,7 @@ enum TypeKind {
 ///
 ///             function readValues() public {
 ///                 // Retrieve a 'uint256' value from the config.
-///                 uint256 myNumber = config.get("important_number").toUint();
+///                 uint256 myNumber = config.get("important_number").toUint256();
 ///
 ///                 // Would revert with `TypeMismatch` as 'important_number' isn't a `uint256` in the config file.
 ///                 // string memory notANumber = config.get("important_number").toString();
@@ -54,6 +54,7 @@ enum TypeKind {
 library LibVariable {
     error NotInitialized();
     error TypeMismatch(string expected, string actual);
+    error UnsafeCast(string message);
 
     // -- TYPE HELPERS ----------------------------------------------------
 
@@ -125,8 +126,56 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to a `uint256` value.
-    function toUint(Variable memory self) internal pure check(self, Type(TypeKind.Uint256, false)) returns (uint256) {
+    function toUint256(Variable memory self)
+        internal
+        pure
+        check(self, Type(TypeKind.Uint256, false))
+        returns (uint256)
+    {
         return abi.decode(self.data, (uint256));
+    }
+
+    /// @notice Coerces a `Variable` to a `uint128` value, checking for overflow.
+    function toUint128(Variable memory self) internal pure returns (uint128) {
+        uint256 value = self.toUint256();
+        if (value > type(uint128).max) {
+            revert UnsafeCast("value does not fit in uint128");
+        }
+        return uint128(value);
+    }
+
+        uint256 value = self.toUint256();
+        if (value > type(uint64).max) {
+            revert UnsafeCast("value does not fit in uint64");
+        }
+        return uint64(value);
+    }
+
+    /// @notice Coerces a `Variable` to a `uint32` value, checking for overflow.
+    function toUint32(Variable memory self) internal pure returns (uint32) {
+        uint256 value = self.toUint256();
+        if (value > type(uint32).max) {
+            revert UnsafeCast("value does not fit in uint32");
+        }
+        return uint32(value);
+    }
+
+    /// @notice Coerces a `Variable` to a `uint16` value, checking for overflow.
+    function toUint16(Variable memory self) internal pure returns (uint16) {
+        uint256 value = self.toUint256();
+        if (value > type(uint16).max) {
+            revert UnsafeCast("value does not fit in uint16");
+        }
+        return uint16(value);
+    }
+
+    /// @notice Coerces a `Variable` to a `uint8` value, checking for overflow.
+    function toUint8(Variable memory self) internal pure returns (uint8) {
+        uint256 value = self.toUint256();
+        if (value > type(uint8).max) {
+            revert UnsafeCast("value does not fit in uint8");
+        }
+        return uint8(value);
     }
 
     /// @notice Coerces a `Variable` to an `address` value.
@@ -182,13 +231,78 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to a `uint256` array.
-    function toUintArray(Variable memory self)
+    function toUint256Array(Variable memory self)
         internal
         pure
         check(self, Type(TypeKind.Uint256, true))
         returns (uint256[] memory)
     {
         return abi.decode(self.data, (uint256[]));
+    }
+
+    /// @notice Coerces a `Variable` to a `uint128` array, checking for overflow.
+    function toUint128Array(Variable memory self) internal pure returns (uint128[] memory) {
+        uint256[] memory values = self.toUint256Array();
+        uint128[] memory result = new uint128[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] > type(uint128).max) {
+                revert UnsafeCast("value in array does not fit in uint128");
+            }
+            result[i] = uint128(values[i]);
+        }
+        return result;
+    }
+
+    /// @notice Coerces a `Variable` to a `uint64` array, checking for overflow.
+    function toUint64Array(Variable memory self) internal pure returns (uint64[] memory) {
+        uint256[] memory values = self.toUint256Array();
+        uint64[] memory result = new uint64[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] > type(uint64).max) {
+                revert UnsafeCast("value in array does not fit in uint64");
+            }
+            result[i] = uint64(values[i]);
+        }
+        return result;
+    }
+
+    /// @notice Coerces a `Variable` to a `uint32` array, checking for overflow.
+    function toUint32Array(Variable memory self) internal pure returns (uint32[] memory) {
+        uint256[] memory values = self.toUint256Array();
+        uint32[] memory result = new uint32[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] > type(uint32).max) {
+                revert UnsafeCast("value in array does not fit in uint32");
+            }
+            result[i] = uint32(values[i]);
+        }
+        return result;
+    }
+
+    /// @notice Coerces a `Variable` to a `uint16` array, checking for overflow.
+    function toUint16Array(Variable memory self) internal pure returns (uint16[] memory) {
+        uint256[] memory values = self.toUint256Array();
+        uint16[] memory result = new uint16[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] > type(uint16).max) {
+                revert UnsafeCast("value in array does not fit in uint16");
+            }
+            result[i] = uint16(values[i]);
+        }
+        return result;
+    }
+
+    /// @notice Coerces a `Variable` to a `uint8` array, checking for overflow.
+    function toUint8Array(Variable memory self) internal pure returns (uint8[] memory) {
+        uint256[] memory values = self.toUint256Array();
+        uint8[] memory result = new uint8[](values.length);
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] > type(uint8).max) {
+                revert UnsafeCast("value in array does not fit in uint8");
+            }
+            result[i] = uint8(values[i]);
+        }
+        return result;
     }
 
     /// @notice Coerces a `Variable` to an `address` array.

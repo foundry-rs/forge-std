@@ -25,6 +25,7 @@ abstract contract Config is CommonBase {
     /// @dev     This function instantiates a `Config` contract, caching all its config variables.
     ///
     /// @param   filePath: the path to the TOML configuration file.
+    /// @param   writeToFile: whether updates are written back to the TOML file.
     function _loadConfig(string memory filePath, bool writeToFile) internal {
         console.log("----------");
         console.log(string(abi.encodePacked("Loading config from '", filePath, "'")));
@@ -41,6 +42,7 @@ abstract contract Config is CommonBase {
     ///          It also creates a map `forkOf[chainId] -> forkId` to easily switch between forks.
     ///
     /// @param   filePath: the path to the TOML configuration file.
+    /// @param   writeToFile: whether updates are written back to the TOML file.
     function _loadConfigAndForks(string memory filePath, bool writeToFile) internal {
         _loadConfig(filePath, writeToFile);
 

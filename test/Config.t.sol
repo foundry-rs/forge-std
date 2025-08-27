@@ -29,8 +29,8 @@ contract ConfigTest is Test, Config {
         assertEq(address_array[1], 0x1111111111111111111111111111111111111111);
 
         // Read and assert uint values
-        assertEq(config.get(1, "number").toUint(), 1234);
-        uint256[] memory uint_array = config.get(1, "number_array").toUintArray();
+        assertEq(config.get(1, "number").toUint256(), 1234);
+        uint256[] memory uint_array = config.get(1, "number_array").toUint256Array();
         assertEq(uint_array[0], 5678);
         assertEq(uint_array[1], 9999);
 
@@ -70,8 +70,8 @@ contract ConfigTest is Test, Config {
         assertEq(address_array[1], 0x3333333333333333333333333333333333333333);
 
         // Read and assert uint values
-        assertEq(config.get(10, "number").toUint(), 9999);
-        uint_array = config.get(10, "number_array").toUintArray();
+        assertEq(config.get(10, "number").toUint256(), 9999);
+        uint_array = config.get(10, "number_array").toUint256Array();
         assertEq(uint_array[0], 1234);
         assertEq(uint_array[1], 5678);
 
@@ -143,7 +143,7 @@ contract ConfigTest is Test, Config {
         new_numbers[2] = 3;
         config.set(10, "number_array", new_numbers);
 
-        uint256[] memory updated_numbers_mem = config.get(10, "number_array").toUintArray();
+        uint256[] memory updated_numbers_mem = config.get(10, "number_array").toUint256Array();
         assertEq(updated_numbers_mem.length, 3);
         assertEq(updated_numbers_mem[0], 1);
         assertEq(updated_numbers_mem[1], 2);
@@ -176,7 +176,7 @@ contract ConfigTest is Test, Config {
         // Create a new uint variable and verify the change.
         config.set(1, "new_uint", 42);
 
-        assertEq(config.get(1, "new_uint").toUint(), 42);
+        assertEq(config.get(1, "new_uint").toUint256(), 42);
 
         content = vm.readFile(testConfig);
         assertEq(vm.parseTomlUint(content, "$.mainnet.uint.new_uint"), 42);
@@ -279,7 +279,7 @@ contract LibVariableTest is Test, Config {
         helper.toBool(notInit);
 
         vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toUint(notInit);
+        helper.toUint256(notInit);
 
         vm.expectRevert(LibVariable.NotInitialized.selector);
         helper.toAddress(notInit);
@@ -298,7 +298,7 @@ contract LibVariableTest is Test, Config {
         helper.toBoolArray(notInit);
 
         vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toUintArray(notInit);
+        helper.toUint256Array(notInit);
 
         vm.expectRevert(LibVariable.NotInitialized.selector);
         helper.toAddressArray(notInit);
@@ -319,7 +319,7 @@ contract LibVariableTest is Test, Config {
 
         // Try to coerce it to wrong single value types - should revert with TypeMismatch
         vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
-        helper.toUint(boolVar);
+        helper.toUint256(boolVar);
 
         vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "bool"));
         helper.toAddress(boolVar);
@@ -352,7 +352,7 @@ contract LibVariableTest is Test, Config {
 
         // Try to coerce array to wrong array type
         vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256[]", "bool[]"));
-        helper.toUintArray(boolArrayVar);
+        helper.toUint256Array(boolArrayVar);
 
         // Get a single value and try to coerce to array
         Variable memory singleBoolVar = config.get(1, "is_live");
@@ -369,8 +369,8 @@ contract LibVariableHelper {
         return v.toBool();
     }
 
-    function toUint(Variable memory v) external pure returns (uint256) {
-        return v.toUint();
+    function toUint256(Variable memory v) external pure returns (uint256) {
+        return v.toUint256();
     }
 
     function toAddress(Variable memory v) external pure returns (address) {
@@ -393,8 +393,8 @@ contract LibVariableHelper {
         return v.toBoolArray();
     }
 
-    function toUintArray(Variable memory v) external pure returns (uint256[] memory) {
-        return v.toUintArray();
+    function toUint256Array(Variable memory v) external pure returns (uint256[] memory) {
+        return v.toUint256Array();
     }
 
     function toAddressArray(Variable memory v) external pure returns (address[] memory) {
