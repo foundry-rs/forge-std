@@ -174,7 +174,7 @@ contract ConfigTest is Test, Config {
         assertEq(updated_strings_disk[1], "world");
 
         // Create a new uint variable and verify the change.
-        config.set(1, "new_uint", 42);
+        config.set(1, "new_uint", uint256(42));
 
         assertEq(config.get(1, "new_uint").toUint256(), 42);
 
