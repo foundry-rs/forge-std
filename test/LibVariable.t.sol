@@ -180,7 +180,6 @@ contract LibVariableTest is Test {
         assertEq(i8_array[1], 20);
     }
 
-
     // -- REVERT CASES ---------------------------------------------------------
 
     function testRevert_NotInitialized() public {
@@ -276,7 +275,6 @@ contract LibVariableTest is Test {
     }
 }
 
-
 /// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
 ///      as direct library calls are inlined by the compiler, causing call depth issues.
 contract LibVariableHelper {
@@ -284,52 +282,153 @@ contract LibVariableHelper {
     using LibVariable for TypeKind;
 
     // Assertions
-    function assertExists(Variable memory v) external pure { v.assertExists(); }
-    function assertEq(Type memory t1, Type memory t2) external pure { t1.assertEq(t2); }
+    function assertExists(Variable memory v) external pure {
+        v.assertExists();
+    }
+
+    function assertEq(Type memory t1, Type memory t2) external pure {
+        t1.assertEq(t2);
+    }
 
     // Single Value Coercion
-    function toBool(Variable memory v) external pure returns (bool) { return v.toBool(); }
-    function toAddress(Variable memory v) external pure returns (address) { return v.toAddress(); }
-    function toBytes32(Variable memory v) external pure returns (bytes32) { return v.toBytes32(); }
-    function toUint256(Variable memory v) external pure returns (uint256) { return v.toUint256(); }
-    function toInt256(Variable memory v) external pure returns (int256) { return v.toInt256(); }
-    function toString(Variable memory v) external pure returns (string memory) { return v.toString(); }
-    function toBytes(Variable memory v) external pure returns (bytes memory) { return v.toBytes(); }
+    function toBool(Variable memory v) external pure returns (bool) {
+        return v.toBool();
+    }
+
+    function toAddress(Variable memory v) external pure returns (address) {
+        return v.toAddress();
+    }
+
+    function toBytes32(Variable memory v) external pure returns (bytes32) {
+        return v.toBytes32();
+    }
+
+    function toUint256(Variable memory v) external pure returns (uint256) {
+        return v.toUint256();
+    }
+
+    function toInt256(Variable memory v) external pure returns (int256) {
+        return v.toInt256();
+    }
+
+    function toString(Variable memory v) external pure returns (string memory) {
+        return v.toString();
+    }
+
+    function toBytes(Variable memory v) external pure returns (bytes memory) {
+        return v.toBytes();
+    }
 
     // Array Coercion
-    function toBoolArray(Variable memory v) external pure returns (bool[] memory) { return v.toBoolArray(); }
-    function toAddressArray(Variable memory v) external pure returns (address[] memory) { return v.toAddressArray(); }
-    function toBytes32Array(Variable memory v) external pure returns (bytes32[] memory) { return v.toBytes32Array(); }
-    function toUint256Array(Variable memory v) external pure returns (uint256[] memory) { return v.toUint256Array(); }
-    function toInt256Array(Variable memory v) external pure returns (int256[] memory) { return v.toInt256Array(); }
-    function toStringArray(Variable memory v) external pure returns (string[] memory) { return v.toStringArray(); }
-    function toBytesArray(Variable memory v) external pure returns (bytes[] memory) { return v.toBytesArray(); }
+    function toBoolArray(Variable memory v) external pure returns (bool[] memory) {
+        return v.toBoolArray();
+    }
+
+    function toAddressArray(Variable memory v) external pure returns (address[] memory) {
+        return v.toAddressArray();
+    }
+
+    function toBytes32Array(Variable memory v) external pure returns (bytes32[] memory) {
+        return v.toBytes32Array();
+    }
+
+    function toUint256Array(Variable memory v) external pure returns (uint256[] memory) {
+        return v.toUint256Array();
+    }
+
+    function toInt256Array(Variable memory v) external pure returns (int256[] memory) {
+        return v.toInt256Array();
+    }
+
+    function toStringArray(Variable memory v) external pure returns (string[] memory) {
+        return v.toStringArray();
+    }
+
+    function toBytesArray(Variable memory v) external pure returns (bytes[] memory) {
+        return v.toBytesArray();
+    }
 
     // Uint Downcasting
-    function toUint128(Variable memory v) external pure returns (uint128) { return v.toUint128(); }
-    function toUint64(Variable memory v) external pure returns (uint64) { return v.toUint64(); }
-    function toUint32(Variable memory v) external pure returns (uint32) { return v.toUint32(); }
-    function toUint16(Variable memory v) external pure returns (uint16) { return v.toUint16(); }
-    function toUint8(Variable memory v) external pure returns (uint8) { return v.toUint8(); }
+    function toUint128(Variable memory v) external pure returns (uint128) {
+        return v.toUint128();
+    }
+
+    function toUint64(Variable memory v) external pure returns (uint64) {
+        return v.toUint64();
+    }
+
+    function toUint32(Variable memory v) external pure returns (uint32) {
+        return v.toUint32();
+    }
+
+    function toUint16(Variable memory v) external pure returns (uint16) {
+        return v.toUint16();
+    }
+
+    function toUint8(Variable memory v) external pure returns (uint8) {
+        return v.toUint8();
+    }
 
     // Int Downcasting
-    function toInt128(Variable memory v) external pure returns (int128) { return v.toInt128(); }
-    function toInt64(Variable memory v) external pure returns (int64) { return v.toInt64(); }
-    function toInt32(Variable memory v) external pure returns (int32) { return v.toInt32(); }
-    function toInt16(Variable memory v) external pure returns (int16) { return v.toInt16(); }
-    function toInt8(Variable memory v) external pure returns (int8) { return v.toInt8(); }
+    function toInt128(Variable memory v) external pure returns (int128) {
+        return v.toInt128();
+    }
+
+    function toInt64(Variable memory v) external pure returns (int64) {
+        return v.toInt64();
+    }
+
+    function toInt32(Variable memory v) external pure returns (int32) {
+        return v.toInt32();
+    }
+
+    function toInt16(Variable memory v) external pure returns (int16) {
+        return v.toInt16();
+    }
+
+    function toInt8(Variable memory v) external pure returns (int8) {
+        return v.toInt8();
+    }
 
     // Uint Array Downcasting
-    function toUint128Array(Variable memory v) external pure returns (uint128[] memory) { return v.toUint128Array(); }
-    function toUint64Array(Variable memory v) external pure returns (uint64[] memory) { return v.toUint64Array(); }
-    function toUint32Array(Variable memory v) external pure returns (uint32[] memory) { return v.toUint32Array(); }
-    function toUint16Array(Variable memory v) external pure returns (uint16[] memory) { return v.toUint16Array(); }
-    function toUint8Array(Variable memory v) external pure returns (uint8[] memory) { return v.toUint8Array(); }
+    function toUint128Array(Variable memory v) external pure returns (uint128[] memory) {
+        return v.toUint128Array();
+    }
+
+    function toUint64Array(Variable memory v) external pure returns (uint64[] memory) {
+        return v.toUint64Array();
+    }
+
+    function toUint32Array(Variable memory v) external pure returns (uint32[] memory) {
+        return v.toUint32Array();
+    }
+
+    function toUint16Array(Variable memory v) external pure returns (uint16[] memory) {
+        return v.toUint16Array();
+    }
+
+    function toUint8Array(Variable memory v) external pure returns (uint8[] memory) {
+        return v.toUint8Array();
+    }
 
     // Int Array Downcasting
-    function toInt128Array(Variable memory v) external pure returns (int128[] memory) { return v.toInt128Array(); }
-    function toInt64Array(Variable memory v) external pure returns (int64[] memory) { return v.toInt64Array(); }
-    function toInt32Array(Variable memory v) external pure returns (int32[] memory) { return v.toInt32Array(); }
-    function toInt16Array(Variable memory v) external pure returns (int16[] memory) { return v.toInt16Array(); }
-    function toInt8Array(Variable memory v) external pure returns (int8[] memory) { return v.toInt8Array(); }
+    function toInt128Array(Variable memory v) external pure returns (int128[] memory) {
+        return v.toInt128Array();
+    }
+
+    function toInt64Array(Variable memory v) external pure returns (int64[] memory) {
+        return v.toInt64Array();
+    }
+
+    function toInt32Array(Variable memory v) external pure returns (int32[] memory) {
+        return v.toInt32Array();
+    }
+
+    function toInt16Array(Variable memory v) external pure returns (int16[] memory) {
+        return v.toInt16Array();
+    }
+
+    function toInt8Array(Variable memory v) external pure returns (int8[] memory) {
+        return v.toInt8Array();
+    }
 }
