@@ -6,6 +6,13 @@ import {Config} from "../src/Config.sol";
 import {StdConfig} from "../src/StdConfig.sol";
 
 contract ConfigTest is Test, Config {
+    function setUp() public {
+        vm.setEnv("MAINNET_RPC", "https://eth.llamarpc.com");
+        vm.setEnv("WETH_MAINNET", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+        vm.setEnv("OPTIMISM_RPC", "https://mainnet.optimism.io");
+        vm.setEnv("WETH_OPTIMISM", "0x4200000000000000000000000000000000000006");
+    }
+
     function test_loadConfig() public {
         // Deploy the config contract with the test fixture.
         _loadConfig("./test/fixtures/config.toml", false);
