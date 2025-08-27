@@ -237,6 +237,40 @@ contract ConfigTest is Test, Config {
         vm.removeFile(testConfig);
     }
 
+    function test_writeUpdatesBackToFile() public {
+        // Create a temporary copy of the config file to avoid modifying the original.
+        string memory originalConfig = "./test/fixtures/config.toml";
+        string memory testConfig = "./test/fixtures/write_config.t.toml";
+        vm.copyFile(originalConfig, testConfig);
+
+        // Deploy the config contract with `writeToFile = false` (disabled).
+        _loadConfig(testConfig, false);
+
+        // Update a single boolean value and verify the file is NOT changed.
+        config.set(1, "is_live", false);
+        string memory content = vm.readFile(testConfig);
+        assertTrue(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should not be updated yet");
+
+        // Enable writing to file.
+        config.writeUpdatesBackToFile(true);
+
+        // Update the value again and verify the file IS changed.
+        config.set(1, "is_live", false);
+        content = vm.readFile(testConfig);
+        assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should be updated now");
+
+        // Disable writing to file.
+        config.writeUpdatesBackToFile(false);
+
+        // Update the value again and verify the file is NOT changed.
+        config.set(1, "is_live", true);
+        content = vm.readFile(testConfig);
+        assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should not be updated again");
+
+        // Clean up the temporary file.
+        vm.removeFile(testConfig);
+    }
+
     function testRevert_InvalidChainKey() public {
         // Create a fixture with an invalid chain key
         string memory invalidChainConfig = "./test/fixtures/config_invalid_chain.toml";

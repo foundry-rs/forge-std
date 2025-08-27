@@ -77,6 +77,7 @@ contract StdConfig {
     ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
+    /// @param  writeToFile: Whether to write updates back to the TOML file.
     constructor(string memory configFilePath, bool writeToFile) {
         _filePath = configFilePath;
         _writeToFile = writeToFile;
@@ -222,7 +223,7 @@ contract StdConfig {
     // -- HELPER FUNCTIONS -----------------------------------------------------
 
     /// @notice Enable or disable automatic writing to the TOML file on `set`.
-    function setAutoWrite(bool enabled) public {
+    function writeUpdatesBackToFile(bool enabled) public {
         _writeToFile = enabled;
     }
 
