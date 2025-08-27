@@ -168,7 +168,7 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to a `uint64` value, checking for overflow.
-    function toUint64(Variable memory self) internal pure returns (uint128) {
+    function toUint64(Variable memory self) internal pure returns (uint64) {
         uint256 value = self.toUint256();
         if (value > type(uint64).max) {
             revert UnsafeCast("value does not fit in 'uint64'");

@@ -22,6 +22,10 @@ deps = [
 number = 1234
 number_array = [5678, 9999]
 
+[mainnet.int]
+signed_number = -1234
+signed_number_array = [-5678, 9999]
+
 [mainnet.bytes32]
 word = "0x00000000000000000000000000000000000000000000000000000000000004d2" # 1234
 word_array = [
@@ -56,6 +60,10 @@ deps = [
 [optimism.uint]
 number = 9999
 number_array = [1234, 5678]
+
+[optimism.int]
+signed_number = 9999
+signed_number_array = [-1234, -5678]
 
 [optimism.bytes32]
 word = "0x000000000000000000000000000000000000000000000000000000000000270f" # 9999

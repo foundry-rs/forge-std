@@ -4,7 +4,6 @@ pragma solidity ^0.8.13;
 import {Test} from "../src/Test.sol";
 import {Config} from "../src/Config.sol";
 import {StdConfig} from "../src/StdConfig.sol";
-import {Variable, LibVariable} from "../src/LibVariable.sol";
 
 contract ConfigTest is Test, Config {
     function test_loadConfig() public {
@@ -28,17 +27,23 @@ contract ConfigTest is Test, Config {
         assertEq(address_array[0], 0x0000000000000000000000000000000000000000);
         assertEq(address_array[1], 0x1111111111111111111111111111111111111111);
 
+        // Read and assert bytes32 values
+        assertEq(config.get(1, "word").toBytes32(), bytes32(uint256(1234)));
+        bytes32[] memory bytes32_array = config.get(1, "word_array").toBytes32Array();
+        assertEq(bytes32_array[0], bytes32(uint256(5678)));
+        assertEq(bytes32_array[1], bytes32(uint256(9999)));
+
         // Read and assert uint values
         assertEq(config.get(1, "number").toUint256(), 1234);
         uint256[] memory uint_array = config.get(1, "number_array").toUint256Array();
         assertEq(uint_array[0], 5678);
         assertEq(uint_array[1], 9999);
 
-        // Read and assert bytes32 values
-        assertEq(config.get(1, "word").toBytes32(), bytes32(uint256(1234)));
-        bytes32[] memory bytes32_array = config.get(1, "word_array").toBytes32Array();
-        assertEq(bytes32_array[0], bytes32(uint256(5678)));
-        assertEq(bytes32_array[1], bytes32(uint256(9999)));
+        // Read and assert int values
+        assertEq(config.get(1, "signed_number").toInt256(), -1234);
+        int256[] memory int_array = config.get(1, "signed_number_array").toInt256Array();
+        assertEq(int_array[0], -5678);
+        assertEq(int_array[1], 9999);
 
         // Read and assert bytes values
         assertEq(config.get(1, "b").toBytes(), hex"abcd");
@@ -69,17 +74,23 @@ contract ConfigTest is Test, Config {
         assertEq(address_array[0], 0x2222222222222222222222222222222222222222);
         assertEq(address_array[1], 0x3333333333333333333333333333333333333333);
 
+        // Read and assert bytes32 values
+        assertEq(config.get(10, "word").toBytes32(), bytes32(uint256(9999)));
+        bytes32_array = config.get(10, "word_array").toBytes32Array();
+        assertEq(bytes32_array[0], bytes32(uint256(1234)));
+        assertEq(bytes32_array[1], bytes32(uint256(5678)));
+
         // Read and assert uint values
         assertEq(config.get(10, "number").toUint256(), 9999);
         uint_array = config.get(10, "number_array").toUint256Array();
         assertEq(uint_array[0], 1234);
         assertEq(uint_array[1], 5678);
 
-        // Read and assert bytes32 values
-        assertEq(config.get(10, "word").toBytes32(), bytes32(uint256(9999)));
-        bytes32_array = config.get(10, "word_array").toBytes32Array();
-        assertEq(bytes32_array[0], bytes32(uint256(1234)));
-        assertEq(bytes32_array[1], bytes32(uint256(5678)));
+        // Read and assert int values
+        assertEq(config.get(10, "signed_number").toInt256(), 9999);
+        int_array = config.get(10, "signed_number_array").toInt256Array();
+        assertEq(int_array[0], -1234);
+        assertEq(int_array[1], -5678);
 
         // Read and assert bytes values
         assertEq(config.get(10, "b").toBytes(), hex"dcba");
@@ -113,90 +124,114 @@ contract ConfigTest is Test, Config {
         string memory testConfig = "./test/fixtures/config.t.toml";
         vm.copyFile(originalConfig, testConfig);
 
-        // Deploy the config contract with the temporary fixture.
+        // Deploy the config contract with the temporary fixture and `writeToFile = true`.
         _loadConfig(testConfig, true);
 
-        // Enable autoWrite so that changes are written to the file
-        config.setAutoWrite(true);
+        {
+            // Update a single boolean value and verify the change.
+            config.set(1, "is_live", false);
 
-        // Update a single boolean value and verify the change.
-        config.set(1, "is_live", false);
+            assertFalse(config.get(1, "is_live").toBool());
 
-        assertFalse(config.get(1, "is_live").toBool());
+            string memory content = vm.readFile(testConfig);
+            assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"));
 
-        string memory content = vm.readFile(testConfig);
-        assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"));
+            // Update a single address value and verify the change.
+            address new_addr = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
+            config.set(1, "weth", new_addr);
 
-        // Update a single address value and verify the change.
-        address new_addr = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
-        config.set(1, "weth", new_addr);
+            assertEq(config.get(1, "weth").toAddress(), new_addr);
 
-        assertEq(config.get(1, "weth").toAddress(), new_addr);
+            content = vm.readFile(testConfig);
+            assertEq(vm.parseTomlAddress(content, "$.mainnet.address.weth"), new_addr);
 
-        content = vm.readFile(testConfig);
-        assertEq(vm.parseTomlAddress(content, "$.mainnet.address.weth"), new_addr);
+            // Update a uint array and verify the change.
+            uint256[] memory new_numbers = new uint256[](3);
+            new_numbers[0] = 1;
+            new_numbers[1] = 2;
+            new_numbers[2] = 3;
+            config.set(10, "number_array", new_numbers);
 
-        // Update a uint array and verify the change.
-        uint256[] memory new_numbers = new uint256[](3);
-        new_numbers[0] = 1;
-        new_numbers[1] = 2;
-        new_numbers[2] = 3;
-        config.set(10, "number_array", new_numbers);
+            uint256[] memory updated_numbers_mem = config.get(10, "number_array").toUint256Array();
+            assertEq(updated_numbers_mem.length, 3);
+            assertEq(updated_numbers_mem[0], 1);
+            assertEq(updated_numbers_mem[1], 2);
+            assertEq(updated_numbers_mem[2], 3);
 
-        uint256[] memory updated_numbers_mem = config.get(10, "number_array").toUint256Array();
-        assertEq(updated_numbers_mem.length, 3);
-        assertEq(updated_numbers_mem[0], 1);
-        assertEq(updated_numbers_mem[1], 2);
-        assertEq(updated_numbers_mem[2], 3);
+            content = vm.readFile(testConfig);
+            uint256[] memory updated_numbers_disk = vm.parseTomlUintArray(content, "$.optimism.uint.number_array");
+            assertEq(updated_numbers_disk.length, 3);
+            assertEq(updated_numbers_disk[0], 1);
+            assertEq(updated_numbers_disk[1], 2);
+            assertEq(updated_numbers_disk[2], 3);
 
-        content = vm.readFile(testConfig);
-        uint256[] memory updated_numbers_disk = vm.parseTomlUintArray(content, "$.optimism.uint.number_array");
-        assertEq(updated_numbers_disk.length, 3);
-        assertEq(updated_numbers_disk[0], 1);
-        assertEq(updated_numbers_disk[1], 2);
-        assertEq(updated_numbers_disk[2], 3);
+            // Update a string array and verify the change.
+            string[] memory new_strings = new string[](2);
+            new_strings[0] = "hello";
+            new_strings[1] = "world";
+            config.set(1, "str_array", new_strings);
 
-        // Update a string array and verify the change.
-        string[] memory new_strings = new string[](2);
-        new_strings[0] = "hello";
-        new_strings[1] = "world";
-        config.set(1, "str_array", new_strings);
+            string[] memory updated_strings_mem = config.get(1, "str_array").toStringArray();
+            assertEq(updated_strings_mem.length, 2);
+            assertEq(updated_strings_mem[0], "hello");
+            assertEq(updated_strings_mem[1], "world");
 
-        string[] memory updated_strings_mem = config.get(1, "str_array").toStringArray();
-        assertEq(updated_strings_mem.length, 2);
-        assertEq(updated_strings_mem[0], "hello");
-        assertEq(updated_strings_mem[1], "world");
+            content = vm.readFile(testConfig);
+            string[] memory updated_strings_disk = vm.parseTomlStringArray(content, "$.mainnet.string.str_array");
+            assertEq(updated_strings_disk.length, 2);
+            assertEq(updated_strings_disk[0], "hello");
+            assertEq(updated_strings_disk[1], "world");
 
-        content = vm.readFile(testConfig);
-        string[] memory updated_strings_disk = vm.parseTomlStringArray(content, "$.mainnet.string.str_array");
-        assertEq(updated_strings_disk.length, 2);
-        assertEq(updated_strings_disk[0], "hello");
-        assertEq(updated_strings_disk[1], "world");
+            // Create a new uint variable and verify the change.
+            config.set(1, "new_uint", uint256(42));
 
-        // Create a new uint variable and verify the change.
-        config.set(1, "new_uint", uint256(42));
+            assertEq(config.get(1, "new_uint").toUint256(), 42);
 
-        assertEq(config.get(1, "new_uint").toUint256(), 42);
+            content = vm.readFile(testConfig);
+            assertEq(vm.parseTomlUint(content, "$.mainnet.uint.new_uint"), 42);
 
-        content = vm.readFile(testConfig);
-        assertEq(vm.parseTomlUint(content, "$.mainnet.uint.new_uint"), 42);
+            // Create a new int variable and verify the change.
+            config.set(1, "new_int", int256(-42));
 
-        // Create a new bytes32 array and verify the change.
-        bytes32[] memory new_words = new bytes32[](2);
-        new_words[0] = bytes32(uint256(0xDEAD));
-        new_words[1] = bytes32(uint256(0xBEEF));
-        config.set(10, "new_words", new_words);
+            assertEq(config.get(1, "new_int").toInt256(), -42);
 
-        bytes32[] memory updated_words_mem = config.get(10, "new_words").toBytes32Array();
-        assertEq(updated_words_mem.length, 2);
-        assertEq(updated_words_mem[0], new_words[0]);
-        assertEq(updated_words_mem[1], new_words[1]);
+            content = vm.readFile(testConfig);
+            assertEq(vm.parseTomlInt(content, "$.mainnet.int.new_int"), -42);
 
-        content = vm.readFile(testConfig);
-        bytes32[] memory updated_words_disk = vm.parseTomlBytes32Array(content, "$.optimism.bytes32.new_words");
-        assertEq(updated_words_disk.length, 2);
-        assertEq(vm.toString(updated_words_disk[0]), vm.toString(new_words[0]));
-        assertEq(vm.toString(updated_words_disk[1]), vm.toString(new_words[1]));
+            // Create a new int array and verify the change.
+            int256[] memory new_ints = new int256[](2);
+            new_ints[0] = -100;
+            new_ints[1] = 200;
+            config.set(10, "new_ints", new_ints);
+
+            int256[] memory updated_ints_mem = config.get(10, "new_ints").toInt256Array();
+            assertEq(updated_ints_mem.length, 2);
+            assertEq(updated_ints_mem[0], -100);
+            assertEq(updated_ints_mem[1], 200);
+
+            content = vm.readFile(testConfig);
+            int256[] memory updated_ints_disk = vm.parseTomlIntArray(content, "$.optimism.int.new_ints");
+            assertEq(updated_ints_disk.length, 2);
+            assertEq(updated_ints_disk[0], -100);
+            assertEq(updated_ints_disk[1], 200);
+
+            // Create a new bytes32 array and verify the change.
+            bytes32[] memory new_words = new bytes32[](2);
+            new_words[0] = bytes32(uint256(0xDEAD));
+            new_words[1] = bytes32(uint256(0xBEEF));
+            config.set(10, "new_words", new_words);
+
+            bytes32[] memory updated_words_mem = config.get(10, "new_words").toBytes32Array();
+            assertEq(updated_words_mem.length, 2);
+            assertEq(updated_words_mem[0], new_words[0]);
+            assertEq(updated_words_mem[1], new_words[1]);
+
+            content = vm.readFile(testConfig);
+            bytes32[] memory updated_words_disk = vm.parseTomlBytes32Array(content, "$.optimism.bytes32.new_words");
+            assertEq(updated_words_disk.length, 2);
+            assertEq(vm.toString(updated_words_disk[0]), vm.toString(new_words[0]));
+            assertEq(vm.toString(updated_words_disk[1]), vm.toString(new_words[1]));
+        }
 
         // Clean up the temporary file.
         vm.removeFile(testConfig);
@@ -257,159 +292,5 @@ contract ConfigTest is Test, Config {
         vm.expectRevert(abi.encodeWithSelector(StdConfig.UnableToParseVariable.selector, "bad_value"));
         new StdConfig(badParseConfig, false);
         vm.removeFile(badParseConfig);
-    }
-}
-
-/// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
-///      as direct library calls are inlined by the compiler, causing call depth issues.
-contract LibVariableTest is Test, Config {
-    LibVariableHelper helper;
-
-    function setUp() public {
-        helper = new LibVariableHelper();
-        _loadConfig("./test/fixtures/config.toml", false);
-    }
-
-    function testRevert_NotInitialized() public {
-        // Try to read a non-existent variable
-        Variable memory notInit = config.get(1, "non_existent_key");
-
-        // Test single value types - should revert with NotInitialized
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBool(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toUint256(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toAddress(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBytes32(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toString(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBytes(notInit);
-
-        // Test array types - should also revert with NotInitialized
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBoolArray(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toUint256Array(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toAddressArray(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBytes32Array(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toStringArray(notInit);
-
-        vm.expectRevert(LibVariable.NotInitialized.selector);
-        helper.toBytesArray(notInit);
-    }
-
-    function testRevert_TypeMismatch() public {
-        // Get a boolean variable
-        Variable memory boolVar = config.get(1, "is_live");
-
-        // Try to coerce it to wrong single value types - should revert with TypeMismatch
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
-        helper.toUint256(boolVar);
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "bool"));
-        helper.toAddress(boolVar);
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes32", "bool"));
-        helper.toBytes32(boolVar);
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "string", "bool"));
-        helper.toString(boolVar);
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bytes", "bool"));
-        helper.toBytes(boolVar);
-
-        // Get a uint variable
-        Variable memory uintVar = config.get(1, "number");
-
-        // Try to coerce it to wrong types
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "uint256"));
-        helper.toBool(uintVar);
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "uint256"));
-        helper.toAddress(uintVar);
-
-        // Get an array variable
-        Variable memory boolArrayVar = config.get(1, "bool_array");
-
-        // Try to coerce array to single value - should revert with TypeMismatch
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "bool[]"));
-        helper.toBool(boolArrayVar);
-
-        // Try to coerce array to wrong array type
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256[]", "bool[]"));
-        helper.toUint256Array(boolArrayVar);
-
-        // Get a single value and try to coerce to array
-        Variable memory singleBoolVar = config.get(1, "is_live");
-
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool[]", "bool"));
-        helper.toBoolArray(singleBoolVar);
-    }
-}
-
-/// @dev We must use an external helper contract to ensure proper call depth for `vm.expectRevert`,
-///      as direct library calls are inlined by the compiler, causing call depth issues.
-contract LibVariableHelper {
-    function toBool(Variable memory v) external pure returns (bool) {
-        return v.toBool();
-    }
-
-    function toUint256(Variable memory v) external pure returns (uint256) {
-        return v.toUint256();
-    }
-
-    function toAddress(Variable memory v) external pure returns (address) {
-        return v.toAddress();
-    }
-
-    function toBytes32(Variable memory v) external pure returns (bytes32) {
-        return v.toBytes32();
-    }
-
-    function toString(Variable memory v) external pure returns (string memory) {
-        return v.toString();
-    }
-
-    function toBytes(Variable memory v) external pure returns (bytes memory) {
-        return v.toBytes();
-    }
-
-    function toBoolArray(Variable memory v) external pure returns (bool[] memory) {
-        return v.toBoolArray();
-    }
-
-    function toUint256Array(Variable memory v) external pure returns (uint256[] memory) {
-        return v.toUint256Array();
-    }
-
-    function toAddressArray(Variable memory v) external pure returns (address[] memory) {
-        return v.toAddressArray();
-    }
-
-    function toBytes32Array(Variable memory v) external pure returns (bytes32[] memory) {
-        return v.toBytes32Array();
-    }
-
-    function toStringArray(Variable memory v) external pure returns (string[] memory) {
-        return v.toStringArray();
-    }
-
-    function toBytesArray(Variable memory v) external pure returns (bytes[] memory) {
-        return v.toBytesArray();
     }
 }
