@@ -38,8 +38,6 @@ contract StdConfig {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `ìnt`, `string`, `bytes`.
-
-    /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `ìnt`, `string`, `bytes`.
     uint8 private constant NUM_TYPES = 7;
 
     // -- ERRORS ---------------------------------------------------------------
