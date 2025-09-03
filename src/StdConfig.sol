@@ -280,7 +280,7 @@ contract StdConfig {
     function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
         string memory chainKey = _getChainKeyFromId(chainId);
         string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
-        vm.writeTomlUpsert(jsonValue, _filePath, valueKey);
+        vm.writeToml(jsonValue, _filePath, valueKey);
     }
 
     // -- GETTER FUNCTIONS -----------------------------------------------------

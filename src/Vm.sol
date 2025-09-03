@@ -1129,6 +1129,7 @@ interface VmSafe {
 
     /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
+    /// This cheatcode will create new keys if they didn't previously exist.
     function writeJson(string calldata json, string calldata path, string calldata valueKey) external;
 
     /// Checks if `key` exists in a JSON object
@@ -1849,21 +1850,12 @@ interface VmSafe {
     /// ABI-encodes a TOML table at `key`.
     function parseToml(string calldata toml, string calldata key) external pure returns (bytes memory abiEncodedData);
 
-    /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
-    /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
-    /// Unlike `writeJson`, this cheatcode will create new keys if they didn't previously exist.
-    function writeJsonUpsert(string calldata json, string calldata path, string calldata valueKey) external;
-
-    /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
-    /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
-    /// Unlike `writeToml`, this cheatcode will create new keys if they didn't previously exist.
-    function writeTomlUpsert(string calldata json, string calldata path, string calldata valueKey) external;
-
     /// Takes serialized JSON, converts to TOML and write a serialized TOML to a file.
     function writeToml(string calldata json, string calldata path) external;
 
     /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    /// This cheatcode will create new keys if they didn't previously exist.
     function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
