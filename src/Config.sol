@@ -28,7 +28,7 @@ abstract contract Config is CommonBase {
     /// @param   writeToFile: whether updates are written back to the TOML file.
     function _loadConfig(string memory filePath, bool writeToFile) internal {
         console.log("----------");
-        console.log(string(abi.encodePacked("Loading config from '", filePath, "'")));
+        console.log(string.concat("Loading config from '", filePath, "'"));
         config = new StdConfig(filePath, writeToFile);
         vm.makePersistent(address(config));
         console.log("Config successfully loaded");

@@ -77,7 +77,7 @@ library LibVariable {
         if (!self.isArray || self.kind == TypeKind.None) {
             return tyStr;
         } else {
-            return string(abi.encodePacked(tyStr, "[]"));
+            return string.concat(tyStr, "[]");
         }
     }
 
