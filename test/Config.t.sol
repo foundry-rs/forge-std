@@ -131,8 +131,11 @@ contract ConfigTest is Test, Config {
         string memory testConfig = "./test/fixtures/config.t.toml";
         vm.copyFile(originalConfig, testConfig);
 
-        // Deploy the config contract with the temporary fixture and `writeToFile = true`.
-        _loadConfig(testConfig, true);
+        // Deploy the config contract with the temporary fixture.
+        _loadConfig(testConfig, false);
+
+        // Enable writing to file bypassing the context check.
+        vm.store(address(config), bytes32(uint256(5)), bytes32(uint256(1)));
 
         {
             // Update a single boolean value and verify the change.
@@ -258,8 +261,8 @@ contract ConfigTest is Test, Config {
         string memory content = vm.readFile(testConfig);
         assertTrue(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should not be updated yet");
 
-        // Enable writing to file.
-        config.writeUpdatesBackToFile(true);
+        // Enable writing to file bypassing the context check.
+        vm.store(address(config), bytes32(uint256(5)), bytes32(uint256(1)));
 
         // Update the value again and verify the file IS changed.
         config.set(1, "is_live", false);
@@ -276,6 +279,19 @@ contract ConfigTest is Test, Config {
 
         // Clean up the temporary file.
         vm.removeFile(testConfig);
+    }
+
+    function testRevert_WriteToFileInForbiddenCtxt() public {
+        // Cannot initialize enabling writing to file unless we are in SCRIPT mode.
+        vm.expectRevert(StdConfig.WriteToFileInForbiddenCtxt.selector);
+        _loadConfig("./test/fixtures/config.toml", true);
+
+        // Initialize with `writeToFile = false`.
+        _loadConfig("./test/fixtures/config.toml", false);
+
+        // Cannot enable writing to file unless we are in SCRIPT mode.
+        vm.expectRevert(StdConfig.WriteToFileInForbiddenCtxt.selector);
+        config.writeUpdatesBackToFile(true);
     }
 
     function testRevert_InvalidChainKey() public {
@@ -305,7 +321,10 @@ contract ConfigTest is Test, Config {
     }
 
     function testRevert_ChainNotInitialized() public {
-        _loadConfig("./test/fixtures/config.toml", true);
+        _loadConfig("./test/fixtures/config.toml", false);
+
+        // Enable writing to file bypassing the context check.
+        vm.store(address(config), bytes32(uint256(5)), bytes32(uint256(1)));
 
         // Try to write a value for a non-existent chain ID
         vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainNotInitialized.selector, uint256(999999)));

@@ -44,6 +44,7 @@ contract StdConfig {
     error InvalidChainKey(string aliasOrId);
     error ChainNotInitialized(uint256 chainId);
     error UnableToParseVariable(string key);
+    error WriteToFileInForbiddenCtxt();
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
@@ -63,6 +64,7 @@ contract StdConfig {
     mapping(uint256 => mapping(string => Type)) private _typeOf;
 
     /// @dev When enabled, `set` will always write updates back to the configuration file.
+    ///      Can only be enabled when scripting.
     bool private _writeToFile;
 
     // -- CONSTRUCTOR ----------------------------------------------------------
@@ -77,8 +79,12 @@ contract StdConfig {
     ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
-    /// @param  writeToFile: Whether to write updates back to the TOML file.
+    /// @param  writeToFile: Whether to write updates back to the TOML file. Only for scrips.
     constructor(string memory configFilePath, bool writeToFile) {
+        if (writeToFile && !vm.isContext(VmSafe.ForgeContext.ScriptGroup)) {
+            revert WriteToFileInForbiddenCtxt();
+        }
+
         _filePath = configFilePath;
         _writeToFile = writeToFile;
         string memory content = vm.resolveEnv(vm.readFile(configFilePath));
@@ -224,7 +230,12 @@ contract StdConfig {
     // -- HELPER FUNCTIONS -----------------------------------------------------
 
     /// @notice Enable or disable automatic writing to the TOML file on `set`.
+    ///         Can only be enabled when scripting.
     function writeUpdatesBackToFile(bool enabled) public {
+        if (enabled && !vm.isContext(VmSafe.ForgeContext.ScriptGroup)) {
+            revert WriteToFileInForbiddenCtxt();
+        }
+
         _writeToFile = enabled;
     }
 
