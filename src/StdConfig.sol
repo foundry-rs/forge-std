@@ -64,7 +64,8 @@ contract StdConfig {
     mapping(uint256 => mapping(string => Type)) private _typeOf;
 
     /// @dev When enabled, `set` will always write updates back to the configuration file.
-    ///      Can only be enabled when scripting.
+    ///      Can only be enabled in a scripting context to prevent file corruption from
+    ///      concurrent I/O access, as tests run in parallel.
     bool private _writeToFile;
 
     // -- CONSTRUCTOR ----------------------------------------------------------
