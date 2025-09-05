@@ -179,7 +179,7 @@ contract StdChainsTest is Test {
         stdChainsMock.exposed_getChain("");
     }
 
-    function test_RevertIf_ChainIdNotFound() public {
+    function test_RevertIf_ChainNotInitialized() public {
         // We deploy a mock to properly test the revert.
         StdChainsMock stdChainsMock = new StdChainsMock();
 

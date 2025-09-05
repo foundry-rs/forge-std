@@ -30,7 +30,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge --version
-      - run: forge build --skip test --deny-warnings ${{ matrix.flags }}
+      - run: |
+          case "${{ matrix.flags }}" in
+            *"solc:0.8.0"* | *"solc:0.7"* | *"solc:0.6"*)
+              forge build --skip test --skip Config --skip StdConfig --skip LibVariable --deny-warnings ${{ matrix.flags }}
+              ;;
+            *)
+              forge build --skip test --deny-warnings ${{ matrix.flags }}
+              ;;
+          esac
       # via-ir compilation time checks.
       - if: contains(matrix.flags, '--via-ir')
         run: forge build --skip test --deny-warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
@@ -48,7 +56,12 @@ jobs:
         with:
           version: ${{ matrix.toolchain }}
       - run: forge --version
-      - run: forge test -vvv
+      - run: |
+          if [ "${{ matrix.toolchain }}" = "stable" ]; then
+            forge test -vvv --no-match-path "test/Config.t.sol"
+          else
+            forge test -vvv
+          fi
 
   fmt:
     runs-on: ubuntu-latest
