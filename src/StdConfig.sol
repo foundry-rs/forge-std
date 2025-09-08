@@ -82,7 +82,7 @@ contract StdConfig {
     ///         parsed as either, the constructor will revert with an error.
     ///
     /// @param  configFilePath: The local path to the TOML configuration file.
-    /// @param  writeToFile: Whether to write updates back to the TOML file. Only for scrips.
+    /// @param  writeToFile: Whether to write updates back to the TOML file. Only for scripts.
     constructor(string memory configFilePath, bool writeToFile) {
         if (writeToFile && !vm.isContext(VmSafe.ForgeContext.ScriptGroup)) {
             revert WriteToFileInForbiddenCtxt();
