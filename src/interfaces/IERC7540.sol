@@ -49,7 +49,7 @@ interface IERC7540Deposit is IERC7540Operator {
      *    approval of ERC-20 tokens from owner to sender is NOT enough.
      *
      * @param assets the amount of deposit assets to transfer from owner
-     * @param controller the controller of the request who will be able to operate the request
+     * @param controller the controller of the request that will be able to operate the request
      * @param owner the source of the deposit assets
      *
      * NOTE: most implementations will require pre-approval of the Vault with the Vault's underlying asset token.
