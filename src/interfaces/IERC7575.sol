@@ -84,7 +84,7 @@ interface IERC7575 is IERC165 {
      *   call in the same transaction. I.e. deposit should return the same or more shares as previewDeposit if called
      *   in the same transaction.
      * - MUST NOT account for deposit limits like those returned from maxDeposit and should always act as though the
-     *   deposit would be accepted, regardless if the user has enough tokens approved, etc.
+     *   deposit would be accepted, regardless of whether the user has enough tokens approved, etc.
      * - MUST be inclusive of deposit fees. Integrators should be aware of the existence of deposit fees.
      * - MUST NOT revert.
      *
@@ -146,7 +146,7 @@ interface IERC7575 is IERC165 {
 
     /**
      * @dev Returns the maximum amount of the underlying asset that can be withdrawn from the owner balance in the
-     * Vault, through a withdraw call.
+     * Vault, through a withdrawal call.
      *
      * - MUST return a limited value if owner is subject to some withdrawal limit or timelock.
      * - MUST NOT revert.
@@ -235,7 +235,7 @@ interface IERC7575Share is IERC165 {
     /**
      * @dev Returns the address of the Vault for the given asset.
      *
-     * @param asset the ERC-20 token to deposit with into the Vault
+     * @param asset the ERC-20 token to deposit into the Vault
      */
     function vault(address asset) external view returns (address);
 }
