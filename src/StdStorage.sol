@@ -423,7 +423,7 @@ library stdStorage {
                 uint256(set) < maxVal,
                 string(
                     abi.encodePacked(
-                        "stdStorage find(StdStorage): Packed slot. We can't fit value greater than ",
+                        "stdStorage find(StdStorage): Packed slot. We can't fit a value greater than ",
                         vm.toString(maxVal)
                     )
                 )
