@@ -63,7 +63,7 @@ abstract contract StdUtils {
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         require(min <= max, "StdUtils bound(int256,int256,int256): Max is less than min.");
 
-        // Shifting all int256 values to uint256 to use _bound function. The range of two types are:
+        // Shifting all int256 values to uint256 to use _bound function. The range of two types is:
         // int256 : -(2**255) ~ (2**255 - 1)
         // uint256:     0     ~ (2**256 - 1)
         // So, add 2**255, INT256_MIN_ABS to the integer values.
