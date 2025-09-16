@@ -1,5 +1,8 @@
 name: CodeQL
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: ["master"]
@@ -19,9 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-      packages: read
       actions: read
-      contents: read
 
     strategy:
       fail-fast: false
