@@ -1,7 +1,6 @@
 name: CodeQL
 
-permissions:
-  contents: read
+permissions: {}
 
 on:
   push:
@@ -23,6 +22,7 @@ jobs:
     permissions:
       security-events: write
       actions: read
+      contents: read
 
     strategy:
       fail-fast: false
