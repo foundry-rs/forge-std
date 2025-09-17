@@ -1,7 +1,6 @@
 name: Sync Release Branch
 
-permissions:
-  contents: read
+permissions: {}
 
 on:
   release:
