@@ -97,6 +97,34 @@ jobs:
           persist-credentials: false
       - uses: crate-ci/typos@85f62a8a84f939ae994ab3763f01a0296d61a7ee # v1
 
+  codeql:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
   ci-success:
     runs-on: ubuntu-latest
     if: always()
@@ -105,6 +133,7 @@ jobs:
       - test
       - fmt
       - typos
+      - codeql
     timeout-minutes: 10
     steps:
       - name: Decide whether the needed jobs succeeded or failed
