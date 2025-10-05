@@ -18,6 +18,7 @@ import {stdError} from "./StdError.sol";
 import {StdInvariant} from "./StdInvariant.sol";
 import {stdJson} from "./StdJson.sol";
 import {stdMath} from "./StdMath.sol";
+import {stdRlp} from "./StdRlp.sol";
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {StdStyle} from "./StdStyle.sol";
 import {stdToml} from "./StdToml.sol";
