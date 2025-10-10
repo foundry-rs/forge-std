@@ -125,7 +125,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, uint256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, uint256(2500)), 2e18);
 
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert("stdMath percentDelta(uint256,uint256): Divisor is zero");
         stdMathMock.exposed_percentDelta(uint256(1), 0);
     }
 
@@ -163,7 +163,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, int256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, int256(2500)), 2e18);
 
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert("stdMath percentDelta(int256,int256): Divisor is zero");
         stdMathMock.exposed_percentDelta(int256(1), 0);
     }
 
