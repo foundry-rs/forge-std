@@ -274,6 +274,11 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "orderly_sepolia", ChainData("Orderly Sepolia", 4460, "https://testnet-rpc.orderly.org")
         );
+
+        setChainWithDefaultRpcUrl("unichain", ChainData("Unichain", 130, "https://mainnet.unichain.org"));
+        setChainWithDefaultRpcUrl(
+            "unichain_sepolia", ChainData("Unichain Sepolia", 1301, "https://sepolia.unichain.org")
+        );
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
