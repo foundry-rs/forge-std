@@ -341,6 +341,14 @@ interface VmSafe {
         bytes32[] storageKeys;
     }
 
+    /// Represents metadata derived from `foundry.toml` for a given profile.
+    struct ProfileMetadata {
+        /// The output path of the generated artifacts.
+        string artifacts;
+        /// The EVM version.
+        string evm;
+    }
+
     // ======== Crypto ========
 
     /// Derives a private key from the name, labels the account with that name, and returns the wallet.
@@ -2022,6 +2030,9 @@ interface VmSafe {
 
     /// Encodes a `string` value to a base64 string.
     function toBase64(string calldata data) external pure returns (string memory);
+
+    function getProfile() external returns (ProfileMetadata memory);
+    function getProfile(string calldata profile) external returns (ProfileMetadata memory);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used

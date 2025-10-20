@@ -1,4 +1,6 @@
 cache/
 out/
+out-cancun/
+out-shanghai/
 .vscode
 .idea

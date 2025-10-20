@@ -7,6 +7,22 @@ optimizer_runs = 200
 # 3860 = init-code-size
 ignored_error_codes = [3860]
 
+[profile.shanghai]
+fs_permissions = [{ access = "read-write", path = "./" }]
+optimizer = true
+optimizer_runs = 200
+evm_version = "shanghai"
+out = "out-shanghai"
+ignored_error_codes = [3860]
+
+[profile.cancun]
+fs_permissions = [{ access = "read-write", path = "./" }]
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+out = "out-cancun"
+ignored_error_codes = [3860]
+
 [rpc_endpoints]
 # The RPC URLs are modified versions of the default for testing initialization.
 mainnet = "https://eth.merkle.io"                                # Different API key.
