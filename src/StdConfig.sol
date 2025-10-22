@@ -105,8 +105,9 @@ contract StdConfig {
 
             // Cache the configure rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (string memory url)
-            {
+            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (
+                string memory url
+            ) {
                 _rpcOf[chainId] = vm.resolveEnv(url);
             } catch {
                 _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(chain_key));
@@ -126,7 +127,7 @@ contract StdConfig {
                             revert AlreadyInitialized(key);
                         }
                     }
-                } catch {} // Section does not exist, ignore.
+                } catch {}
             }
         }
     }
