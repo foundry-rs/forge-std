@@ -1928,6 +1928,9 @@ interface VmSafe {
     /// Returns ENS namehash for provided string.
     function ensNamehash(string calldata name) external pure returns (bytes32);
 
+    /// RLP decodes an RLP payload into a list of bytes.
+    function fromRlp(bytes calldata rlp) external pure returns (bytes[] memory data);
+
     /// Gets the label for the specified address.
     function getLabel(address account) external view returns (string memory currentLabel);
 
@@ -1998,6 +2001,9 @@ interface VmSafe {
 
     /// Encodes a `string` value to a base64 string.
     function toBase64(string calldata data) external pure returns (string memory);
+
+    /// RLP encodes a list of bytes into an RLP payload.
+    function toRlp(bytes[] calldata data) external pure returns (bytes memory);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
