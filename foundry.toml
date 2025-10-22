@@ -14,6 +14,9 @@ optimism_sepolia = "https://sepolia.optimism.io/"                # Adds a traili
 arbitrum_one_sepolia = "https://sepolia-rollup.arbitrum.io/rpc/" # Adds a trailing slash.
 needs_undefined_env_var = "${UNDEFINED_RPC_URL_PLACEHOLDER}"
 
+[lint]
+lint_on_build = false
+
 [fmt]
 # These are all the `forge fmt` defaults.
 line_length = 120
