@@ -9,10 +9,13 @@ ignored_error_codes = [3860]
 
 [rpc_endpoints]
 # The RPC URLs are modified versions of the default for testing initialization.
-mainnet = "https://eth.merkle.io"                                # Different API key.
+mainnet = "https://reth-ethereum.ithaca.xyz/rpc"
 optimism_sepolia = "https://sepolia.optimism.io/"                # Adds a trailing slash.
 arbitrum_one_sepolia = "https://sepolia-rollup.arbitrum.io/rpc/" # Adds a trailing slash.
 needs_undefined_env_var = "${UNDEFINED_RPC_URL_PLACEHOLDER}"
+
+[lint]
+lint_on_build = false
 
 [fmt]
 # These are all the `forge fmt` defaults.
