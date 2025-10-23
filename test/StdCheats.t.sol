@@ -151,7 +151,7 @@ contract StdCheatsTest is Test {
         assertEq(barToken.balanceOf(bar), 1);
     }
 
-    function test_DeployCode() public {
+    function test_deployCode() public {
         address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
@@ -183,18 +183,18 @@ contract StdCheatsTest is Test {
         assertEq(bar.balance, 0);
     }
 
-    function test_DeployCodeNoArgs() public {
+    function test_deployCodeNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:Bar");
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
-    function test_DeployCodeVal() public {
+    function test_deployCodeVal() public {
         address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""), 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
     }
 
-    function test_DeployCodeValNoArgs() public {
+    function test_deployCodeValNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:Bar", 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
@@ -205,7 +205,7 @@ contract StdCheatsTest is Test {
         deployCode(what);
     }
 
-    function test_RevertIf_DeployCodeFail() public {
+    function test_RevertIf_deployCodeFails() public {
         vm.expectRevert(bytes("StdCheats deployCode(string): Deployment failed."));
         this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
     }
@@ -424,7 +424,7 @@ contract StdCheatsTest is Test {
         deployCodeTo("StdCheats.t.sol:RevertingContract", address(0));
     }
 
-    function test_DeployCodeTo() external {
+    function test_deployCodeTo() external {
         address arbitraryAddress = makeAddr("arbitraryAddress");
 
         deployCodeTo(

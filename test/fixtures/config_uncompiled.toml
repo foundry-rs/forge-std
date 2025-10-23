@@ -1,0 +1,6 @@
+[mainnet]
+endpoint_url = "https://eth.llamarpc.com"
+profile = "uncompiled"
+
+[mainnet.uint]
+number = 123
