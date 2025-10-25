@@ -715,6 +715,7 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     function changePrank(address msgSender, address txOrigin) internal virtual {
+        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
         vm.stopPrank();
         vm.startPrank(msgSender, txOrigin);
     }
