@@ -343,9 +343,9 @@ interface VmSafe {
 
     /// Represents metadata derived from `foundry.toml` for a given profile.
     struct ProfileMetadata {
-        /// The output path of the generated artifacts.
+        // The output path of the generated artifacts.
         string artifacts;
-        /// The EVM version.
+        // The EVM version.
         string evm;
     }
 

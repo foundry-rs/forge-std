@@ -7,6 +7,7 @@ import {Config} from "../src/Config.sol";
 import {StdConfig} from "../src/StdConfig.sol";
 import {ConfigView, LibConfigView} from "../src/LibConfigView.sol";
 
+// forgefmt: disable-start
 contract ConfigTest is Test, Config {
     using LibConfigView for ConfigView;
     function setUp() public {
