@@ -1,0 +1,6 @@
+[mainnet]
+endpoint_url = "${MAINNET_RPC}"
+profile = "shanghai"
+
+[mainnet.bool]
+is_live = true
