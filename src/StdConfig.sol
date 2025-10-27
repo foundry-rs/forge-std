@@ -146,11 +146,11 @@ contract StdConfig {
 
                 try vm.parseTomlKeys(content, typePath) returns (string[] memory keys) {
                     for (uint256 j = 0; j < keys.length; j++) {
-                        string memory key = keys[j];
-                        if (_typeOf[chainId][key].kind == TypeKind.None) {
-                            _loadAndCacheValue(content, string.concat(typePath, ".", key), chainId, key, ty);
+                        string memory k = keys[j];
+                        if (_typeOf[chainId][k].kind == TypeKind.None) {
+                            _loadAndCacheValue(content, string.concat(typePath, ".", k), chainId, k, ty);
                         } else {
-                            revert AlreadyInitialized(key);
+                            revert AlreadyInitialized(k);
                         }
                     }
                 } catch {}
