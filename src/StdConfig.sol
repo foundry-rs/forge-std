@@ -153,7 +153,7 @@ contract StdConfig {
                             revert AlreadyInitialized(key);
                         }
                     }
-                } catch {} // Section does not exist, ignore.
+                } catch {}
             }
         }
     }
