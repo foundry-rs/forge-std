@@ -6,6 +6,7 @@ import {VmSafe} from "../src/Vm.sol";
 import {Config} from "../src/Config.sol";
 import {StdConfig} from "../src/StdConfig.sol";
 import {ConfigView, LibConfigView} from "../src/LibConfigView.sol";
+import {LibVariable} from "../src/LibVariable.sol";
 
 // forgefmt: disable-start
 contract ConfigTest is Test, Config {
@@ -215,7 +216,7 @@ contract ConfigTest is Test, Config {
         vm.store(address(_chainConfig[10]), bytes32(uint256(7)), bytes32(uint256(1))); // Cancun StdConfig
 
         {
-            _chainConfig[1].set(1, "is_live", false);
+            _chainConfig[1].set(1, "is_live", LibVariable.from(false));
 
             assertFalse(_chainConfig[1].get(1, "is_live").toBool());
 
@@ -223,7 +224,7 @@ contract ConfigTest is Test, Config {
             assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"));
 
             address new_addr = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
-            _chainConfig[1].set(1, "weth", new_addr);
+            _chainConfig[1].set(1, "weth", LibVariable.from(new_addr));
 
             assertEq(_chainConfig[1].get(1, "weth").toAddress(), new_addr);
 
@@ -234,7 +235,7 @@ contract ConfigTest is Test, Config {
             new_numbers[0] = 1;
             new_numbers[1] = 2;
             new_numbers[2] = 3;
-            _chainConfig[10].set(10, "number_array", new_numbers);
+            _chainConfig[10].set(10, "number_array", LibVariable.from(new_numbers));
 
             uint256[] memory updated_numbers_mem = _chainConfig[10].get(10, "number_array").toUint256Array();
             assertEq(updated_numbers_mem.length, 3);
@@ -252,7 +253,7 @@ contract ConfigTest is Test, Config {
             string[] memory new_strings = new string[](2);
             new_strings[0] = "hello";
             new_strings[1] = "world";
-            _chainConfig[1].set(1, "str_array", new_strings);
+            _chainConfig[1].set(1, "str_array", LibVariable.from(new_strings));
 
             string[] memory updated_strings_mem = _chainConfig[1].get(1, "str_array").toStringArray();
             assertEq(updated_strings_mem.length, 2);
@@ -265,14 +266,14 @@ contract ConfigTest is Test, Config {
             assertEq(updated_strings_disk[0], "hello");
             assertEq(updated_strings_disk[1], "world");
 
-            _chainConfig[1].set(1, "new_uint", uint256(42));
+            _chainConfig[1].set(1, "new_uint", LibVariable.from(uint256(42)));
 
             assertEq(_chainConfig[1].get(1, "new_uint").toUint256(), 42);
 
             content = vm.readFile(testConfig);
             assertEq(vm.parseTomlUint(content, "$.mainnet.uint.new_uint"), 42);
 
-            _chainConfig[1].set(1, "new_int", int256(-42));
+            _chainConfig[1].set(1, "new_int", LibVariable.from(int256(-42)));
 
             assertEq(_chainConfig[1].get(1, "new_int").toInt256(), -42);
 
@@ -282,7 +283,7 @@ contract ConfigTest is Test, Config {
             int256[] memory new_ints = new int256[](2);
             new_ints[0] = -100;
             new_ints[1] = 200;
-            _chainConfig[10].set(10, "new_ints", new_ints);
+            _chainConfig[10].set(10, "new_ints", LibVariable.from(new_ints));
 
             int256[] memory updated_ints_mem = _chainConfig[10].get(10, "new_ints").toInt256Array();
             assertEq(updated_ints_mem.length, 2);
@@ -298,7 +299,7 @@ contract ConfigTest is Test, Config {
             bytes32[] memory new_words = new bytes32[](2);
             new_words[0] = bytes32(uint256(0xDEAD));
             new_words[1] = bytes32(uint256(0xBEEF));
-            _chainConfig[10].set(10, "new_words", new_words);
+            _chainConfig[10].set(10, "new_words", LibVariable.from(new_words));
 
             bytes32[] memory updated_words_mem = _chainConfig[10].get(10, "new_words").toBytes32Array();
             assertEq(updated_words_mem.length, 2);
@@ -321,7 +322,7 @@ contract ConfigTest is Test, Config {
         loadConfig(testConfig, false);
 
         // Update a single boolean value and verify the file is NOT changed.
-        _chainConfig[1].set(1, "is_live", false);
+        _chainConfig[1].set(1, "is_live", LibVariable.from(false));
         string memory content = vm.readFile(testConfig);
         assertTrue(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should not be updated yet");
 
@@ -329,7 +330,7 @@ contract ConfigTest is Test, Config {
         vm.store(address(_chainConfig[1]), bytes32(uint256(7)), bytes32(uint256(1)));
 
         // Update the value again and verify the file IS changed.
-        _chainConfig[1].set(1, "is_live", false);
+        _chainConfig[1].set(1, "is_live", LibVariable.from(false));
         content = vm.readFile(testConfig);
         assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should be updated now");
 
@@ -337,7 +338,7 @@ contract ConfigTest is Test, Config {
         _chainConfig[1].writeUpdatesBackToFile(false);
 
         // Update the value again and verify the file is NOT changed.
-        _chainConfig[1].set(1, "is_live", true);
+        _chainConfig[1].set(1, "is_live", LibVariable.from(true));
         content = vm.readFile(testConfig);
         assertFalse(vm.parseTomlBool(content, "$.mainnet.bool.is_live"), "File should not be updated again");
 
@@ -382,7 +383,7 @@ contract ConfigTest is Test, Config {
         // Try to write a value for a non-existent chain ID through the shanghai StdConfig
         // This should fail because the shanghai StdConfig only manages chain 1, not chain 999999
         vm.expectRevert(abi.encodeWithSelector(StdConfig.ChainNotInitialized.selector, uint256(999999)));
-        _chainConfig[1].set(999999, "some_key", uint256(123));
+        _chainConfig[1].set(999999, "some_key", LibVariable.from(uint256(123)));
 
         vm.removeFile(singleChainConfig);
     }

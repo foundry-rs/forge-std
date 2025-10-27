@@ -474,4 +474,78 @@ library LibVariable {
     {
         return abi.decode(self.data, (bytes[]));
     }
+
+    // -- FACTORY FUNCTIONS (SINGLE VALUES) ------------------------------------
+
+    /// @notice Creates a `Variable` from a `bool` value.
+    function from(bool value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bool, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from an `address` value.
+    function from(address value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Address, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `bytes32` value.
+    function from(bytes32 value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bytes32, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `uint256` value.
+    function from(uint256 value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Uint256, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from an `int256` value.
+    function from(int256 value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Int256, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `string` value.
+    function from(string memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.String, false), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `bytes` value.
+    function from(bytes memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bytes, false), abi.encode(value));
+    }
+
+    // -- FACTORY FUNCTIONS (ARRAYS) -------------------------------------------
+
+    /// @notice Creates a `Variable` from a `bool` array.
+    function from(bool[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bool, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from an `address` array.
+    function from(address[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Address, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `bytes32` array.
+    function from(bytes32[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bytes32, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `uint256` array.
+    function from(uint256[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Uint256, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from an `int256` array.
+    function from(int256[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Int256, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `string` array.
+    function from(string[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.String, true), abi.encode(value));
+    }
+
+    /// @notice Creates a `Variable` from a `bytes` array.
+    function from(bytes[] memory value) internal pure returns (Variable memory) {
+        return Variable(Type(TypeKind.Bytes, true), abi.encode(value));
+    }
 }

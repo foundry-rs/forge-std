@@ -110,7 +110,7 @@ contract StdConfig {
             if (vm.parseTomlKeys(content, string.concat("$.", key)).length == 0) {
                 continue;
             }
-            uint256 chainId = resolveChainId(key);
+            uint256 chainId = _resolveChainId(key);
 
             // Cache the configured profile metadata for that chain.
             // Falls back to the currently active profile. Panics if the profile name doesn't exist.
@@ -257,81 +257,6 @@ contract StdConfig {
         }
     }
 
-    // -- HELPER FUNCTIONS -----------------------------------------------------
-
-    /// @notice Enable or disable automatic writing to the TOML file on `set`.
-    ///         Can only be enabled when scripting.
-    function writeUpdatesBackToFile(bool enabled) public {
-        if (enabled && !vm.isContext(VmSafe.ForgeContext.ScriptGroup)) {
-            revert WriteToFileInForbiddenCtxt();
-        }
-
-        _writeToFile = enabled;
-    }
-
-    /// @notice Resolves a chain alias or a chain id string to its numerical chain id.
-    /// @param aliasOrId The string representing the chain alias (i.e. "mainnet") or a numerical ID (i.e. "1").
-    /// @return The numerical chain ID.
-    /// @dev It first attempts to parse the input as a number. If that fails, it uses `vm.getChain` to resolve a named alias.
-    ///      Reverts if the alias is not valid or not a number.
-    function resolveChainId(string memory aliasOrId) public view returns (uint256) {
-        try vm.parseUint(aliasOrId) returns (uint256 chainId) {
-            return chainId;
-        } catch {
-            try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
-                return chainInfo.chainId;
-            } catch {
-                revert InvalidChainKey(aliasOrId);
-            }
-        }
-    }
-
-    /// @dev Retrieves the chain key/alias from the configuration based on the chain ID.
-    function _getChainKeyFromId(uint256 chainId) private view returns (string memory) {
-        string memory key = _keyOf[chainId];
-        if (bytes(key).length == 0) revert ChainNotInitialized(chainId);
-        return key;
-    }
-
-    /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.
-    ///      Updates type only when the previous type was `None`.
-    function _ensureTypeConsistency(uint256 chainId, string memory key, Type memory ty) private {
-        Type memory current = _typeOf[chainId][key];
-
-        if (current.kind == TypeKind.None) {
-            _typeOf[chainId][key] = ty;
-        } else {
-            current.assertEq(ty);
-        }
-    }
-
-    /// @dev Wraps a string in double quotes for JSON compatibility.
-    function _quote(string memory s) private pure returns (string memory) {
-        return string.concat('"', s, '"');
-    }
-
-    /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
-    /// @param chainId The chain id to write under.
-    /// @param ty The type category ('bool', 'address', 'uint', 'bytes32', 'string', or 'bytes').
-    /// @param key The variable key name.
-    /// @param jsonValue The JSON-formatted value to write.
-    function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
-        string memory chainKey = _getChainKeyFromId(chainId);
-        string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
-        vm.writeToml(jsonValue, _filePath, valueKey);
-    }
-
-    /// @dev Validates that a chain has been initialized in this StdConfig instance.
-    function _isCached(uint256 chainId) private view {
-        if (bytes(_keyOf[chainId]).length == 0) revert ChainNotInitialized(chainId);
-    }
-
-    /// @dev Modifier to ensure chain is initialized before accessing its data.
-    modifier isCached(uint256 chainId) {
-        _isCached(chainId);
-        _;
-    }
-
     // -- GETTER FUNCTIONS -----------------------------------------------------
 
     /// @dev    Reads a variable for a given chain id and key, and returns it in a generic container.
@@ -380,271 +305,176 @@ contract StdConfig {
         return _profileOf[vm.getChainId()];
     }
 
-    // -- SETTER FUNCTIONS (SINGLE VALUES) -------------------------------------
+    // -- SETTER FUNCTIONS -----------------------------------------------------
 
-    /// @notice Sets a boolean value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bool value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bool, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, vm.toString(value));
+    /// @notice Enable or disable automatic writing to the TOML file on `set`.
+    ///         Can only be enabled when scripting.
+    function writeUpdatesBackToFile(bool enabled) public {
+        if (enabled && !vm.isContext(VmSafe.ForgeContext.ScriptGroup)) {
+            revert WriteToFileInForbiddenCtxt();
+        }
+
+        _writeToFile = enabled;
     }
 
-    /// @notice Sets a boolean value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bool value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets an address value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, address value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Address, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _quote(vm.toString(value)));
-    }
-
-    /// @notice Sets an address value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, address value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a bytes32 value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bytes32 value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bytes32, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _quote(vm.toString(value)));
-    }
-
-    /// @notice Sets a bytes32 value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bytes32 value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a uint256 value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, uint256 value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Uint256, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, vm.toString(value));
-    }
-
-    /// @notice Sets a uint256 value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, uint256 value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets an int256 value for a given key and chain ID.
-    function set(uint256 chainId, string memory key, int256 value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Int256, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, vm.toString(value));
-    }
-
-    /// @notice Sets an int256 value for a given key on the current chain.
-    function set(string memory key, int256 value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a string value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, string memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.String, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _quote(value));
-    }
-
-    /// @notice Sets a string value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, string memory value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a bytes value for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bytes memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bytes, false);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _quote(vm.toString(value)));
-    }
-
-    /// @notice Sets a bytes value for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bytes memory value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    // -- SETTER FUNCTIONS (ARRAYS) --------------------------------------------
-
-    /// @notice Sets a boolean array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bool[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bool, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
+    /// @notice Sets a variable for a given key and chain ID.
+    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `writeToFile` is enabled.
+    ///         Use `LibVariable.from(...)` to create the Variable from concrete types.
+    /// @param  chainId The chain ID to set the value for.
+    /// @param  key The key of the variable to set.
+    /// @param  value The Variable containing the type and ABI-encoded value.
+    function set(uint256 chainId, string memory key, Variable memory value) public isCached(chainId) {
+        _ensureTypeConsistency(chainId, key, value.ty);
+        _dataOf[chainId][key] = value.data;
         if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
+            _writeToToml(chainId, value.ty.kind.toTomlKey(), key, _serializeToJson(value));
         }
     }
 
-    /// @notice Sets a boolean array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bool[] memory value) public {
+    /// @notice Sets a variable for a given key on the current chain.
+    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `writeToFile` is enabled.
+    ///         Use `LibVariable.from(...)` to create the Variable from concrete types.
+    /// @param  key The key of the variable to set.
+    /// @param  value The Variable containing the type and ABI-encoded value.
+    function set(string memory key, Variable memory value) public {
         set(vm.getChainId(), key, value);
     }
 
-    /// @notice Sets an address array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, address[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Address, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+    // -- HELPER FUNCTIONS -----------------------------------------------------
+
+    /// @dev Validates that a chain has been initialized in this StdConfig instance.
+    function _isCached(uint256 chainId) private view {
+        if (bytes(_keyOf[chainId]).length == 0) revert ChainNotInitialized(chainId);
+    }
+
+    /// @dev Modifier to ensure chain is initialized before accessing its data.
+    modifier isCached(uint256 chainId) {
+        _isCached(chainId);
+        _;
+    }
+
+    /// @notice Resolves a chain alias or a chain id string to its numerical chain id.
+    /// @param aliasOrId The string representing the chain alias (i.e. "mainnet") or a numerical ID (i.e. "1").
+    /// @return The numerical chain ID.
+    /// @dev It first attempts to parse the input as a number. If that fails, it uses `vm.getChain` to resolve a named alias.
+    ///      Reverts if the alias is not valid or not a number.
+    function _resolveChainId(string memory aliasOrId) public view returns (uint256) {
+        try vm.parseUint(aliasOrId) returns (uint256 chainId) {
+            return chainId;
+        } catch {
+            try vm.getChain(aliasOrId) returns (VmSafe.Chain memory chainInfo) {
+                return chainInfo.chainId;
+            } catch {
+                revert InvalidChainKey(aliasOrId);
             }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
 
-    /// @notice Sets an address array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, address[] memory value) public {
-        set(vm.getChainId(), key, value);
+    /// @dev Retrieves the chain key/alias from the configuration based on the chain ID.
+    function _getChainKeyFromId(uint256 chainId) private view returns (string memory) {
+        string memory key = _keyOf[chainId];
+        if (bytes(key).length == 0) revert ChainNotInitialized(chainId);
+        return key;
     }
 
-    /// @notice Sets a bytes32 array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bytes32[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bytes32, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
-            }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
+    /// @dev Ensures type consistency when setting a value - prevents changing types unless uninitialized.
+    ///      Updates type only when the previous type was `None`.
+    function _ensureTypeConsistency(uint256 chainId, string memory key, Type memory ty) private {
+        Type memory current = _typeOf[chainId][key];
+
+        if (current.kind == TypeKind.None) {
+            _typeOf[chainId][key] = ty;
+        } else {
+            current.assertEq(ty);
         }
     }
 
-    /// @notice Sets a bytes32 array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bytes32[] memory value) public {
-        set(vm.getChainId(), key, value);
+    /// @dev Wraps a string in double quotes for JSON compatibility.
+    function _quote(string memory s) private pure returns (string memory) {
+        return string.concat('"', s, '"');
     }
 
-    /// @notice Sets a uint256 array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, uint256[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Uint256, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+    /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
+    /// @param chainId The chain id to write under.
+    /// @param ty The type category ('bool', 'address', 'uint', 'bytes32', 'string', or 'bytes').
+    /// @param key The variable key name.
+    /// @param jsonValue The JSON-formatted value to write.
+    function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
+        string memory chainKey = _getChainKeyFromId(chainId);
+        string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
+        vm.writeToml(jsonValue, _filePath, valueKey);
+    }
+
+    /// @dev Serializes a Variable to JSON format for TOML writing.
+    function _serializeToJson(Variable memory value) private pure returns (string memory) {
+        TypeKind kind = value.ty.kind;
+        bool isArray = value.ty.isArray;
+
+        // single values
+        if (!isArray) {
+            if (kind == TypeKind.Bool) {
+                return abi.decode(value.data, (bool)) ? "true" : "false";
+            } else if (kind == TypeKind.Address) {
+                return _quote(vm.toString(abi.decode(value.data, (address))));
+            } else if (kind == TypeKind.Bytes32) {
+                return _quote(vm.toString(abi.decode(value.data, (bytes32))));
+            } else if (kind == TypeKind.Uint256) {
+                return vm.toString(abi.decode(value.data, (uint256)));
+            } else if (kind == TypeKind.Int256) {
+                return vm.toString(abi.decode(value.data, (int256)));
+            } else if (kind == TypeKind.String) {
+                return _quote(abi.decode(value.data, (string)));
+            } else if (kind == TypeKind.Bytes) {
+                return _quote(vm.toString(abi.decode(value.data, (bytes))));
             }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
-    }
 
-    /// @notice Sets a uint256 array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, uint256[] memory value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a int256 array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, int256[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Int256, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+        // arrays
+        string memory json = "[";
+        if (kind == TypeKind.Bool) {
+            bool[] memory arr = abi.decode(value.data, (bool[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, arr[i] ? "true" : "false");
+                if (i < arr.length - 1) json = string.concat(json, ",");
             }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
-        }
-    }
-
-    /// @notice Sets a int256 array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, int256[] memory value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a string array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, string[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.String, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+        } else if (kind == TypeKind.Address) {
+            address[] memory arr = abi.decode(value.data, (address[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, _quote(vm.toString(arr[i])));
+                if (i < arr.length - 1) json = string.concat(json, ",");
             }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
-        }
-    }
-
-    /// @notice Sets a string array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, string[] memory value) public {
-        set(vm.getChainId(), key, value);
-    }
-
-    /// @notice Sets a bytes array for a given key and chain ID.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(uint256 chainId, string memory key, bytes[] memory value) public isCached(chainId) {
-        Type memory ty = Type(TypeKind.Bytes, true);
-        _ensureTypeConsistency(chainId, key, ty);
-        _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) {
-            string memory json = "[";
-            for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+        } else if (kind == TypeKind.Bytes32) {
+            bytes32[] memory arr = abi.decode(value.data, (bytes32[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, _quote(vm.toString(arr[i])));
+                if (i < arr.length - 1) json = string.concat(json, ",");
             }
-            json = string.concat(json, "]");
-            _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
+        } else if (kind == TypeKind.Uint256) {
+            uint256[] memory arr = abi.decode(value.data, (uint256[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, vm.toString(arr[i]));
+                if (i < arr.length - 1) json = string.concat(json, ",");
+            }
+        } else if (kind == TypeKind.Int256) {
+            int256[] memory arr = abi.decode(value.data, (int256[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, vm.toString(arr[i]));
+                if (i < arr.length - 1) json = string.concat(json, ",");
+            }
+        } else if (kind == TypeKind.String) {
+            string[] memory arr = abi.decode(value.data, (string[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, _quote(arr[i]));
+                if (i < arr.length - 1) json = string.concat(json, ",");
+            }
+        } else if (kind == TypeKind.Bytes) {
+            bytes[] memory arr = abi.decode(value.data, (bytes[]));
+            for (uint256 i = 0; i < arr.length; i++) {
+                json = string.concat(json, _quote(vm.toString(arr[i])));
+                if (i < arr.length - 1) json = string.concat(json, ",");
+            }
         }
-    }
-
-    /// @notice Sets a bytes array for a given key on the current chain.
-    /// @dev    Sets the cached value in storage and writes the change back to the TOML file if `autoWrite` is enabled.
-    function set(string memory key, bytes[] memory value) public {
-        set(vm.getChainId(), key, value);
+        json = string.concat(json, "]");
+        return json;
     }
 }
