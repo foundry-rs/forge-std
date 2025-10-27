@@ -104,13 +104,11 @@ abstract contract Config is CommonBase {
 
         // Deploy StdConfig from the profile's artifact directory if not already deployed
         if (address(std_configOf[evmVersion]) == address(0)) {
-            string memory artifact = string.concat(
-                profile[chainId].artifacts,
-                "/StdConfig.sol/StdConfig.json"
-            );
+            string memory artifact = string.concat(profile[chainId].artifacts, "/StdConfig.sol/StdConfig.json");
 
             // Validate artifact exists
-            try vm.readFile(artifact) {} catch {
+            try vm.readFile(artifact) {}
+            catch {
                 revert ProfileArtifactsNotFound(profileName, artifact);
             }
 
@@ -178,13 +176,11 @@ abstract contract Config is CommonBase {
             // Deploy or reuse StdConfig based on EVM version
             if (address(std_configOf[evmVersion]) == address(0)) {
                 // First chain with this EVM version - deploy new StdConfig
-                string memory artifact = string.concat(
-                    profile[chainId].artifacts,
-                    "/StdConfig.sol/StdConfig.json"
-                );
+                string memory artifact = string.concat(profile[chainId].artifacts, "/StdConfig.sol/StdConfig.json");
 
                 // Validate artifact exists
-                try vm.readFile(artifact) {} catch {
+                try vm.readFile(artifact) {}
+                catch {
                     revert ProfileArtifactsNotFound(profileName, artifact);
                 }
 
@@ -218,7 +214,6 @@ abstract contract Config is CommonBase {
         vm.setEvmVersion(profile[chainId].evm);
     }
 
-
     // -- DEPLOYMENT HELPERS ---------------------------------------------------
 
     /// @notice  Deploys a contract from an artifact file of the configured profile for the input chain.
@@ -229,11 +224,10 @@ abstract contract Config is CommonBase {
     /// @param   chainId: the chain ID.
     /// @param   contractFile: the file that contains the contract's source code (i.e. "Counter.sol").
     /// @param   contractName: the name of the contract (i.e. "Counter").
-    function deployCode(
-        uint256 chainId,
-        string memory contractFile,
-        string memory contractName
-    ) internal returns (address) {
+    function deployCode(uint256 chainId, string memory contractFile, string memory contractName)
+        internal
+        returns (address)
+    {
         string memory artifactPath = _getArtifactPath(chainId, contractFile, contractName);
         return vm.deployCode(artifactPath);
     }
@@ -266,12 +260,10 @@ abstract contract Config is CommonBase {
     /// @param   contractFile: the file that contains the contract's source code (i.e. "Counter.sol").
     /// @param   contractName: the name of the contract (i.e. "Counter").
     /// @param   value: `msg.value`
-    function deployCode(
-        uint256 chainId,
-        string memory contractFile,
-        string memory contractName,
-        uint256 value
-    ) internal returns (address) {
+    function deployCode(uint256 chainId, string memory contractFile, string memory contractName, uint256 value)
+        internal
+        returns (address)
+    {
         string memory artifactPath = _getArtifactPath(chainId, contractFile, contractName);
         return vm.deployCode(artifactPath, value);
     }
@@ -306,12 +298,10 @@ abstract contract Config is CommonBase {
     /// @param   contractFile: the file that contains the contract's source code (i.e. "Counter.sol").
     /// @param   contractName: the name of the contract (i.e. "Counter").
     /// @param   salt: the salt used in CREATE2.
-    function deployCode(
-        uint256 chainId,
-        string memory contractFile,
-        string memory contractName,
-        bytes32 salt
-    ) internal returns (address) {
+    function deployCode(uint256 chainId, string memory contractFile, string memory contractName, bytes32 salt)
+        internal
+        returns (address)
+    {
         string memory artifactPath = _getArtifactPath(chainId, contractFile, contractName);
         return vm.deployCode(artifactPath, salt);
     }
@@ -410,19 +400,13 @@ abstract contract Config is CommonBase {
     /// @param   contractFile: the file that contains the contract's source code (i.e. "Counter.sol").
     /// @param   contractName: the contract name (i.e. "Counter").
     /// @return  The full path to the artifact JSON file.
-    function _getArtifactPath(
-        uint256 chainId,
-        string memory contractFile,
-        string memory contractName
-    ) internal view isActive(chainId) returns (string memory) {
-        return string.concat(
-            profile[chainId].artifacts,
-            "/",
-            contractFile,
-            "/",
-            contractName,
-            ".json"
-        );
+    function _getArtifactPath(uint256 chainId, string memory contractFile, string memory contractName)
+        internal
+        view
+        isActive(chainId)
+        returns (string memory)
+    {
+        return string.concat(profile[chainId].artifacts, "/", contractFile, "/", contractName, ".json");
     }
 
     function _assertCached(uint256 chainId) internal view {

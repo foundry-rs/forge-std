@@ -105,18 +105,17 @@ contract StdConfig {
 
         // Cache the entire configuration to storage
         for (uint256 i = 0; i < chain_keys.length; i++) {
-            string memory chain_key = chain_keys[i];
+            string memory key = chain_keys[i];
             // Ignore top-level keys that are not tables
-            if (vm.parseTomlKeys(content, string.concat("$.", chain_key)).length == 0) {
+            if (vm.parseTomlKeys(content, string.concat("$.", key)).length == 0) {
                 continue;
             }
-            uint256 chainId = resolveChainId(chain_key);
+            uint256 chainId = resolveChainId(key);
 
             // Cache the configured profile metadata for that chain.
             // Falls back to the currently active profile. Panics if the profile name doesn't exist.
             VmSafe.ProfileMetadata memory chainProfile;
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".profile")) returns (string memory profile)
-            {
+            try vm.parseTomlString(content, string.concat("$.", key, ".profile")) returns (string memory profile) {
                 chainProfile = vm.getProfile(profile);
             } catch {
                 chainProfile = vm.getProfile();
@@ -130,21 +129,20 @@ contract StdConfig {
             // This chain matches our EVM version, load it
             _chainIds.push(chainId);
             _profileOf[chainId] = chainProfile;
-            _keyOf[chainId] = chain_key;
+            _keyOf[chainId] = key;
 
             // Cache the configured rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (string memory url)
-            {
+            try vm.parseTomlString(content, string.concat("$.", key, ".endpoint_url")) returns (string memory url) {
                 _rpcOf[chainId] = vm.resolveEnv(url);
             } catch {
-                _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(chain_key));
+                _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(key));
             }
 
             // Iterate through all the available `TypeKind`s (except `None`) to create the sub-section paths
             for (uint8 t = 1; t <= NUM_TYPES; t++) {
                 TypeKind ty = TypeKind(t);
-                string memory typePath = string.concat("$.", chain_key, ".", ty.toTomlKey());
+                string memory typePath = string.concat("$.", key, ".", ty.toTomlKey());
 
                 try vm.parseTomlKeys(content, typePath) returns (string[] memory keys) {
                     for (uint256 j = 0; j < keys.length; j++) {
@@ -343,12 +341,7 @@ contract StdConfig {
     /// @param  chain_id The chain ID to read from.
     /// @param  key The key of the variable to retrieve.
     /// @return `Variable` struct containing the type and the ABI-encoded value.
-    function get(uint256 chain_id, string memory key)
-        public
-        view
-        isCached(chain_id)
-        returns (Variable memory)
-    {
+    function get(uint256 chain_id, string memory key) public view isCached(chain_id) returns (Variable memory) {
         return Variable(_typeOf[chain_id][key], _dataOf[chain_id][key]);
     }
 
