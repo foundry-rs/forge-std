@@ -372,12 +372,10 @@ interface VmSafe {
 
     /// Derive a private key from a provided mnemonic string (or mnemonic file path) in the specified language
     /// at `{derivationPath}{index}`.
-    function deriveKey(
-        string calldata mnemonic,
-        string calldata derivationPath,
-        uint32 index,
-        string calldata language
-    ) external pure returns (uint256 privateKey);
+    function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index, string calldata language)
+        external
+        pure
+        returns (uint256 privateKey);
 
     /// Derives secp256r1 public key from the provided `privateKey`.
     function publicKeyP256(uint256 privateKey) external pure returns (uint256 publicKeyX, uint256 publicKeyY);
@@ -2360,13 +2358,8 @@ interface Vm is VmSafe {
     /// Prepare an expected anonymous log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData.).
     /// Call this function, then emit an anonymous event, then call a function. Internally after the call, we check if
     /// logs were emitted in the expected order with the expected topics and data (as specified by the booleans).
-    function expectEmitAnonymous(
-        bool checkTopic0,
-        bool checkTopic1,
-        bool checkTopic2,
-        bool checkTopic3,
-        bool checkData
-    ) external;
+    function expectEmitAnonymous(bool checkTopic0, bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData)
+        external;
 
     /// Same as the previous method, but also checks supplied address against emitting contract.
     function expectEmitAnonymous(
