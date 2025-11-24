@@ -4,21 +4,6 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 abstract contract StdInvariant {
-    struct FuzzSelector {
-        address addr;
-        bytes4[] selectors;
-    }
-
-    struct FuzzArtifactSelector {
-        string artifact;
-        bytes4[] selectors;
-    }
-
-    struct FuzzInterface {
-        address addr;
-        string[] artifacts;
-    }
-
     address[] private _excludedContracts;
     address[] private _excludedSenders;
     address[] private _targetedContracts;
@@ -27,12 +12,17 @@ abstract contract StdInvariant {
     string[] private _excludedArtifacts;
     string[] private _targetedArtifacts;
 
-    FuzzArtifactSelector[] private _targetedArtifactSelectors;
+    string[] private _targetArtifactSelectorArtifacts;
+    bytes4[] private _targetArtifactSelectorSelectors;
 
-    FuzzSelector[] private _excludedSelectors;
-    FuzzSelector[] private _targetedSelectors;
+    address[] private _excludedSelectorAddresses;
+    bytes4[] private _excludedSelectorSelectors;
 
-    FuzzInterface[] private _targetedInterfaces;
+    address[] private _targetedSelectorAddresses;
+    bytes4[] private _targetedSelectorSelectors;
+
+    address[] private _targetedInterfaceAddresses;
+    string[] private _targetedInterfaceArtifacts;
 
     // Functions for users:
     // These are intended to be called in tests.
@@ -41,8 +31,9 @@ abstract contract StdInvariant {
         _excludedContracts.push(newExcludedContract_);
     }
 
-    function excludeSelector(FuzzSelector memory newExcludedSelector_) internal {
-        _excludedSelectors.push(newExcludedSelector_);
+    function excludeSelector(address addr, bytes4 selector) internal {
+        _excludedSelectorAddresses.push(addr);
+        _excludedSelectorSelectors.push(selector);
     }
 
     function excludeSender(address newExcludedSender_) internal {
@@ -57,24 +48,27 @@ abstract contract StdInvariant {
         _targetedArtifacts.push(newTargetedArtifact_);
     }
 
-    function targetArtifactSelector(FuzzArtifactSelector memory newTargetedArtifactSelector_) internal {
-        _targetedArtifactSelectors.push(newTargetedArtifactSelector_);
+    function targetArtifactSelector(string memory artifact, bytes4 selector) internal {
+        _targetArtifactSelectorArtifacts.push(artifact);
+        _targetArtifactSelectorSelectors.push(selector);
     }
 
     function targetContract(address newTargetedContract_) internal {
         _targetedContracts.push(newTargetedContract_);
     }
 
-    function targetSelector(FuzzSelector memory newTargetedSelector_) internal {
-        _targetedSelectors.push(newTargetedSelector_);
+    function targetSelector(address addr, bytes4 selector) internal {
+        _targetedSelectorAddresses.push(addr);
+        _targetedSelectorSelectors.push(selector);
     }
 
     function targetSender(address newTargetedSender_) internal {
         _targetedSenders.push(newTargetedSender_);
     }
 
-    function targetInterface(FuzzInterface memory newTargetedInterface_) internal {
-        _targetedInterfaces.push(newTargetedInterface_);
+    function targetInterface(address addr, string memory artifact) internal {
+        _targetedInterfaceAddresses.push(addr);
+        _targetedInterfaceArtifacts.push(artifact);
     }
 
     // Functions for forge:
@@ -88,8 +82,13 @@ abstract contract StdInvariant {
         excludedContracts_ = _excludedContracts;
     }
 
-    function excludeSelectors() public view returns (FuzzSelector[] memory excludedSelectors_) {
-        excludedSelectors_ = _excludedSelectors;
+    function excludeSelectors()
+        public
+        view
+        returns (address[] memory excludedAddresses, bytes4[] memory excludedSelectors)
+    {
+        excludedAddresses = _excludedSelectorAddresses;
+        excludedSelectors = _excludedSelectorSelectors;
     }
 
     function excludeSenders() public view returns (address[] memory excludedSenders_) {
@@ -100,23 +99,38 @@ abstract contract StdInvariant {
         targetedArtifacts_ = _targetedArtifacts;
     }
 
-    function targetArtifactSelectors() public view returns (FuzzArtifactSelector[] memory targetedArtifactSelectors_) {
-        targetedArtifactSelectors_ = _targetedArtifactSelectors;
+    function targetArtifactSelectors()
+        public
+        view
+        returns (string[] memory targetArtifact_, bytes4[] memory targetSelectors_)
+    {
+        targetArtifact_ = _targetArtifactSelectorArtifacts;
+        targetSelectors_ = _targetArtifactSelectorSelectors;
     }
 
     function targetContracts() public view returns (address[] memory targetedContracts_) {
         targetedContracts_ = _targetedContracts;
     }
 
-    function targetSelectors() public view returns (FuzzSelector[] memory targetedSelectors_) {
-        targetedSelectors_ = _targetedSelectors;
+    function targetSelectors()
+        public
+        view
+        returns (address[] memory targetedAddresses_, bytes4[] memory targetedSelectors_)
+    {
+        targetedAddresses_ = _targetedSelectorAddresses;
+        targetedSelectors_ = _targetedSelectorSelectors;
     }
 
     function targetSenders() public view returns (address[] memory targetedSenders_) {
         targetedSenders_ = _targetedSenders;
     }
 
-    function targetInterfaces() public view returns (FuzzInterface[] memory targetedInterfaces_) {
-        targetedInterfaces_ = _targetedInterfaces;
+    function targetInterfaces()
+        public
+        view
+        returns (address[] memory targetedAddresses_, string[] memory targetedArtifacts_)
+    {
+        targetedAddresses_ = _targetedInterfaceAddresses;
+        targetedArtifacts_ = _targetedInterfaceArtifacts;
     }
 }
