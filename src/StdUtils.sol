@@ -57,7 +57,6 @@ abstract contract StdUtils {
 
     function bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         result = _bound(x, min, max);
-        console2_log_StdUtils("Bound result", result);
     }
 
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
@@ -82,7 +81,6 @@ abstract contract StdUtils {
 
     function bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         result = _bound(x, min, max);
-        console2_log_StdUtils("Bound result", vm.toString(result));
     }
 
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
