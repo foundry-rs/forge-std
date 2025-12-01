@@ -5,11 +5,11 @@ import {stdMath} from "../src/StdMath.sol";
 import {Test, stdError} from "../src/Test.sol";
 
 contract StdMathMock is Test {
-    function exposed_percentDelta(uint256 a, uint256 b) public pure returns (uint256) {
+    function exposedPercentDelta(uint256 a, uint256 b) public pure returns (uint256) {
         return stdMath.percentDelta(a, b);
     }
 
-    function exposed_percentDelta(int256 a, int256 b) public pure returns (uint256) {
+    function exposedPercentDelta(int256 a, int256 b) public pure returns (uint256) {
         return stdMath.percentDelta(a, b);
     }
 }
@@ -125,8 +125,8 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, uint256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, uint256(2500)), 2e18);
 
-        vm.expectRevert(stdError.divisionError);
-        stdMathMock.exposed_percentDelta(uint256(1), 0);
+        vm.expectRevert("stdMath percentDelta(uint256,uint256): Divisor is zero");
+        stdMathMock.exposedPercentDelta(uint256(1), 0);
     }
 
     function testFuzz_GetPercentDelta_Uint(uint192 a, uint192 b) external pure {
@@ -163,8 +163,8 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, int256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, int256(2500)), 2e18);
 
-        vm.expectRevert(stdError.divisionError);
-        stdMathMock.exposed_percentDelta(int256(1), 0);
+        vm.expectRevert("stdMath percentDelta(int256,int256): Divisor is zero");
+        stdMathMock.exposedPercentDelta(int256(1), 0);
     }
 
     function testFuzz_GetPercentDelta_Int(int192 a, int192 b) external pure {

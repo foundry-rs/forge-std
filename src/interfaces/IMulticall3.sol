@@ -27,10 +27,7 @@ interface IMulticall3 {
         bytes returnData;
     }
 
-    function aggregate(Call[] calldata calls)
-        external
-        payable
-        returns (uint256 blockNumber, bytes[] memory returnData);
+    function aggregate(Call[] calldata calls) external payable returns (uint256 blockNumber, bytes[] memory returnData);
 
     function aggregate3(Call3[] calldata calls) external payable returns (Result[] memory returnData);
 
