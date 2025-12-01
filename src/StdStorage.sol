@@ -282,7 +282,11 @@ library stdStorageSafe {
     function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
         bytes32 out;
 
-        uint256 max = b.length > 32 ? 32 : b.length;
+        // Cap read length by remaining bytes from `offset`, and at most 32 bytes to avoid out-of-bounds
+        uint256 max = b.length > offset ? b.length - offset : 0;
+        if (max > 32) {
+            max = 32;
+        }
         for (uint256 i = 0; i < max; i++) {
             out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
         }
