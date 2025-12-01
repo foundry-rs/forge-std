@@ -4,6 +4,7 @@ pragma solidity >=0.6.2 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
+import {StdConstants} from "./StdConstants.sol";
 import {VmSafe} from "./Vm.sol";
 
 abstract contract StdUtils {
@@ -11,7 +12,6 @@ abstract contract StdUtils {
                                      CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    IMulticall3 private constant multicall = IMulticall3(0xcA11bde05977b3631167028862bE2a173976CA11);
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
     address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
     uint256 private constant INT256_MIN_ABS =
@@ -20,9 +20,6 @@ abstract contract StdUtils {
         115792089237316195423570985008687907852837564279074904382605163141518161494337;
     uint256 private constant UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
-
-    // Used by default when deploying with create2, https://github.com/Arachnid/deterministic-deployment-proxy.
-    address private constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
     /*//////////////////////////////////////////////////////////////////////////
                                  INTERNAL FUNCTIONS
@@ -148,7 +145,7 @@ abstract contract StdUtils {
         }
 
         // Make the aggregate call.
-        (, bytes[] memory returnData) = multicall.aggregate(calls);
+        (, bytes[] memory returnData) = StdConstants.MULTICALL3_ADDRESS.aggregate(calls);
 
         // ABI decode the return data and return the balances.
         balances = new uint256[](length);
