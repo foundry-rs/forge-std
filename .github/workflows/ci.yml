@@ -31,10 +31,10 @@ jobs:
           persist-credentials: false
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge --version
-      - run: forge build --skip test --deny-warnings ${{ matrix.flags }}
+      - run: forge build --skip test --deny warnings ${{ matrix.flags }}
       # via-ir compilation time checks.
       - if: contains(matrix.flags, '--via-ir')
-        run: forge build --skip test --deny-warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+        run: forge build --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
       - run: |
           tmp_dir="test/ci-$(date +%s)"
           mkdir -p "$tmp_dir"
@@ -47,7 +47,7 @@ jobs:
           import "../../src/Script.sol";
 
           contract BasicTest is Test {
-              function test_ok() public pure{
+              function test_ok() public pure {
                   assertTrue(true);
               }
           }
@@ -57,7 +57,7 @@ jobs:
           }
           EOF
 
-          forge test --deny-warnings ${{ matrix.flags }}
+          forge test --deny warnings ${{ matrix.flags }}
 
   test:
     runs-on: ubuntu-latest
