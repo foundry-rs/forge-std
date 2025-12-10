@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge --version
-      - run: forge build --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+      - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
