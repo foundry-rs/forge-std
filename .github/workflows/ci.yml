@@ -23,6 +23,8 @@ jobs:
         flags:
           - ""
           - --via-ir
+          - --use solc:0.8.31 --via-ir
+          - --use solc:0.8.31
           - --use solc:0.8.13 --via-ir
           - --use solc:0.8.13
     steps:
@@ -30,6 +32,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: ${{ matrix.toolchain }}
       - run: forge --version
       - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
 
