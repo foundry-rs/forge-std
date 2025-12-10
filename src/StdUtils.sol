@@ -185,8 +185,8 @@ abstract contract StdUtils {
     function _sendLogPayloadView(bytes memory payload) private view {
         uint256 payloadLength = payload.length;
         address consoleAddress = CONSOLE2_ADDRESS;
-        /// @solidity memory-safe-assembly
-        assembly {
+
+        assembly ("memory-safe") {
             let payloadStart := add(payload, 32)
             let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
         }

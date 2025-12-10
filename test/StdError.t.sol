@@ -91,8 +91,7 @@ contract ErrorsTest {
     }
 
     function encodeStgError() public {
-        /// @solidity memory-safe-assembly
-        assembly {
+        assembly ("memory-safe") {
             sstore(someBytes.slot, 1)
         }
         keccak256(someBytes);

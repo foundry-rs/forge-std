@@ -293,8 +293,7 @@ library stdStorageSafe {
         bytes memory result = new bytes(b.length * 32);
         for (uint256 i = 0; i < b.length; i++) {
             bytes32 k = b[i];
-            /// @solidity memory-safe-assembly
-            assembly {
+            assembly ("memory-safe") {
                 mstore(add(result, add(32, mul(32, i))), k)
             }
         }
@@ -400,8 +399,8 @@ library stdStorage {
 
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
-        /// @solidity memory-safe-assembly
-        assembly {
+
+        assembly ("memory-safe") {
             t := write
         }
         checked_write(self, t);
