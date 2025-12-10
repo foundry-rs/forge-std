@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.2;
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.8.13 <0.9.0;
 
 /// @dev Interface of the ERC20 standard as defined in the EIP.
 /// @dev This includes the optional name, symbol, and decimals metadata.
