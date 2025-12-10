@@ -5,8 +5,8 @@ import "../src/Test.sol";
 import "../src/Script.sol";
 
 contract BasicTest is Test {
-    function test_ok() public {
-        assertTrue(true);
+    function test_ok() public pure {
+        assertTrue(false);
     }
 }
 
