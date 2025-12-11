@@ -146,7 +146,7 @@ When reviewing a pull request, the primary goals are for the codebase to improve
 
 Do not overwhelm new contributors.
 
-It is tempting to micro-optimize and make everything about relative performance, perfect grammar, or exact style matches. Do not succumb to that temptation..
+It is tempting to micro-optimize and make everything about relative performance, perfect grammar, or exact style matches. Do not succumb to that temptation.
 
 Focus first on the most significant aspects of the change:
 
