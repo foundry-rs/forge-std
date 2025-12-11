@@ -74,7 +74,7 @@ contract TestContract is Test {
     }
 
     function testFindExists() public {
-        // Lets say we want to find the slot for the public
+        // Let's say we want to find the slot for the public
         // variable `exists`. We just pass in the function selector
         // to the `find` command
         uint256 slot = stdstore.target(address(test)).sig("exists()").find();
@@ -82,7 +82,7 @@ contract TestContract is Test {
     }
 
     function testWriteExists() public {
-        // Lets say we want to write to the slot for the public
+        // Let's say we want to write to the slot for the public
         // variable `exists`. We just pass in the function selector
         // to the `checked_write` command
         stdstore.target(address(test)).sig("exists()").checked_write(100);
