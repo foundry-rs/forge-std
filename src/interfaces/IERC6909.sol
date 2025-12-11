@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.6.2;
 
 import {IERC165} from "./IERC165.sol";
