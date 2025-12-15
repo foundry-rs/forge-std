@@ -399,7 +399,6 @@ library stdStorage {
 
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
-
         assembly ("memory-safe") {
             t := write
         }
