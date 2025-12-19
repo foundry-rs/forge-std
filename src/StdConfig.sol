@@ -322,7 +322,7 @@ contract StdConfig {
     }
 
     /// @dev    Checks the existence of a variable for a given chain ID and key, and returns a boolean.
-    ///         Example: `bool hasKey = config.exists("my_key");`
+    ///         Example: `bool hasKey = config.exists(1, "my_key");`
     ///
     /// @param chain_id The chain ID to check.
     /// @param key The variable key name.
