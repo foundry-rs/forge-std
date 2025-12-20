@@ -258,7 +258,7 @@ contract StdStorageTest is Test {
 
     function testFuzz_Packed(uint256 val, uint8 elemToGet) public {
         // This function tries an assortment of packed slots, shifts meaning number of elements
-        // that are packed. Shiftsizes are the size of each element, i.e. 8 means a data type that is 8 bits, 16 == 16 bits, etc.
+        // that are packed. Shift sizes are the size of each element, i.e. 8 means a data type that is 8 bits, 16 == 16 bits, etc.
         // Combined, these determine how a slot is packed. Making it random is too hard to avoid global rejection limit
         // and make it performant.
 
