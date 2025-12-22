@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.13;
 
 import {VmSafe} from "./Vm.sol";
@@ -105,8 +105,9 @@ contract StdConfig {
 
             // Cache the configure rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (string memory url)
-            {
+            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (
+                string memory url
+            ) {
                 _rpcOf[chainId] = vm.resolveEnv(url);
             } catch {
                 _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(chain_key));
@@ -126,7 +127,7 @@ contract StdConfig {
                             revert AlreadyInitialized(key);
                         }
                     }
-                } catch {} // Section does not exist, ignore.
+                } catch {}
             }
         }
     }
@@ -318,6 +319,25 @@ contract StdConfig {
     /// @return `Variable` struct containing the type and the ABI-encoded value.
     function get(string memory key) public view returns (Variable memory) {
         return get(vm.getChainId(), key);
+    }
+
+    /// @dev    Checks the existence of a variable for a given chain ID and key, and returns a boolean.
+    ///         Example: `bool hasKey = config.exists(1, "my_key");`
+    ///
+    /// @param chain_id The chain ID to check.
+    /// @param key The variable key name.
+    /// @return `bool` indicating whether a variable with the given key exists.
+    function exists(uint256 chain_id, string memory key) public view returns (bool) {
+        return _dataOf[chain_id][key].length > 0;
+    }
+
+    /// @dev    Checks the existence of a variable for the current chain id and a given key, and returns a boolean.
+    ///         Example: `bool hasKey = config.exists("my_key");`
+    ///
+    /// @param key The variable key name.
+    /// @return `bool` indicating whether a variable with the given key exists.
+    function exists(string memory key) public view returns (bool) {
+        return exists(vm.getChainId(), key);
     }
 
     /// @notice Returns the numerical chain ids for all configured chains.

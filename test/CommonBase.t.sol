@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
 import {CommonBase} from "../src/Base.sol";
