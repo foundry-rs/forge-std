@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
 import {Test} from "../src/Test.sol";
@@ -13,6 +13,6 @@ contract VmTest is Test {
     }
 
     function test_VmSafeInterfaceId() public pure {
-        assertEq(type(VmSafe).interfaceId, bytes4(0xf4408204), "VmSafe");
+        assertEq(type(VmSafe).interfaceId, bytes4(0x7f58f7be), "VmSafe");
     }
 }

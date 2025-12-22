@@ -233,6 +233,10 @@ interface VmSafe {
         StorageAccess[] storageAccesses;
         // Call depth traversed during the recording of state differences
         uint64 depth;
+        // The previous nonce of the accessed account.
+        uint64 oldNonce;
+        // The new nonce of the accessed account.
+        uint64 newNonce;
     }
 
     /// The storage accessed during an `AccountAccess`.
@@ -348,25 +352,25 @@ interface VmSafe {
     /// Generates a wallet from the private key, labels the account with that name, and returns the wallet.
     function createWallet(uint256 privateKey, string calldata walletLabel) external returns (Wallet memory wallet);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path)
     /// at the derivation path `m/44'/60'/0'/0/{index}`.
     function deriveKey(string calldata mnemonic, uint32 index) external pure returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path)
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path)
     /// at `{derivationPath}{index}`.
     function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index)
         external
         pure
         returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path) in the specified language
     /// at the derivation path `m/44'/60'/0'/0/{index}`.
     function deriveKey(string calldata mnemonic, uint32 index, string calldata language)
         external
         pure
         returns (uint256 privateKey);
 
-    /// Derive a private key from a provided mnenomic string (or mnenomic file path) in the specified language
+    /// Derive a private key from a provided mnemonic string (or mnemonic file path) in the specified language
     /// at `{derivationPath}{index}`.
     function deriveKey(string calldata mnemonic, string calldata derivationPath, uint32 index, string calldata language)
         external
@@ -425,6 +429,13 @@ interface VmSafe {
 
     /// Signs `digest` with `privateKey` using the secp256r1 curve.
     function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
+
+    /// Signs `digest` with `privateKey` on the secp256k1 curve, using the given `nonce`
+    /// as the raw ephemeral k value in ECDSA (instead of deriving it deterministically).
+    function signWithNonceUnsafe(uint256 privateKey, bytes32 digest, uint256 nonce)
+        external
+        pure
+        returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Signs data with a `Wallet`.
     function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
@@ -598,13 +609,16 @@ interface VmSafe {
     /// Returns true if `forge` command was executed in given context.
     function isContext(ForgeContext context) external view returns (bool result);
 
+    /// Resolves the env variable placeholders of a given input string.
+    function resolveEnv(string calldata input) external returns (string memory);
+
     /// Sets environment variables.
     function setEnv(string calldata name, string calldata value) external;
 
     // ======== EVM ========
 
     /// Gets all accessed reads and write slot from a `vm.record` session, for a given address.
-    function accesses(address target) external returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
+    function accesses(address target) external view returns (bytes32[] memory readSlots, bytes32[] memory writeSlots);
 
     /// Gets the address for a given private key.
     function addr(uint256 privateKey) external pure returns (address keyAddr);
@@ -612,6 +626,7 @@ interface VmSafe {
     /// Gets all the logs according to specified filter.
     function eth_getLogs(uint256 fromBlock, uint256 toBlock, address target, bytes32[] calldata topics)
         external
+        view
         returns (EthGetLogs[] memory logs);
 
     /// Gets the current `block.blobbasefee`.
@@ -632,36 +647,56 @@ interface VmSafe {
     /// See https://github.com/foundry-rs/foundry/issues/6180
     function getBlockTimestamp() external view returns (uint256 timestamp);
 
+    /// Gets the current `block.chainid` of the currently selected environment.
+    /// You should use this instead of `block.chainid` if you use `vm.selectFork` or `vm.createSelectFork`, as `block.chainid` could be assumed
+    /// to be constant across a transaction, and as a result will get optimized out by the compiler.
+    /// See https://github.com/foundry-rs/foundry/issues/6180
+    function getChainId() external view returns (uint256 blockChainId);
+
+    /// Returns the test or script execution evm version.
+    /// **Note:** The execution evm version is not the same as the compilation one.
+    function getEvmVersion() external pure returns (string memory evm);
+
     /// Gets the map key and parent of a mapping at a given slot, for a given address.
     function getMappingKeyAndParentOf(address target, bytes32 elementSlot)
         external
+        view
         returns (bool found, bytes32 key, bytes32 parent);
 
     /// Gets the number of elements in the mapping at the given slot, for a given address.
-    function getMappingLength(address target, bytes32 mappingSlot) external returns (uint256 length);
+    function getMappingLength(address target, bytes32 mappingSlot) external view returns (uint256 length);
 
     /// Gets the elements at index idx of the mapping at the given slot, for a given address. The
     /// index must be less than the length of the mapping (i.e. the number of keys in the mapping).
-    function getMappingSlotAt(address target, bytes32 mappingSlot, uint256 idx) external returns (bytes32 value);
+    function getMappingSlotAt(address target, bytes32 mappingSlot, uint256 idx) external view returns (bytes32 value);
 
     /// Gets the nonce of an account.
     function getNonce(address account) external view returns (uint64 nonce);
 
     /// Get the nonce of a `Wallet`.
-    function getNonce(Wallet calldata wallet) external returns (uint64 nonce);
+    function getNonce(Wallet calldata wallet) external view returns (uint64 nonce);
 
     /// Gets the RLP encoded block header for a given block number.
     /// Returns the block header in the same format as `cast block <block_number> --raw`.
     function getRawBlockHeader(uint256 blockNumber) external view returns (bytes memory rlpHeader);
 
     /// Gets all the recorded logs.
-    function getRecordedLogs() external returns (Log[] memory logs);
+    function getRecordedLogs() external view returns (Log[] memory logs);
 
     /// Returns state diffs from current `vm.startStateDiffRecording` session.
     function getStateDiff() external view returns (string memory diff);
 
     /// Returns state diffs from current `vm.startStateDiffRecording` session, in json format.
     function getStateDiffJson() external view returns (string memory diff);
+
+    /// Returns an array of `StorageAccess` from current `vm.stateStateDiffRecording` session
+    function getStorageAccesses() external view returns (StorageAccess[] memory storageAccesses);
+
+    /// Returns an array of storage slots occupied by the specified variable.
+    function getStorageSlots(address target, string calldata variableName)
+        external
+        view
+        returns (uint256[] memory slots);
 
     /// Gets the gas used in the last call from the callee perspective.
     function lastCallGas() external view returns (Gas memory gas);
@@ -692,6 +727,10 @@ interface VmSafe {
     function rpc(string calldata urlOrAlias, string calldata method, string calldata params)
         external
         returns (bytes memory data);
+
+    /// Set the exact test or script execution evm version, e.g. `berlin`, `cancun`.
+    /// **Note:** The execution evm version is not the same as the compilation one.
+    function setEvmVersion(string calldata evm) external;
 
     /// Records the debug trace during the run.
     function startDebugTraceRecording() external;
@@ -736,10 +775,12 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     function deployCode(string calldata artifactPath) external returns (address deployedAddress);
 
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts abi-encoded constructor arguments.
     function deployCode(string calldata artifactPath, bytes calldata constructorArgs)
         external
@@ -747,11 +788,13 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts `msg.value`.
     function deployCode(string calldata artifactPath, uint256 value) external returns (address deployedAddress);
 
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts abi-encoded constructor arguments and `msg.value`.
     function deployCode(string calldata artifactPath, bytes calldata constructorArgs, uint256 value)
         external
@@ -759,10 +802,12 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     function deployCode(string calldata artifactPath, bytes32 salt) external returns (address deployedAddress);
 
     /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts abi-encoded constructor arguments.
     function deployCode(string calldata artifactPath, bytes calldata constructorArgs, bytes32 salt)
         external
@@ -770,6 +815,7 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts `msg.value`.
     function deployCode(string calldata artifactPath, uint256 value, bytes32 salt)
         external
@@ -777,6 +823,7 @@ interface VmSafe {
 
     /// Deploys a contract from an artifact file, using the CREATE2 salt. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    /// Reverts if the target artifact contains unlinked library placeholders.
     /// Additionally accepts abi-encoded constructor arguments and `msg.value`.
     function deployCode(string calldata artifactPath, bytes calldata constructorArgs, uint256 value, bytes32 salt)
         external
@@ -832,10 +879,7 @@ interface VmSafe {
     function getDeployment(string calldata contractName) external view returns (address deployedAddress);
 
     /// Returns the most recent deployment for the given contract on `chainId`
-    function getDeployment(string calldata contractName, uint64 chainId)
-        external
-        view
-        returns (address deployedAddress);
+    function getDeployment(string calldata contractName, uint64 chainId) external view returns (address deployedAddress);
 
     /// Returns all deployments for the given contract on `chainId`
     /// Sorted in descending order of deployment time i.e descending order of BroadcastTxSummary.blockNumber.
@@ -942,10 +986,7 @@ interface VmSafe {
     function parseJsonAddress(string calldata json, string calldata key) external pure returns (address);
 
     /// Parses a string of JSON data at `key` and coerces it to `address[]`.
-    function parseJsonAddressArray(string calldata json, string calldata key)
-        external
-        pure
-        returns (address[] memory);
+    function parseJsonAddressArray(string calldata json, string calldata key) external pure returns (address[] memory);
 
     /// Parses a string of JSON data at `key` and coerces it to `bool`.
     function parseJsonBool(string calldata json, string calldata key) external pure returns (bool);
@@ -960,10 +1001,7 @@ interface VmSafe {
     function parseJsonBytes32(string calldata json, string calldata key) external pure returns (bytes32);
 
     /// Parses a string of JSON data at `key` and coerces it to `bytes32[]`.
-    function parseJsonBytes32Array(string calldata json, string calldata key)
-        external
-        pure
-        returns (bytes32[] memory);
+    function parseJsonBytes32Array(string calldata json, string calldata key) external pure returns (bytes32[] memory);
 
     /// Parses a string of JSON data at `key` and coerces it to `bytes[]`.
     function parseJsonBytesArray(string calldata json, string calldata key) external pure returns (bytes[] memory);
@@ -990,10 +1028,7 @@ interface VmSafe {
         returns (bytes memory);
 
     /// Parses a string of JSON data and coerces it to type corresponding to `typeDescription`.
-    function parseJsonType(string calldata json, string calldata typeDescription)
-        external
-        pure
-        returns (bytes memory);
+    function parseJsonType(string calldata json, string calldata typeDescription) external pure returns (bytes memory);
 
     /// Parses a string of JSON data at `key` and coerces it to type corresponding to `typeDescription`.
     function parseJsonType(string calldata json, string calldata key, string calldata typeDescription)
@@ -1111,6 +1146,7 @@ interface VmSafe {
 
     /// Write a serialized JSON object to an **existing** JSON file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a JSON file, without having to parse the entire thing.
+    /// This cheatcode will create new keys if they didn't previously exist.
     function writeJson(string calldata json, string calldata path, string calldata valueKey) external;
 
     /// Checks if `key` exists in a JSON object
@@ -1147,7 +1183,7 @@ interface VmSafe {
     function broadcast(uint256 privateKey) external;
 
     /// Returns addresses of available unlocked wallets in the script environment.
-    function getWallets() external returns (address[] memory wallets);
+    function getWallets() external view returns (address[] memory wallets);
 
     /// Sign an EIP-7702 authorization and designate the next call as an EIP-7702 transaction
     function signAndAttachDelegation(address implementation, uint256 privateKey)
@@ -1200,7 +1236,7 @@ interface VmSafe {
     // ======== String ========
 
     /// Returns true if `search` is found in `subject`, false otherwise.
-    function contains(string calldata subject, string calldata search) external returns (bool result);
+    function contains(string calldata subject, string calldata search) external pure returns (bool result);
 
     /// Returns the index of the first occurrence of a `key` in an `input` string.
     /// Returns `NOT_FOUND` (i.e. `type(uint256).max`) if the `key` is not found.
@@ -1359,9 +1395,7 @@ interface VmSafe {
     /// Compares two `int256` values. Expects relative difference in percents to be less than or equal to `maxPercentDelta`.
     /// `maxPercentDelta` is an 18 decimal fixed point number, where 1e18 == 100%
     /// Includes error message into revert string on failure.
-    function assertApproxEqRel(int256 left, int256 right, uint256 maxPercentDelta, string calldata error)
-        external
-        pure;
+    function assertApproxEqRel(int256 left, int256 right, uint256 maxPercentDelta, string calldata error) external pure;
 
     /// Asserts that two `uint256` values are equal, formatting them with decimals in failure message.
     function assertEqDecimal(uint256 left, uint256 right, uint256 decimals) external pure;
@@ -1760,10 +1794,7 @@ interface VmSafe {
     function parseTomlAddress(string calldata toml, string calldata key) external pure returns (address);
 
     /// Parses a string of TOML data at `key` and coerces it to `address[]`.
-    function parseTomlAddressArray(string calldata toml, string calldata key)
-        external
-        pure
-        returns (address[] memory);
+    function parseTomlAddressArray(string calldata toml, string calldata key) external pure returns (address[] memory);
 
     /// Parses a string of TOML data at `key` and coerces it to `bool`.
     function parseTomlBool(string calldata toml, string calldata key) external pure returns (bool);
@@ -1778,10 +1809,7 @@ interface VmSafe {
     function parseTomlBytes32(string calldata toml, string calldata key) external pure returns (bytes32);
 
     /// Parses a string of TOML data at `key` and coerces it to `bytes32[]`.
-    function parseTomlBytes32Array(string calldata toml, string calldata key)
-        external
-        pure
-        returns (bytes32[] memory);
+    function parseTomlBytes32Array(string calldata toml, string calldata key) external pure returns (bytes32[] memory);
 
     /// Parses a string of TOML data at `key` and coerces it to `bytes[]`.
     function parseTomlBytesArray(string calldata toml, string calldata key) external pure returns (bytes[] memory);
@@ -1808,10 +1836,7 @@ interface VmSafe {
         returns (bytes memory);
 
     /// Parses a string of TOML data and coerces it to type corresponding to `typeDescription`.
-    function parseTomlType(string calldata toml, string calldata typeDescription)
-        external
-        pure
-        returns (bytes memory);
+    function parseTomlType(string calldata toml, string calldata typeDescription) external pure returns (bytes memory);
 
     /// Parses a string of TOML data at `key` and coerces it to type corresponding to `typeDescription`.
     function parseTomlType(string calldata toml, string calldata key, string calldata typeDescription)
@@ -1836,15 +1861,19 @@ interface VmSafe {
 
     /// Takes serialized JSON, converts to TOML and write a serialized TOML table to an **existing** TOML file, replacing a value with key = <value_key.>
     /// This is useful to replace a specific value of a TOML file, without having to parse the entire thing.
+    /// This cheatcode will create new keys if they didn't previously exist.
     function writeToml(string calldata json, string calldata path, string calldata valueKey) external;
 
     // ======== Utilities ========
 
+    /// Returns an uint256 value bounded in given range and different from the current one.
+    function bound(uint256 current, uint256 min, uint256 max) external view returns (uint256);
+
+    /// Returns an int256 value bounded in given range and different from the current one.
+    function bound(int256 current, int256 min, int256 max) external view returns (int256);
+
     /// Compute the address of a contract created with CREATE2 using the given CREATE2 deployer.
-    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash, address deployer)
-        external
-        pure
-        returns (address);
+    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash, address deployer) external pure returns (address);
 
     /// Compute the address of a contract created with CREATE2 using the default CREATE2 deployer.
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) external pure returns (address);
@@ -1904,6 +1933,9 @@ interface VmSafe {
 
     /// Returns ENS namehash for provided string.
     function ensNamehash(string calldata name) external pure returns (bytes32);
+
+    /// RLP decodes an RLP payload into a list of bytes.
+    function fromRlp(bytes calldata rlp) external pure returns (bytes[] memory data);
 
     /// Gets the label for the specified address.
     function getLabel(address account) external view returns (string memory currentLabel);
@@ -1975,6 +2007,9 @@ interface VmSafe {
 
     /// Encodes a `string` value to a base64 string.
     function toBase64(string calldata data) external pure returns (string memory);
+
+    /// RLP encodes a list of bytes into an RLP payload.
+    function toRlp(bytes[] calldata data) external pure returns (bytes memory);
 }
 
 /// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
@@ -2091,8 +2126,7 @@ interface Vm is VmSafe {
     function mockCallRevert(address callee, bytes calldata data, bytes calldata revertData) external;
 
     /// Reverts a call to an address with a specific `msg.value`, with specified revert data.
-    function mockCallRevert(address callee, uint256 msgValue, bytes calldata data, bytes calldata revertData)
-        external;
+    function mockCallRevert(address callee, uint256 msgValue, bytes calldata data, bytes calldata revertData) external;
 
     /// Reverts a call to an address with specified revert data.
     /// Overload to pass the function selector directly `token.approve.selector` instead of `abi.encodeWithSelector(token.approve.selector)`.
@@ -2164,7 +2198,7 @@ interface Vm is VmSafe {
     function prevrandao(uint256 newPrevrandao) external;
 
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
-    function readCallers() external returns (CallerMode callerMode, address msgSender, address txOrigin);
+    function readCallers() external view returns (CallerMode callerMode, address msgSender, address txOrigin);
 
     /// Resets the nonce of an account to 0 for EOAs and 1 for contract accounts.
     function resetNonce(address account) external;
@@ -2365,8 +2399,7 @@ interface Vm is VmSafe {
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData) external;
 
     /// Same as the previous method, but also checks supplied address against emitting contract.
-    function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, address emitter)
-        external;
+    function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData, address emitter) external;
 
     /// Prepare an expected log with all topic and data checks enabled.
     /// Call this function, then emit an event, then call a function. Internally after the call, we check if
