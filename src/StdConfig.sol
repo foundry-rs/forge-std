@@ -331,7 +331,7 @@ contract StdConfig {
         return _dataOf[chain_id][key].length > 0;
     }
 
-    /// @dev    Checks existance of a variable for the current chain id and a given key, and returns a boolean.
+    /// @dev    Checks the existence of a variable for the current chain id and a given key, and returns a boolean.
     ///         Example: `bool hasKey = config.exists("my_key");`
     ///
     /// @param key The variable key name.
