@@ -44,8 +44,7 @@ library safeconsole {
             bytes32 m0;
             bytes32 m1;
             bytes32 m2;
-
-            assembly {
+            assembly ("memory-safe") {
                 m0 := mload(sub(offset, 0x60))
                 m1 := mload(sub(offset, 0x40))
                 m2 := mload(sub(offset, 0x20))
@@ -55,8 +54,7 @@ library safeconsole {
                 mstore(sub(offset, 0x20), length)
             }
             _sendLogPayload(offset - 0x44, length + 0x44);
-
-            assembly {
+            assembly ("memory-safe") {
                 mstore(sub(offset, 0x60), m0)
                 mstore(sub(offset, 0x40), m1)
                 mstore(sub(offset, 0x20), m2)
@@ -67,15 +65,13 @@ library safeconsole {
             bytes32 m1;
             bytes32 m2;
             uint256 endOffset = offset + length;
-
-            assembly {
+            assembly ("memory-safe") {
                 m0 := mload(add(endOffset, 0x00))
                 m1 := mload(add(endOffset, 0x20))
                 m2 := mload(add(endOffset, 0x40))
             }
             _memcopy(offset, offset + 0x60, length);
-
-            assembly {
+            assembly ("memory-safe") {
                 // Selector of `log(bytes)`.
                 mstore(add(offset, 0x00), 0x0be77f56)
                 mstore(add(offset, 0x20), 0x20)
@@ -83,8 +79,7 @@ library safeconsole {
             }
             _sendLogPayload(offset + 0x1c, length + 0x44);
             _memcopy(offset + 0x60, offset, length);
-
-            assembly {
+            assembly ("memory-safe") {
                 mstore(add(endOffset, 0x00), m0)
                 mstore(add(endOffset, 0x20), m1)
                 mstore(add(endOffset, 0x40), m2)
