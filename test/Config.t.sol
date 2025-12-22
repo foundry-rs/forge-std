@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.13;
 
 import {Test} from "../src/Test.sol";
@@ -7,7 +7,7 @@ import {StdConfig} from "../src/StdConfig.sol";
 
 contract ConfigTest is Test, Config {
     function setUp() public {
-        vm.setEnv("MAINNET_RPC", "https://eth.llamarpc.com");
+        vm.setEnv("MAINNET_RPC", "https://reth-ethereum.ithaca.xyz/rpc");
         vm.setEnv("WETH_MAINNET", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
         vm.setEnv("OPTIMISM_RPC", "https://mainnet.optimism.io");
         vm.setEnv("WETH_OPTIMISM", "0x4200000000000000000000000000000000000006");
@@ -20,7 +20,7 @@ contract ConfigTest is Test, Config {
         // -- MAINNET --------------------------------------------------------------
 
         // Read and assert RPC URL for Mainnet (chain ID 1)
-        assertEq(config.getRpcUrl(1), "https://eth.llamarpc.com");
+        assertEq(config.getRpcUrl(1), "https://reth-ethereum.ithaca.xyz/rpc");
 
         // Read and assert boolean values
         assertTrue(config.get(1, "is_live").toBool());
@@ -123,6 +123,35 @@ contract ConfigTest is Test, Config {
         assertEq(forkOf[10], 1);
         vm.selectFork(forkOf[10]);
         assertEq(vm.getChainId(), 10);
+    }
+
+    function test_configExists() public {
+        _loadConfig("./test/fixtures/config.toml", false);
+
+        string[] memory keys = new string[](7);
+        keys[0] = "is_live";
+        keys[1] = "weth";
+        keys[2] = "word";
+        keys[3] = "number";
+        keys[4] = "signed_number";
+        keys[5] = "b";
+        keys[6] = "str";
+
+        // Read and assert RPC URL for Mainnet (chain ID 1)
+        assertEq(config.getRpcUrl(1), "https://reth-ethereum.ithaca.xyz/rpc");
+
+        for (uint256 i = 0; i < keys.length; ++i) {
+            assertTrue(config.exists(1, keys[i]));
+            assertFalse(config.exists(1, string.concat(keys[i], "_")));
+        }
+
+        // Assert RPC URL for Optimism (chain ID 10)
+        assertEq(config.getRpcUrl(10), "https://mainnet.optimism.io");
+
+        for (uint256 i = 0; i < keys.length; ++i) {
+            assertTrue(config.exists(10, keys[i]));
+            assertFalse(config.exists(10, string.concat(keys[i], "_")));
+        }
     }
 
     function test_writeConfig() public {
@@ -301,7 +330,7 @@ contract ConfigTest is Test, Config {
             invalidChainConfig,
             string.concat(
                 "[mainnet]\n",
-                "endpoint_url = \"https://eth.llamarpc.com\"\n",
+                "endpoint_url = \"https://reth-ethereum.ithaca.xyz/rpc\"\n",
                 "\n",
                 "[mainnet.uint]\n",
                 "valid_number = 123\n",
@@ -338,7 +367,7 @@ contract ConfigTest is Test, Config {
             badParseConfig,
             string.concat(
                 "[mainnet]\n",
-                "endpoint_url = \"https://eth.llamarpc.com\"\n",
+                "endpoint_url = \"https://reth-ethereum.ithaca.xyz/rpc\"\n",
                 "\n",
                 "[mainnet.uint]\n",
                 "bad_value = \"not_a_number\"\n"

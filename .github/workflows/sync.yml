@@ -1,5 +1,7 @@
 name: Sync Release Branch
 
+permissions: {}
+
 on:
   release:
     types:
@@ -8,11 +10,14 @@ on:
 jobs:
   sync-release-branch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: startsWith(github.event.release.tag_name, 'v1')
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          persist-credentials: true
           fetch-depth: 0
           ref: v1
 
