@@ -321,6 +321,25 @@ contract StdConfig {
         return get(vm.getChainId(), key);
     }
 
+    /// @dev    Checks the existence of a variable for a given chain ID and key, and returns a boolean.
+    ///         Example: `bool hasKey = config.exists(1, "my_key");`
+    ///
+    /// @param chain_id The chain ID to check.
+    /// @param key The variable key name.
+    /// @return `bool` indicating whether a variable with the given key exists.
+    function exists(uint256 chain_id, string memory key) public view returns (bool) {
+        return _dataOf[chain_id][key].length > 0;
+    }
+
+    /// @dev    Checks the existence of a variable for the current chain id and a given key, and returns a boolean.
+    ///         Example: `bool hasKey = config.exists("my_key");`
+    ///
+    /// @param key The variable key name.
+    /// @return `bool` indicating whether a variable with the given key exists.
+    function exists(string memory key) public view returns (bool) {
+        return exists(vm.getChainId(), key);
+    }
+
     /// @notice Returns the numerical chain ids for all configured chains.
     function getChainIds() public view returns (uint256[] memory) {
         string[] memory keys = _chainKeys;

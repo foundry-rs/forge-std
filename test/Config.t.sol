@@ -125,6 +125,35 @@ contract ConfigTest is Test, Config {
         assertEq(vm.getChainId(), 10);
     }
 
+    function test_configExists() public {
+        _loadConfig("./test/fixtures/config.toml", false);
+
+        string[] memory keys = new string[](7);
+        keys[0] = "is_live";
+        keys[1] = "weth";
+        keys[2] = "word";
+        keys[3] = "number";
+        keys[4] = "signed_number";
+        keys[5] = "b";
+        keys[6] = "str";
+
+        // Read and assert RPC URL for Mainnet (chain ID 1)
+        assertEq(config.getRpcUrl(1), "https://reth-ethereum.ithaca.xyz/rpc");
+
+        for (uint256 i = 0; i < keys.length; ++i) {
+            assertTrue(config.exists(1, keys[i]));
+            assertFalse(config.exists(1, string.concat(keys[i], "_")));
+        }
+
+        // Assert RPC URL for Optimism (chain ID 10)
+        assertEq(config.getRpcUrl(10), "https://mainnet.optimism.io");
+
+        for (uint256 i = 0; i < keys.length; ++i) {
+            assertTrue(config.exists(10, keys[i]));
+            assertFalse(config.exists(10, string.concat(keys[i], "_")));
+        }
+    }
+
     function test_writeConfig() public {
         // Create a temporary copy of the config file to avoid modifying the original.
         string memory originalConfig = "./test/fixtures/config.toml";
