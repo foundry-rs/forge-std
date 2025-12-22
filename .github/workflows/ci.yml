@@ -23,15 +23,10 @@ jobs:
         flags:
           - ""
           - --via-ir
-          - --use solc:0.8.31 --via-ir
-          - --use solc:0.8.31
+          - --use solc:0.8.33 --via-ir
+          - --use solc:0.8.33
           - --use solc:0.8.13 --via-ir
           - --use solc:0.8.13
-        exclude:
-          - toolchain: stable
-            flags: --use solc:0.8.31 --via-ir
-          - toolchain: stable
-            flags: --use solc:0.8.31
     steps:
       - uses: actions/checkout@v6
         with:
