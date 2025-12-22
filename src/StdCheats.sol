@@ -392,6 +392,7 @@ abstract contract StdCheatsSafe {
     function rawToConvertedEIPTx1559(RawTx1559 memory rawTx) internal pure virtual returns (Tx1559 memory) {
         Tx1559 memory transaction;
         transaction.arguments = rawTx.arguments;
+        transaction.contractAddress = rawTx.contractAddress;
         transaction.contractName = rawTx.contractName;
         transaction.functionSig = rawTx.functionSig;
         transaction.hash = rawTx.hash;
