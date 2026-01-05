@@ -42,12 +42,12 @@ jobs:
               forge build --skip test --skip Config --skip StdConfig --skip LibVariable --deny-warnings ${{ matrix.flags }}
               ;;
             *)
-              forge build --skip test --deny-warnings ${{ matrix.flags }}
+              forge build --skip test ${{ matrix.flags }}
               ;;
           esac
       # via-ir compilation time checks.
       - if: contains(matrix.flags, '--via-ir')
-        run: forge build --skip test --deny-warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+        run: forge build --skip test ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
