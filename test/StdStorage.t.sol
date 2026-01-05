@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.13 <0.9.0;
 
 import {stdStorage, StdStorage} from "../src/StdStorage.sol";
 import {Test} from "../src/Test.sol";
@@ -419,8 +419,7 @@ contract StorageTest {
 
     function hidden() public view returns (bytes32 t) {
         bytes32 slot = keccak256("my.random.var");
-        /// @solidity memory-safe-assembly
-        assembly {
+        assembly ("memory-safe") {
             t := sload(slot)
         }
     }

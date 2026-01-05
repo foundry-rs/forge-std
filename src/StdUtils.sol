@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.6.2 <0.9.0;
-
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.13 <0.9.0;
 
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 import {StdConstants} from "./StdConstants.sol";
@@ -182,8 +180,7 @@ abstract contract StdUtils {
     function _sendLogPayloadView(bytes memory payload) private view {
         uint256 payloadLength = payload.length;
         address consoleAddress = CONSOLE2_ADDRESS;
-        /// @solidity memory-safe-assembly
-        assembly {
+        assembly ("memory-safe") {
             let payloadStart := add(payload, 32)
             let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
         }

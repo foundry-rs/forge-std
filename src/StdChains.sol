@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.6.2 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.13 <0.9.0;
 
 import {VmSafe} from "./Vm.sol";
 
@@ -176,8 +175,7 @@ abstract contract StdChains {
                     (errHash != keccak256(oldNotFoundError) && errHash != keccak256(newNotFoundError))
                         || bytes(chain.rpcUrl).length == 0
                 ) {
-                    /// @solidity memory-safe-assembly
-                    assembly {
+                    assembly ("memory-safe") {
                         revert(add(32, err), mload(err))
                     }
                 }
