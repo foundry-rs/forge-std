@@ -141,6 +141,24 @@ contract LibVariableTest is Test {
         assertEq(strings.length, 2);
         assertEq(strings[0], "one");
         assertEq(strings[1], "two");
+
+        // Bytes32 array
+        bytes32[] memory b32s = helper.toBytes32Array(bytes32ArrayVar);
+        assertEq(b32s.length, 2);
+        assertEq(b32s[0], bytes32(uint256(1)));
+        assertEq(b32s[1], bytes32(uint256(2)));
+
+        // Int array
+        int256[] memory ints = helper.toInt256Array(intArrayVar);
+        assertEq(ints.length, 2);
+        assertEq(ints[0], -1);
+        assertEq(ints[1], 2);
+
+        // Bytes array
+        bytes[] memory b = helper.toBytesArray(bytesArrayVar);
+        assertEq(b.length, 2);
+        assertEq(b[0], hex"01");
+        assertEq(b[1], hex"02");
     }
 
     function test_Downcasting() public view {
