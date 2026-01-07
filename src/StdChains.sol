@@ -58,9 +58,9 @@ abstract contract StdChains {
 
     // Maps from the chain's alias (matching the alias in the `foundry.toml` file) to chain data.
     mapping(string => Chain) private chains;
-    // Maps from the chain's alias to it's default RPC URL.
+    // Maps from the chain's alias to its default RPC URL.
     mapping(string => string) private defaultRpcUrls;
-    // Maps from a chain ID to it's alias.
+    // Maps from a chain ID to its alias.
     mapping(uint256 => string) private idToAlias;
 
     bool private fallbackToDefaultRpcUrls = true;
