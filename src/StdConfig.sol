@@ -4,13 +4,13 @@ pragma solidity ^0.8.13;
 import {VmSafe} from "./Vm.sol";
 import {Variable, Type, TypeKind, LibVariable} from "./LibVariable.sol";
 
-/// @notice  A contract that parses a toml configuration file and load its
+/// @notice  A contract that parses a toml configuration file and loads its
 ///          variables into storage, automatically casting them, on deployment.
 ///
 /// @dev     This contract assumes a toml structure where top-level keys
 ///          represent chain ids or aliases. Under each chain key, variables are
 ///          organized by type in separate sub-tables like `[<chain>.<type>]`, where
-///          type must be: `bool`, `address`, `bytes32`, `uint`, `ìnt`, `string`, or `bytes`.
+///          type must be: `bool`, `address`, `bytes32`, `uint`, `int`, `string`, or `bytes`.
 ///
 ///          Supported format:
 ///          ```
@@ -37,7 +37,7 @@ contract StdConfig {
 
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `ìnt`, `string`, `bytes`.
+    /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `int`, `string`, `bytes`.
     uint8 private constant NUM_TYPES = 7;
 
     // -- ERRORS ---------------------------------------------------------------
@@ -630,3 +630,4 @@ contract StdConfig {
         set(vm.getChainId(), key, value);
     }
 }
+
