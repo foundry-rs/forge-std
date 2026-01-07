@@ -296,7 +296,7 @@ interface VmSafe {
         // Represent the type of transaction among CALL, CREATE, CREATE2
         BroadcastTxType txType;
         // The address of the contract that was called or created.
-        // This is address of the contract that is created if the txType is CREATE or CREATE2.
+        // This is the address of the contract that is created if the txType is CREATE or CREATE2.
         address contractAddress;
         // The block number the transaction landed in.
         uint64 blockNumber;
