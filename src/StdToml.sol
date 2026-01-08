@@ -8,16 +8,16 @@ import {VmSafe} from "./Vm.sol";
 // ```
 // using stdToml for string;
 // string memory toml = vm.readFile("<some_path>");
-// toml.readUint("<json_path>");
+// toml.readUint("<toml_path>");
 // ```
 // To write:
 // ```
 // using stdToml for string;
-// string memory json = "json";
-// json.serialize("a", uint256(123));
-// string memory semiFinal = json.serialize("b", string("test"));
-// string memory finalJson = json.serialize("c", semiFinal);
-// finalJson.write("<some_path>");
+// string memory toml = "toml";
+// toml.serialize("a", uint256(123));
+// string memory semiFinal = toml.serialize("b", string("test"));
+// string memory finalToml = toml.serialize("c", semiFinal);
+// finalToml.write("<some_path>");
 // ```
 
 library stdToml {
