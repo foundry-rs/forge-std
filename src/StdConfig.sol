@@ -103,7 +103,7 @@ contract StdConfig {
             uint256 chainId = resolveChainId(chain_key);
             _chainKeys.push(chain_key);
 
-            // Cache the configure rpc endpoint for that chain.
+            // Cache the configured RPC endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
             try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (
                 string memory url
