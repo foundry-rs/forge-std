@@ -630,4 +630,3 @@ contract StdConfig {
         set(vm.getChainId(), key, value);
     }
 }
-
