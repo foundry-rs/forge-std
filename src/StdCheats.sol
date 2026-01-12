@@ -14,7 +14,7 @@ abstract contract StdCheatsSafe {
     bool private gasMeteringOff;
 
     // Data structures to parse Transaction objects from the broadcast artifact
-    // that conform to EIP1559. The Raw structs is what is parsed from the JSON
+    // that conform to EIP1559. The Raw structs are what are parsed from the JSON
     // and then converted to the one that is used by the user for better UX.
 
     struct RawTx1559 {
@@ -63,7 +63,7 @@ abstract contract StdCheatsSafe {
     }
 
     // Data structures to parse Transaction objects from the broadcast artifact
-    // that DO NOT conform to EIP1559. The Raw structs is what is parsed from the JSON
+    // that DO NOT conform to EIP1559. The Raw structs are what are parsed from the JSON
     // and then converted to the one that is used by the user for better UX.
 
     struct TxLegacy {
