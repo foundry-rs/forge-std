@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {VmSafe} from "./Vm.sol";
 import {Variable, Type, TypeKind, LibVariable} from "./LibVariable.sol";
 
-/// @notice  A contract that parses a toml configuration file and load its
+/// @notice  A contract that parses a toml configuration file and loads its
 ///          variables into storage, automatically casting them, on deployment.
 ///
 /// @dev     This contract assumes a toml structure where top-level keys
