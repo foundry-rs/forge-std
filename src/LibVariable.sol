@@ -47,7 +47,7 @@ enum TypeKind {
 ///                 // Would revert with `TypeMismatch` as 'important_number' isn't a `uint256` in the config file.
 ///                 // string memory notANumber = config.get("important_number").toString();
 ///
-///                 // Retrieve a address array from the config.
+///                 // Retrieve an address array from the config.
 ///                 address[] memory admins = config.get("whitelisted_admins").toAddressArray();
 ///          }
 ///      }
