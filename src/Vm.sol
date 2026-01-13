@@ -204,7 +204,7 @@ interface VmSafe {
         // If kind is Call, DelegateCall, StaticCall or CallCode, then the account is the callee.
         // If kind is Create, then the account is the newly created account.
         // If kind is SelfDestruct, then the account is the selfdestruct recipient.
-        // If kind is a Resume, then account represents a account context that has resumed.
+        // If kind is a Resume, then account represents an account context that has resumed.
         AccountAccessKind kind;
         // The account that was accessed.
         // It's either the account created, callee or a selfdestruct recipient for CREATE, CALL or SELFDESTRUCT.
