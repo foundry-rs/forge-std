@@ -688,7 +688,7 @@ interface VmSafe {
     /// Returns state diffs from current `vm.startStateDiffRecording` session, in json format.
     function getStateDiffJson() external view returns (string memory diff);
 
-    /// Returns an array of `StorageAccess` from current `vm.stateStateDiffRecording` session
+    /// Returns an array of `StorageAccess` from current `vm.startStateDiffRecording` session
     function getStorageAccesses() external view returns (StorageAccess[] memory storageAccesses);
 
     /// Returns an array of storage slots occupied by the specified variable.
