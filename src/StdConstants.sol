@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
+import {ICreateX} from "./interfaces/ICreateX.sol";
 import {IMulticall3} from "./interfaces/IMulticall3.sol";
 import {Vm} from "./Vm.sol";
 
@@ -11,9 +12,13 @@ library StdConstants {
     /// @dev console.sol and console2.sol work by executing a staticcall to this address.
     /// Calculated as `address(uint160(uint88(bytes11("console.log"))))`.
     address internal constant CONSOLE = 0x000000000000000000636F6e736F6c652e6c6f67;
-    /// @dev Used when deploying with create2.
+    /// @dev Nick's CREATE2 factory used when deploying with create2.
     /// Taken from https://github.com/Arachnid/deterministic-deployment-proxy.
     address internal constant CREATE2_FACTORY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+    /// @dev The CreateX universal contract deployer.
+    /// Provides CREATE2, CREATE3, and various deployment utilities.
+    /// See: https://github.com/pcaversaccio/createx
+    ICreateX internal constant CREATEX = ICreateX(0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed);
     /// @dev The default address for tx.origin and msg.sender.
     /// Calculated as `address(uint160(uint256(keccak256("foundry default caller"))))`.
     address internal constant DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
