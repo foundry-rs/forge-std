@@ -62,9 +62,11 @@ contract StdCheatsTest is Test {
     function test_ChangePrankMsgSender() public {
         vm.startPrank(address(1337));
         test.bar(address(1337));
-        changePrank(address(0xdead));
+        vm.stopPrank();
+        vm.startPrank(address(0xdead));
         test.bar(address(0xdead));
-        changePrank(address(1337));
+        vm.stopPrank();
+        vm.startPrank(address(1337));
         test.bar(address(1337));
         vm.stopPrank();
     }
@@ -72,9 +74,11 @@ contract StdCheatsTest is Test {
     function test_ChangePrankMsgSenderAndTxOrigin() public {
         vm.startPrank(address(1337), address(1338));
         test.origin(address(1337), address(1338));
-        changePrank(address(0xdead), address(0xbeef));
+        vm.stopPrank();
+        vm.startPrank(address(0xdead), address(0xbeef));
         test.origin(address(0xdead), address(0xbeef));
-        changePrank(address(1337), address(1338));
+        vm.stopPrank();
+        vm.startPrank(address(1337), address(1338));
         test.origin(address(1337), address(1338));
         vm.stopPrank();
     }

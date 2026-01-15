@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
 import {Vm} from "./Vm.sol";
 
@@ -471,5 +471,81 @@ library stdStorage {
 
     function root(StdStorage storage self) internal returns (uint256) {
         return stdStorageSafe.root(self);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TRY VARIANTS - Return (bool success, T result) instead of reverting
+    // Designed for AI/agent workflows that need to handle failures gracefully
+    // ═══════════════════════════════════════════════════════════════════════
+
+    function tryFind(StdStorage storage self) internal returns (bool success, uint256 slot) {
+        return tryFind(self, true);
+    }
+
+    function tryFind(StdStorage storage self, bool _clear) internal returns (bool success, uint256 slot) {
+        FindData storage data = stdStorageSafe.find(self, false);
+        if (data.found) {
+            slot = data.slot;
+            success = true;
+        }
+        if (_clear) {
+            stdStorageSafe.clear(self);
+        }
+    }
+
+    function tryRead_bytes32(StdStorage storage self) internal returns (bool success, bytes32 value) {
+        (bool found,) = tryFind(self, false);
+        if (found) {
+            value = stdStorageSafe.read_bytes32(self);
+            success = true;
+        } else {
+            stdStorageSafe.clear(self);
+        }
+    }
+
+    function tryRead_bool(StdStorage storage self) internal returns (bool success, bool value) {
+        (bool found,) = tryFind(self, false);
+        if (found) {
+            int256 v = stdStorageSafe.read_int(self);
+            if (v == 0) {
+                value = false;
+                success = true;
+            } else if (v == 1) {
+                value = true;
+                success = true;
+            }
+        } else {
+            stdStorageSafe.clear(self);
+        }
+    }
+
+    function tryRead_address(StdStorage storage self) internal returns (bool success, address value) {
+        (bool found,) = tryFind(self, false);
+        if (found) {
+            value = stdStorageSafe.read_address(self);
+            success = true;
+        } else {
+            stdStorageSafe.clear(self);
+        }
+    }
+
+    function tryRead_uint(StdStorage storage self) internal returns (bool success, uint256 value) {
+        (bool found,) = tryFind(self, false);
+        if (found) {
+            value = stdStorageSafe.read_uint(self);
+            success = true;
+        } else {
+            stdStorageSafe.clear(self);
+        }
+    }
+
+    function tryRead_int(StdStorage storage self) internal returns (bool success, int256 value) {
+        (bool found,) = tryFind(self, false);
+        if (found) {
+            value = stdStorageSafe.read_int(self);
+            success = true;
+        } else {
+            stdStorageSafe.clear(self);
+        }
     }
 }

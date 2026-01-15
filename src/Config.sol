@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.20 <0.9.0;
 
-import {console} from "./console.sol";
+import {console2} from "./console2.sol";
 import {StdConfig} from "./StdConfig.sol";
 import {CommonBase} from "./Base.sol";
 
@@ -27,12 +27,12 @@ abstract contract Config is CommonBase {
     /// @param   filePath: the path to the TOML configuration file.
     /// @param   writeToFile: whether updates are written back to the TOML file.
     function _loadConfig(string memory filePath, bool writeToFile) internal {
-        console.log("----------");
-        console.log(string.concat("Loading config from '", filePath, "'"));
+        console2.log("----------");
+        console2.log(string.concat("Loading config from '", filePath, "'"));
         config = new StdConfig(filePath, writeToFile);
         vm.makePersistent(address(config));
-        console.log("Config successfully loaded");
-        console.log("----------");
+        console2.log("Config successfully loaded");
+        console2.log("----------");
     }
 
     /// @notice  Loads configuration from a file and creates forks for each specified chain.
@@ -46,7 +46,7 @@ abstract contract Config is CommonBase {
     function _loadConfigAndForks(string memory filePath, bool writeToFile) internal {
         _loadConfig(filePath, writeToFile);
 
-        console.log("Setting up forks for the configured chains...");
+        console2.log("Setting up forks for the configured chains...");
         uint256[] memory chains = config.getChainIds();
         for (uint256 i = 0; i < chains.length; i++) {
             uint256 chainId = chains[i];
@@ -54,7 +54,7 @@ abstract contract Config is CommonBase {
             forkOf[chainId] = forkId;
             chainIds.push(chainId);
         }
-        console.log("Forks successfully created");
-        console.log("----------");
+        console2.log("Forks successfully created");
+        console2.log("----------");
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {console2} from "./console2.sol";
@@ -222,14 +222,6 @@ abstract contract StdCheatsSafe {
         // 4-byte selector for `isBlackListed(address)`, used by USDT.
         (success, returnData) = token.staticcall(abi.encodeWithSelector(0xe47d6060, addr));
         vm.assume(!success || abi.decode(returnData, (bool)) == false);
-    }
-
-    // Checks that `addr` is not blacklisted by token contracts that have a blacklist.
-    // This is identical to `assumeNotBlacklisted(address,address)` but with a different name, for
-    // backwards compatibility, since this name was used in the original PR which already has
-    // a release. This function can be removed in a future release once we want a breaking change.
-    function assumeNoBlacklisted(address token, address addr) internal view virtual {
-        assumeNotBlacklisted(token, addr);
     }
 
     function assumeAddressIsNot(address addr, AddressType addressType) internal virtual {
@@ -701,18 +693,6 @@ abstract contract StdCheats is StdCheatsSafe {
     function startHoax(address msgSender, address origin, uint256 give) internal virtual {
         vm.deal(msgSender, give);
         vm.startPrank(msgSender, origin);
-    }
-
-    function changePrank(address msgSender) internal virtual {
-        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
-        vm.stopPrank();
-        vm.startPrank(msgSender);
-    }
-
-    function changePrank(address msgSender, address txOrigin) internal virtual {
-        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
-        vm.stopPrank();
-        vm.startPrank(msgSender, txOrigin);
     }
 
     // The same as Vm's `deal`
