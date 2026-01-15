@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
-import {Test, StdUtils} from "../src/Test.sol";
+import {Test, StdUtils, StdConstants} from "../src/Test.sol";
 
 contract StdUtilsMock is StdUtils {
     // We deploy a mock version so we can properly test expected reverts.
@@ -59,7 +59,7 @@ contract StdUtilsTest is Test {
 
     function testFuzz_Bound_DistributionIsEven(uint256 min, uint256 size) public pure {
         size = size % 100 + 1;
-        min = bound(min, UINT256_MAX / 2, UINT256_MAX / 2 + size);
+        min = bound(min, StdConstants.UINT256_MAX / 2, StdConstants.UINT256_MAX / 2 + size);
         uint256 max = min + size - 1;
         uint256 result;
 
@@ -209,10 +209,10 @@ contract StdUtilsTest is Test {
         assertEq(boundPrivateKey(1), 1);
         assertEq(boundPrivateKey(300), 300);
         assertEq(boundPrivateKey(9999), 9999);
-        assertEq(boundPrivateKey(SECP256K1_ORDER - 1), SECP256K1_ORDER - 1);
-        assertEq(boundPrivateKey(SECP256K1_ORDER), 1);
-        assertEq(boundPrivateKey(SECP256K1_ORDER + 1), 2);
-        assertEq(boundPrivateKey(UINT256_MAX), UINT256_MAX & SECP256K1_ORDER - 1); // x&y is equivalent to x-x%y
+        assertEq(boundPrivateKey(StdConstants.SECP256K1_ORDER - 1), StdConstants.SECP256K1_ORDER - 1);
+        assertEq(boundPrivateKey(StdConstants.SECP256K1_ORDER), 1);
+        assertEq(boundPrivateKey(StdConstants.SECP256K1_ORDER + 1), 2);
+        assertEq(boundPrivateKey(StdConstants.UINT256_MAX), StdConstants.UINT256_MAX & StdConstants.SECP256K1_ORDER - 1); // x&y is equivalent to x-x%y
     }
 
     /*//////////////////////////////////////////////////////////////////////////

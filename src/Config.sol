@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {console2} from "./console2.sol";
+import {console} from "./console.sol";
 import {StdConfig} from "./StdConfig.sol";
-import {CommonBase} from "./Base.sol";
+import {StdConstants} from "./StdConstants.sol";
 
 /// @notice Boilerplate to streamline the setup of multi-chain environments.
-abstract contract Config is CommonBase {
+/// @dev Meant to be used alongside Test or Script which provides the `vm` instance.
+abstract contract Config {
     // -- STORAGE (CONFIG + CHAINS + FORKS) ------------------------------------
 
     /// @dev Contract instance holding the data from the TOML config file.
@@ -27,12 +28,12 @@ abstract contract Config is CommonBase {
     /// @param   filePath: the path to the TOML configuration file.
     /// @param   writeToFile: whether updates are written back to the TOML file.
     function _loadConfig(string memory filePath, bool writeToFile) internal {
-        console2.log("----------");
-        console2.log(string.concat("Loading config from '", filePath, "'"));
+        console.log("----------");
+        console.log(string.concat("Loading config from '", filePath, "'"));
         config = new StdConfig(filePath, writeToFile);
-        vm.makePersistent(address(config));
-        console2.log("Config successfully loaded");
-        console2.log("----------");
+        StdConstants.VM.makePersistent(address(config));
+        console.log("Config successfully loaded");
+        console.log("----------");
     }
 
     /// @notice  Loads configuration from a file and creates forks for each specified chain.
@@ -46,15 +47,15 @@ abstract contract Config is CommonBase {
     function _loadConfigAndForks(string memory filePath, bool writeToFile) internal {
         _loadConfig(filePath, writeToFile);
 
-        console2.log("Setting up forks for the configured chains...");
+        console.log("Setting up forks for the configured chains...");
         uint256[] memory chains = config.getChainIds();
         for (uint256 i = 0; i < chains.length; i++) {
             uint256 chainId = chains[i];
-            uint256 forkId = vm.createFork(config.getRpcUrl(chainId));
+            uint256 forkId = StdConstants.VM.createFork(config.getRpcUrl(chainId));
             forkOf[chainId] = forkId;
             chainIds.push(chainId);
         }
-        console2.log("Forks successfully created");
-        console2.log("----------");
+        console.log("Forks successfully created");
+        console.log("----------");
     }
 }

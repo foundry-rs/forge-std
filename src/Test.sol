@@ -2,29 +2,35 @@
 pragma solidity >=0.8.20 <0.9.0;
 
 // 💬 ABOUT
-// Forge Std's default Test.
+// Forge Std Test - AI/Agent-first design with explicit type-named assertions.
+//
+// FEATURES:
+// - Assertions use explicit type names: assertEqUint, assertEqAddress, etc.
+// - Uses console2 for logging
+// - Requires Solidity >=0.8.20
+//
+// For unified namespace access, use: import {forge} from "forge-std/Forge.sol";
 
 // 🧩 MODULES
-import {console2} from "./console2.sol";
+import {console} from "./console.sol";
 import {StdAssertions} from "./StdAssertions.sol";
-import {StdChains} from "./StdChains.sol";
-import {StdCheats} from "./StdCheats.sol";
+import {StdCheats} from "./test/StdCheats.sol";
 import {StdConstants} from "./StdConstants.sol";
-import {stdError} from "./StdError.sol";
-import {StdInvariant} from "./StdInvariant.sol";
-import {stdJson} from "./StdJson.sol";
-import {stdMath} from "./StdMath.sol";
-import {StdStorage, stdStorage} from "./StdStorage.sol";
-import {StdStyle} from "./StdStyle.sol";
-import {stdToml} from "./StdToml.sol";
-import {StdUtils} from "./StdUtils.sol";
+import {StdErrors} from "./utils/StdErrors.sol";
+import {StdInvariant} from "./test/StdInvariant.sol";
+import {stdJson} from "./script/StdJson.sol";
+import {stdMath} from "./utils/StdMath.sol";
+import {StdStorage, stdStorage} from "./test/StdStorage.sol";
+import {stdToml} from "./script/StdToml.sol";
+import {StdUtils} from "./test/StdUtils.sol";
 import {Vm} from "./Vm.sol";
 
-// 📦 BOILERPLATE
-import {TestBase} from "./Base.sol";
-
 // ⭐️ TEST
-abstract contract Test is TestBase, StdAssertions, StdChains, StdCheats, StdInvariant, StdUtils {
-    // Note: IS_TEST() must return true.
+/// @title Test - AI/Agent-first test base contract
+/// @notice Uses explicit type-named assertions for better AI disambiguation
+abstract contract Test is StdAssertions, StdCheats, StdInvariant, StdUtils {
     bool public IS_TEST = true;
+
+    Vm internal constant vm = StdConstants.VM;
+    StdStorage internal stdstore;
 }

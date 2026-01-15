@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {TestV2} from "./TestV2.sol";
+import {Test} from "./Test.sol";
 import {Vm} from "./Vm.sol";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -53,7 +53,7 @@ import {Vm} from "./Vm.sol";
 /// @title InvariantBase - Lightweight base for invariant-first testing
 /// @notice Extends Test with actor management and ghost variables
 /// @dev Stays close to Foundry's native invariant testing approach
-abstract contract InvariantBase is TestV2 {
+abstract contract InvariantBase is Test {
     // ═══════════════════════════════════════════════════════════════════════
     // ACTOR MANAGEMENT
     // ═══════════════════════════════════════════════════════════════════════

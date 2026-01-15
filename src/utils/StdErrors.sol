@@ -2,7 +2,7 @@
 // Panics work for versions >=0.8.0, but we lowered the pragma to make this compatible with Test
 pragma solidity >=0.8.20 <0.9.0;
 
-library stdError {
+library StdErrors {
     bytes public constant assertionError = abi.encodeWithSignature("Panic(uint256)", 0x01);
     bytes public constant arithmeticError = abi.encodeWithSignature("Panic(uint256)", 0x11);
     bytes public constant divisionError = abi.encodeWithSignature("Panic(uint256)", 0x12);

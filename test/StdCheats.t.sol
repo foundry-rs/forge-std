@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
-import {StdCheats} from "../src/StdCheats.sol";
+import {StdCheats} from "../src/test/StdCheats.sol";
 import {Test} from "../src/Test.sol";
-import {stdJson} from "../src/StdJson.sol";
-import {stdToml} from "../src/StdToml.sol";
+import {stdJson} from "../src/script/StdJson.sol";
+import {stdToml} from "../src/script/StdToml.sol";
 import {IERC20} from "../src/interfaces/IERC20.sol";
 
 contract StdCheatsTest is Test {
@@ -402,8 +402,8 @@ contract StdCheatsTest is Test {
         stdCheatsMock.exposedAssumeNotPayable(address(cp));
     }
 
-    function testFuzz_AssumeNotPrecompile(address addr) external {
-        assumeNotPrecompile(addr, getChain("optimism_sepolia").chainId);
+    function testFuzz_AssumeNotPrecompile(address addr) external pure {
+        assumeNotPrecompile(addr, 11155420); // OP Sepolia chain ID
         assertTrue(
             addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
                 || addr > address(0x4200000000000000000000000000000000000800)

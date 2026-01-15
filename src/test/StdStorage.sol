@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {Vm} from "./Vm.sol";
+import {Vm} from "../Vm.sol";
 
 struct FindData {
     uint256 slot;

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.20 <0.9.0;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FORGE-STD V2 - Unified Namespace
+// FORGE-STD - Unified Namespace
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // Usage:
@@ -23,16 +23,14 @@ pragma solidity >=0.8.20 <0.9.0;
 // ═══════════════════════════════════════════════════════════════════════════
 
 import {Vm} from "./Vm.sol";
-import {console2} from "./console2.sol";
-import {stdStorage, StdStorage} from "./StdStorage.sol";
-import {stdJson} from "./StdJson.sol";
-import {stdToml} from "./StdToml.sol";
-import {stdMath} from "./StdMath.sol";
-import {stdError} from "./StdError.sol";
-import {StdChains} from "./StdChains.sol";
-import {StdStyle} from "./StdStyle.sol";
+import {console} from "./console.sol";
+import {stdStorage, StdStorage} from "./test/StdStorage.sol";
+import {stdJson} from "./script/StdJson.sol";
+import {stdToml} from "./script/StdToml.sol";
+import {stdMath} from "./utils/StdMath.sol";
+import {StdErrors} from "./utils/StdErrors.sol";
 
-// V2 Advanced modules (re-exported for convenience)
+// Advanced modules (re-exported for convenience)
 import {scenario, ScenarioBuilder, ScenarioResult, ScenarioActor, Actor} from "./Scenario.sol";
 import {expect, Expectation, ExpectationResult} from "./Expect.sol";
 import {mock, spy, MockSetup, Spy} from "./Mock.sol";
@@ -41,7 +39,7 @@ import {trace, CallTrace, CallNode} from "./Trace.sol";
 import {InvariantBase, HandlerBase} from "./InvariantBase.sol";
 import {Spec, ActionsBase, Actions, IActionSet, SpecActor} from "./Spec.sol";
 
-/// @title Forge Standard Library V2 - Unified Namespace
+/// @title Forge Standard Library - Unified Namespace
 /// @notice Single entry point for all forge-std functionality
 /// @dev Import and use as: forge.vm, forge.console, forge.storage, etc.
 library forge {
@@ -56,31 +54,31 @@ library forge {
     // ═══════════════════════════════════════════════════════════════════════
 
     function logString(string memory message) internal pure {
-        console2.logString(message);
+        console.logString(message);
     }
 
     function logUint(uint256 value) internal pure {
-        console2.logUint(value);
+        console.logUint(value);
     }
 
     function logInt(int256 value) internal pure {
-        console2.logInt(value);
+        console.logInt(value);
     }
 
     function logAddress(address value) internal pure {
-        console2.logAddress(value);
+        console.logAddress(value);
     }
 
     function logBool(bool value) internal pure {
-        console2.logBool(value);
+        console.logBool(value);
     }
 
     function logBytes32(bytes32 value) internal pure {
-        console2.logBytes32(value);
+        console.logBytes32(value);
     }
 
     function logBytes(bytes memory value) internal pure {
-        console2.logBytes(value);
+        console.logBytes(value);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -437,34 +435,34 @@ library forge {
     // ═══════════════════════════════════════════════════════════════════════
 
     function arithmeticError() internal pure returns (bytes memory) {
-        return stdError.arithmeticError;
+        return StdErrors.arithmeticError;
     }
 
     function assertionError() internal pure returns (bytes memory) {
-        return stdError.assertionError;
+        return StdErrors.assertionError;
     }
 
     function indexOOBError() internal pure returns (bytes memory) {
-        return stdError.indexOOBError;
+        return StdErrors.indexOOBError;
     }
 
     function divisionError() internal pure returns (bytes memory) {
-        return stdError.divisionError;
+        return StdErrors.divisionError;
     }
 
     function encodeStorageError() internal pure returns (bytes memory) {
-        return stdError.encodeStorageError;
+        return StdErrors.encodeStorageError;
     }
 
     function popError() internal pure returns (bytes memory) {
-        return stdError.popError;
+        return StdErrors.popError;
     }
 
     function memOverflowError() internal pure returns (bytes memory) {
-        return stdError.memOverflowError;
+        return StdErrors.memOverflowError;
     }
 
     function zeroVarError() internal pure returns (bytes memory) {
-        return stdError.zeroVarError;
+        return StdErrors.zeroVarError;
     }
 }

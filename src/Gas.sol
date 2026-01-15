@@ -2,7 +2,7 @@
 pragma solidity >=0.8.20 <0.9.0;
 
 import {Vm} from "./Vm.sol";
-import {console2} from "./console2.sol";
+import {console} from "./console.sol";
 
 /// @title Gas - Structured Gas Profiling
 /// @notice Profile and compare gas usage in a structured, agent-parseable format
@@ -15,7 +15,7 @@ import {console2} from "./console2.sol";
 /// token.transfer(recipient, 100);
 ///
 /// GasReport memory r = gas.endProfile(p);
-/// console2.log("Gas used:", r.gasUsed);
+/// console.log("Gas used:", r.gasUsed);
 ///
 /// // Or use the helper:
 /// GasReport memory r2 = gas.measure("approve", address(token), abi.encodeCall(token.approve, (spender, 100)));
@@ -378,15 +378,15 @@ library GasLib {
     // ═══════════════════════════════════════════════════════════════════════
 
     function log(GasReport memory r) internal pure {
-        console2.logString(format(r));
+        console.logString(format(r));
     }
 
     function log(GasComparison memory c) internal pure {
-        console2.logString(format(c));
+        console.logString(format(c));
     }
 
     function log(GasBenchmark memory b) internal pure {
-        console2.logString(format(b));
+        console.logString(format(b));
     }
 }
 

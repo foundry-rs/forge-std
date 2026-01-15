@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {VmSafe} from "./Vm.sol";
+import {VmSafe} from "../Vm.sol";
 
 // Helpers for parsing and writing TOML files
 // To parse:

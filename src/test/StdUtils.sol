@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {IMulticall3} from "./interfaces/IMulticall3.sol";
-import {StdConstants} from "./StdConstants.sol";
-import {VmSafe} from "./Vm.sol";
+import {IMulticall3} from "../interfaces/IMulticall3.sol";
+import {StdConstants} from "../StdConstants.sol";
+import {VmSafe} from "../Vm.sol";
 
 abstract contract StdUtils {
     /*//////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ abstract contract StdUtils {
         }
 
         // Make the aggregate call.
-        (, bytes[] memory returnData) = StdConstants.MULTICALL3_ADDRESS.aggregate(calls);
+        (, bytes[] memory returnData) = StdConstants.MULTICALL3.aggregate(calls);
 
         // ABI decode the return data and return the balances.
         balances = new uint256[](length);

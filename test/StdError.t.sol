@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
-import {stdError} from "../src/StdError.sol";
+import {StdErrors} from "../src/utils/StdErrors.sol";
 import {Test} from "../src/Test.sol";
 
 contract StdErrorsTest is Test {
@@ -12,52 +12,52 @@ contract StdErrorsTest is Test {
     }
 
     function test_RevertIf_AssertionError() public {
-        vm.expectRevert(stdError.assertionError);
+        vm.expectRevert(StdErrors.assertionError);
         test.assertionError();
     }
 
     function test_RevertIf_ArithmeticError() public {
-        vm.expectRevert(stdError.arithmeticError);
+        vm.expectRevert(StdErrors.arithmeticError);
         test.arithmeticError(10);
     }
 
     function test_RevertIf_DivisionError() public {
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert(StdErrors.divisionError);
         test.divError(0);
     }
 
     function test_RevertIf_ModError() public {
-        vm.expectRevert(stdError.divisionError);
+        vm.expectRevert(StdErrors.divisionError);
         test.modError(0);
     }
 
     function test_RevertIf_EnumConversionError() public {
-        vm.expectRevert(stdError.enumConversionError);
+        vm.expectRevert(StdErrors.enumConversionError);
         test.enumConversion(1);
     }
 
     function test_RevertIf_EncodeStgError() public {
-        vm.expectRevert(stdError.encodeStorageError);
+        vm.expectRevert(StdErrors.encodeStorageError);
         test.encodeStgError();
     }
 
     function test_RevertIf_PopError() public {
-        vm.expectRevert(stdError.popError);
+        vm.expectRevert(StdErrors.popError);
         test.pop();
     }
 
     function test_RevertIf_IndexOOBError() public {
-        vm.expectRevert(stdError.indexOOBError);
+        vm.expectRevert(StdErrors.indexOOBError);
         test.indexOOBError(1);
     }
 
     function test_RevertIf_MemOverflowError() public {
-        vm.expectRevert(stdError.memOverflowError);
+        vm.expectRevert(StdErrors.memOverflowError);
         test.mem();
     }
 
     function test_RevertIf_InternError() public {
-        vm.expectRevert(stdError.zeroVarError);
+        vm.expectRevert(StdErrors.zeroVarError);
         test.intern();
     }
 }

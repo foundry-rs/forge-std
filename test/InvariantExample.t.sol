@@ -152,7 +152,7 @@ contract TokenInvariantTest is InvariantBase {
 
     /// @notice CRITICAL: Total supply must equal sum of all balances
     function invariant_supplyEqualsBalances() public view {
-        assertEqUint(
+        assertEq(
             token.totalSupply(),
             _ghost("sumOfBalances"),
             "Supply must equal sum of balances"
@@ -163,7 +163,7 @@ contract TokenInvariantTest is InvariantBase {
     function invariant_noBalanceExceedsSupply() public view {
         address[] memory actors = _actors();
         for (uint256 i = 0; i < actors.length; i++) {
-            assertLeUint(
+            assertLe(
                 token.balanceOf(actors[i]),
                 token.totalSupply(),
                 "No balance should exceed supply"
@@ -175,7 +175,7 @@ contract TokenInvariantTest is InvariantBase {
     function invariant_ghostBalancesMatch() public view {
         address[] memory actors = _actors();
         for (uint256 i = 0; i < actors.length; i++) {
-            assertEqUint(
+            assertEq(
                 token.balanceOf(actors[i]),
                 _ghostFor("balance", actors[i]),
                 "Ghost balance must match actual"
@@ -213,7 +213,7 @@ contract TokenPropertyTest is InvariantBase {
 
         token.mint(actor, amount);
 
-        assertEqUint(token.totalSupply(), supplyBefore + amount);
+        assertEq(token.totalSupply(), supplyBefore + amount);
     }
 
     /// @notice Property: transfer preserves total supply
@@ -235,7 +235,7 @@ contract TokenPropertyTest is InvariantBase {
 
         token.transfer(from, to, transferAmount);
 
-        assertEqUint(token.totalSupply(), supplyBefore);
+        assertEq(token.totalSupply(), supplyBefore);
     }
 
     /// @notice Property: burn decreases supply by exact amount
@@ -249,6 +249,6 @@ contract TokenPropertyTest is InvariantBase {
 
         token.burn(actor, burnAmount);
 
-        assertEqUint(token.totalSupply(), supplyBefore - burnAmount);
+        assertEq(token.totalSupply(), supplyBefore - burnAmount);
     }
 }

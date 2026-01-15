@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
-import {stdStorage, StdStorage} from "../src/StdStorage.sol";
+import {stdStorage, StdStorage} from "../src/test/StdStorage.sol";
 import {Test} from "../src/Test.sol";
 
 contract StdStorageTest is Test {
@@ -219,7 +219,7 @@ contract StdStorageTest is Test {
 
     function test_StorageReadBytes32() public {
         bytes32 val = stdstore.target(address(test)).sig(test.tE.selector).read_bytes32();
-        assertEq(val, hex"1337");
+        assertEq(val, bytes32(hex"1337"));
     }
 
     function test_StorageReadBool_False() public {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.20 <0.9.0;
 
-import {TestV2} from "../src/TestV2.sol";
+import {Test} from "../src/Test.sol";
 import {
     forge,
     scenario,
@@ -41,7 +41,7 @@ contract SimpleToken {
     }
 }
 
-contract V2FeaturesTest is TestV2 {
+contract FeaturesTest is Test {
     using ScenarioLib for ScenarioBuilder;
     using ScenarioResultLib for ScenarioResult;
     using ExpectLib for Expectation;
@@ -68,9 +68,9 @@ contract V2FeaturesTest is TestV2 {
             .build();
 
         // Verify actors were created
-        assertNotEqAddress(s.getActorAddress("alice"), address(0));
-        assertNotEqAddress(s.getActorAddress("bob"), address(0));
-        assertNotEqAddress(s.getActorAddress("alice"), s.getActorAddress("bob"));
+        assertNotEq(s.getActorAddress("alice"), address(0));
+        assertNotEq(s.getActorAddress("bob"), address(0));
+        assertNotEq(s.getActorAddress("alice"), s.getActorAddress("bob"));
 
         // Act as alice
         s.asActor("alice");
@@ -84,13 +84,13 @@ contract V2FeaturesTest is TestV2 {
             .atTimestamp(1000)
             .build();
 
-        assertEqUint(block.timestamp, 1000);
+        assertEq(block.timestamp, 1000);
 
         s.skipTime(100);
-        assertEqUint(block.timestamp, 1100);
+        assertEq(block.timestamp, 1100);
 
         s.rewindTime(50);
-        assertEqUint(block.timestamp, 1050);
+        assertEq(block.timestamp, 1050);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -108,7 +108,7 @@ contract V2FeaturesTest is TestV2 {
         );
 
         assertTrue(r.success);
-        assertGtUint(r.gasUsed, 0);
+        assertGt(r.gasUsed, 0);
 
         // Log the report
         GasLib.log(r);
@@ -139,7 +139,7 @@ contract V2FeaturesTest is TestV2 {
         GasComparison memory comparison = gas.compare(r1, r2);
 
         // Both should use similar gas (ERC20 transfer cost is constant)
-        assertLtUint(
+        assertLt(
             comparison.difference > 0 ? uint256(comparison.difference) : uint256(-comparison.difference),
             1000 // Should be within 1000 gas
         );
@@ -166,7 +166,7 @@ contract V2FeaturesTest is TestV2 {
         );
 
         assertTrue(success);
-        assertEqUint(abi.decode(data, (uint256)), 1000 ether);
+        assertEq(abi.decode(data, (uint256)), 1000 ether);
     }
 
     function test_MockRevert() public {
@@ -204,30 +204,29 @@ contract V2FeaturesTest is TestV2 {
         assertTrue(success);
         assertTrue(abi.decode(returnData, (bool)));
 
-        assertEqAddress(node.to, address(token));
-        assertEqBytes32(bytes32(node.selector), bytes32(token.transfer.selector));
-        assertGtUint(node.gasUsed, 0);
+        assertEq(node.to, address(token));
+        assertEq(bytes32(node.selector), bytes32(token.transfer.selector));
+        assertGt(node.gasUsed, 0);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // EXPLICIT ASSERTION TESTS (V2)
+    // EXPLICIT ASSERTION TESTS ()
     // ═══════════════════════════════════════════════════════════════════════
 
-    function test_ExplicitAssertions() public pure {
-        // These explicit names are more AI-friendly than overloaded assertEq
-        assertEqUint(1, 1);
-        assertEqInt(-1, -1);
-        assertEqAddress(address(0x1), address(0x1));
-        assertEqBytes32(bytes32(uint256(1)), bytes32(uint256(1)));
-        assertEqBool(true, true);
-        assertEqString("hello", "hello");
+    function test_Assertions() public pure {
+        assertEq(uint256(1), uint256(1));
+        assertEq(int256(-1), int256(-1));
+        assertEq(address(0x1), address(0x1));
+        assertEq(bytes32(uint256(1)), bytes32(uint256(1)));
+        assertEq(true, true);
+        assertEq(string("hello"), string("hello"));
 
-        assertNotEqUint(1, 2);
-        assertNotEqAddress(address(0x1), address(0x2));
+        assertNotEq(uint256(1), uint256(2));
+        assertNotEq(address(0x1), address(0x2));
 
-        assertGtUint(2, 1);
-        assertGeUint(2, 2);
-        assertLtUint(1, 2);
-        assertLeUint(2, 2);
+        assertGt(uint256(2), uint256(1));
+        assertGe(uint256(2), uint256(2));
+        assertLt(uint256(1), uint256(2));
+        assertLe(uint256(2), uint256(2));
     }
 }

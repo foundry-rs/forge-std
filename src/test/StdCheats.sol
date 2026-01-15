@@ -2,8 +2,8 @@
 pragma solidity >=0.8.20 <0.9.0;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
-import {console2} from "./console2.sol";
-import {Vm} from "./Vm.sol";
+import {console} from "../console.sol";
+import {Vm} from "../Vm.sol";
 
 abstract contract StdCheatsSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
