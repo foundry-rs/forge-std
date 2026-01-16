@@ -288,7 +288,7 @@ abstract contract StdChains {
             "tempo_moderato", ChainData("Tempo Moderato", 42431, "https://rpc.moderato.tempo.xyz")
         );
         setChainWithDefaultRpcUrl(
-            "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.andantino.tempo.xyz")
+            "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.testnet.tempo.xyz")
         );
     }
 
