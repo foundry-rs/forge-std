@@ -1865,10 +1865,10 @@ interface VmSafe {
 
     // ======== Utilities ========
 
-    /// Returns an uint256 value bounded in given range and different from the current one.
+    /// Returns a uint256 value bounded in a given range and different from the current one.
     function bound(uint256 current, uint256 min, uint256 max) external view returns (uint256);
 
-    /// Returns an int256 value bounded in given range and different from the current one.
+    /// Returns an int256 value bounded in a given range and different from the current one.
     function bound(int256 current, int256 min, int256 max) external view returns (int256);
 
     /// Compute the address of a contract created with CREATE2 using the given CREATE2 deployer.
