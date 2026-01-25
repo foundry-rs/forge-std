@@ -138,7 +138,7 @@ abstract contract StdUtils {
         uint256 length = addresses.length;
         IMulticall3.Call[] memory calls = new IMulticall3.Call[](length);
         for (uint256 i = 0; i < length; ++i) {
-            // 0x70a08231 = bytes4("balanceOf(address)"))
+            // 0x70a08231 = bytes4(keccak256("balanceOf(address)"))
             calls[i] = IMulticall3.Call({target: token, callData: abi.encodeWithSelector(0x70a08231, (addresses[i]))});
         }
 
