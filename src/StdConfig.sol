@@ -75,7 +75,7 @@ contract StdConfig {
     /// @notice Reads the TOML file and iterates through each top-level key, which is
     ///         assumed to be a chain name or ID. For each chain, it caches its RPC
     ///         endpoint and all variables defined in typed sub-tables like `[<chain>.<type>]`,
-    ///         where type must be: `bool`, `address`, `uint`, `bytes32`, `string`, or `bytes`.
+    ///         where type must be: `bool`, `address`, `bytes32`, `uint`, `int`, `string`, or `bytes`.
     ///
     ///         The constructor attempts to parse each variable first as a single value,
     ///         and if that fails, as an array of that type. If a variable cannot be
