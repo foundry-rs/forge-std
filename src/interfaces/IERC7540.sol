@@ -95,7 +95,7 @@ interface IERC7540Deposit is IERC7540Operator {
     function mint(uint256 shares, address receiver, address controller) external returns (uint256 assets);
 }
 
-/// @dev Interface of the asynchronous deposit Vault interface of ERC7540, as defined in
+/// @dev Interface of the asynchronous redeem Vault interface of ERC7540, as defined in
 /// https://eips.ethereum.org/EIPS/eip-7540
 interface IERC7540Redeem is IERC7540Operator {
     event RedeemRequest(
