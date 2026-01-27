@@ -425,7 +425,7 @@ library stdStorage {
                 uint256(set) < maxVal,
                 string(
                     abi.encodePacked(
-                        "stdStorage find(StdStorage): Packed slot. We can't fit value greater than ",
+                        "stdStorage checked_write(StdStorage): Packed slot. We can't fit value greater than ",
                         vm.toString(maxVal)
                     )
                 )
@@ -440,7 +440,7 @@ library stdStorage {
 
         if (!success || callResult != set) {
             vm.store(who, bytes32(data.slot), curVal);
-            revert("stdStorage find(StdStorage): Failed to write value.");
+            revert("stdStorage checked_write(StdStorage): Failed to write value.");
         }
         clear(self);
     }
