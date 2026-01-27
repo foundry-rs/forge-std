@@ -782,7 +782,7 @@ abstract contract StdCheats is StdCheatsSafe {
     function dealERC721(address token, address to, uint256 id) internal virtual {
         // check if token id is already minted and the actual owner.
         (bool successMinted, bytes memory ownerData) = token.staticcall(abi.encodeWithSelector(0x6352211e, id));
-        require(successMinted, "StdCheats deal(address,address,uint,bool): id not minted.");
+        require(successMinted, "StdCheats dealERC721(address,address,uint256): id not minted.");
 
         // get owner current balance
         (, bytes memory fromBalData) =
