@@ -767,7 +767,7 @@ abstract contract StdCheats is StdCheatsSafe {
             (, bytes memory totSupData) = token.staticcall(abi.encodeWithSelector(0xbd85b039, id));
             require(
                 totSupData.length != 0,
-                "StdCheats deal(address,address,uint,uint,bool): target contract is not ERC1155Supply."
+                "StdCheats dealERC1155(address,address,uint256,uint256,bool): target contract is not ERC1155Supply."
             );
             uint256 totSup = abi.decode(totSupData, (uint256));
             if (give < prevBal) {
