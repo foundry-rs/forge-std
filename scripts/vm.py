@@ -22,7 +22,7 @@ VM_SAFE_DOC = """\
 """
 
 VM_DOC = """\
-/// The `Vm` interface does allow manipulation of the EVM state. These are all intended to be used
+/// The `Vm` interface allows manipulation of the EVM state. These are all intended to be used
 /// in tests, but it is not recommended to use these cheats in scripts.
 """
 
