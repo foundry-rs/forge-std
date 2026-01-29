@@ -7,7 +7,7 @@ import {StdConfig} from "../src/StdConfig.sol";
 
 contract ConfigTest is Test, Config {
     function setUp() public {
-        vm.setEnv("MAINNET_RPC", "https://reth-ethereum.ithaca.xyz/rpc");
+        vm.setEnv("MAINNET_RPC", "https://ethereum.reth.rs/rpc");
         vm.setEnv("WETH_MAINNET", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
         vm.setEnv("OPTIMISM_RPC", "https://mainnet.optimism.io");
         vm.setEnv("WETH_OPTIMISM", "0x4200000000000000000000000000000000000006");
@@ -20,7 +20,7 @@ contract ConfigTest is Test, Config {
         // -- MAINNET --------------------------------------------------------------
 
         // Read and assert RPC URL for Mainnet (chain ID 1)
-        assertEq(config.getRpcUrl(1), "https://reth-ethereum.ithaca.xyz/rpc");
+        assertEq(config.getRpcUrl(1), "https://ethereum.reth.rs/rpc");
 
         // Read and assert boolean values
         assertTrue(config.get(1, "is_live").toBool());
@@ -138,7 +138,7 @@ contract ConfigTest is Test, Config {
         keys[6] = "str";
 
         // Read and assert RPC URL for Mainnet (chain ID 1)
-        assertEq(config.getRpcUrl(1), "https://reth-ethereum.ithaca.xyz/rpc");
+        assertEq(config.getRpcUrl(1), "https://ethereum.reth.rs/rpc");
 
         for (uint256 i = 0; i < keys.length; ++i) {
             assertTrue(config.exists(1, keys[i]));
@@ -330,7 +330,7 @@ contract ConfigTest is Test, Config {
             invalidChainConfig,
             string.concat(
                 "[mainnet]\n",
-                "endpoint_url = \"https://reth-ethereum.ithaca.xyz/rpc\"\n",
+                "endpoint_url = \"https://ethereum.reth.rs/rpc\"\n",
                 "\n",
                 "[mainnet.uint]\n",
                 "valid_number = 123\n",
@@ -367,7 +367,7 @@ contract ConfigTest is Test, Config {
             badParseConfig,
             string.concat(
                 "[mainnet]\n",
-                "endpoint_url = \"https://reth-ethereum.ithaca.xyz/rpc\"\n",
+                "endpoint_url = \"https://ethereum.reth.rs/rpc\"\n",
                 "\n",
                 "[mainnet.uint]\n",
                 "bad_value = \"not_a_number\"\n"
