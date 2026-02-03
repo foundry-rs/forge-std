@@ -682,6 +682,9 @@ interface VmSafe {
     /// Gets all the recorded logs.
     function getRecordedLogs() external view returns (Log[] memory logs);
 
+    /// Gets all the recorded logs, in json format.
+    function getRecordedLogsJson() external view returns (string memory logsJson);
+
     /// Returns state diffs from current `vm.startStateDiffRecording` session.
     function getStateDiff() external view returns (string memory diff);
 
