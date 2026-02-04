@@ -204,7 +204,7 @@ interface VmSafe {
         // If kind is Call, DelegateCall, StaticCall or CallCode, then the account is the callee.
         // If kind is Create, then the account is the newly created account.
         // If kind is SelfDestruct, then the account is the selfdestruct recipient.
-        // If kind is a Resume, then account represents an account context that has resumed.
+        // If kind is a Resume, then account represents a account context that has resumed.
         AccountAccessKind kind;
         // The account that was accessed.
         // It's either the account created, callee or a selfdestruct recipient for CREATE, CALL or SELFDESTRUCT.
@@ -296,7 +296,7 @@ interface VmSafe {
         // Represent the type of transaction among CALL, CREATE, CREATE2
         BroadcastTxType txType;
         // The address of the contract that was called or created.
-        // This is the address of the contract that is created if the txType is CREATE or CREATE2.
+        // This is address of the contract that is created if the txType is CREATE or CREATE2.
         address contractAddress;
         // The block number the transaction landed in.
         uint64 blockNumber;
@@ -401,7 +401,7 @@ interface VmSafe {
     /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
     /// signature's `s` value, and the recovery id `v` in a single bytes32.
     /// This format reduces the signature size from 65 to 64 bytes.
-    function signCompact(Wallet calldata wallet, bytes32 digest) external returns (bytes32 r, bytes32 vs);
+    function signCompact(Wallet calldata wallet, bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
 
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     /// Returns a compact signature (`r`, `vs`) as per EIP-2098, where `vs` encodes both the
@@ -437,7 +437,7 @@ interface VmSafe {
         returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Signs data with a `Wallet`.
-    function sign(Wallet calldata wallet, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+    function sign(Wallet calldata wallet, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
 
     /// Signs `digest` with `privateKey` using the secp256k1 curve.
     function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
@@ -681,6 +681,9 @@ interface VmSafe {
 
     /// Gets all the recorded logs.
     function getRecordedLogs() external view returns (Log[] memory logs);
+
+    /// Gets all the recorded logs, in JSON format.
+    function getRecordedLogsJson() external view returns (string memory logsJson);
 
     /// Returns state diffs from current `vm.startStateDiffRecording` session.
     function getStateDiff() external view returns (string memory diff);
@@ -1889,7 +1892,7 @@ interface VmSafe {
     /// * requires previous binding generation with `forge bind-json`.
     /// * bindings will be retrieved from the path configured in `foundry.toml`.
     /// 2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
-    /// * Note: the cheatcode will use the canonical type even if the input is malformed
+    /// * Note: the cheatcode will use the canonical type even if the input is malformated
     /// with the wrong order of elements or with extra whitespaces.
     function eip712HashStruct(string calldata typeNameOrDefinition, bytes calldata abiEncodedData)
         external
@@ -1913,7 +1916,7 @@ interface VmSafe {
     /// * requires previous binding generation with `forge bind-json`.
     /// * bindings will be retrieved from the path configured in `foundry.toml`.
     /// 2. String representation of the type (i.e. "Foo(Bar bar) Bar(uint256 baz)").
-    /// * Note: the cheatcode will output the canonical type even if the input is malformed
+    /// * Note: the cheatcode will output the canonical type even if the input is malformated
     /// with the wrong order of elements or with extra whitespaces.
     function eip712HashType(string calldata typeNameOrDefinition) external pure returns (bytes32 typeHash);
 
