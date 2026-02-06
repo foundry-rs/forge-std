@@ -167,7 +167,7 @@ contract Storage {
 
 ### stdCheats
 
-This is a wrapper around miscellaneous cheatcodes that need wrappers to be more dev-friendly. Currently there are only functions related to `prank`. In general, users may expect ETH to be put into an address with `prank`, but this is not the case for safety reasons. Explicitly, this `hoax` function should only be used for addresses that have expected balances as it will get overwritten. If an address already has ETH, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
+This is a wrapper around miscellaneous cheatcodes that need wrappers to be more dev-friendly. It includes functions for pranking, dealing with ETH and tokens, deploying contracts, creating test addresses, time manipulation, and fuzzing helpers. In general, users may expect ETH to be put into an address with `prank`, but this is not the case for safety reasons. Explicitly, this `hoax` function should only be used for addresses that have expected balances as it will get overwritten. If an address already has ETH, you should just use `prank`. If you want to change that balance explicitly, just use `deal`. If you want to do both, `hoax` is also right for you.
 
 #### Example usage:
 
