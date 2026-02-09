@@ -219,7 +219,7 @@ contract Bar {
 
 ### Std Assertions
 
-Contains various assertions.
+Provides comprehensive assertion functions for testing, including equality checks (assertEq, assertNotEq), comparisons (assertLt, assertGt, assertLe, assertGe), approximate equality (assertApproxEqAbs, assertApproxEqRel), and boolean assertions (assertTrue, assertFalse). All assertions support multiple data types and optional custom error messages.
 
 ### `console.log`
 
