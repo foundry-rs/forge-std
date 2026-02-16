@@ -342,6 +342,10 @@ interface VmSafe {
 
     // ======== Crypto ========
 
+    /// Generates an Ed25519 key pair from a deterministic salt.
+    /// Returns (publicKey, privateKey) as 32-byte values.
+    function createEd25519Key(bytes32 salt) external pure returns (bytes32 publicKey, bytes32 privateKey);
+
     /// Derives a private key from the name, labels the account with that name, and returns the wallet.
     function createWallet(string calldata walletLabel) external returns (Wallet memory wallet);
 
@@ -375,6 +379,9 @@ interface VmSafe {
         external
         pure
         returns (uint256 privateKey);
+
+    /// Derives the Ed25519 public key from a private key.
+    function publicKeyEd25519(bytes32 privateKey) external pure returns (bytes32 publicKey);
 
     /// Derives secp256r1 public key from the provided `privateKey`.
     function publicKeyP256(uint256 privateKey) external pure returns (uint256 publicKeyX, uint256 publicKeyY);
@@ -426,6 +433,14 @@ interface VmSafe {
     /// Raises error if none of the signers passed into the script have provided address.
     function signCompact(address signer, bytes32 digest) external pure returns (bytes32 r, bytes32 vs);
 
+    /// Signs a message with namespace using Ed25519.
+    /// The signature covers namespace || message for domain separation.
+    /// Returns a 64-byte Ed25519 signature.
+    function signEd25519(bytes calldata namespace, bytes calldata message, bytes32 privateKey)
+        external
+        pure
+        returns (bytes memory signature);
+
     /// Signs `digest` with `privateKey` using the secp256r1 curve.
     function signP256(uint256 privateKey, bytes32 digest) external pure returns (bytes32 r, bytes32 s);
 
@@ -452,6 +467,15 @@ interface VmSafe {
     /// Signs `digest` with signer provided to script using the secp256k1 curve.
     /// Raises error if none of the signers passed into the script have provided address.
     function sign(address signer, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
+
+    /// Verifies an Ed25519 signature over namespace || message.
+    /// Returns true if signature is valid, false otherwise.
+    function verifyEd25519(
+        bytes calldata signature,
+        bytes calldata namespace,
+        bytes calldata message,
+        bytes32 publicKey
+    ) external pure returns (bool valid);
 
     // ======== Environment ========
 
@@ -2096,6 +2120,12 @@ interface Vm is VmSafe {
 
     /// Sets an address' code.
     function etch(address target, bytes calldata newRuntimeBytecode) external;
+
+    /// Executes an RLP-encoded signed transaction with full EVM semantics (like `--isolate` mode).
+    /// The transaction is decoded from EIP-2718 format (type byte prefix + RLP payload) or legacy RLP.
+    /// Returns the execution output bytes.
+    /// This cheatcode is not allowed in `forge script` contexts.
+    function executeTransaction(bytes calldata rawTx) external returns (bytes memory);
 
     /// Sets `block.basefee`.
     function fee(uint256 newBasefee) external;
