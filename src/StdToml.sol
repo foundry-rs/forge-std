@@ -187,89 +187,89 @@ library stdToml {
         return keyExists(toml, key) ? readBytesArray(toml, key) : defaultValue;
     }
 
-    function serialize(string memory jsonKey, string memory rootObject) internal returns (string memory) {
-        return vm.serializeJson(jsonKey, rootObject);
+    function serialize(string memory tomlKey, string memory rootObject) internal returns (string memory) {
+        return vm.serializeJson(tomlKey, rootObject);
     }
 
-    function serialize(string memory jsonKey, string memory key, bool value) internal returns (string memory) {
-        return vm.serializeBool(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, bool value) internal returns (string memory) {
+        return vm.serializeBool(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bool[] memory value) internal returns (string memory) {
-        return vm.serializeBool(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, bool[] memory value) internal returns (string memory) {
+        return vm.serializeBool(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, uint256 value) internal returns (string memory) {
-        return vm.serializeUint(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, uint256 value) internal returns (string memory) {
+        return vm.serializeUint(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, uint256[] memory value)
+    function serialize(string memory tomlKey, string memory key, uint256[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeUint(jsonKey, key, value);
+        return vm.serializeUint(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, int256 value) internal returns (string memory) {
-        return vm.serializeInt(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, int256 value) internal returns (string memory) {
+        return vm.serializeInt(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, int256[] memory value)
+    function serialize(string memory tomlKey, string memory key, int256[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeInt(jsonKey, key, value);
+        return vm.serializeInt(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, address value) internal returns (string memory) {
-        return vm.serializeAddress(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, address value) internal returns (string memory) {
+        return vm.serializeAddress(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, address[] memory value)
+    function serialize(string memory tomlKey, string memory key, address[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeAddress(jsonKey, key, value);
+        return vm.serializeAddress(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bytes32 value) internal returns (string memory) {
-        return vm.serializeBytes32(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, bytes32 value) internal returns (string memory) {
+        return vm.serializeBytes32(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bytes32[] memory value)
+    function serialize(string memory tomlKey, string memory key, bytes32[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeBytes32(jsonKey, key, value);
+        return vm.serializeBytes32(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bytes memory value) internal returns (string memory) {
-        return vm.serializeBytes(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, bytes memory value) internal returns (string memory) {
+        return vm.serializeBytes(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, bytes[] memory value)
+    function serialize(string memory tomlKey, string memory key, bytes[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeBytes(jsonKey, key, value);
+        return vm.serializeBytes(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, string memory value) internal returns (string memory) {
-        return vm.serializeString(jsonKey, key, value);
+    function serialize(string memory tomlKey, string memory key, string memory value) internal returns (string memory) {
+        return vm.serializeString(tomlKey, key, value);
     }
 
-    function serialize(string memory jsonKey, string memory key, string[] memory value)
+    function serialize(string memory tomlKey, string memory key, string[] memory value)
         internal
         returns (string memory)
     {
-        return vm.serializeString(jsonKey, key, value);
+        return vm.serializeString(tomlKey, key, value);
     }
 
-    function write(string memory jsonKey, string memory path) internal {
-        vm.writeToml(jsonKey, path);
+    function write(string memory tomlKey, string memory path) internal {
+        vm.writeToml(tomlKey, path);
     }
 
-    function write(string memory jsonKey, string memory path, string memory valueKey) internal {
-        vm.writeToml(jsonKey, path, valueKey);
+    function write(string memory tomlKey, string memory path, string memory valueKey) internal {
+        vm.writeToml(tomlKey, path, valueKey);
     }
 }
