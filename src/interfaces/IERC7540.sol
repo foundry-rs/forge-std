@@ -99,7 +99,7 @@ interface IERC7540Deposit is IERC7540Operator {
 /// https://eips.ethereum.org/EIPS/eip-7540
 interface IERC7540Redeem is IERC7540Operator {
     event RedeemRequest(
-        address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 assets
+        address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 shares
     );
 
     /**
