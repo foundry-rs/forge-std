@@ -138,7 +138,7 @@ interface IERC4626 is IERC20 {
     /// - MUST NOT revert.
     ///
     /// NOTE: any unfavorable discrepancy between convertToShares and previewWithdraw SHOULD be considered slippage in
-    /// share price or some other type of condition, meaning the depositor will lose assets by withdrawing.
+    /// share price or some other type of condition, meaning the owner will lose assets by withdrawing.
     function previewWithdraw(uint256 assets) external view returns (uint256 shares);
 
     /// @notice Burns shares from owner and sends exactly assets of underlying tokens to receiver.
@@ -173,7 +173,7 @@ interface IERC4626 is IERC20 {
     /// - MUST NOT revert.
     ///
     /// NOTE: any unfavorable discrepancy between convertToAssets and previewRedeem SHOULD be considered slippage in
-    /// share price or some other type of condition, meaning the depositor will lose assets by redeeming.
+    /// share price or some other type of condition, meaning the owner will lose assets by redeeming.
     function previewRedeem(uint256 shares) external view returns (uint256 assets);
 
     /// @notice Burns exactly shares from owner and sends assets of underlying tokens to receiver.
