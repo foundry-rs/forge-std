@@ -23,6 +23,12 @@ abstract contract StdUtils {
                                  INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    /// @notice Maps an unsigned integer into the inclusive range `[min, max]`.
+    /// @dev Values outside the range are wrapped into it.
+    /// @param x The unsigned value to bound.
+    /// @param min The inclusive lower bound.
+    /// @param max The inclusive upper bound.
+    /// @return result The bounded value.
     function _bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         require(min <= max, "StdUtils bound(uint256,uint256,uint256): Max is less than min.");
         // If x is between min and max, return x directly. This is to ensure that dictionary values
@@ -50,10 +56,21 @@ abstract contract StdUtils {
         }
     }
 
+    /// @notice Wrapper for `_bound(uint256,uint256,uint256)`.
+    /// @param x The unsigned value to bound.
+    /// @param min The inclusive lower bound.
+    /// @param max The inclusive upper bound.
+    /// @return result The bounded value.
     function bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         result = _bound(x, min, max);
     }
 
+    /// @notice Maps a signed integer into the inclusive range `[min, max]`.
+    /// @dev Values outside the range are wrapped into it.
+    /// @param x The signed value to bound.
+    /// @param min The inclusive lower bound.
+    /// @param max The inclusive upper bound.
+    /// @return result The bounded value.
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         require(min <= max, "StdUtils bound(int256,int256,int256): Max is less than min.");
 
@@ -74,25 +91,46 @@ abstract contract StdUtils {
         result = y < INT256_MIN_ABS ? int256(~(INT256_MIN_ABS - y) + 1) : int256(y - INT256_MIN_ABS);
     }
 
+    /// @notice Wrapper for `_bound(int256,int256,int256)`.
+    /// @param x The signed value to bound.
+    /// @param min The inclusive lower bound.
+    /// @param max The inclusive upper bound.
+    /// @return result The bounded value.
     function bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         result = _bound(x, min, max);
     }
 
+    /// @notice Maps a value into the valid secp256k1 private key range `[1, n - 1]`.
+    /// @param privateKey The raw private key candidate.
+    /// @return result The bounded private key.
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
         result = _bound(privateKey, 1, SECP256K1_ORDER - 1);
     }
 
+    /// @notice Converts a byte array (up to 32 bytes) into a `uint256`.
+    /// @param b The byte array to decode.
+    /// @return The decoded unsigned integer.
     function bytesToUint(bytes memory b) internal pure virtual returns (uint256) {
         require(b.length <= 32, "StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 
-    /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
+    /// @notice Computes the CREATE deployment address for `deployer` and `nonce`.
+    /// @dev Deprecated in favor of `vm.computeCreateAddress`.
+    /// @param deployer The deployer address.
+    /// @param nonce The deployer nonce used for CREATE.
+    /// @return The computed CREATE address.
     function computeCreateAddress(address deployer, uint256 nonce) internal pure virtual returns (address) {
         console2_log_StdUtils("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
         return vm.computeCreateAddress(deployer, nonce);
     }
 
+    /// @notice Computes the CREATE2 address from a salt, init code hash, and deployer.
+    /// @dev Deprecated in favor of `vm.computeCreate2Address`.
+    /// @param salt The CREATE2 salt.
+    /// @param initcodeHash The hash of the full init code.
+    /// @param deployer The deployer address.
+    /// @return The computed CREATE2 address.
     function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer)
         internal
         pure
@@ -103,26 +141,35 @@ abstract contract StdUtils {
         return vm.computeCreate2Address(salt, initcodeHash, deployer);
     }
 
-    /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
+    /// @notice Computes a CREATE2 address using the default CREATE2 deployer.
+    /// @dev Deprecated in favor of `vm.computeCreate2Address`.
+    /// @param salt The CREATE2 salt.
+    /// @param initCodeHash The hash of the full init code.
+    /// @return The computed CREATE2 address.
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal pure returns (address) {
         console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
         return vm.computeCreate2Address(salt, initCodeHash);
     }
 
-    /// @dev returns the hash of the init code (creation code + no args) used in CREATE2 with no constructor arguments
-    /// @param creationCode the creation code of a contract C, as returned by type(C).creationCode
+    /// @notice Returns the init code hash for CREATE2 without constructor arguments.
+    /// @param creationCode The creation code of contract `C`, as returned by `type(C).creationCode`.
+    /// @return The keccak256 hash of the init code.
     function hashInitCode(bytes memory creationCode) internal pure returns (bytes32) {
         return hashInitCode(creationCode, "");
     }
 
-    /// @dev returns the hash of the init code (creation code + ABI-encoded args) used in CREATE2
-    /// @param creationCode the creation code of a contract C, as returned by type(C).creationCode
-    /// @param args the ABI-encoded arguments to the constructor of C
+    /// @notice Returns the init code hash for CREATE2 with ABI-encoded constructor arguments.
+    /// @param creationCode The creation code of contract `C`, as returned by `type(C).creationCode`.
+    /// @param args The ABI-encoded constructor arguments for `C`.
+    /// @return The keccak256 hash of `creationCode || args`.
     function hashInitCode(bytes memory creationCode, bytes memory args) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(creationCode, args));
     }
 
-    // Performs a single call with Multicall3 to query the ERC-20 token balances of the given addresses.
+    /// @notice Queries ERC-20 balances for multiple addresses in one Multicall3 request.
+    /// @param token The ERC-20 token contract to query.
+    /// @param addresses The addresses to query balances for.
+    /// @return balances The token balances in the same order as `addresses`.
     function getTokenBalances(address token, address[] memory addresses)
         internal
         virtual
