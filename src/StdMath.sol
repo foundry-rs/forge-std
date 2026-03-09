@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-/// @notice Math helpers used across forge-std tests.
 library stdMath {
     int256 private constant INT256_MIN = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
