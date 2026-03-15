@@ -25,7 +25,7 @@ interface IERC7540Operator {
     function setOperator(address operator, bool approved) external returns (bool);
 
     /**
-     * @dev Returns `true` if the `operator` is approved as an operator for an `controller`.
+     * @dev Returns `true` if the `operator` is approved as an operator for a `controller`.
      *
      * @param controller The address of the controller.
      * @param operator The address of the operator.
@@ -41,12 +41,11 @@ interface IERC7540Deposit is IERC7540Operator {
         address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 assets
     );
     /**
-     * @dev Transfers assets from sender into the Vault and submits a Request for asynchronous deposit.
+     * @dev Transfers assets from owner into the Vault and submits a Request for asynchronous deposit.
      *
      * - MUST support ERC-20 approve / transferFrom on asset as a deposit Request flow.
-     * - MUST revert if all assets cannot be requested for deposit.
-     * - owner MUST be msg.sender unless some unspecified explicit approval is given by the caller,
-     *    approval of ERC-20 tokens from owner to sender is NOT enough.
+     * - owner MUST be msg.sender unless owner has approved msg.sender as an operator.
+     * - MUST revert if all assets cannot be requested for deposit or mint.
      *
      * @param assets the amount of deposit assets to transfer from owner
      * @param controller the controller of the request who will be able to operate the request
