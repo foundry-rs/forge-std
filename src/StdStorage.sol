@@ -27,6 +27,7 @@ library stdStorageSafe {
 
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    uint256 constant MAX_SLOT_READS = 256;
 
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(sigStr)));
@@ -123,7 +124,8 @@ library stdStorageSafe {
         if (reads.length == 0) {
             revert("stdStorage find(StdStorage): No storage use detected for target.");
         } else {
-            for (uint256 i = reads.length; i > 0;) {
+            uint256 start = reads.length > MAX_SLOT_READS ? reads.length - MAX_SLOT_READS : 0;
+            for (uint256 i = reads.length; i > start;) {
                 --i;
                 bytes32 prev = vm.load(who, reads[i]);
                 if (prev == bytes32(0)) {

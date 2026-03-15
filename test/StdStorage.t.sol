@@ -360,6 +360,15 @@ contract StdStorageTest is Test {
         vm.expectRevert("stdStorage find(StdStorage): Slot(s) not found.");
         target.findBalanceOf(address(this));
     }
+
+    // Fork regression test for https://github.com/foundry-rs/forge-std/issues/740
+    // BabyDoge on BSC is a reflection token whose `balanceOf` reads many slots.
+    // Before the fix, `deal()` would hang indefinitely.
+    function test_RevertDealReflectionTokenFork() public {
+        vm.createSelectFork("https://bsc-rpc.publicnode.com");
+        vm.expectRevert("stdStorage find(StdStorage): Slot(s) not found.");
+        deal(0xc748673057861a797275CD8A068AbB95A902e8de, address(this), 1 ether);
+    }
 }
 
 contract StorageTestTarget {
