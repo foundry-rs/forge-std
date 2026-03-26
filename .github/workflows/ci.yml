@@ -9,8 +9,50 @@ on:
     branches:
       - master
 
+env:
+  SOLC_MINIMUM: "0.8.13"
+  SOLC_LATEST: "0.8.34"
+  SOLC_PRERELEASE: "0.8.35-pre.1"
+
 jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - id: generate
+        run: |
+          MINIMUM="${{ env.SOLC_MINIMUM }}"
+          LATEST="${{ env.SOLC_LATEST }}"
+          PRERELEASE="${{ env.SOLC_PRERELEASE }}"
+          matrix='{"include":['
+          for toolchain in stable nightly; do
+            for flags in \
+              "" \
+              "--via-ir" \
+              "--use solc:${LATEST}" \
+              "--use solc:${LATEST} --via-ir" \
+              "--use solc:${MINIMUM}" \
+              "--use solc:${MINIMUM} --via-ir"
+            do
+              matrix+='{"toolchain":"'"$toolchain"'","flags":"'"$flags"'","prerelease":false},'
+            done
+          done
+          # prerelease (nightly only, svm-rs is not up to date on stable)
+          for flags in \
+            "--use solc:${PRERELEASE}" \
+            "--use solc:${PRERELEASE} --via-ir"
+          do
+            matrix+='{"toolchain":"nightly","flags":"'"$flags"'","prerelease":true},'
+          done
+          matrix="${matrix%,}]}"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: build-matrix
     name: build +${{ matrix.toolchain }} ${{ matrix.flags }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -18,17 +60,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix:
-        toolchain: [stable, nightly]
-        flags:
-          - ""
-          - --via-ir
-          - --use solc:0.8.35-pre.1 --via-ir
-          - --use solc:0.8.35-pre.1
-          - --use solc:0.8.34 --via-ir
-          - --use solc:0.8.34
-          - --use solc:0.8.13 --via-ir
-          - --use solc:0.8.13
+      matrix: ${{ fromJSON(needs.build-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -38,7 +70,7 @@ jobs:
           version: ${{ matrix.toolchain }}
       - run: forge --version
       # 3805: "This is a pre-release compiler version, please do not use it in production."
-      - run: forge build -vvvvv --skip test --deny warnings ${{ contains(matrix.flags, 'pre') && '--ignored-error-codes 3805' || '' }} ${{ matrix.flags }} --contracts 'test/compilation/*'
+      - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.prerelease && '--ignored-error-codes 3805' || '' }} ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
@@ -115,6 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - build-matrix
       - build
       - test
       - fmt
