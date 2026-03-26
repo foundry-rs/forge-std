@@ -23,8 +23,10 @@ jobs:
         flags:
           - ""
           - --via-ir
-          - --use solc:0.8.33 --via-ir
-          - --use solc:0.8.33
+          - --use solc:0.8.35-pre.1 --via-ir
+          - --use solc:0.8.35-pre.1
+          - --use solc:0.8.34 --via-ir
+          - --use solc:0.8.34
           - --use solc:0.8.13 --via-ir
           - --use solc:0.8.13
     steps:
