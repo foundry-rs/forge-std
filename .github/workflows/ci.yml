@@ -23,8 +23,8 @@ jobs:
         flags:
           - ""
           - --via-ir
-          - --use solc:0.8.33 --via-ir
-          - --use solc:0.8.33
+          - --use solc:0.8.34 --via-ir
+          - --use solc:0.8.34
           - --use solc:0.8.13 --via-ir
           - --use solc:0.8.13
     steps:
@@ -36,6 +36,34 @@ jobs:
           version: ${{ matrix.toolchain }}
       - run: forge --version
       - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+
+  build-pre-release:
+    name: build (solc pre-release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        flags:
+          - ""
+          - --via-ir
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Download solc pre-release
+        run: |
+          curl -Lo "$HOME/.svm/solc-0.8.35-pre.1" \
+            "https://github.com/argotorg/solidity/releases/download/v0.8.35-pre.1/solc-static-linux"
+          chmod +x "$HOME/.svm/solc-0.8.35-pre.1"
+      - run: forge --version
+      - run: forge build -vvvvv --skip test --deny warnings --use "$HOME/.svm/solc-0.8.35-pre.1" ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
