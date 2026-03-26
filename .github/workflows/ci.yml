@@ -57,13 +57,8 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Download solc pre-release
-        run: |
-          curl -Lo "$HOME/.svm/solc-0.8.35-pre.1" \
-            "https://github.com/argotorg/solidity/releases/download/v0.8.35-pre.1/solc-static-linux"
-          chmod +x "$HOME/.svm/solc-0.8.35-pre.1"
       - run: forge --version
-      - run: forge build -vvvvv --skip test --deny warnings --use "$HOME/.svm/solc-0.8.35-pre.1" ${{ matrix.flags }} --contracts 'test/compilation/*'
+      - run: forge build -vvvvv --skip test --deny warnings --use https://github.com/argotorg/solidity/releases/download/v0.8.35-pre.1/solc-static-linux ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
