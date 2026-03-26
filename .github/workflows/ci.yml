@@ -37,7 +37,8 @@ jobs:
         with:
           version: ${{ matrix.toolchain }}
       - run: forge --version
-      - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+      # 3805: "This is a pre-release compiler version, please do not use it in production."
+      - run: forge build -vvvvv --skip test --deny warnings ${{ contains(matrix.flags, 'pre') && '--ignored-error-codes 3805' || '' }} ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
