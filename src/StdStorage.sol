@@ -93,17 +93,36 @@ library stdStorageSafe {
         return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
 
+    function _identity(uint256 x) internal pure returns (uint256) {
+        return x;
+    }
+
     function find(StdStorage storage self) internal returns (FindData storage) {
         return find(self, true);
     }
 
+    function find(StdStorage storage self, bool _clear) internal returns (FindData storage) {
+        return find(self, _clear, _identity);
+    }
+
+    function find(StdStorage storage self, function(uint256) internal view returns (uint256) transform)
+        internal
+        returns (FindData storage)
+    {
+        return find(self, true, transform);
+    }
+
     /// @notice find an arbitrary storage slot given a function sig, input data, address of the contract and a value to check against
+    /// @dev an optional transform can be applied to the call result before comparison
     // slot complexity:
     //  if flat, will be bytes32(uint256(uint));
     //  if map, will be keccak256(abi.encode(key, uint(slot)));
     //  if deep map, will be keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))));
     //  if map struct, will be bytes32(uint256(keccak256(abi.encode(key1, keccak256(abi.encode(key0, uint(slot)))))) + structFieldDepth);
-    function find(StdStorage storage self, bool _clear) internal returns (FindData storage) {
+    function find(StdStorage storage self, bool _clear, function(uint256) internal view returns (uint256) transform)
+        internal
+        returns (FindData storage)
+    {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
@@ -147,7 +166,7 @@ library stdStorageSafe {
                 // Check that value between found offsets is equal to the current call result
                 uint256 curVal = (uint256(prev) & getMaskByOffsets(offsetLeft, offsetRight)) >> offsetRight;
 
-                if (uint256(callResult) != curVal) {
+                if (transform(uint256(callResult)) != curVal) {
                     continue;
                 }
 
@@ -348,6 +367,13 @@ library stdStorage {
 
     function find(StdStorage storage self, bool _clear) internal returns (uint256) {
         return stdStorageSafe.find(self, _clear).slot;
+    }
+
+    function find(StdStorage storage self, bool _clear, function(uint256) internal view returns (uint256) transform)
+        internal
+        returns (uint256)
+    {
+        return stdStorageSafe.find(self, _clear, transform).slot;
     }
 
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
