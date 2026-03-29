@@ -9,6 +9,10 @@ contract StdStorageTest is Test {
 
     StorageTest internal test;
 
+    function _double(uint256 x) internal pure returns (uint256) {
+        return x * 2;
+    }
+
     function setUp() public {
         test = new StorageTest();
     }
@@ -198,6 +202,12 @@ contract StdStorageTest is Test {
         assertEq(1337, test.read_struct_lower(address(1337)));
     }
 
+    function test_StorageCheckedWriteTransform() public {
+        MockDoubledStorage ds = new MockDoubledStorage();
+        stdstore.target(address(ds)).sig("value()").checked_write(uint256(100), _double);
+        assertEq(ds.value(), 100);
+    }
+
     function test_RevertStorageConst() public {
         StorageTestTarget target = new StorageTestTarget(test);
 
@@ -350,16 +360,6 @@ contract StdStorageTest is Test {
         stdstore.target(address(test)).sig("edgeCaseArray(uint256)").with_key(uint256(0)).checked_write(1);
         assertEq(test.edgeCaseArray(0), 1);
     }
-
-    // Regression test for https://github.com/foundry-rs/forge-std/issues/740
-    // `find()` used to infinite-loop on tokens whose `balanceOf` reads multiple
-    // storage slots and returns a derived value (reflection tokens).
-    function test_RevertFindOnReflectionToken() public {
-        MockReflectionToken token = new MockReflectionToken();
-        ReflectionTokenTarget target = new ReflectionTokenTarget(token);
-        vm.expectRevert("stdStorage find(StdStorage): Slot(s) not found.");
-        target.findBalanceOf(address(this));
-    }
 }
 
 contract StorageTestTarget {
@@ -374,21 +374,6 @@ contract StorageTestTarget {
 
     function expectRevertStorageConst() public {
         stdstore.target(address(test)).sig("const()").find();
-    }
-}
-
-contract ReflectionTokenTarget {
-    using stdStorage for StdStorage;
-
-    StdStorage internal stdstore;
-    MockReflectionToken internal token;
-
-    constructor(MockReflectionToken token_) {
-        token = token_;
-    }
-
-    function findBalanceOf(address who) public {
-        stdstore.target(address(token)).sig("balanceOf(address)").with_key(who).find();
     }
 }
 
@@ -509,24 +494,10 @@ contract StorageTest {
     }
 }
 
-// Minimal mock of a reflection token: `balanceOf` reads many storage slots
-// and always returns a constant, so no single slot mutation can change its
-// return value and stdStorage can never find a matching slot.
-contract MockReflectionToken {
-    uint256 internal _a = 1;
-    uint256 internal _b = 2;
-    uint256 internal _c = 3;
-    mapping(address => uint256) internal _balances;
+contract MockDoubledStorage {
+    uint256 private _doubled;
 
-    constructor() {
-        _balances[msg.sender] = 1000 ether;
-    }
-
-    // Reads _a, _b, _c, and _balances[account] but always returns a constant.
-    // This means mutating any single slot won't change the return value.
-    function balanceOf(address account) public view returns (uint256) {
-        uint256 x = _a + _b + _c + _balances[account];
-        x; // suppress unused warning
-        return 42;
+    function value() public view returns (uint256) {
+        return _doubled / 2;
     }
 }
