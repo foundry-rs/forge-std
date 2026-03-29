@@ -111,6 +111,13 @@ contract StdCheatsTest is Test {
         assertEq(barToken.balanceOf(address(this)), 10000e18);
     }
 
+    function test_DealReflectionToken() public {
+        BarReflection token = new BarReflection();
+        uint256 dealAmount = 1000e18;
+        deal(address(token), address(this), dealAmount);
+        assertEq(token.balanceOf(address(this)), dealAmount);
+    }
+
     function test_DealTokenAdjustTotalSupply() public {
         Bar barToken = new Bar();
         address bar = address(barToken);
@@ -613,6 +620,32 @@ contract BarERC721 {
 
     mapping(uint256 => address) private _owners;
     mapping(address => uint256) private _balances;
+}
+
+contract BarReflection {
+    uint256 private _tTotal = 10000e18;
+    uint256 private _rTotal = type(uint256).max - (type(uint256).max % _tTotal);
+    mapping(address => uint256) private _rOwned;
+
+    constructor() {
+        _rOwned[address(this)] = _rTotal;
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _tTotal;
+    }
+
+    function balanceOf(address account) public view returns (uint256) {
+        return _rOwned[account] / _getRate();
+    }
+
+    function reflectionFromToken(uint256 tAmount, bool) public view returns (uint256) {
+        return tAmount * _getRate();
+    }
+
+    function _getRate() private view returns (uint256) {
+        return _rTotal / _tTotal;
+    }
 }
 
 contract RevertingContract {
