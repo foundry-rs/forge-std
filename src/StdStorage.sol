@@ -424,6 +424,14 @@ library stdStorage {
         checked_write(self, bytes32(amt));
     }
 
+    function checked_write(
+        StdStorage storage self,
+        uint256 amt,
+        function(uint256) internal view returns (uint256) transform
+    ) internal {
+        checked_write(self, bytes32(amt), transform);
+    }
+
     function checked_write_int(StdStorage storage self, int256 val) internal {
         checked_write(self, bytes32(uint256(val)));
     }
@@ -437,13 +445,21 @@ library stdStorage {
     }
 
     function checked_write(StdStorage storage self, bytes32 set) internal {
+        checked_write(self, set, stdStorageSafe._identity);
+    }
+
+    function checked_write(
+        StdStorage storage self,
+        bytes32 set,
+        function(uint256) internal view returns (uint256) transform
+    ) internal {
         address who = self._target;
         bytes4 fsig = self._sig;
         uint256 field_depth = self._depth;
         bytes memory params = stdStorageSafe.getCallParams(self);
 
         if (!self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found) {
-            find(self, false);
+            find(self, false, transform);
         }
         FindData storage data = self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
         if ((data.offsetLeft + data.offsetRight) > 0) {
@@ -459,7 +475,8 @@ library stdStorage {
             );
         }
         bytes32 curVal = vm.load(who, bytes32(data.slot));
-        bytes32 valToSet = stdStorageSafe.getUpdatedSlotValue(curVal, uint256(set), data.offsetLeft, data.offsetRight);
+        bytes32 valToSet =
+            stdStorageSafe.getUpdatedSlotValue(curVal, transform(uint256(set)), data.offsetLeft, data.offsetRight);
 
         vm.store(who, bytes32(data.slot), valToSet);
 
