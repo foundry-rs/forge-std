@@ -733,13 +733,25 @@ abstract contract StdCheats is StdCheatsSafe {
         dealERC1155(token, to, id, give, false);
     }
 
+    uint256 private _reflectionRate;
+
+    function _reflectionTransform(uint256 give) internal view returns (uint256) {
+        return give * _reflectionRate;
+    }
+
     function deal(address token, address to, uint256 give, bool adjust) internal virtual {
         // get current balance
         (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
 
+        (bool isReflection, bytes memory rateData) = token.staticcall(abi.encodeWithSelector(0x4549b039, 1, false));
         // update balance
-        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
+        if (isReflection) {
+            _reflectionRate = abi.decode(rateData, (uint256));
+            stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give, _reflectionTransform);
+        } else {
+            stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
+        }
 
         // update total supply
         if (adjust) {
