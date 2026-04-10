@@ -715,6 +715,38 @@ abstract contract StdCheats is StdCheatsSafe {
         vm.startPrank(msgSender, txOrigin);
     }
 
+    function expectAndMockCall(address callee, bytes memory data, bytes memory returnData) internal virtual {
+        vm.expectCall(callee, data);
+        vm.mockCall(callee, data, returnData);
+    }
+
+    function expectAndMockCall(address callee, bytes memory data, uint64 count, bytes memory returnData)
+        internal
+        virtual
+    {
+        vm.expectCall(callee, data, count);
+        vm.mockCall(callee, data, returnData);
+    }
+
+    function expectAndMockCall(address callee, uint256 msgValue, bytes memory data, bytes memory returnData)
+        internal
+        virtual
+    {
+        vm.expectCall(callee, msgValue, data);
+        vm.mockCall(callee, msgValue, data, returnData);
+    }
+
+    function expectAndMockCall(
+        address callee,
+        uint256 msgValue,
+        bytes memory data,
+        uint64 count,
+        bytes memory returnData
+    ) internal virtual {
+        vm.expectCall(callee, msgValue, data, count);
+        vm.mockCall(callee, msgValue, data, returnData);
+    }
+
     // The same as Vm's `deal`
     // Use the alternative signature for ERC20 tokens
     function deal(address to, uint256 give) internal virtual {
