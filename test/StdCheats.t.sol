@@ -440,6 +440,40 @@ contract StdCheatsTest is Test {
         assertTrue(ct.y());
         assertEq(ct.z(), bytes20(arbitraryAddress));
     }
+
+    function test_ExpectAndMockCall() public {
+        bytes memory data = abi.encodeWithSelector(Bar.balanceOf.selector, address(this));
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), data, returnData);
+
+        assertEq(test.balanceOf(address(this)), 100);
+    }
+
+    function test_ExpectAndMockCall_Count() public {
+        bytes memory data = abi.encodeWithSelector(Bar.balanceOf.selector, address(this));
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), data, 2, returnData);
+
+        assertEq(test.balanceOf(address(this)), 100);
+        assertEq(test.balanceOf(address(this)), 100);
+    }
+
+    function test_ExpectAndMockCall_MsgValue() public {
+        bytes memory data = abi.encodeWithSelector(Bar.payableBar.selector);
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), 1 ether, data, returnData);
+
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+    }
+
+    function test_ExpectAndMockCall_MsgValueAndCount() public {
+        bytes memory data = abi.encodeWithSelector(Bar.payableBar.selector);
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), 1 ether, data, 2, returnData);
+
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+    }
 }
 
 contract StdCheatsMock is StdCheats {
@@ -549,7 +583,7 @@ contract Bar {
     constructor() payable {
         /// `DEAL` STDCHEAT
         totalSupply = 10000e18;
-        balanceOf[address(this)] = totalSupply;
+        _balances[address(this)] = totalSupply;
     }
 
     /// `HOAX` and `CHANGEPRANK` STDCHEATS
@@ -567,8 +601,16 @@ contract Bar {
         require(tx.origin == expectedOrigin, "!prank");
     }
 
+    function payableBar() public payable returns (uint256) {
+        return 0;
+    }
+
     /// `DEAL` STDCHEAT
-    mapping(address => uint256) public balanceOf;
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
+    }
+
+    mapping(address => uint256) private _balances;
     uint256 public totalSupply;
 }
 
