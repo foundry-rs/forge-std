@@ -747,13 +747,10 @@ abstract contract StdCheats is StdCheatsSafe {
         vm.mockCall(callee, msgValue, data, returnData);
     }
 
-    function expectAndMockCall(
-        address callee,
-        uint256 msgValue,
-        uint64 gas,
-        bytes memory data,
-        bytes memory returnData
-    ) internal virtual {
+    function expectAndMockCall(address callee, uint256 msgValue, uint64 gas, bytes memory data, bytes memory returnData)
+        internal
+        virtual
+    {
         vm.expectCall(callee, msgValue, gas, data);
         vm.mockCall(callee, msgValue, data, returnData);
     }
