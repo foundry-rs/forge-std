@@ -290,6 +290,10 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.testnet.tempo.xyz")
         );
+
+        // TODO(gravity-l1): replace placeholder RPC URL with the final mainnet endpoint
+        // before this PR is marked ready for review.
+        setChainWithDefaultRpcUrl("grav", ChainData("Gravity", 127001, "https://<gravity-l1-rpc>"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
