@@ -447,6 +447,59 @@ contract StdCheatsTest is Test {
         assertTrue(ct.y());
         assertEq(ct.z(), bytes20(arbitraryAddress));
     }
+
+    function test_ExpectAndMockCall() public {
+        bytes memory data = abi.encodeWithSignature("balanceOf(address)", address(this));
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), data, returnData);
+
+        assertEq(test.balanceOf(address(this)), 100);
+    }
+
+    function test_ExpectAndMockCall_Count() public {
+        bytes memory data = abi.encodeWithSignature("balanceOf(address)", address(this));
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), data, 2, returnData);
+
+        assertEq(test.balanceOf(address(this)), 100);
+        assertEq(test.balanceOf(address(this)), 100);
+    }
+
+    function test_ExpectAndMockCall_MsgValue() public {
+        bytes memory data = abi.encodeWithSignature("payableBar()");
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), 1 ether, data, returnData);
+
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+    }
+
+    function test_ExpectAndMockCall_MsgValueAndCount() public {
+        bytes memory data = abi.encodeWithSignature("payableBar()");
+        bytes memory returnData = abi.encode(uint256(100));
+        expectAndMockCall(address(test), 1 ether, data, 2, returnData);
+
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+        assertEq(test.payableBar{value: 1 ether}(), 100);
+    }
+
+    function test_ExpectAndMockCall_Gas() public {
+        bytes memory data = abi.encodeWithSignature("payableBar()");
+        bytes memory returnData = abi.encode(uint256(100));
+        uint64 gas = 30_000;
+        expectAndMockCall(address(test), 1 ether, gas, data, returnData);
+
+        assertEq(test.payableBar{value: 1 ether, gas: gas}(), 100);
+    }
+
+    function test_ExpectAndMockCall_GasAndCount() public {
+        bytes memory data = abi.encodeWithSignature("payableBar()");
+        bytes memory returnData = abi.encode(uint256(100));
+        uint64 gas = 30_000;
+        expectAndMockCall(address(test), 1 ether, gas, data, 2, returnData);
+
+        assertEq(test.payableBar{value: 1 ether, gas: gas}(), 100);
+        assertEq(test.payableBar{value: 1 ether, gas: gas}(), 100);
+    }
 }
 
 contract StdCheatsMock is StdCheats {
@@ -572,6 +625,10 @@ contract Bar {
     function origin(address expectedSender, address expectedOrigin) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
+    }
+
+    function payableBar() public payable returns (uint256) {
+        return 0;
     }
 
     /// `DEAL` STDCHEAT
