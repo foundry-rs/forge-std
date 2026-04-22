@@ -295,6 +295,8 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.testnet.tempo.xyz")
         );
+
+        setChainWithDefaultRpcUrl("grav", ChainData("Gravity", 127001, "https://mainnet-rpc.gravity.xyz"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
