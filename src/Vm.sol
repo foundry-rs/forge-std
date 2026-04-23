@@ -799,6 +799,10 @@ interface VmSafe {
     /// `path` is relative to the project root.
     function createDir(string calldata path, bool recursive) external;
 
+    /// Get the source file path of the currently running test or script contract,
+    /// relative to the project root.
+    function currentFilePath() external view returns (string memory path);
+
     /// Deploys a contract from an artifact file. Takes in the relative path to the json file or the path to the
     /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
     /// Reverts if the target artifact contains unlinked library placeholders.
@@ -1907,9 +1911,6 @@ interface VmSafe {
     /// Compute the address a contract will be deployed at for a given deployer address and nonce.
     function computeCreateAddress(address deployer, uint256 nonce) external pure returns (address);
 
-    /// Utility cheatcode to copy storage of `from` contract to another `to` contract.
-    function copyStorage(address from, address to) external;
-
     /// Generates the struct hash of the canonical EIP-712 type representation and its abi-encoded data.
     /// Supports 2 different inputs:
     /// 1. Name of the type (i.e. "PermitSingle"):
@@ -2005,13 +2006,6 @@ interface VmSafe {
 
     /// Unpauses collection of call traces.
     function resumeTracing() external view;
-
-    /// Utility cheatcode to set arbitrary storage for given target address.
-    function setArbitraryStorage(address target) external;
-
-    /// Utility cheatcode to set arbitrary storage for given target address and overwrite
-    /// any storage slots that have been previously set.
-    function setArbitraryStorage(address target, bool overwrite) external;
 
     /// Set RNG seed.
     function setSeed(uint256 seed) external;
@@ -2522,6 +2516,9 @@ interface Vm is VmSafe {
 
     // ======== Utilities ========
 
+    /// Utility cheatcode to copy storage of `from` contract to another `to` contract.
+    function copyStorage(address from, address to) external;
+
     /// Causes the next contract creation (via new) to fail and return its initcode in the returndata buffer.
     /// This allows type-safe access to the initcode payload that would be used for contract creation.
     /// Example usage:
@@ -2530,4 +2527,11 @@ interface Vm is VmSafe {
     /// try new MyContract(param1, param2) { assert(false); }
     /// catch (bytes memory interceptedInitcode) { initcode = interceptedInitcode; }
     function interceptInitcode() external;
+
+    /// Utility cheatcode to set arbitrary storage for given target address.
+    function setArbitraryStorage(address target) external;
+
+    /// Utility cheatcode to set arbitrary storage for given target address and overwrite
+    /// any storage slots that have been previously set.
+    function setArbitraryStorage(address target, bool overwrite) external;
 }
