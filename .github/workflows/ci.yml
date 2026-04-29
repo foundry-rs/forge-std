@@ -11,8 +11,8 @@ on:
 
 env:
   SOLC_MINIMUM: "0.8.13"
-  SOLC_LATEST: "0.8.34"
-  SOLC_PRERELEASE: "0.8.35-pre.1"
+  SOLC_LATEST: "0.8.35"
+  SOLC_PRERELEASE: ""
 
 jobs:
   build-matrix:
@@ -42,12 +42,14 @@ jobs:
             done
           done
           # prerelease (nightly only, svm-rs is not up to date on stable)
-          for flags in \
-            "--use solc:${PRERELEASE}" \
-            "--use solc:${PRERELEASE} --via-ir"
-          do
-            matrix+='{"toolchain":"nightly","flags":"'"$flags"'","prerelease":true},'
-          done
+          if [ -n "$PRERELEASE" ]; then
+            for flags in \
+              "--use solc:${PRERELEASE}" \
+              "--use solc:${PRERELEASE} --via-ir"
+            do
+              matrix+='{"toolchain":"nightly","flags":"'"$flags"'","prerelease":true},'
+            done
+          fi
           matrix="${matrix%,}]}"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
