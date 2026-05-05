@@ -265,6 +265,11 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl("race", ChainData("Race", 6805, "https://racemainnet.io"));
         setChainWithDefaultRpcUrl("race_sepolia", ChainData("Race Sepolia", 6806, "https://racemainnet.io"));
 
+        setChainWithDefaultRpcUrl("radius", ChainData("Radius", 723487, "https://rpc.radiustech.xyz"));
+        setChainWithDefaultRpcUrl(
+            "radius_testnet", ChainData("Radius Testnet", 72344, "https://rpc.testnet.radiustech.xyz")
+        );
+
         setChainWithDefaultRpcUrl("metal", ChainData("Metal", 1750, "https://metall2.drpc.org"));
         setChainWithDefaultRpcUrl("metal_sepolia", ChainData("Metal Sepolia", 1740, "https://testnet.rpc.metall2.com"));
 
@@ -290,6 +295,8 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl(
             "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.testnet.tempo.xyz")
         );
+
+        setChainWithDefaultRpcUrl("grav", ChainData("Gravity", 127001, "https://mainnet-rpc.gravity.xyz"));
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml

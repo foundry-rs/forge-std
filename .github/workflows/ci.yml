@@ -9,8 +9,52 @@ on:
     branches:
       - master
 
+env:
+  SOLC_MINIMUM: "0.8.13"
+  SOLC_LATEST: "0.8.35"
+  SOLC_PRERELEASE: ""
+
 jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - id: generate
+        run: |
+          MINIMUM="${{ env.SOLC_MINIMUM }}"
+          LATEST="${{ env.SOLC_LATEST }}"
+          PRERELEASE="${{ env.SOLC_PRERELEASE }}"
+          matrix='{"include":['
+          for toolchain in stable nightly; do
+            for flags in \
+              "" \
+              "--via-ir" \
+              "--use solc:${LATEST}" \
+              "--use solc:${LATEST} --via-ir" \
+              "--use solc:${MINIMUM}" \
+              "--use solc:${MINIMUM} --via-ir"
+            do
+              matrix+='{"toolchain":"'"$toolchain"'","flags":"'"$flags"'","prerelease":false},'
+            done
+          done
+          # prerelease (nightly only, svm-rs is not up to date on stable)
+          if [ -n "$PRERELEASE" ]; then
+            for flags in \
+              "--use solc:${PRERELEASE}" \
+              "--use solc:${PRERELEASE} --via-ir"
+            do
+              matrix+='{"toolchain":"nightly","flags":"'"$flags"'","prerelease":true},'
+            done
+          fi
+          matrix="${matrix%,}]}"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: build-matrix
     name: build +${{ matrix.toolchain }} ${{ matrix.flags }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -18,24 +62,17 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix:
-        toolchain: [stable, nightly]
-        flags:
-          - ""
-          - --via-ir
-          - --use solc:0.8.33 --via-ir
-          - --use solc:0.8.33
-          - --use solc:0.8.13 --via-ir
-          - --use solc:0.8.13
+      matrix: ${{ fromJSON(needs.build-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # v1.8.0
         with:
           version: ${{ matrix.toolchain }}
       - run: forge --version
-      - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.flags }} --contracts 'test/compilation/*'
+      # 3805: "This is a pre-release compiler version, please do not use it in production."
+      - run: forge build -vvvvv --skip test --deny warnings ${{ matrix.prerelease && '--ignored-error-codes 3805' || '' }} ${{ matrix.flags }} --contracts 'test/compilation/*'
 
   test:
     runs-on: ubuntu-latest
@@ -47,10 +84,10 @@ jobs:
       matrix:
         toolchain: [stable, nightly]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # v1.8.0
         with:
           version: ${{ matrix.toolchain }}
       - run: forge --version
@@ -62,10 +99,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # v1.8.0
       - run: forge --version
       - run: forge fmt --check
 
@@ -75,10 +112,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: crate-ci/typos@631208b7aac2daa8b707f55e7331f9112b0e062d # v1
+      - uses: crate-ci/typos@7c572958218557a3272c2d6719629443b5cc26fd # v1.45.2
 
   codeql:
     name: Analyze (${{ matrix.language }})
@@ -95,16 +132,16 @@ jobs:
             build-mode: none
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           category: "/language:${{matrix.language}}"
 
@@ -112,6 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - build-matrix
       - build
       - test
       - fmt
