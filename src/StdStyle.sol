@@ -19,13 +19,13 @@ library StdStyle {
     string constant INVERSE = "\u001b[7m";
     string constant RESET = "\u001b[0m";
 
-    function styleConcat(string memory style, string memory self) private pure returns (string memory) {
+    function _styleConcat(string memory style, string memory self) private pure returns (string memory) {
         return string(abi.encodePacked(style, self, RESET));
     }
 
     /// @notice Returns `self` wrapped in red ANSI color codes.
     function red(string memory self) internal pure returns (string memory) {
-        return styleConcat(RED, self);
+        return _styleConcat(RED, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in red ANSI color codes.
@@ -60,7 +60,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in green ANSI color codes.
     function green(string memory self) internal pure returns (string memory) {
-        return styleConcat(GREEN, self);
+        return _styleConcat(GREEN, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in green ANSI color codes.
@@ -95,7 +95,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in yellow ANSI color codes.
     function yellow(string memory self) internal pure returns (string memory) {
-        return styleConcat(YELLOW, self);
+        return _styleConcat(YELLOW, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in yellow ANSI color codes.
@@ -130,7 +130,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in blue ANSI color codes.
     function blue(string memory self) internal pure returns (string memory) {
-        return styleConcat(BLUE, self);
+        return _styleConcat(BLUE, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in blue ANSI color codes.
@@ -165,7 +165,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in magenta ANSI color codes.
     function magenta(string memory self) internal pure returns (string memory) {
-        return styleConcat(MAGENTA, self);
+        return _styleConcat(MAGENTA, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in magenta ANSI color codes.
@@ -200,7 +200,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in cyan ANSI color codes.
     function cyan(string memory self) internal pure returns (string memory) {
-        return styleConcat(CYAN, self);
+        return _styleConcat(CYAN, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in cyan ANSI color codes.
@@ -235,7 +235,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in bold ANSI style codes.
     function bold(string memory self) internal pure returns (string memory) {
-        return styleConcat(BOLD, self);
+        return _styleConcat(BOLD, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in bold ANSI style codes.
@@ -270,7 +270,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in dim ANSI style codes.
     function dim(string memory self) internal pure returns (string memory) {
-        return styleConcat(DIM, self);
+        return _styleConcat(DIM, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in dim ANSI style codes.
@@ -305,7 +305,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in italic ANSI style codes.
     function italic(string memory self) internal pure returns (string memory) {
-        return styleConcat(ITALIC, self);
+        return _styleConcat(ITALIC, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in italic ANSI style codes.
@@ -340,7 +340,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in underline ANSI style codes.
     function underline(string memory self) internal pure returns (string memory) {
-        return styleConcat(UNDERLINE, self);
+        return _styleConcat(UNDERLINE, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in underline ANSI style codes.
@@ -375,7 +375,7 @@ library StdStyle {
 
     /// @notice Returns `self` wrapped in inverse ANSI style codes.
     function inverse(string memory self) internal pure returns (string memory) {
-        return styleConcat(INVERSE, self);
+        return _styleConcat(INVERSE, self);
     }
 
     /// @notice Returns the string representation of `self` wrapped in inverse ANSI style codes.

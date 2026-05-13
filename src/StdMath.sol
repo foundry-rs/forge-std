@@ -3,14 +3,15 @@ pragma solidity >=0.8.13 <0.9.0;
 
 /// @notice Mathematical utility functions for unsigned and signed integers.
 library stdMath {
-    int256 private constant INT256_MIN = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+    int256 private constant _INT256_MIN =
+        -57896044618658097711785492504343953926634992332820282019728792003956564819968;
 
     /// @notice Computes the absolute value of a signed integer.
     /// @param a The signed integer to compute the absolute value of.
     /// @return The absolute value as an unsigned integer.
     function abs(int256 a) internal pure returns (uint256) {
         // Required or it will fail when `a = type(int256).min`
-        if (a == INT256_MIN) {
+        if (a == _INT256_MIN) {
             return 57896044618658097711785492504343953926634992332820282019728792003956564819968;
         }
 
