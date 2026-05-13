@@ -65,7 +65,7 @@ abstract contract StdChains {
 
     bool private fallbackToDefaultRpcUrls = true;
 
-    // The RPC URL will be fetched from config or defaultRpcUrls if possible.
+    /// @notice Returns chain data for the given alias, with the RPC URL resolved from config or defaults.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
         require(bytes(chainAlias).length != 0, "StdChains getChain(string): Chain alias cannot be the empty string.");
 
@@ -79,6 +79,7 @@ abstract contract StdChains {
         chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
+    /// @notice Returns chain data for the given chain ID, with the RPC URL resolved from config or defaults.
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
         require(chainId != 0, "StdChains getChain(uint256): Chain ID cannot be 0.");
         initializeStdChains();
@@ -94,7 +95,7 @@ abstract contract StdChains {
         chain = getChainWithUpdatedRpcUrl(chainAlias, chain);
     }
 
-    // set chain info, with priority to argument's rpcUrl field.
+    /// @notice Registers chain data under `chainAlias`, with priority given to the argument's `rpcUrl` field.
     function setChain(string memory chainAlias, ChainData memory chain) internal virtual {
         require(
             bytes(chainAlias).length != 0,
@@ -127,7 +128,7 @@ abstract contract StdChains {
         idToAlias[chain.chainId] = chainAlias;
     }
 
-    // set chain info, with priority to argument's rpcUrl field.
+    /// @notice Registers chain data under `chainAlias`, with priority given to the argument's `rpcUrl` field.
     function setChain(string memory chainAlias, Chain memory chain) internal virtual {
         setChain(chainAlias, ChainData({name: chain.name, chainId: chain.chainId, rpcUrl: chain.rpcUrl}));
     }
@@ -184,6 +185,7 @@ abstract contract StdChains {
         return chain;
     }
 
+    /// @notice Sets whether to fall back to default RPC URLs when no URL is configured for a chain.
     function setFallbackToDefaultRpcUrls(bool useDefault) internal {
         fallbackToDefaultRpcUrls = useDefault;
     }
