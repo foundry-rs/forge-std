@@ -36,7 +36,7 @@ library stdStorageSafe {
     /// @notice Returns the encoded call parameters (keys or raw calldata) for the configured target function.
     function getCallParams(StdStorage storage self) internal view returns (bytes memory) {
         if (self._calldata.length == 0) {
-            return flatten(self._keys);
+            return _flatten(self._keys);
         } else {
             return self._calldata;
         }
@@ -46,7 +46,7 @@ library stdStorageSafe {
     function callTarget(StdStorage storage self) internal view returns (bool, bytes32) {
         bytes memory cd = abi.encodePacked(self._sig, getCallParams(self));
         (bool success, bytes memory rdat) = self._target.staticcall(cd);
-        bytes32 result = bytesToBytes32(rdat, 32 * self._depth);
+        bytes32 result = _bytesToBytes32(rdat, 32 * self._depth);
 
         return (success, result);
     }
@@ -225,7 +225,7 @@ library stdStorageSafe {
         return self;
     }
 
-    function read(StdStorage storage self) private returns (bytes memory) {
+    function _read(StdStorage storage self) private returns (bytes memory) {
         FindData storage data = find(self, false);
         uint256 mask = getMaskByOffsets(data.offsetLeft, data.offsetRight);
         uint256 value = (uint256(vm.load(self._target, bytes32(data.slot))) & mask) >> data.offsetRight;
@@ -235,7 +235,7 @@ library stdStorageSafe {
 
     /// @notice Reads the found storage slot value as bytes32.
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
-        return abi.decode(read(self), (bytes32));
+        return abi.decode(_read(self), (bytes32));
     }
 
     /// @notice Reads the found storage slot value as bool.
@@ -249,17 +249,17 @@ library stdStorageSafe {
 
     /// @notice Reads the found storage slot value as address.
     function read_address(StdStorage storage self) internal returns (address) {
-        return abi.decode(read(self), (address));
+        return abi.decode(_read(self), (address));
     }
 
     /// @notice Reads the found storage slot value as uint256.
     function read_uint(StdStorage storage self) internal returns (uint256) {
-        return abi.decode(read(self), (uint256));
+        return abi.decode(_read(self), (uint256));
     }
 
     /// @notice Reads the found storage slot value as int256.
     function read_int(StdStorage storage self) internal returns (int256) {
-        return abi.decode(read(self), (int256));
+        return abi.decode(_read(self), (int256));
     }
 
     /// @notice Returns the parent mapping slot index and the key used to reach the found slot.
@@ -299,7 +299,7 @@ library stdStorageSafe {
         return uint256(root_slot);
     }
 
-    function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
+    function _bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
         bytes32 out;
 
         // Cap read length by remaining bytes from `offset`, and at most 32 bytes to avoid out-of-bounds
@@ -313,7 +313,7 @@ library stdStorageSafe {
         return out;
     }
 
-    function flatten(bytes32[] memory b) private pure returns (bytes memory) {
+    function _flatten(bytes32[] memory b) private pure returns (bytes memory) {
         bytes memory result = new bytes(b.length * 32);
         for (uint256 i = 0; i < b.length; i++) {
             bytes32 k = b[i];

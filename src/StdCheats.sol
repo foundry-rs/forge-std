@@ -8,10 +8,10 @@ import {Vm} from "./Vm.sol";
 abstract contract StdCheatsSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    uint256 private constant UINT256_MAX =
+    uint256 private constant _UINT256_MAX =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
-    bool private gasMeteringOff;
+    bool private _gasMeteringOff;
 
     // Data structures to parse Transaction objects from the broadcast artifact
     // that conform to EIP1559. The Raw structs are what are parsed from the JSON
@@ -283,7 +283,7 @@ abstract contract StdCheatsSafe {
     // implemented by `addr`, which should be taken into account when this function is used.
     function _isPayable(address addr) private returns (bool) {
         require(
-            addr.balance < UINT256_MAX,
+            addr.balance < _UINT256_MAX,
             "StdCheats _isPayable(address): Balance equals max uint256, so it cannot receive any more funds"
         );
         uint256 origBalanceTest = address(this).balance;
@@ -629,14 +629,14 @@ abstract contract StdCheatsSafe {
         // i.e. funcA() noGasMetering { funcB() }, where funcB has noGasMetering as well.
         // funcA will have `gasStartedOff` as false, funcB will have it as true,
         // so we only turn metering back on at the end of the funcA
-        bool gasStartedOff = gasMeteringOff;
-        gasMeteringOff = true;
+        bool gasStartedOff = _gasMeteringOff;
+        _gasMeteringOff = true;
 
         _;
 
         // if gas metering was on when this modifier was called, turn it back on at the end
         if (!gasStartedOff) {
-            gasMeteringOff = false;
+            _gasMeteringOff = false;
             vm.resumeGasMetering();
         }
     }
@@ -668,9 +668,9 @@ abstract contract StdCheatsSafe {
 abstract contract StdCheats is StdCheatsSafe {
     using stdStorage for StdStorage;
 
-    StdStorage private stdstore;
+    StdStorage private _stdstore;
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
+    address private constant _CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
 
     /// @notice Advances the block timestamp forward by `time` seconds.
     function skip(uint256 time) internal virtual {
@@ -733,7 +733,7 @@ abstract contract StdCheats is StdCheatsSafe {
     /// @notice Changes the active prank to `msgSender`.
     /// @dev Deprecated. Use `vm.startPrank` instead.
     function changePrank(address msgSender) internal virtual {
-        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
+        _console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
         vm.stopPrank();
         vm.startPrank(msgSender);
     }
@@ -741,7 +741,7 @@ abstract contract StdCheats is StdCheatsSafe {
     /// @notice Changes the active prank to `msgSender` with `txOrigin` as `tx.origin`.
     /// @dev Deprecated. Use `vm.startPrank` instead.
     function changePrank(address msgSender, address txOrigin) internal virtual {
-        console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
+        _console2_log_StdCheats("changePrank is deprecated. Please use vm.startPrank instead.");
         vm.stopPrank();
         vm.startPrank(msgSender, txOrigin);
     }
@@ -828,7 +828,7 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
+        _stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
 
         // update total supply
         if (adjust) {
@@ -839,7 +839,7 @@ abstract contract StdCheats is StdCheatsSafe {
             } else {
                 totSup += (give - prevBal);
             }
-            stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
+            _stdstore.target(token).sig(0x18160ddd).checked_write(totSup);
         }
     }
 
@@ -850,7 +850,7 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(give);
+        _stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(give);
 
         // update total supply
         if (adjust) {
@@ -865,7 +865,7 @@ abstract contract StdCheats is StdCheatsSafe {
             } else {
                 totSup += (give - prevBal);
             }
-            stdstore.target(token).sig(0xbd85b039).with_key(id).checked_write(totSup);
+            _stdstore.target(token).sig(0xbd85b039).with_key(id).checked_write(totSup);
         }
     }
 
@@ -885,11 +885,11 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
         // update balances
-        stdstore.target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
-        stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
+        _stdstore.target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
+        _stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
 
         // update owner
-        stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
+        _stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
     }
 
     /// @notice Etches the runtime bytecode of `what` (from the artifacts directory) at `where`.
@@ -915,8 +915,8 @@ abstract contract StdCheats is StdCheatsSafe {
     }
 
     // Used to prevent the compilation of console, which shortens the compilation time when console is not used elsewhere.
-    function console2_log_StdCheats(string memory p0) private view {
-        (bool status,) = address(CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
+    function _console2_log_StdCheats(string memory p0) private view {
+        (bool status,) = address(_CONSOLE2_ADDRESS).staticcall(abi.encodeWithSignature("log(string)", p0));
         status;
     }
 }
