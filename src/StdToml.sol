@@ -218,6 +218,7 @@ library stdToml {
     }
 
     /// @notice Serializes a JSON object `rootObject` under `jsonKey` and returns the serialized string.
+    /// @dev Values are accumulated as JSON in memory; conversion to TOML happens on `write`.
     function serialize(string memory jsonKey, string memory rootObject) internal returns (string memory) {
         return vm.serializeJson(jsonKey, rootObject);
     }

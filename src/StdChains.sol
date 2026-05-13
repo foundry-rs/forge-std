@@ -66,6 +66,7 @@ abstract contract StdChains {
     bool private fallbackToDefaultRpcUrls = true;
 
     /// @notice Returns chain data for the given alias, with the RPC URL resolved from config or defaults.
+    /// @dev Reverts if `chainAlias` is empty or has not been registered.
     function getChain(string memory chainAlias) internal virtual returns (Chain memory chain) {
         require(bytes(chainAlias).length != 0, "StdChains getChain(string): Chain alias cannot be the empty string.");
 
@@ -80,6 +81,7 @@ abstract contract StdChains {
     }
 
     /// @notice Returns chain data for the given chain ID, with the RPC URL resolved from config or defaults.
+    /// @dev Reverts if `chainId` is `0` or has not been registered.
     function getChain(uint256 chainId) internal virtual returns (Chain memory chain) {
         require(chainId != 0, "StdChains getChain(uint256): Chain ID cannot be 0.");
         initializeStdChains();

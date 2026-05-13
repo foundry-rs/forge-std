@@ -82,7 +82,7 @@ library stdStorageSafe {
         return (false, 0);
     }
 
-    /// @notice Returns the left and right bit offsets of the packed variable within `slot`.
+    /// @notice Returns whether both offsets were found, along with the left and right bit offsets of the packed variable within `slot`.
     function findOffsets(StdStorage storage self, bytes32 slot) internal returns (bool, uint256, uint256) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
 
@@ -239,6 +239,7 @@ library stdStorageSafe {
     }
 
     /// @notice Reads the found storage slot value as bool.
+    /// @dev Reverts if the stored value is neither `0` nor `1`.
     function read_bool(StdStorage storage self) internal returns (bool) {
         int256 v = read_int(self);
         if (v == 0) return false;

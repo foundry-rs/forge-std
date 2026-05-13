@@ -619,6 +619,7 @@ abstract contract StdCheatsSafe {
     }
 
     /// @notice Disables gas metering for the duration of the function, re-enabling it on exit.
+    /// @dev When nested, gas metering is only resumed at the end of the outermost function that uses this modifier.
     modifier noGasMetering() {
         vm.pauseGasMetering();
         // To prevent turning gas monitoring back on with nested functions that use this modifier,
@@ -781,7 +782,8 @@ abstract contract StdCheats is StdCheatsSafe {
         vm.mockCall(callee, msgValue, data, returnData);
     }
 
-    /// @notice Expects a call to `callee` with `msgValue`, `gas`, and `data` and mocks it to return `returnData`.
+    /// @notice Expects a call to `callee` with `msgValue` and `data` forwarding `gas`, and mocks it to return `returnData`.
+    /// @dev `gas` only applies to the call expectation; the mock call ignores `gas`.
     function expectAndMockCall(address callee, uint256 msgValue, uint64 gas, bytes memory data, bytes memory returnData)
         internal
         virtual
@@ -790,7 +792,8 @@ abstract contract StdCheats is StdCheatsSafe {
         vm.mockCall(callee, msgValue, data, returnData);
     }
 
-    /// @notice Expects exactly `count` calls to `callee` with `msgValue`, `gas`, and `data` and mocks them to return `returnData`.
+    /// @notice Expects exactly `count` calls to `callee` with `msgValue` and `data` forwarding `gas`, and mocks them to return `returnData`.
+    /// @dev `gas` only applies to the call expectation; the mock call ignores `gas`.
     function expectAndMockCall(
         address callee,
         uint256 msgValue,
@@ -889,17 +892,20 @@ abstract contract StdCheats is StdCheatsSafe {
         stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
     }
 
-    /// @notice Deploys the bytecode from the artifacts directory to a specific `where` address.
+    /// @notice Etches the runtime bytecode of `what` (from the artifacts directory) at `where`.
+    /// @dev Runs the contract's creation code via `vm.etch` + a self-call, then etches the resulting runtime code at `where`. Constructor side-effects on other contracts are not preserved.
     function deployCodeTo(string memory what, address where) internal virtual {
         deployCodeTo(what, "", 0, where);
     }
 
-    /// @notice Deploys the bytecode from the artifacts directory with ABI-encoded constructor arguments to a specific `where` address.
+    /// @notice Etches the runtime bytecode of `what` (from the artifacts directory) at `where`, using `args` as ABI-encoded constructor arguments.
+    /// @dev Runs the contract's creation code via `vm.etch` + a self-call, then etches the resulting runtime code at `where`. Constructor side-effects on other contracts are not preserved.
     function deployCodeTo(string memory what, bytes memory args, address where) internal virtual {
         deployCodeTo(what, args, 0, where);
     }
 
-    /// @notice Deploys the bytecode from the artifacts directory with ABI-encoded constructor arguments to a specific `where` address, sending `value` wei on construction.
+    /// @notice Etches the runtime bytecode of `what` (from the artifacts directory) at `where`, using `args` as ABI-encoded constructor arguments and sending `value` wei to the constructor.
+    /// @dev Runs the contract's creation code via `vm.etch` + a self-call, then etches the resulting runtime code at `where`. Constructor side-effects on other contracts are not preserved.
     function deployCodeTo(string memory what, bytes memory args, uint256 value, address where) internal virtual {
         bytes memory creationCode = vm.getCode(what);
         vm.etch(where, abi.encodePacked(creationCode, args));
