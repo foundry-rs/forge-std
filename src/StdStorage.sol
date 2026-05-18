@@ -28,30 +28,31 @@ library stdStorageSafe {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
+    /// @notice Returns the 4-byte function selector for `sigStr`.
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(sigStr)));
     }
 
+    /// @notice Returns the encoded call parameters (keys or raw calldata) for the configured target function.
     function getCallParams(StdStorage storage self) internal view returns (bytes memory) {
         if (self._calldata.length == 0) {
-            return flatten(self._keys);
+            return _flatten(self._keys);
         } else {
             return self._calldata;
         }
     }
 
-    // Calls target contract with configured parameters
+    /// @notice Calls the target contract with the configured parameters and returns the success flag and return value.
     function callTarget(StdStorage storage self) internal view returns (bool, bytes32) {
         bytes memory cd = abi.encodePacked(self._sig, getCallParams(self));
         (bool success, bytes memory rdat) = self._target.staticcall(cd);
-        bytes32 result = bytesToBytes32(rdat, 32 * self._depth);
+        bytes32 result = _bytesToBytes32(rdat, 32 * self._depth);
 
         return (success, result);
     }
 
-    // Tries mutating slot value to determine if the targeted value is stored in it.
-    // If current value is 0, then we are setting slot value to type(uint256).max
-    // Otherwise, we set it to 0. That way, return value should always be affected.
+    /// @notice Returns whether mutating `slot` changes the return value of the configured target call.
+    /// @dev Temporarily writes either `type(uint256).max` or `0` to the slot to detect sensitivity.
     function checkSlotMutatesCall(StdStorage storage self, bytes32 slot) internal returns (bool) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
         (bool success, bytes32 prevReturnValue) = callTarget(self);
@@ -66,8 +67,7 @@ library stdStorageSafe {
         return (success && (prevReturnValue != newReturnValue));
     }
 
-    // Tries setting one of the bits in slot to 1 until return value changes.
-    // Index of resulted bit is an offset packed slot has from left/right side
+    /// @notice Searches for the bit offset of the packed variable within `slot` from the left or right side.
     function findOffset(StdStorage storage self, bytes32 slot, bool left) internal returns (bool, uint256) {
         for (uint256 offset = 0; offset < 256; offset++) {
             uint256 valueToPut = left ? (1 << (255 - offset)) : (1 << offset);
@@ -82,6 +82,7 @@ library stdStorageSafe {
         return (false, 0);
     }
 
+    /// @notice Returns whether both offsets were found, along with the left and right bit offsets of the packed variable within `slot`.
     function findOffsets(StdStorage storage self, bytes32 slot) internal returns (bool, uint256, uint256) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
 
@@ -93,6 +94,7 @@ library stdStorageSafe {
         return (foundLeft && foundRight, offsetLeft, offsetRight);
     }
 
+    /// @notice Finds the storage slot for the configured target and returns its data, clearing the configuration.
     function find(StdStorage storage self) internal returns (FindData storage) {
         return find(self, true);
     }
@@ -169,52 +171,61 @@ library stdStorageSafe {
         return self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
     }
 
+    /// @notice Sets the target contract address for the storage lookup.
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
         self._target = _target;
         return self;
     }
 
+    /// @notice Sets the target function selector for the storage lookup.
     function sig(StdStorage storage self, bytes4 _sig) internal returns (StdStorage storage) {
         self._sig = _sig;
         return self;
     }
 
+    /// @notice Sets the target function selector from a signature string for the storage lookup.
     function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
         self._sig = sigs(_sig);
         return self;
     }
 
+    /// @notice Sets raw calldata to use instead of ABI-encoded keys for the target call.
     function with_calldata(StdStorage storage self, bytes memory _calldata) internal returns (StdStorage storage) {
         self._calldata = _calldata;
         return self;
     }
 
+    /// @notice Adds an address mapping key to the storage lookup path.
     function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
         self._keys.push(bytes32(uint256(uint160(who))));
         return self;
     }
 
+    /// @notice Adds a uint256 mapping key to the storage lookup path.
     function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
         self._keys.push(bytes32(amt));
         return self;
     }
 
+    /// @notice Adds a bytes32 mapping key to the storage lookup path.
     function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
         self._keys.push(key);
         return self;
     }
 
+    /// @notice Enables detection and handling of values packed into shared storage slots.
     function enable_packed_slots(StdStorage storage self) internal returns (StdStorage storage) {
         self._enable_packed_slots = true;
         return self;
     }
 
+    /// @notice Sets the struct field depth for storage lookups into nested structs.
     function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
         self._depth = _depth;
         return self;
     }
 
-    function read(StdStorage storage self) private returns (bytes memory) {
+    function _read(StdStorage storage self) private returns (bytes memory) {
         FindData storage data = find(self, false);
         uint256 mask = getMaskByOffsets(data.offsetLeft, data.offsetRight);
         uint256 value = (uint256(vm.load(self._target, bytes32(data.slot))) & mask) >> data.offsetRight;
@@ -222,10 +233,13 @@ library stdStorageSafe {
         return abi.encode(value);
     }
 
+    /// @notice Reads the found storage slot value as bytes32.
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
-        return abi.decode(read(self), (bytes32));
+        return abi.decode(_read(self), (bytes32));
     }
 
+    /// @notice Reads the found storage slot value as bool.
+    /// @dev Reverts if the stored value is neither `0` nor `1`.
     function read_bool(StdStorage storage self) internal returns (bool) {
         int256 v = read_int(self);
         if (v == 0) return false;
@@ -233,18 +247,22 @@ library stdStorageSafe {
         revert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
     }
 
+    /// @notice Reads the found storage slot value as address.
     function read_address(StdStorage storage self) internal returns (address) {
-        return abi.decode(read(self), (address));
+        return abi.decode(_read(self), (address));
     }
 
+    /// @notice Reads the found storage slot value as uint256.
     function read_uint(StdStorage storage self) internal returns (uint256) {
-        return abi.decode(read(self), (uint256));
+        return abi.decode(_read(self), (uint256));
     }
 
+    /// @notice Reads the found storage slot value as int256.
     function read_int(StdStorage storage self) internal returns (int256) {
-        return abi.decode(read(self), (int256));
+        return abi.decode(_read(self), (int256));
     }
 
+    /// @notice Returns the parent mapping slot index and the key used to reach the found slot.
     function parent(StdStorage storage self) internal returns (uint256, bytes32) {
         address who = self._target;
         uint256 field_depth = self._depth;
@@ -259,6 +277,7 @@ library stdStorageSafe {
         return (uint256(parent_slot), key);
     }
 
+    /// @notice Returns the root mapping slot index by traversing the mapping parent chain.
     function root(StdStorage storage self) internal returns (uint256) {
         address who = self._target;
         uint256 field_depth = self._depth;
@@ -280,7 +299,7 @@ library stdStorageSafe {
         return uint256(root_slot);
     }
 
-    function bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
+    function _bytesToBytes32(bytes memory b, uint256 offset) private pure returns (bytes32) {
         bytes32 out;
 
         // Cap read length by remaining bytes from `offset`, and at most 32 bytes to avoid out-of-bounds
@@ -294,7 +313,7 @@ library stdStorageSafe {
         return out;
     }
 
-    function flatten(bytes32[] memory b) private pure returns (bytes memory) {
+    function _flatten(bytes32[] memory b) private pure returns (bytes memory) {
         bytes memory result = new bytes(b.length * 32);
         for (uint256 i = 0; i < b.length; i++) {
             bytes32 k = b[i];
@@ -306,6 +325,7 @@ library stdStorageSafe {
         return result;
     }
 
+    /// @notice Resets all configured parameters on `self`.
     function clear(StdStorage storage self) internal {
         delete self._target;
         delete self._sig;
@@ -315,8 +335,8 @@ library stdStorageSafe {
         delete self._calldata;
     }
 
-    // Returns mask which contains non-zero bits for values between `offsetLeft` and `offsetRight`
-    // (slotValue & mask) >> offsetRight will be the value of the given packed variable
+    /// @notice Returns a bitmask with ones in the bit range `[offsetRight, 255 - offsetLeft]`.
+    /// @dev `(slotValue & mask) >> offsetRight` extracts the packed variable's value.
     function getMaskByOffsets(uint256 offsetLeft, uint256 offsetRight) internal pure returns (uint256 mask) {
         // mask = ((1 << (256 - (offsetRight + offsetLeft))) - 1) << offsetRight;
         // using assembly because (1 << 256) causes overflow
@@ -325,7 +345,7 @@ library stdStorageSafe {
         }
     }
 
-    // Returns slot value with updated packed variable.
+    /// @notice Returns `curValue` with the packed variable at `[offsetRight, 255 - offsetLeft]` replaced by `varValue`.
     function getUpdatedSlotValue(bytes32 curValue, uint256 varValue, uint256 offsetLeft, uint256 offsetRight)
         internal
         pure
@@ -338,70 +358,87 @@ library stdStorageSafe {
 library stdStorage {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    /// @notice Returns the 4-byte function selector for `sigStr`.
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return stdStorageSafe.sigs(sigStr);
     }
 
+    /// @notice Finds the storage slot index for the configured target, clearing the configuration.
     function find(StdStorage storage self) internal returns (uint256) {
         return find(self, true);
     }
 
+    /// @notice Finds the storage slot index for the configured target, optionally clearing the configuration.
     function find(StdStorage storage self, bool _clear) internal returns (uint256) {
         return stdStorageSafe.find(self, _clear).slot;
     }
 
+    /// @notice Sets the target contract address for the storage lookup.
     function target(StdStorage storage self, address _target) internal returns (StdStorage storage) {
         return stdStorageSafe.target(self, _target);
     }
 
+    /// @notice Sets the target function selector for the storage lookup.
     function sig(StdStorage storage self, bytes4 _sig) internal returns (StdStorage storage) {
         return stdStorageSafe.sig(self, _sig);
     }
 
+    /// @notice Sets the target function selector from a signature string for the storage lookup.
     function sig(StdStorage storage self, string memory _sig) internal returns (StdStorage storage) {
         return stdStorageSafe.sig(self, _sig);
     }
 
+    /// @notice Adds an address mapping key to the storage lookup path.
     function with_key(StdStorage storage self, address who) internal returns (StdStorage storage) {
         return stdStorageSafe.with_key(self, who);
     }
 
+    /// @notice Adds a uint256 mapping key to the storage lookup path.
     function with_key(StdStorage storage self, uint256 amt) internal returns (StdStorage storage) {
         return stdStorageSafe.with_key(self, amt);
     }
 
+    /// @notice Adds a bytes32 mapping key to the storage lookup path.
     function with_key(StdStorage storage self, bytes32 key) internal returns (StdStorage storage) {
         return stdStorageSafe.with_key(self, key);
     }
 
+    /// @notice Sets raw calldata to use instead of ABI-encoded keys for the target call.
     function with_calldata(StdStorage storage self, bytes memory _calldata) internal returns (StdStorage storage) {
         return stdStorageSafe.with_calldata(self, _calldata);
     }
 
+    /// @notice Enables detection and handling of values packed into shared storage slots.
     function enable_packed_slots(StdStorage storage self) internal returns (StdStorage storage) {
         return stdStorageSafe.enable_packed_slots(self);
     }
 
+    /// @notice Sets the struct field depth for storage lookups into nested structs.
     function depth(StdStorage storage self, uint256 _depth) internal returns (StdStorage storage) {
         return stdStorageSafe.depth(self, _depth);
     }
 
+    /// @notice Resets all configured parameters on `self`.
     function clear(StdStorage storage self) internal {
         stdStorageSafe.clear(self);
     }
 
+    /// @notice Writes `who` to the found storage slot and verifies the value was applied correctly.
     function checked_write(StdStorage storage self, address who) internal {
         checked_write(self, bytes32(uint256(uint160(who))));
     }
 
+    /// @notice Writes `amt` to the found storage slot and verifies the value was applied correctly.
     function checked_write(StdStorage storage self, uint256 amt) internal {
         checked_write(self, bytes32(amt));
     }
 
+    /// @notice Writes `val` to the found storage slot and verifies the value was applied correctly.
     function checked_write_int(StdStorage storage self, int256 val) internal {
         checked_write(self, bytes32(uint256(val)));
     }
 
+    /// @notice Writes `write` to the found storage slot and verifies the value was applied correctly.
     function checked_write(StdStorage storage self, bool write) internal {
         bytes32 t;
         assembly ("memory-safe") {
@@ -410,6 +447,7 @@ library stdStorage {
         checked_write(self, t);
     }
 
+    /// @notice Writes `set` to the found storage slot and verifies the value was applied correctly.
     function checked_write(StdStorage storage self, bytes32 set) internal {
         address who = self._target;
         bytes4 fsig = self._sig;
@@ -446,30 +484,37 @@ library stdStorage {
         clear(self);
     }
 
+    /// @notice Reads the found storage slot value as bytes32.
     function read_bytes32(StdStorage storage self) internal returns (bytes32) {
         return stdStorageSafe.read_bytes32(self);
     }
 
+    /// @notice Reads the found storage slot value as bool.
     function read_bool(StdStorage storage self) internal returns (bool) {
         return stdStorageSafe.read_bool(self);
     }
 
+    /// @notice Reads the found storage slot value as address.
     function read_address(StdStorage storage self) internal returns (address) {
         return stdStorageSafe.read_address(self);
     }
 
+    /// @notice Reads the found storage slot value as uint256.
     function read_uint(StdStorage storage self) internal returns (uint256) {
         return stdStorageSafe.read_uint(self);
     }
 
+    /// @notice Reads the found storage slot value as int256.
     function read_int(StdStorage storage self) internal returns (int256) {
         return stdStorageSafe.read_int(self);
     }
 
+    /// @notice Returns the parent mapping slot index and the key used to reach the found slot.
     function parent(StdStorage storage self) internal returns (uint256, bytes32) {
         return stdStorageSafe.parent(self);
     }
 
+    /// @notice Returns the root mapping slot index by traversing the mapping parent chain.
     function root(StdStorage storage self) internal returns (uint256) {
         return stdStorageSafe.root(self);
     }

@@ -33,7 +33,7 @@ abstract contract StdAssertions {
     event log_named_array(string key, int256[] val);
     event log_named_array(string key, address[] val);
 
-    bytes32 private constant FAILED_SLOT = bytes32("failed");
+    bytes32 private constant _FAILED_SLOT = bytes32("failed");
 
     bool private _failed;
 
@@ -43,13 +43,13 @@ abstract contract StdAssertions {
         if (_failed) {
             return true;
         } else {
-            return vm.load(address(vm), FAILED_SLOT) != bytes32(0);
+            return vm.load(address(vm), _FAILED_SLOT) != bytes32(0);
         }
     }
 
     /// @notice Marks the test as failed and records the failure in storage.
     function fail() internal virtual {
-        vm.store(address(vm), FAILED_SLOT, bytes32(uint256(1)));
+        vm.store(address(vm), _FAILED_SLOT, bytes32(uint256(1)));
         _failed = true;
     }
 
