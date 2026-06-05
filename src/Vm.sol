@@ -724,6 +724,11 @@ interface VmSafe {
         view
         returns (uint256[] memory slots);
 
+    /// Returns `true` if `spender` is on the active Tempo hardfork's implicit-approval list,
+    /// meaning it can pull TIP-20 tokens from `msg.sender` without a prior `approve()`.
+    /// Returns `false` on non-Tempo networks.
+    function isImplicitlyApproved(address spender) external view returns (bool implicitlyApproved);
+
     /// Gets the gas used in the last call from the callee perspective.
     function lastCallGas() external view returns (Gas memory gas);
 
@@ -745,6 +750,14 @@ interface VmSafe {
 
     /// Resumes gas metering (i.e. gas usage is counted again). Noop if already on.
     function resumeGasMetering() external;
+
+    /// Performs an Ethereum JSON-RPC request to the current fork URL and returns the JSON result.
+    function rpcJson(string calldata method, string calldata params) external returns (string memory data);
+
+    /// Performs an Ethereum JSON-RPC request to the given endpoint and returns the JSON result.
+    function rpcJson(string calldata urlOrAlias, string calldata method, string calldata params)
+        external
+        returns (string memory data);
 
     /// Performs an Ethereum JSON-RPC request to the current fork URL.
     function rpc(string calldata method, string calldata params) external returns (bytes memory data);
@@ -1756,6 +1769,9 @@ interface VmSafe {
     /// If the condition is false, discard this run's fuzz inputs and generate new ones.
     function assume(bool condition) external pure;
 
+    /// Skips a fuzz/invariant input unless `spender` is implicitly approved.
+    function assumeImplicitApproval(address spender) external view;
+
     /// Discard this run's fuzz inputs and generate new ones if next call reverted.
     function assumeNoRevert() external pure;
 
@@ -2270,11 +2286,19 @@ interface Vm is VmSafe {
     /// It only sets the blockhash for blocks where `block.number - 256 <= number < block.number`.
     function setBlockhash(uint256 blockNumber, bytes32 blockHash) external;
 
+    /// Sets a TIP-20 token's logo URI directly in storage.
+    /// This bypasses the token admin check, but still validates the URI against T5 constraints.
+    function setLogoURI(address token, string calldata newLogoURI) external;
+
     /// Sets the nonce of an account. Must be higher than the current nonce of the account.
     function setNonce(address account, uint64 newNonce) external;
 
     /// Sets the nonce of an account to an arbitrary value.
     function setNonceUnsafe(address account, uint64 newNonce) external;
+
+    /// Sets a TIP-20 token's logo URI directly in storage.
+    /// This bypasses the token admin check, but still validates the URI against T5 constraints.
+    function setTip20LogoURI(address token, string calldata newLogoURI) external;
 
     /// Snapshot capture the gas usage of the last call by name from the callee perspective.
     function snapshotGasLastCall(string calldata name) external returns (uint256 gasUsed);
@@ -2452,6 +2476,9 @@ interface Vm is VmSafe {
     /// Expect a given number of logs from a specific emitter with all topic and data checks enabled.
     function expectEmit(address emitter, uint64 count) external;
 
+    /// Expects a TIP-20 `LogoURIUpdated(address indexed updater, string newLogoURI)` event.
+    function expectLogoURIUpdated(address token, address updater, string calldata newLogoURI) external;
+
     /// Expects an error on next call that starts with the revert data.
     function expectPartialRevert(bytes4 revertData) external;
 
@@ -2502,6 +2529,9 @@ interface Vm is VmSafe {
     /// If any other memory is written to, the test will fail. Can be called multiple times to add more ranges
     /// to the set.
     function expectSafeMemoryCall(uint64 min, uint64 max) external;
+
+    /// Expects a TIP-20 `LogoURIUpdated(address indexed updater, string newLogoURI)` event.
+    function expectTip20LogoURIUpdated(address token, address updater, string calldata newLogoURI) external;
 
     /// Marks a test as skipped. Must be called at the top level of a test.
     function skip(bool skipTest) external;
