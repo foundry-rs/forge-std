@@ -303,6 +303,13 @@ abstract contract StdChains {
         );
 
         _setChainWithDefaultRpcUrl("grav", ChainData("Gravity", 127001, "https://mainnet-rpc.gravity.xyz"));
+
+        _setChainWithDefaultRpcUrl(
+            "battlechain", ChainData("BattleChain Mainnet", 626, "https://mainnet.battlechain.com")
+        );
+        _setChainWithDefaultRpcUrl(
+            "battlechain_testnet", ChainData("BattleChain Testnet", 627, "https://testnet.battlechain.com")
+        );
     }
 
     // set chain info, with priority to chainAlias' rpc url in foundry.toml
