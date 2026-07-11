@@ -351,6 +351,25 @@ contract StdStorageTest is Test {
         assertEq(test.edgeCaseArray(0), 1);
     }
 
+    // Regression tests for https://github.com/foundry-rs/forge-std/issues/345
+    function test_StorageFindShortString() public {
+        ShortStringStorage t = new ShortStringStorage();
+        uint256 slot = stdstore.target(address(t)).sig("exists()").find();
+        assertEq(slot, 0);
+    }
+
+    function test_StorageFindLongString() public {
+        LongStringStorage t = new LongStringStorage();
+        // Long strings SLOAD base + content slots; find must not revert (content slot is OK).
+        stdstore.target(address(t)).sig("exists()").find();
+    }
+
+    function test_StorageFindBytes() public {
+        BytesStorage t = new BytesStorage();
+        uint256 slot = stdstore.target(address(t)).sig("data()").find();
+        assertEq(slot, 0);
+    }
+
     // Regression test for https://github.com/foundry-rs/forge-std/issues/740
     // `find()` used to infinite-loop on tokens whose `balanceOf` reads multiple
     // storage slots and returns a derived value (reflection tokens).
@@ -375,6 +394,21 @@ contract StorageTestTarget {
     function expectRevertStorageConst() public {
         stdstore.target(address(test)).sig("const()").find();
     }
+}
+
+
+contract ShortStringStorage {
+    // 31 chars => short string encoding (length in low byte)
+    string public exists = "thequickbrownfoxjumpsoverthelaz";
+}
+
+contract LongStringStorage {
+    string public exists =
+        "the quick brown fox jumps over the lazy dog and then keeps running so this is long";
+}
+
+contract BytesStorage {
+    bytes public data = hex"00112233445566778899aabbccddeeff00112233";
 }
 
 contract ReflectionTokenTarget {

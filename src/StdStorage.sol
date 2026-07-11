@@ -51,20 +51,62 @@ library stdStorageSafe {
         return (success, result);
     }
 
+    /// @notice Staticcall the configured target and return raw returndata.
+    function callTargetRaw(StdStorage storage self) internal view returns (bool success, bytes memory rdat) {
+        bytes memory cd = abi.encodePacked(self._sig, getCallParams(self));
+        (success, rdat) = self._target.staticcall(cd);
+    }
+
+    /// @notice True when returndata is a single ABI dynamic value (string/bytes): word0 == 0x20 offset.
+    function _isSingleDynamicReturn(bytes memory rdat) private pure returns (bool) {
+        if (rdat.length < 64) {
+            return false;
+        }
+        return uint256(_bytesToBytes32(rdat, 0)) == 32;
+    }
+
     /// @notice Returns whether mutating `slot` changes the return value of the configured target call.
-    /// @dev Temporarily writes either `type(uint256).max` or `0` to the slot to detect sensitivity.
+    /// @dev Temporarily writes 0 / type(uint256).max to the slot to detect sensitivity.
+    ///      Static multi-word returns (structs) still compare only the word at `depth` so mutating a
+    ///      sibling field is not a hit for this field.
+    ///      Single dynamic returns (string/bytes) compare the full returndata hash: word0 is usually
+    ///      just the ABI offset 0x20 and does not change when content changes (fixes #345).
     function checkSlotMutatesCall(StdStorage storage self, bytes32 slot) internal returns (bool) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
-        (bool success, bytes32 prevReturnValue) = callTarget(self);
+        (bool prevSuccess, bytes memory prevRet) = callTargetRaw(self);
 
+        if (prevSuccess && _isSingleDynamicReturn(prevRet)) {
+            vm.store(self._target, slot, bytes32(UINT256_MAX));
+            (bool newSuccess, bytes memory newRet) = callTargetRaw(self);
+            bool changed =
+                (prevSuccess != newSuccess) || (prevSuccess && keccak256(prevRet) != keccak256(newRet));
+            if (!changed) {
+                vm.store(self._target, slot, bytes32(0));
+                (newSuccess, newRet) = callTargetRaw(self);
+                changed =
+                    (prevSuccess != newSuccess) || (prevSuccess && keccak256(prevRet) != keccak256(newRet));
+            }
+            vm.store(self._target, slot, prevSlotValue);
+            return changed;
+        }
+
+        bytes32 prevReturnValue = _bytesToBytes32(prevRet, 32 * self._depth);
         bytes32 testVal = prevReturnValue == bytes32(0) ? bytes32(UINT256_MAX) : bytes32(0);
         vm.store(self._target, slot, testVal);
-
-        (, bytes32 newReturnValue) = callTarget(self);
-
+        (, bytes memory newRetStatic) = callTargetRaw(self);
+        bytes32 newReturnValue = _bytesToBytes32(newRetStatic, 32 * self._depth);
         vm.store(self._target, slot, prevSlotValue);
+        return (prevSuccess && (prevReturnValue != newReturnValue));
+    }
 
-        return (success && (prevReturnValue != newReturnValue));
+    /// @dev Skip raw slot==return equality when the getter is a single dynamic ABI return
+    ///      (string/bytes). `callResult` at depth 0 is the offset word (0x20) in that case.
+    function _skipSlotValueCheck(StdStorage storage self, bytes32 callResult) private view returns (bool) {
+        if (uint256(callResult) != 32) {
+            return false;
+        }
+        (bool ok, bytes memory rdat) = callTargetRaw(self);
+        return ok && _isSingleDynamicReturn(rdat);
     }
 
     /// @notice Searches for the bit offset of the packed variable within `slot` from the left or right side.
@@ -146,10 +188,12 @@ library stdStorageSafe {
                     }
                 }
 
-                // Check that value between found offsets is equal to the current call result
+                // Check that value between found offsets is equal to the current call result.
+                // For string/bytes getters the word at depth 0 is the ABI offset (0x20), not the
+                // storage encoding — skip the raw equality check in that case (#345).
                 uint256 curVal = (uint256(prev) & getMaskByOffsets(offsetLeft, offsetRight)) >> offsetRight;
 
-                if (uint256(callResult) != curVal) {
+                if (uint256(callResult) != curVal && !_skipSlotValueCheck(self, callResult)) {
                     continue;
                 }
 
