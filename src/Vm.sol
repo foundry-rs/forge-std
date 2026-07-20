@@ -966,6 +966,10 @@ interface VmSafe {
         view
         returns (address[] memory deployedAddresses);
 
+    /// Gets all function selectors from a contract artifact. Takes in the relative path to the json file or the path to the
+    /// artifact in the form of <path>:<contract>:<version> where <contract> and <version> parts are optional.
+    function getSelectors(string calldata artifactPath) external view returns (bytes4[] memory selectors);
+
     /// Returns true if the path exists on disk and is pointing at a directory, else returns false.
     function isDir(string calldata path) external view returns (bool result);
 
@@ -1064,6 +1068,9 @@ interface VmSafe {
 
     /// Parses a string of JSON data at `key` and coerces it to `address[]`.
     function parseJsonAddressArray(string calldata json, string calldata key) external pure returns (address[] memory);
+
+    /// Returns the length of the JSON array at `key`.
+    function parseJsonArrayLength(string calldata json, string calldata key) external pure returns (uint256 length);
 
     /// Parses a string of JSON data at `key` and coerces it to `bool`.
     function parseJsonBool(string calldata json, string calldata key) external pure returns (bool);
@@ -2231,6 +2238,19 @@ interface Vm is VmSafe {
     /// Calldata match takes precedence over `msg.value` in case of ambiguity.
     /// Overload to pass the function selector directly `token.approve.selector` instead of `abi.encodeWithSelector(token.approve.selector)`.
     function mockCall(address callee, uint256 msgValue, bytes4 data, bytes calldata returnData) external;
+
+    /// Mocks a call to an address, returning specified data.
+    /// Calldata can either be strict or a partial match, e.g. if you only
+    /// pass a Solidity selector to the expected calldata, then the entire Solidity
+    /// function will be mocked.
+    /// Overload to control whether code is injected into `callee`. The other overloads etch a
+    /// single byte into an empty account to circumvent Solidity's `extcodesize` check, with the
+    /// side effect that unmocked calls to it no longer revert; `injectCode = false` leaves the
+    /// account codeless, so unmocked calls to it revert in the caller. Mocked calls that return
+    /// data still succeed, as Solidity checks `returndatasize()` instead of `extcodesize()` when
+    /// return data is expected, but mocked calls to functions without return values may still
+    /// revert in the caller due to the `extcodesize` check.
+    function mockCall(address callee, bytes calldata data, bytes calldata returnData, bool injectCode) external;
 
     /// Mocks multiple calls to an address, returning specified data for each call.
     function mockCalls(address callee, bytes calldata data, bytes[] calldata returnData) external;
