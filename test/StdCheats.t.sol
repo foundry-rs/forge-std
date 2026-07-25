@@ -687,7 +687,6 @@ contract BarERC721 {
     mapping(address => uint256) private _balances;
 }
 
-
 /// ERC20-like balance packed with adjacent metadata in the same slot (low 128 = balance).
 contract PackedBalanceToken {
     // layout per address: [other:128][balance:128]

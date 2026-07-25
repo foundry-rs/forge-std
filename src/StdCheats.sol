@@ -885,7 +885,8 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
         // update balances (packed-aware)
-        _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
+        _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address)))
+            .checked_write(--fromPrevBal);
         _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
 
         // update owner
