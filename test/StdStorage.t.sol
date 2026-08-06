@@ -357,8 +357,11 @@ contract StdStorageTest is Test {
         assertEq(stdstore.target(address(target)).sig(target.exists.selector).find(), 0);
     }
 
-    function test_StorageFindShortBytes() public {
+    function test_StorageFindShortBytesWithDirtyPadding() public {
         ShortBytesStorage target = new ShortBytesStorage();
+        bytes32 slotValue = vm.load(address(target), bytes32(uint256(1)));
+        vm.store(address(target), bytes32(uint256(1)), slotValue | bytes32(uint256(0xDEADBE) << 8));
+        assertEq(target.data(), hex"616263");
         assertEq(stdstore.target(address(target)).sig(target.data.selector).find(), 1);
     }
 
@@ -407,7 +410,7 @@ contract StorageTestTarget {
 
 contract ShortBytesStorage {
     string public exists = "thequickbrownfoxjumpsoverthelaz";
-    bytes public data = hex"001122003344";
+    bytes public data = hex"616263";
 }
 
 contract CanonicalLookingStaticReturn {

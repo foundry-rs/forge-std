@@ -83,6 +83,13 @@ library stdStorageSafe {
         return value | bytes32(length * 2);
     }
 
+    /// @notice Returns whether the payload and length marker match a short `bytes` or `string` storage value.
+    function _matchesShortBytes(bytes32 slotValue, bytes32 expected) private pure returns (bool) {
+        uint256 length = uint8(uint256(expected)) / 2;
+        uint256 mask = (type(uint256).max << ((32 - length) * 8)) | 0xFF;
+        return uint256(slotValue) & mask == uint256(expected);
+    }
+
     /// @notice Returns whether clearing `slot` makes the configured target return an empty dynamic byte array.
     function _checkShortBytesSlot(StdStorage storage self, bytes32 slot) private returns (bool) {
         bytes32 prevSlotValue = vm.load(self._target, slot);
@@ -184,7 +191,7 @@ library stdStorageSafe {
                 }
 
                 bool shortBytesFound = callData.shortBytesStorageValue != bytes32(0)
-                    && prev == callData.shortBytesStorageValue && _checkShortBytesSlot(self, slot);
+                    && _matchesShortBytes(prev, callData.shortBytesStorageValue) && _checkShortBytesSlot(self, slot);
 
                 if (!shortBytesFound && !checkSlotMutatesCall(self, slot)) {
                     continue;
