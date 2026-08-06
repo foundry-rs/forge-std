@@ -359,10 +359,12 @@ contract StdStorageTest is Test {
 
     function test_StorageFindShortBytesWithDirtyPadding() public {
         ShortBytesStorage target = new ShortBytesStorage();
-        bytes32 slotValue = vm.load(address(target), bytes32(uint256(1)));
-        vm.store(address(target), bytes32(uint256(1)), slotValue | bytes32(uint256(0xDEADBE) << 8));
+        bytes32 slot = bytes32(uint256(1));
+        bytes32 dirtyValue = vm.load(address(target), slot) | bytes32(uint256(0xDEADBE) << 8);
+        vm.store(address(target), slot, dirtyValue);
         assertEq(target.data(), hex"616263");
         assertEq(stdstore.target(address(target)).sig(target.data.selector).find(), 1);
+        assertEq(vm.load(address(target), slot), dirtyValue);
     }
 
     function test_StorageFindCanonicalLookingStaticReturn() public {
