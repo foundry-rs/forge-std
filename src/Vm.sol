@@ -1060,9 +1060,10 @@ interface VmSafe {
 
     // ======== JSON ========
 
+    /// Checks if `key` exists in a JSON object.
+    ///
     /// JSON `key` parameters use selector syntax: use a leading dot for object fields
     /// (for example, `.bar`) or `$` for the root object.
-    /// Checks if `key` exists in a JSON object.
     function keyExistsJson(string calldata json, string calldata key) external view returns (bool);
 
     /// Parses a string of JSON data at `key` and coerces it to `address`.
