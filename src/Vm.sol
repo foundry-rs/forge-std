@@ -380,6 +380,44 @@ interface VmSafe {
         pure
         returns (uint256 privateKey);
 
+    /// Adds the secp256k1 affine points `point1 = (pointX1, pointY1)` and
+    /// `point2 = (pointX2, pointY2)`.
+    /// The point at infinity is represented as `(0, 0)`.
+    function ecAddAffine(uint256 pointX1, uint256 pointY1, uint256 pointX2, uint256 pointY2)
+        external
+        pure
+        returns (uint256 resultX, uint256 resultY);
+
+    /// Adds the secp256k1 projective points `point1 = (pointX1, pointY1, pointZ1)` and
+    /// `point2 = (pointX2, pointY2, pointZ2)`.
+    /// The point at infinity is accepted as `(0, y, 0)` for any non-zero `y` and returned as
+    /// `(0, 1, 0)`. Any other result is normalized to `(x, y, 1)`.
+    function ecAddProjective(
+        uint256 pointX1,
+        uint256 pointY1,
+        uint256 pointZ1,
+        uint256 pointX2,
+        uint256 pointY2,
+        uint256 pointZ2
+    ) external pure returns (uint256 resultX, uint256 resultY, uint256 resultZ);
+
+    /// Multiplies the secp256k1 affine point `(pointX, pointY)` by `scalar`.
+    /// The scalar is reduced modulo the secp256k1 group order.
+    /// The point at infinity is represented as `(0, 0)`.
+    function ecMulAffine(uint256 pointX, uint256 pointY, uint256 scalar)
+        external
+        pure
+        returns (uint256 resultX, uint256 resultY);
+
+    /// Multiplies the secp256k1 projective point `(pointX, pointY, pointZ)` by `scalar`.
+    /// The scalar is reduced modulo the secp256k1 group order.
+    /// The point at infinity is accepted as `(0, y, 0)` for any non-zero `y` and returned as
+    /// `(0, 1, 0)`. Any other result is normalized to `(x, y, 1)`.
+    function ecMulProjective(uint256 pointX, uint256 pointY, uint256 pointZ, uint256 scalar)
+        external
+        pure
+        returns (uint256 resultX, uint256 resultY, uint256 resultZ);
+
     /// Derives the Ed25519 public key from a private key.
     function publicKeyEd25519(bytes32 privateKey) external pure returns (bytes32 publicKey);
 
@@ -793,7 +831,7 @@ interface VmSafe {
     /// Records the debug trace during the run.
     function startDebugTraceRecording() external;
 
-    /// Starts recording all map SSTOREs for later retrieval.
+    /// Starts recording mapping SSTOREs for later retrieval.
     function startMappingRecording() external;
 
     /// Record all account accesses as part of CREATE, CALL or SELFDESTRUCT opcodes in order,
@@ -806,7 +844,7 @@ interface VmSafe {
     /// Returns an ordered array of all account accesses from a `vm.startStateDiffRecording` session.
     function stopAndReturnStateDiff() external returns (AccountAccess[] memory accountAccesses);
 
-    /// Stops recording all map SSTOREs for later retrieval and clears the recorded data.
+    /// Stops recording mapping SSTOREs and clears the recorded data.
     function stopMappingRecording() external;
 
     /// Stops recording storage reads and writes.
@@ -2164,7 +2202,8 @@ interface Vm is VmSafe {
     /// Reverts if used on unsupported EVM versions.
     function difficulty(uint256 newDifficulty) external;
 
-    /// Dump a genesis JSON file's `allocs` to disk.
+    /// Dumps a genesis JSON file's `allocs` to disk. Accounts created in the current transaction
+    /// are ordered by deployment, followed by the remaining accounts in ascending address order.
     function dumpState(string calldata pathToStateJson) external;
 
     /// Sets an address' code.
@@ -2478,6 +2517,10 @@ interface Vm is VmSafe {
 
     /// Expects the deployment of the specified bytecode by the specified address using the CREATE2 opcode
     function expectCreate2(bytes calldata bytecode, address deployer) external;
+
+    /// Expects a delegate call to an address with the specified calldata.
+    /// Calldata can either be a strict or a partial match.
+    function expectDelegateCall(address callee, bytes calldata data) external;
 
     /// Prepare an expected anonymous log with (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData.).
     /// Call this function, then emit an anonymous event, then call a function. Internally after the call, we check if
