@@ -14,6 +14,7 @@ VoidFn = Callable[[], None]
 
 CHEATCODES_JSON_URL = "https://raw.githubusercontent.com/foundry-rs/foundry/master/crates/cheatcodes/assets/cheatcodes.json"
 OUT_PATH = "src/Vm.sol"
+TEST_PATH = "test/Vm.t.sol"
 
 VM_SAFE_DOC = """\
 /// The `VmSafe` interface does not allow manipulation of the EVM state or other actions that may
@@ -49,6 +50,8 @@ def main():
     unsafe = list(filter(lambda cc: cc.safety == "unsafe", ccs))
     unsafe.sort(key=CmpCheatcode)
     assert len(safe) + len(unsafe) == len(ccs)
+
+    update_interface_ids(safe, unsafe)
 
     prefix_with_group_headers(safe)
     prefix_with_group_headers(unsafe)
@@ -104,6 +107,22 @@ def main():
     assert res.returncode == 0, f"command failed: {forge_fmt}"
 
     print(f"Wrote to {OUT_PATH}")
+
+
+def update_interface_ids(safe: list["Cheatcode"], unsafe: list["Cheatcode"]):
+    test_path = Path(TEST_PATH)
+    out = test_path.read_text()
+
+    for name, cheatcodes in [("Vm", unsafe), ("VmSafe", safe)]:
+        interface_id = 0
+        for cheatcode in cheatcodes:
+            interface_id ^= int.from_bytes(cheatcode.func.selector_bytes, byteorder="big")
+
+        pattern = rf"(type\({name}\)\.interfaceId, bytes4\()0x[0-9a-fA-F]{{8}}(\), \"{name}\"\))"
+        out, count = re.subn(pattern, rf"\g<1>0x{interface_id:08x}\g<2>", out)
+        assert count == 1, f"failed to update {name} interface ID in {TEST_PATH}"
+
+    test_path.write_text(out)
 
 
 class CmpCheatcode:
