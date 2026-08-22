@@ -47,6 +47,7 @@ contract StdConfig {
     error ChainNotInitialized(uint256 chainId);
     error UnableToParseVariable(string key);
     error WriteToFileInForbiddenCtxt();
+    error MissingRpcEndpoint(uint256 chainId);
 
     // -- STORAGE (CACHE FROM CONFIG FILE) ------------------------------------
 
@@ -104,13 +105,17 @@ contract StdConfig {
             _chainKeys.push(chain_key);
 
             // Cache the configured RPC endpoint for that chain.
-            // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
+            // Falls back to `[rpc_endpoints]`. A chain section may exist only to carry
+            // config values, in which case no endpoint is needed, so a missing one is
+            // deferred to `getRpcUrl` instead of failing the whole load here.
             try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (
                 string memory url
             ) {
                 _rpcOf[chainId] = vm.resolveEnv(url);
             } catch {
-                _rpcOf[chainId] = vm.resolveEnv(vm.rpcUrl(chain_key));
+                try vm.rpcUrl(chain_key) returns (string memory url) {
+                    _rpcOf[chainId] = vm.resolveEnv(url);
+                } catch {}
             }
 
             // Iterate through all the available `TypeKind`s (except `None`) to create the sub-section paths
@@ -353,13 +358,18 @@ contract StdConfig {
     }
 
     /// @notice Reads the RPC URL for a specific chain id.
+    /// @dev    Reverts with `MissingRpcEndpoint` if the chain was configured without an
+    ///         endpoint. Loading such a chain is allowed, since its config values are
+    ///         still usable; only asking for the endpoint is an error.
     function getRpcUrl(uint256 chainId) public view returns (string memory) {
-        return _rpcOf[chainId];
+        string memory url = _rpcOf[chainId];
+        if (bytes(url).length == 0) revert MissingRpcEndpoint(chainId);
+        return url;
     }
 
     /// @notice Reads the RPC URL for the current chain.
     function getRpcUrl() public view returns (string memory) {
-        return _rpcOf[vm.getChainId()];
+        return getRpcUrl(vm.getChainId());
     }
 
     // -- SETTER FUNCTIONS (SINGLE VALUES) -------------------------------------

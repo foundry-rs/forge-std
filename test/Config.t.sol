@@ -378,4 +378,51 @@ contract ConfigTest is Test, Config {
         new StdConfig(badParseConfig, false);
         vm.removeFile(badParseConfig);
     }
+
+    function test_loadConfigWithoutRpcEndpoint() public {
+        // A chain section may exist only to carry config values. Loading it should not
+        // require an endpoint, since nothing on the `_loadConfig` path ever reads one.
+        string memory configOnly = "./test/fixtures/config_no_endpoint.toml";
+        vm.writeFile(
+            configOnly,
+            string.concat(
+                "[mainnet]\n",
+                "endpoint_url = \"https://ethereum.reth.rs/rpc\"\n",
+                "\n",
+                "# No endpoint_url, and no matching entry in `[rpc_endpoints]`.\n",
+                "[optimism.uint]\n",
+                "some_number = 7\n"
+            )
+        );
+
+        _loadConfig(configOnly, false);
+
+        assertEq(config.getChainIds().length, 2, "both chains should load");
+        assertEq(config.get(10, "some_number").toUint256(), 7, "config values stay readable");
+        assertEq(config.getRpcUrl(1), "https://ethereum.reth.rs/rpc", "configured endpoints still resolve");
+
+        vm.removeFile(configOnly);
+    }
+
+    function testRevert_MissingRpcEndpoint() public {
+        // Loading a chain without an endpoint is fine; asking for the endpoint is not.
+        string memory configOnly = "./test/fixtures/config_no_endpoint_revert.toml";
+        vm.writeFile(
+            configOnly,
+            string.concat(
+                "[mainnet]\n",
+                "endpoint_url = \"https://ethereum.reth.rs/rpc\"\n",
+                "\n",
+                "[optimism.uint]\n",
+                "some_number = 7\n"
+            )
+        );
+
+        _loadConfig(configOnly, false);
+
+        vm.expectRevert(abi.encodeWithSelector(StdConfig.MissingRpcEndpoint.selector, uint256(10)));
+        config.getRpcUrl(10);
+
+        vm.removeFile(configOnly);
+    }
 }
