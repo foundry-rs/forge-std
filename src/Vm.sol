@@ -1101,47 +1101,113 @@ interface VmSafe {
     /// Checks if `key` exists in a JSON object.
     function keyExistsJson(string calldata json, string calldata key) external view returns (bool);
 
+    /// Parses a string of JSON data at `key` and coerces it to `address[]`.
+    function parseJsonAddressArray(string calldata json, string calldata key) external pure returns (address[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `address[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonAddressArray(string calldata json, string calldata key, address[] calldata defaultValue)
+        external
+        pure
+        returns (address[] memory);
+
     /// Parses a string of JSON data at `key` and coerces it to `address`.
     function parseJsonAddress(string calldata json, string calldata key) external pure returns (address);
 
-    /// Parses a string of JSON data at `key` and coerces it to `address[]`.
-    function parseJsonAddressArray(string calldata json, string calldata key) external pure returns (address[] memory);
+    /// Parses a string of JSON data at `key` and coerces it to `address`, or returns `defaultValue` if the key does not exist.
+    function parseJsonAddress(string calldata json, string calldata key, address defaultValue)
+        external
+        pure
+        returns (address);
 
     /// Returns the length of the JSON array at `key`.
     function parseJsonArrayLength(string calldata json, string calldata key) external pure returns (uint256 length);
 
-    /// Parses a string of JSON data at `key` and coerces it to `bool`.
-    function parseJsonBool(string calldata json, string calldata key) external pure returns (bool);
-
     /// Parses a string of JSON data at `key` and coerces it to `bool[]`.
     function parseJsonBoolArray(string calldata json, string calldata key) external pure returns (bool[] memory);
 
-    /// Parses a string of JSON data at `key` and coerces it to `bytes`.
-    function parseJsonBytes(string calldata json, string calldata key) external pure returns (bytes memory);
+    /// Parses a string of JSON data at `key` and coerces it to `bool[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBoolArray(string calldata json, string calldata key, bool[] calldata defaultValue)
+        external
+        pure
+        returns (bool[] memory);
 
-    /// Parses a string of JSON data at `key` and coerces it to `bytes32`.
-    function parseJsonBytes32(string calldata json, string calldata key) external pure returns (bytes32);
+    /// Parses a string of JSON data at `key` and coerces it to `bool`.
+    function parseJsonBool(string calldata json, string calldata key) external pure returns (bool);
+
+    /// Parses a string of JSON data at `key` and coerces it to `bool`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBool(string calldata json, string calldata key, bool defaultValue) external pure returns (bool);
 
     /// Parses a string of JSON data at `key` and coerces it to `bytes32[]`.
     function parseJsonBytes32Array(string calldata json, string calldata key) external pure returns (bytes32[] memory);
 
+    /// Parses a string of JSON data at `key` and coerces it to `bytes32[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBytes32Array(string calldata json, string calldata key, bytes32[] calldata defaultValue)
+        external
+        pure
+        returns (bytes32[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `bytes32`.
+    function parseJsonBytes32(string calldata json, string calldata key) external pure returns (bytes32);
+
+    /// Parses a string of JSON data at `key` and coerces it to `bytes32`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBytes32(string calldata json, string calldata key, bytes32 defaultValue)
+        external
+        pure
+        returns (bytes32);
+
     /// Parses a string of JSON data at `key` and coerces it to `bytes[]`.
     function parseJsonBytesArray(string calldata json, string calldata key) external pure returns (bytes[] memory);
 
-    /// Parses a string of JSON data at `key` and coerces it to `int256`.
-    function parseJsonInt(string calldata json, string calldata key) external pure returns (int256);
+    /// Parses a string of JSON data at `key` and coerces it to `bytes[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBytesArray(string calldata json, string calldata key, bytes[] calldata defaultValue)
+        external
+        pure
+        returns (bytes[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `bytes`.
+    function parseJsonBytes(string calldata json, string calldata key) external pure returns (bytes memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `bytes`, or returns `defaultValue` if the key does not exist.
+    function parseJsonBytes(string calldata json, string calldata key, bytes calldata defaultValue)
+        external
+        pure
+        returns (bytes memory);
 
     /// Parses a string of JSON data at `key` and coerces it to `int256[]`.
     function parseJsonIntArray(string calldata json, string calldata key) external pure returns (int256[] memory);
 
+    /// Parses a string of JSON data at `key` and coerces it to `int256[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonIntArray(string calldata json, string calldata key, int256[] calldata defaultValue)
+        external
+        pure
+        returns (int256[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `int256`.
+    function parseJsonInt(string calldata json, string calldata key) external pure returns (int256);
+
+    /// Parses a string of JSON data at `key` and coerces it to `int256`, or returns `defaultValue` if the key does not exist.
+    function parseJsonInt(string calldata json, string calldata key, int256 defaultValue) external pure returns (int256);
+
     /// Returns an array of all the keys in a JSON object.
     function parseJsonKeys(string calldata json, string calldata key) external pure returns (string[] memory keys);
+
+    /// Parses a string of JSON data at `key` and coerces it to `string[]`.
+    function parseJsonStringArray(string calldata json, string calldata key) external pure returns (string[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `string[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonStringArray(string calldata json, string calldata key, string[] calldata defaultValue)
+        external
+        pure
+        returns (string[] memory);
 
     /// Parses a string of JSON data at `key` and coerces it to `string`.
     function parseJsonString(string calldata json, string calldata key) external pure returns (string memory);
 
-    /// Parses a string of JSON data at `key` and coerces it to `string[]`.
-    function parseJsonStringArray(string calldata json, string calldata key) external pure returns (string[] memory);
+    /// Parses a string of JSON data at `key` and coerces it to `string`, or returns `defaultValue` if the key does not exist.
+    function parseJsonString(string calldata json, string calldata key, string calldata defaultValue)
+        external
+        pure
+        returns (string memory);
 
     /// Parses a string of JSON data at `key` and coerces it to type array corresponding to `typeDescription`.
     function parseJsonTypeArray(string calldata json, string calldata key, string calldata typeDescription)
@@ -1158,11 +1224,23 @@ interface VmSafe {
         pure
         returns (bytes memory);
 
+    /// Parses a string of JSON data at `key` and coerces it to `uint256[]`.
+    function parseJsonUintArray(string calldata json, string calldata key) external pure returns (uint256[] memory);
+
+    /// Parses a string of JSON data at `key` and coerces it to `uint256[]`, or returns `defaultValue` if the key does not exist.
+    function parseJsonUintArray(string calldata json, string calldata key, uint256[] calldata defaultValue)
+        external
+        pure
+        returns (uint256[] memory);
+
     /// Parses a string of JSON data at `key` and coerces it to `uint256`.
     function parseJsonUint(string calldata json, string calldata key) external pure returns (uint256);
 
-    /// Parses a string of JSON data at `key` and coerces it to `uint256[]`.
-    function parseJsonUintArray(string calldata json, string calldata key) external pure returns (uint256[] memory);
+    /// Parses a string of JSON data at `key` and coerces it to `uint256`, or returns `defaultValue` if the key does not exist.
+    function parseJsonUint(string calldata json, string calldata key, uint256 defaultValue)
+        external
+        pure
+        returns (uint256);
 
     /// ABI-encodes a JSON object.
     function parseJson(string calldata json) external pure returns (bytes memory abiEncodedData);
@@ -1913,44 +1991,110 @@ interface VmSafe {
     /// Checks if `key` exists in a TOML table.
     function keyExistsToml(string calldata toml, string calldata key) external view returns (bool);
 
-    /// Parses a string of TOML data at `key` and coerces it to `address`.
-    function parseTomlAddress(string calldata toml, string calldata key) external pure returns (address);
-
     /// Parses a string of TOML data at `key` and coerces it to `address[]`.
     function parseTomlAddressArray(string calldata toml, string calldata key) external pure returns (address[] memory);
 
-    /// Parses a string of TOML data at `key` and coerces it to `bool`.
-    function parseTomlBool(string calldata toml, string calldata key) external pure returns (bool);
+    /// Parses a string of TOML data at `key` and coerces it to `address[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlAddressArray(string calldata toml, string calldata key, address[] calldata defaultValue)
+        external
+        pure
+        returns (address[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address`.
+    function parseTomlAddress(string calldata toml, string calldata key) external pure returns (address);
+
+    /// Parses a string of TOML data at `key` and coerces it to `address`, or returns `defaultValue` if the key does not exist.
+    function parseTomlAddress(string calldata toml, string calldata key, address defaultValue)
+        external
+        pure
+        returns (address);
 
     /// Parses a string of TOML data at `key` and coerces it to `bool[]`.
     function parseTomlBoolArray(string calldata toml, string calldata key) external pure returns (bool[] memory);
 
-    /// Parses a string of TOML data at `key` and coerces it to `bytes`.
-    function parseTomlBytes(string calldata toml, string calldata key) external pure returns (bytes memory);
+    /// Parses a string of TOML data at `key` and coerces it to `bool[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBoolArray(string calldata toml, string calldata key, bool[] calldata defaultValue)
+        external
+        pure
+        returns (bool[] memory);
 
-    /// Parses a string of TOML data at `key` and coerces it to `bytes32`.
-    function parseTomlBytes32(string calldata toml, string calldata key) external pure returns (bytes32);
+    /// Parses a string of TOML data at `key` and coerces it to `bool`.
+    function parseTomlBool(string calldata toml, string calldata key) external pure returns (bool);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bool`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBool(string calldata toml, string calldata key, bool defaultValue) external pure returns (bool);
 
     /// Parses a string of TOML data at `key` and coerces it to `bytes32[]`.
     function parseTomlBytes32Array(string calldata toml, string calldata key) external pure returns (bytes32[] memory);
 
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBytes32Array(string calldata toml, string calldata key, bytes32[] calldata defaultValue)
+        external
+        pure
+        returns (bytes32[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32`.
+    function parseTomlBytes32(string calldata toml, string calldata key) external pure returns (bytes32);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes32`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBytes32(string calldata toml, string calldata key, bytes32 defaultValue)
+        external
+        pure
+        returns (bytes32);
+
     /// Parses a string of TOML data at `key` and coerces it to `bytes[]`.
     function parseTomlBytesArray(string calldata toml, string calldata key) external pure returns (bytes[] memory);
 
-    /// Parses a string of TOML data at `key` and coerces it to `int256`.
-    function parseTomlInt(string calldata toml, string calldata key) external pure returns (int256);
+    /// Parses a string of TOML data at `key` and coerces it to `bytes[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBytesArray(string calldata toml, string calldata key, bytes[] calldata defaultValue)
+        external
+        pure
+        returns (bytes[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes`.
+    function parseTomlBytes(string calldata toml, string calldata key) external pure returns (bytes memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `bytes`, or returns `defaultValue` if the key does not exist.
+    function parseTomlBytes(string calldata toml, string calldata key, bytes calldata defaultValue)
+        external
+        pure
+        returns (bytes memory);
 
     /// Parses a string of TOML data at `key` and coerces it to `int256[]`.
     function parseTomlIntArray(string calldata toml, string calldata key) external pure returns (int256[] memory);
 
+    /// Parses a string of TOML data at `key` and coerces it to `int256[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlIntArray(string calldata toml, string calldata key, int256[] calldata defaultValue)
+        external
+        pure
+        returns (int256[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256`.
+    function parseTomlInt(string calldata toml, string calldata key) external pure returns (int256);
+
+    /// Parses a string of TOML data at `key` and coerces it to `int256`, or returns `defaultValue` if the key does not exist.
+    function parseTomlInt(string calldata toml, string calldata key, int256 defaultValue) external pure returns (int256);
+
     /// Returns an array of all the keys in a TOML table.
     function parseTomlKeys(string calldata toml, string calldata key) external pure returns (string[] memory keys);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string[]`.
+    function parseTomlStringArray(string calldata toml, string calldata key) external pure returns (string[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `string[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlStringArray(string calldata toml, string calldata key, string[] calldata defaultValue)
+        external
+        pure
+        returns (string[] memory);
 
     /// Parses a string of TOML data at `key` and coerces it to `string`.
     function parseTomlString(string calldata toml, string calldata key) external pure returns (string memory);
 
-    /// Parses a string of TOML data at `key` and coerces it to `string[]`.
-    function parseTomlStringArray(string calldata toml, string calldata key) external pure returns (string[] memory);
+    /// Parses a string of TOML data at `key` and coerces it to `string`, or returns `defaultValue` if the key does not exist.
+    function parseTomlString(string calldata toml, string calldata key, string calldata defaultValue)
+        external
+        pure
+        returns (string memory);
 
     /// Parses a string of TOML data at `key` and coerces it to type array corresponding to `typeDescription`.
     function parseTomlTypeArray(string calldata toml, string calldata key, string calldata typeDescription)
@@ -1967,11 +2111,23 @@ interface VmSafe {
         pure
         returns (bytes memory);
 
+    /// Parses a string of TOML data at `key` and coerces it to `uint256[]`.
+    function parseTomlUintArray(string calldata toml, string calldata key) external pure returns (uint256[] memory);
+
+    /// Parses a string of TOML data at `key` and coerces it to `uint256[]`, or returns `defaultValue` if the key does not exist.
+    function parseTomlUintArray(string calldata toml, string calldata key, uint256[] calldata defaultValue)
+        external
+        pure
+        returns (uint256[] memory);
+
     /// Parses a string of TOML data at `key` and coerces it to `uint256`.
     function parseTomlUint(string calldata toml, string calldata key) external pure returns (uint256);
 
-    /// Parses a string of TOML data at `key` and coerces it to `uint256[]`.
-    function parseTomlUintArray(string calldata toml, string calldata key) external pure returns (uint256[] memory);
+    /// Parses a string of TOML data at `key` and coerces it to `uint256`, or returns `defaultValue` if the key does not exist.
+    function parseTomlUint(string calldata toml, string calldata key, uint256 defaultValue)
+        external
+        pure
+        returns (uint256);
 
     /// ABI-encodes a TOML table.
     function parseToml(string calldata toml) external pure returns (bytes memory abiEncodedData);
@@ -2332,6 +2488,50 @@ interface Vm is VmSafe {
 
     /// Reads the current `msg.sender` and `tx.origin` from state and reports if there is any active caller modification.
     function readCallers() external view returns (CallerMode callerMode, address msgSender, address txOrigin);
+
+    /// Registers a callback after exact mapping-element SSTOREs rooted at `rootSlot` in `target`'s effective storage account.
+    /// The callback signature is `function(address account, bytes32 computedSlot, bytes32 rootSlot,
+    /// bytes32[] keys, bytes32 oldValue, bytes32 newValue) external`; keys are raw words in
+    /// root-to-leaf order. Only complete 64-byte Keccak chains observed after the latest mapping
+    /// hook registration for `target` in the current top-level execution match; provenance is
+    /// cleared between top-level executions. Resolution follows the complete chain to its terminal
+    /// root and ignores registered intermediate hashes. Offsets, incomplete or unknown chains,
+    /// hashes computed before registration or in an earlier top-level execution, and source layouts
+    /// do not match. The contract that calls this cheatcode receives the callback. Registration
+    /// persists across reverts and replaces the same target/root callback; callback state rolls back
+    /// with its enclosing context, callback reverts propagate, and hooks are suppressed throughout
+    /// callback subtrees. The callback must authenticate `msg.sender == address(vm)` to prevent
+    /// external spoofing. Raw and mapping SSTORE hooks conflict per target, while multiple mapping
+    /// roots may be registered.
+    function registerMappingSstoreHook(address target, bytes32 rootSlot, bytes4 callback) external;
+
+    /// Registers a callback invoked after each SLOAD against `target`'s effective storage account,
+    /// including when its code runs by delegatecall.
+    /// The callback must have the signature `function(address,bytes32,bytes32) external`.
+    /// Registering another callback for the same target and access kind replaces it. Registration
+    /// survives EVM reverts, while callback state follows the enclosing EVM context and rolls back
+    /// with it. Callback reverts propagate through the storage operation. Hooks are suppressed in
+    /// the callback and its entire call subtree. The callback must authenticate
+    /// `msg.sender == address(vm)` to prevent external spoofing. Callback execution is hidden from
+    /// mocks, expectations, log recording, and storage-access recording. It does not inherit
+    /// staticness. The callback runs as an ordinary call frame and consumes one of the 1024
+    /// protocol call-depth slots; a load at the maximum legal call depth can have its callback
+    /// rejected as too deep, propagating as a failure of the load.
+    function registerSloadHook(address target, bytes4 callback) external;
+
+    /// Registers a callback invoked after each SSTORE against `target`'s effective storage account,
+    /// including when its code runs by delegatecall.
+    /// The callback must have the signature `function(address,bytes32,bytes32,bytes32) external`.
+    /// Registering another callback for the same target and access kind replaces it. Registration
+    /// survives EVM reverts, while callback state follows the enclosing EVM context and rolls back
+    /// with it. Callback reverts propagate through the storage operation. Hooks are suppressed in
+    /// the callback and its entire call subtree. The callback must authenticate
+    /// `msg.sender == address(vm)` to prevent external spoofing. Callback execution is hidden from
+    /// mocks, expectations, log recording, and storage-access recording. It does not inherit
+    /// staticness. The callback runs as an ordinary call frame and consumes one of the 1024
+    /// protocol call-depth slots; a store at the maximum legal call depth can have its callback
+    /// rejected as too deep, propagating as a failure of the store.
+    function registerSstoreHook(address target, bytes4 callback) external;
 
     /// Resets the nonce of an account to 0 for EOAs and 1 for contract accounts.
     function resetNonce(address account) external;
