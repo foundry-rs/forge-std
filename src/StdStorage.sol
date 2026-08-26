@@ -177,6 +177,7 @@ library stdStorageSafe {
                 callData.shortBytesStorageValue = _parseShortBytesReturn(rdat);
             }
             (callData.reads,) = vm.accesses(address(who));
+            vm.stopRecord();
         }
 
         if (callData.reads.length == 0) {

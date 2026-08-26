@@ -21,6 +21,16 @@ contract StdStorageTest is Test {
         assertEq(uint256(0), stdstore.target(address(test)).sig("exists()").find());
     }
 
+    function test_StorageFindStopsRecording() public {
+        stdstore.target(address(test)).sig("exists()").find();
+        (bytes32[] memory readsBefore,) = vm.accesses(address(test));
+
+        test.map_addr(address(this));
+        (bytes32[] memory readsAfter,) = vm.accesses(address(test));
+
+        assertEq(readsAfter, readsBefore);
+    }
+
     function test_StorageExtraSload() public {
         assertEq(16, stdstore.target(address(test)).sig(test.extra_sload.selector).find());
     }
