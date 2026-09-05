@@ -296,6 +296,31 @@ contract StdStorageTest is Test {
         assertEq(val, type(int256).min);
     }
 
+    // A getter returning a signed type narrower than 256 bits ABI-encodes the value
+    // sign-extended, while the slot holds only the field's own bits. Before this was handled,
+    // `find` matched neither and reverted with "Slot(s) not found."
+    function test_StorageReadIntPackedNegative() public {
+        int256 val = stdstore.enable_packed_slots().target(address(test)).sig(test.tJ.selector).read_int();
+        assertEq(val, -5);
+    }
+
+    function test_StorageReadIntPackedPositiveSibling() public {
+        uint256 val = stdstore.enable_packed_slots().target(address(test)).sig(test.tK.selector).read_uint();
+        assertEq(val, 7);
+    }
+
+    function test_StorageReadIntSoloNegative() public {
+        int256 val = stdstore.enable_packed_slots().target(address(test)).sig(test.tSolo.selector).read_int();
+        assertEq(val, -1);
+    }
+
+    function test_StorageWriteIntPackedNegative() public {
+        stdstore.enable_packed_slots().target(address(test)).sig(test.tJ.selector).checked_write_int(-42);
+        assertEq(test.tJ(), -42);
+        // the neighbour sharing the slot is untouched
+        assertEq(test.tK(), 7);
+    }
+
     function testFuzz_Packed(uint256 val, uint8 elemToGet) public {
         // This function tries an assortment of packed slots, shifts meaning number of elements
         // that are packed. Shiftsizes are the size of each element, i.e. 8 means a data type that is 8 bits, 16 == 16 bits, etc.
@@ -532,6 +557,14 @@ contract StorageTest {
 
     // Array with length matching values of elements.
     uint256[] public edgeCaseArray = [3, 3, 3];
+
+    // Signed fields narrower than 256 bits. `tJ`/`tK` share a slot; `tSolo` is pushed into a
+    // slot of its own by the `uint256` that follows it.
+    int64 public tJ = -5;
+    uint64 public tK = 7;
+
+    int8 public tSolo = -1;
+    uint256 public tAfterSolo = 1;
 
     constructor() {
         basic = UnpackedStruct({a: 1337, b: 1337});

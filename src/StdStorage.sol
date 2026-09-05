@@ -211,7 +211,16 @@ library stdStorageSafe {
                 // Check that value between found offsets is equal to the current call result
                 uint256 curVal = (uint256(prev) & getMaskByOffsets(offsetLeft, offsetRight)) >> offsetRight;
 
-                if (!shortBytesFound && uint256(callData.result) != curVal) {
+                // A getter whose return type is a signed integer narrower than 256 bits
+                // ABI-encodes its value sign-extended, while storage holds only the field's own
+                // bits, so a negative value never matches the slot that holds it. Compare the
+                // return truncated to the field's width. For a full-width field the mask is all
+                // ones and this is a no-op.
+                if (
+                    !shortBytesFound
+                        && (uint256(callData.result) & (getMaskByOffsets(offsetLeft, offsetRight) >> offsetRight))
+                            != curVal
+                ) {
                     continue;
                 }
 
@@ -320,8 +329,19 @@ library stdStorageSafe {
     }
 
     /// @notice Reads the found storage slot value as int256.
+    /// @dev A field narrower than 256 bits is stored as its own bits only, so the value is
+    /// sign-extended back to `int256` from the field's width. Full-width fields are unchanged.
     function read_int(StdStorage storage self) internal returns (int256) {
-        return abi.decode(_read(self), (int256));
+        FindData storage data = find(self, false);
+        uint256 offsetLeft = data.offsetLeft;
+        uint256 offsetRight = data.offsetRight;
+        uint256 value = (uint256(vm.load(self._target, bytes32(data.slot))) & getMaskByOffsets(offsetLeft, offsetRight))
+            >> offsetRight;
+        clear(self);
+
+        uint256 shift = offsetLeft + offsetRight;
+        if (shift == 0) return int256(value);
+        return (int256(value) << shift) >> shift;
     }
 
     /// @notice Returns the parent mapping slot index and the key used to reach the found slot.
@@ -520,10 +540,19 @@ library stdStorage {
             find(self, false);
         }
         FindData storage data = self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))];
+        uint256 valueToStore = uint256(set);
         if ((data.offsetLeft + data.offsetRight) > 0) {
-            uint256 maxVal = 2 ** (256 - (data.offsetLeft + data.offsetRight));
+            uint256 width = 256 - (data.offsetLeft + data.offsetRight);
+            uint256 maxVal = 2 ** width;
+            // `checked_write_int` sign-extends a negative value to 256 bits, which does not fit
+            // the field even when the number it represents does. Narrow it back when the whole
+            // extension is consistent; the getter still returns the sign-extended form, so the
+            // verification below is unaffected.
+            if (valueToStore >= maxVal && (int256(valueToStore) >> (width - 1)) == -1) {
+                valueToStore &= maxVal - 1;
+            }
             require(
-                uint256(set) < maxVal,
+                valueToStore < maxVal,
                 string(
                     abi.encodePacked(
                         "stdStorage checked_write(StdStorage): Packed slot. We can't fit value greater than ",
@@ -533,7 +562,7 @@ library stdStorage {
             );
         }
         bytes32 curVal = vm.load(who, bytes32(data.slot));
-        bytes32 valToSet = stdStorageSafe.getUpdatedSlotValue(curVal, uint256(set), data.offsetLeft, data.offsetRight);
+        bytes32 valToSet = stdStorageSafe.getUpdatedSlotValue(curVal, valueToStore, data.offsetLeft, data.offsetRight);
 
         vm.store(who, bytes32(data.slot), valToSet);
 
