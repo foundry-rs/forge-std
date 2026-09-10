@@ -254,19 +254,30 @@ interface VmSafe {
         bool reverted;
     }
 
-    /// Gas used. Returned by `lastCallGas` and `lastFrameGas`.
+    /// Gas measured for the last completed call or create frame, from the callee's perspective,
+    /// including nested execution. Isolated transactions include intrinsic gas.
+    /// Regular gas (the EIP's execution gas) and EIP-8037 state gas are reported separately.
+    /// Without EIP-8037, state creation uses the ordinary gas schedule and `gasStateUsed` is zero.
+    /// See <https://eips.ethereum.org/EIPS/eip-8037> and <https://getfoundry.sh/reference/cheatcodes/last-frame-gas>.
     struct Gas {
-        // The gas limit of the call.
+        // Regular gas available to the frame at entry. Excludes the EIP-8037 state gas reservoir.
         uint64 gasLimit;
-        // The total regular gas used.
+        // Regular gas spent by the frame, before refunds. Excludes EIP-8037 state gas; see `gasStateUsed`.
+        // With isolation, includes intrinsic gas and the regular-gas calldata floor.
         uint64 gasTotalUsed;
-        // DEPRECATED: The amount of gas used for memory expansion. Ref: <https://github.com/foundry-rs/foundry/pull/7934#pullrequestreview-2069236939>
+        // DEPRECATED: always zero. Memory expansion costs are included in `gasTotalUsed`.
+        // Ref: <https://github.com/foundry-rs/foundry/pull/7934#pullrequestreview-2069236939>.
         uint64 gasMemoryUsed;
-        // The amount of gas refunded.
+        // Ordinary refund counter before transaction settlement; finalized for an isolated transaction.
+        // Can be negative in nested frames. State gas refills are already netted into `gasStateUsed`.
         int64 gasRefunded;
-        // The amount of gas remaining.
+        // Regular gas left at frame end. Excludes the EIP-8037 state gas reservoir.
+        // State charges can draw from this allowance, so `gasLimit - gasRemaining` can include state gas.
         uint64 gasRemaining;
-        // The net state gas used. Zero for reverted or halted frames; may be negative within a nested frame when state gas is refunded.
+        // Net EIP-8037 state gas: state creation charges minus refills, including nested execution.
+        // Zero without EIP-8037 or if the frame reverted or halted. Can be negative when the frame
+        // undoes state created earlier in the same transaction; use signed arithmetic with `gasTotalUsed`.
+        // Their sum measures net consumption, not the gas limit needed to execute.
         int64 gasStateUsed;
     }
 
@@ -328,7 +339,7 @@ interface VmSafe {
     struct PotentialRevert {
         // The allowed origin of the revert opcode; address(0) allows reverts from any address
         address reverter;
-        // When true, only matches on the beginning of the revert data, otherwise, matches on entire revert data
+        // When true, only matches on the first 4 bytes (usually the selector) of the revert data, otherwise, matches on entire revert data
         bool partialMatch;
         // The data to use to match encountered reverts
         bytes revertData;
@@ -403,6 +414,13 @@ interface VmSafe {
         uint256 pointZ2
     ) external pure returns (uint256 resultX, uint256 resultY, uint256 resultZ);
 
+    /// Converts the secp256k1 affine point `(pointX, pointY)` to projective coordinates.
+    /// The point at infinity is converted from `(0, 0)` to `(0, 1, 0)`.
+    function ecAffineToProjective(uint256 pointX, uint256 pointY)
+        external
+        pure
+        returns (uint256 resultX, uint256 resultY, uint256 resultZ);
+
     /// Multiplies the secp256k1 affine point `(pointX, pointY)` by `scalar`.
     /// The scalar is reduced modulo the secp256k1 group order.
     /// The point at infinity is represented as `(0, 0)`.
@@ -419,6 +437,13 @@ interface VmSafe {
         external
         pure
         returns (uint256 resultX, uint256 resultY, uint256 resultZ);
+
+    /// Converts the secp256k1 projective point `(pointX, pointY, pointZ)` to affine coordinates.
+    /// The point at infinity is converted from `(0, y, 0)` for any non-zero `y` to `(0, 0)`.
+    function ecProjectiveToAffine(uint256 pointX, uint256 pointY, uint256 pointZ)
+        external
+        pure
+        returns (uint256 resultX, uint256 resultY);
 
     /// Derives the Ed25519 public key from a private key.
     function publicKeyEd25519(bytes32 privateKey) external pure returns (bytes32 publicKey);
@@ -795,7 +820,9 @@ interface VmSafe {
     /// Returns true if isolated test execution is enabled.
     function isIsolateMode() external view returns (bool result);
 
-    /// Gets the gas used in the last call or create from the callee perspective.
+    /// Gets gas measurements for the last completed call or create, from the callee's perspective.
+    /// Unlike `lastCallGas`, CREATE and CREATE2 frames are recorded too. Cheatcode calls are never recorded.
+    /// See `Gas` for field semantics and <https://getfoundry.sh/reference/cheatcodes/last-frame-gas>.
     function lastFrameGas() external view returns (Gas memory gas);
 
     /// Loads a storage slot from an address.
@@ -860,7 +887,9 @@ interface VmSafe {
     function stopRecord() external;
 
     /// DEPRECATED: use `lastFrameGas` instead.
-    /// Gets the gas used in the last call from the callee perspective.
+    /// Gets gas measurements for the last completed call, from the callee's perspective.
+    /// Unlike `lastFrameGas`, CREATE and CREATE2 frames are not recorded; calls made by a constructor are.
+    /// See `Gas` for field semantics.
     function lastCallGas() external view returns (Gas memory gas);
 
     // ======== Filesystem ========
@@ -955,6 +984,15 @@ interface VmSafe {
 
     /// Performs a foreign function call via the terminal.
     function ffi(string[] calldata commandInput) external returns (bytes memory result);
+
+    /// Performs a foreign function call via the terminal and decodes the output as hex bytes.
+    function ffiBytes(string[] calldata commandInput) external returns (bytes memory result);
+
+    /// Performs a foreign function call via the terminal and returns the output as a string.
+    function ffiString(string[] calldata commandInput) external returns (string memory result);
+
+    /// Performs a foreign function call via the terminal and parses the output as a `uint256`.
+    function ffiUint(string[] calldata commandInput) external returns (uint256 result);
 
     /// Given a path, query the file system to get information about a file, directory, etc.
     function fsMetadata(string calldata path) external view returns (FsMetadata memory metadata);
@@ -2608,9 +2646,13 @@ interface Vm is VmSafe {
     function setTip20LogoURI(address token, string calldata newLogoURI) external;
 
     /// Snapshot capture the gas usage of the last call or create by name from the callee perspective.
+    /// Without isolation, measures regular counter consumption, including spillover but excluding reservoir-funded state gas.
+    /// Isolated frames with zero net state gas use receipt gas; see <https://getfoundry.sh/reference/cheatcodes/gas-snapshots>.
     function snapshotGasLastFrame(string calldata name) external returns (uint256 gasUsed);
 
     /// Snapshot capture the gas usage of the last call or create by name in a group from the callee perspective.
+    /// Without isolation, measures regular counter consumption, including spillover but excluding reservoir-funded state gas.
+    /// Isolated frames with zero net state gas use receipt gas; see <https://getfoundry.sh/reference/cheatcodes/gas-snapshots>.
     function snapshotGasLastFrame(string calldata group, string calldata name) external returns (uint256 gasUsed);
 
     /// Snapshot the current state of the evm.
@@ -2639,22 +2681,27 @@ interface Vm is VmSafe {
 
     /// Start a snapshot capture of the current gas usage by name.
     /// The group name is derived from the contract name.
+    /// Measures gas consumed from the regular counter, including state spillover but excluding reservoir-funded state gas.
     function startSnapshotGas(string calldata name) external;
 
     /// Start a snapshot capture of the current gas usage by name in a group.
+    /// Measures gas consumed from the regular counter, including state spillover but excluding reservoir-funded state gas.
     function startSnapshotGas(string calldata group, string calldata name) external;
 
     /// Resets subsequent calls' `msg.sender` to be `address(this)`.
     function stopPrank() external;
 
     /// Stop the snapshot capture of the current gas by latest snapshot name, capturing the gas used since the start.
+    /// Measures gas consumed from the regular counter, including state spillover but excluding reservoir-funded state gas.
     function stopSnapshotGas() external returns (uint256 gasUsed);
 
     /// Stop the snapshot capture of the current gas usage by name, capturing the gas used since the start.
     /// The group name is derived from the contract name.
+    /// Measures gas consumed from the regular counter, including state spillover but excluding reservoir-funded state gas.
     function stopSnapshotGas(string calldata name) external returns (uint256 gasUsed);
 
     /// Stop the snapshot capture of the current gas usage by name in a group, capturing the gas used since the start.
+    /// Measures gas consumed from the regular counter, including state spillover but excluding reservoir-funded state gas.
     function stopSnapshotGas(string calldata group, string calldata name) external returns (uint256 gasUsed);
 
     /// Stores a value to an address' storage slot.
@@ -2689,10 +2736,14 @@ interface Vm is VmSafe {
 
     /// DEPRECATED: use `snapshotGasLastFrame` instead.
     /// Snapshot capture the gas usage of the last call by name from the callee perspective.
+    /// Without isolation, measures regular counter consumption, including spillover but excluding reservoir-funded state gas.
+    /// Isolated frames with zero net state gas use receipt gas; see <https://getfoundry.sh/reference/cheatcodes/gas-snapshots>.
     function snapshotGasLastCall(string calldata name) external returns (uint256 gasUsed);
 
     /// DEPRECATED: use `snapshotGasLastFrame` instead.
     /// Snapshot capture the gas usage of the last call by name in a group from the callee perspective.
+    /// Without isolation, measures regular counter consumption, including spillover but excluding reservoir-funded state gas.
+    /// Isolated frames with zero net state gas use receipt gas; see <https://getfoundry.sh/reference/cheatcodes/gas-snapshots>.
     function snapshotGasLastCall(string calldata group, string calldata name) external returns (uint256 gasUsed);
 
     /// `snapshot` is being deprecated in favor of `snapshotState`. It will be removed in future versions.
