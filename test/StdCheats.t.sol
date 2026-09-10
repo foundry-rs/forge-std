@@ -122,6 +122,21 @@ contract StdCheatsTest is Test {
         assertEq(barToken.totalSupply(), 10000e18);
     }
 
+    function test_DealTokenPackedBalance() public {
+        // Balance packed in the low 128 bits of a storage word (USDC / sUSD class).
+        PackedBalanceToken token = new PackedBalanceToken();
+        address other = address(0xBEEF);
+        token.seed(address(this), 100, 0xdead);
+        token.seed(other, 50, 0xbeef);
+
+        deal(address(token), address(this), 999);
+        assertEq(token.balanceOf(address(this)), 999);
+        // high bits must be preserved
+        assertEq(token.other(address(this)), 0xdead);
+        assertEq(token.balanceOf(other), 50);
+        assertEq(token.other(other), 0xbeef);
+    }
+
     function test_DealERC1155Token() public {
         BarERC1155 barToken = new BarERC1155();
         address bar = address(barToken);
@@ -670,6 +685,24 @@ contract BarERC721 {
 
     mapping(uint256 => address) private _owners;
     mapping(address => uint256) private _balances;
+}
+
+/// ERC20-like balance packed with adjacent metadata in the same slot (low 128 = balance).
+contract PackedBalanceToken {
+    // layout per address: [other:128][balance:128]
+    mapping(address => uint256) private _slot;
+
+    function seed(address account, uint128 bal, uint128 meta) external {
+        _slot[account] = uint256(bal) | (uint256(meta) << 128);
+    }
+
+    function balanceOf(address account) external view returns (uint256) {
+        return uint128(_slot[account]);
+    }
+
+    function other(address account) external view returns (uint256) {
+        return uint256(uint128(_slot[account] >> 128));
+    }
 }
 
 contract RevertingContract {
