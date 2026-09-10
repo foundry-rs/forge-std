@@ -765,6 +765,13 @@ interface VmSafe {
     /// Gets all the recorded logs, in JSON format.
     function getRecordedLogsJson() external view returns (string memory logsJson);
 
+    /// Gets the current `block.slotnum`.
+    /// Use this instead of `block.slotnum` after `vm.rollSlot`, as the compiler assumes
+    /// `block.slotnum` is constant across a transaction and may optimize repeated reads away.
+    /// Not available on EVM versions before Amsterdam.
+    /// If used on unsupported EVM versions it will revert.
+    function getSlotNumber() external view returns (uint64 slotNumber);
+
     /// Returns state diffs from current `vm.startStateDiffRecording` session.
     function getStateDiff() external view returns (string memory diff);
 
@@ -2573,6 +2580,11 @@ interface Vm is VmSafe {
 
     /// Updates the given fork to block number of the given transaction and replays all transaction mined before it in the block.
     function rollFork(uint256 forkId, bytes32 txHash) external;
+
+    /// Sets `block.slotnum` without changing the block number or timestamp.
+    /// Not available on EVM versions before Amsterdam.
+    /// If used on unsupported EVM versions it will revert.
+    function rollSlot(uint64 newSlotNumber) external;
 
     /// Takes a fork identifier created by `createFork` and sets the corresponding forked state as active.
     function selectFork(uint256 forkId) external;
