@@ -2,7 +2,7 @@
 
 Forge Standard Library is a collection of helpful contracts and libraries for use with [Forge and Foundry](https://github.com/foundry-rs/foundry). It leverages Forge's cheatcodes to make writing tests easier and faster, while improving the UX of cheatcodes.
 
-**Learn how to use Forge-Std with the [📖 Foundry Book (Forge-Std Guide)](https://getfoundry.sh/reference/forge-std/overview/).**
+**Learn how to use Forge-Std with the [📖 Foundry Book](https://getfoundry.sh/) and [Forge Repository](https://github.com/foundry-rs/foundry)(https://getfoundry.sh/reference/forge-std/overview/).**
 
 ## Install
 
