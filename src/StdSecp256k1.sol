@@ -7,9 +7,17 @@ pragma solidity >=0.8.13 <0.9.0;
 /// @dev Curve parameters taken from:
 /// - https://en.bitcoin.it/wiki/Secp256k1
 /// - https://github.com/ethereum/go-ethereum/blob/v1.17.5/crypto/secp256k1/curve.go#L267
-/// @dev Projective coordinates are homogeneous `(X / Z, Y / Z)`, not Jacobian `(X / Z², Y / Z³)`.
-/// Affine infinity is `(0, 0)`; projective infinity is `(0, y, 0)` with `y ∈ [1, P)`
-/// (normalized `(0, 1, 0)`), finite `(x, y, 1)`.
+/// @dev Coordinate representations:
+/// The affine point at infinity is represented as `(0, 0)`.
+/// Projective inputs use homogeneous coordinates: `(X, Y, Z)` represents the affine point
+/// `(X / Z, Y / Z)` over the secp256k1 base field. These are not Jacobian coordinates,
+/// which use `(X / Z², Y / Z³)`.
+/// For projective inputs, the point at infinity is `(0, y, 0)` for any non-zero `y`.
+/// Projective results are normalized: finite points return `(x, y, 1)`, and the point
+/// at infinity returns `(0, 1, 0)`.
+/// `Vm.ecAffineToProjective` maps `(0, 0)` to `(0, 1, 0)` and finite points to `(x, y, 1)`.
+/// `Vm.ecProjectiveToAffine` maps projective points at infinity to `(0, 0)` and normalizes
+/// finite points to affine coordinates.
 library StdSecp256k1 {
     /// @dev Curve parameter `a = 0`.
     uint256 internal constant A = 0x0000000000000000000000000000000000000000000000000000000000000000;
