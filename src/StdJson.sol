@@ -34,6 +34,10 @@ library stdJson {
 
     /// @notice ABI-encodes the JSON value selected by `key`.
     /// @dev `key` uses the same selector syntax as `vm.parseJson*`, such as `.a` or `$`.
+    /// @dev The value's type is inferred, not declared. A hex string of exactly 20 bytes is encoded
+    /// as an `address` and one of exactly 32 bytes as a `bytes32`; every other length is encoded as
+    /// dynamic `bytes`. Decoding those two lengths as `bytes` therefore reverts, so prefer
+    /// `readBytes` when the value is meant to be byte data.
     function parseRaw(string memory json, string memory key) internal pure returns (bytes memory) {
         return vm.parseJson(json, key);
     }
