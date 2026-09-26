@@ -16,4 +16,4 @@ jobs:
       contents: read
       id-token: write
     with:
-      secure-runner-fail-on-violation: false
+      ensure-secure-runner: false
