@@ -119,6 +119,34 @@ interface VmSafe {
         bool removed;
     }
 
+    /// A Merkle proof for a single storage slot. Part of `EthGetProof`.
+    struct EthStorageProof {
+        // The storage slot.
+        bytes32 key;
+        // The value stored at the slot.
+        uint256 value;
+        // The RLP-encoded trie nodes from the storage root to the slot, root first.
+        bytes[] proof;
+    }
+
+    /// An EIP-1186 account and storage proof. Returned by `eth_getProof`.
+    struct EthGetProof {
+        // The address of the account.
+        address account;
+        // The balance of the account.
+        uint256 balance;
+        // The hash of the account's code.
+        bytes32 codeHash;
+        // The nonce of the account.
+        uint64 nonce;
+        // The root of the account's storage trie.
+        bytes32 storageHash;
+        // The RLP-encoded trie nodes from the state root to the account, root first.
+        bytes[] accountProof;
+        // The proofs for the requested storage slots, in the order they were requested.
+        EthStorageProof[] storageProof;
+    }
+
     /// A single entry in a directory listing. Returned by `readDir`.
     struct DirEntry {
         // The error message, if any.
@@ -732,6 +760,13 @@ interface VmSafe {
         external
         view
         returns (EthGetLogs[] memory logs);
+
+    /// Gets the EIP-1186 account and storage proof of `target` at `blockNumber` from the active fork.
+    /// The proof is fetched from the fork's RPC endpoint and does not reflect local state changes.
+    function eth_getProof(address target, bytes32[] calldata slots, uint256 blockNumber)
+        external
+        view
+        returns (EthGetProof memory proof);
 
     /// Gets the current `block.blobbasefee`.
     /// You should use this instead of `block.blobbasefee` if you use `vm.blobBaseFee`, as `block.blobbasefee` is assumed to be constant across a transaction,
@@ -2421,7 +2456,7 @@ interface Vm is VmSafe {
     /// Sets `block.basefee`.
     function fee(uint256 newBasefee) external;
 
-    /// Gets the blockhashes from the current transaction.
+    /// Gets the blobhashes from the current transaction.
     /// Not available on EVM versions before Cancun.
     /// If used on unsupported EVM versions it will revert.
     function getBlobhashes() external view returns (bytes32[] memory hashes);
