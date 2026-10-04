@@ -827,8 +827,8 @@ abstract contract StdCheats is StdCheatsSafe {
         (, bytes memory balData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 prevBal = abi.decode(balData, (uint256));
 
-        // update balance
-        _stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(give);
+        // update balance (packed-aware for tokens like USDC / sUSD that pack balance into a slot)
+        _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(to).checked_write(give);
 
         // update total supply
         if (adjust) {
@@ -850,7 +850,7 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 prevBal = abi.decode(balData, (uint256));
 
         // update balance
-        _stdstore.target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(give);
+        _stdstore.enable_packed_slots().target(token).sig(0x00fdd58e).with_key(to).with_key(id).checked_write(give);
 
         // update total supply
         if (adjust) {
@@ -884,9 +884,10 @@ abstract contract StdCheats is StdCheatsSafe {
         (, bytes memory toBalData) = token.staticcall(abi.encodeWithSelector(0x70a08231, to));
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
-        // update balances
-        _stdstore.target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
-        _stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
+        // update balances (packed-aware)
+        _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address)))
+            .checked_write(--fromPrevBal);
+        _stdstore.enable_packed_slots().target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
 
         // update owner
         _stdstore.target(token).sig(0x6352211e).with_key(id).checked_write(to);
