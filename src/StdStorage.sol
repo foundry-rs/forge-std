@@ -117,6 +117,19 @@ library stdStorageSafe {
         return (success && (prevReturnValue != newReturnValue));
     }
 
+    /// @notice Returns whether any slot in `reads` changes the return value of the configured target call.
+    /// @dev Only used after a search fails, to tell "none of the slots we read matter" apart from
+    /// "a slot matters, but its stored value is transformed before being returned" (e.g. rebasing tokens).
+    function _anySlotAffectsCall(StdStorage storage self, bytes32[] memory reads) private returns (bool) {
+        for (uint256 i = reads.length; i > 0;) {
+            --i;
+            if (checkSlotMutatesCall(self, reads[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// @notice Searches for the bit offset of the packed variable within `slot` from the left or right side.
     function findOffset(StdStorage storage self, bytes32 slot, bool left) internal returns (bool, uint256) {
         for (uint256 offset = 0; offset < 256; offset++) {
@@ -231,10 +244,19 @@ library stdStorageSafe {
             }
         }
 
-        require(
-            self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found,
-            "stdStorage find(StdStorage): Slot(s) not found."
-        );
+        if (!self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found) {
+            // Distinguish "none of the slots we read matter" from "a slot matters but never
+            // holds the returned value", which means the target transforms the stored value
+            // before returning it. Skipped for short bytes/string returns, where a word-wise
+            // comparison does not apply and a mismatch says nothing about how the value is
+            // produced. Only reached on the failing path, so this costs nothing otherwise.
+            if (callData.shortBytesStorageValue == bytes32(0) && _anySlotAffectsCall(self, callData.reads)) {
+                revert(
+                    "stdStorage find(StdStorage): Slot(s) affect the return value but none hold it. Target may derive the value (e.g. rebasing token) or pack it (try enable_packed_slots())."
+                );
+            }
+            revert("stdStorage find(StdStorage): Slot(s) not found.");
+        }
 
         if (_clear) {
             clear(self);
