@@ -18,6 +18,14 @@ abstract contract Config is CommonBase {
     /// @dev A mapping from a chain ID to its initialized fork ID.
     mapping(uint256 => uint256) internal forkOf;
 
+    // -- GETTER FUNCTIONS -----------------------------------------------------
+
+    /// @notice Returns the chain IDs for which forks have been created.
+    /// @dev Only populated after calling `_loadConfigAndForks`.
+    function getForkedChainIds() public view returns (uint256[] memory) {
+        return chainIds;
+    }
+
     // -- HELPER FUNCTIONS -----------------------------------------------------
 
     /// @notice  Loads configuration from a file.
