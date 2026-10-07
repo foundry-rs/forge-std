@@ -327,7 +327,8 @@ abstract contract StdCheatsSafe {
         // address), but the same rationale for excluding them applies so we include those too.
 
         // These are reserved by Ethereum and may be on all EVM-compatible chains.
-        vm.assume(addr < address(0x1) || addr > address(0xff));
+        // 0x100 is P256VERIFY (EIP-7951).
+        vm.assume(addr < address(0x1) || addr > address(0x100));
 
         // forgefmt: disable-start
         if (chainId == 10 || chainId == 420 || chainId == 11155420) {
