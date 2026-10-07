@@ -401,9 +401,17 @@ contract StdCheatsTest is Test {
     function testFuzz_AssumeNotPrecompile(address addr) external {
         assumeNotPrecompile(addr, getChain("optimism_sepolia").chainId);
         assertTrue(
-            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
+            addr < address(1) || (addr > address(0x100) && addr < address(0x4200000000000000000000000000000000000000))
                 || addr > address(0x4200000000000000000000000000000000000800)
         );
+    }
+
+    function test_AssumeNotPrecompileP256Verify() external {
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
+
+        // P256VERIFY (EIP-7951)
+        vm.expectRevert();
+        stdCheatsMock.exposedAssumeNotPrecompile(address(0x100));
     }
 
     function testFuzz_AssumeNotForgeAddress(address addr) external pure {
@@ -507,6 +515,10 @@ contract StdCheatsMock is StdCheats {
     // We deploy a mock version so we can properly test expected reverts.
     function exposedAssumeNotBlacklisted(address token, address addr) external view {
         return assumeNotBlacklisted(token, addr);
+    }
+
+    function exposedAssumeNotPrecompile(address addr) external pure {
+        assumeNotPrecompile(addr);
     }
 }
 
