@@ -65,11 +65,12 @@ library StdSecp256k1 {
         return (GX, GY, 1);
     }
 
-    /// @notice Returns whether the affine point `(x, y)` is on the curve `y² ≡ x³ + 7 (mod P)`.
+    /// @notice Returns whether the affine point `(x, y)` is on the curve `y² ≡ x³ + 7 (mod P)`
+    /// with `x` and `y` in `[0, P)`.
     /// @dev Uses `mulmod`/`addmod` for field arithmetic.
     function isOnCurve(uint256 x, uint256 y) internal pure returns (bool) {
         // https://github.com/ethereum/go-ethereum/blob/v1.17.5/crypto/secp256k1/curve.go#L75
-        return mulmod(y, y, P) == addmod(mulmod(x, mulmod(x, x, P), P), B, P);
+        return x < P && y < P && mulmod(y, y, P) == addmod(mulmod(x, mulmod(x, x, P), P), B, P);
     }
 
     /// @notice Returns whether `scalar` is canonically valid (`scalar` in `[0, N)`).
