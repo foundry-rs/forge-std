@@ -151,6 +151,17 @@ contract StdCheatsTest is Test {
         assertEq(barToken.balanceOf(bar), 1);
     }
 
+    function test_DealERC721SameOwnerDoesNotChangeBalance() public {
+        BarERC721 barToken = new BarERC721();
+        address owner = address(barToken);
+        uint256 balanceBefore = barToken.balanceOf(owner);
+
+        dealERC721(address(barToken), owner, 2);
+
+        assertEq(barToken.ownerOf(2), owner);
+        assertEq(barToken.balanceOf(owner), balanceBefore);
+    }
+
     function test_DeployCode() public {
         address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""));
         assertEq(string(getCode(deployed)), string(getCode(address(test))));

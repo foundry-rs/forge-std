@@ -875,9 +875,11 @@ abstract contract StdCheats is StdCheatsSafe {
         (bool successMinted, bytes memory ownerData) = token.staticcall(abi.encodeWithSelector(0x6352211e, id));
         require(successMinted, "StdCheats dealERC721(address,address,uint256): id not minted.");
 
+        address owner = abi.decode(ownerData, (address));
+        if (owner == to) return;
+
         // get owner current balance
-        (, bytes memory fromBalData) =
-            token.staticcall(abi.encodeWithSelector(0x70a08231, abi.decode(ownerData, (address))));
+        (, bytes memory fromBalData) = token.staticcall(abi.encodeWithSelector(0x70a08231, owner));
         uint256 fromPrevBal = abi.decode(fromBalData, (uint256));
 
         // get new user current balance
@@ -885,7 +887,7 @@ abstract contract StdCheats is StdCheatsSafe {
         uint256 toPrevBal = abi.decode(toBalData, (uint256));
 
         // update balances
-        _stdstore.target(token).sig(0x70a08231).with_key(abi.decode(ownerData, (address))).checked_write(--fromPrevBal);
+        _stdstore.target(token).sig(0x70a08231).with_key(owner).checked_write(--fromPrevBal);
         _stdstore.target(token).sig(0x70a08231).with_key(to).checked_write(++toPrevBal);
 
         // update owner
