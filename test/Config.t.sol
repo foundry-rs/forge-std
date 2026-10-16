@@ -276,6 +276,37 @@ contract ConfigTest is Test, Config {
         vm.removeFile(testConfig);
     }
 
+    function test_writeConfigEscapesStrings() public {
+        string memory testConfig = "./test/fixtures/escape_config.t.toml";
+        vm.copyFile("./test/fixtures/config.toml", testConfig);
+        _loadConfig(testConfig, false);
+
+        // Enable writing to file bypassing the context check.
+        vm.store(address(config), bytes32(uint256(5)), bytes32(uint256(1)));
+
+        string memory quoted = 'say "hi"';
+        string memory path = "C:\\tmp\\new";
+        string memory multiline = "line one\nline two";
+
+        config.set(1, "quoted", quoted);
+        config.set(1, "path", path);
+
+        string[] memory values = new string[](2);
+        values[0] = quoted;
+        values[1] = multiline;
+        config.set(1, "escaped_array", values);
+
+        string memory content = vm.readFile(testConfig);
+        assertEq(vm.parseTomlString(content, "$.mainnet.string.quoted"), quoted);
+        assertEq(vm.parseTomlString(content, "$.mainnet.string.path"), path);
+        string[] memory onDisk = vm.parseTomlStringArray(content, "$.mainnet.string.escaped_array");
+        assertEq(onDisk.length, 2);
+        assertEq(onDisk[0], quoted);
+        assertEq(onDisk[1], multiline);
+
+        vm.removeFile(testConfig);
+    }
+
     function test_writeUpdatesBackToFile() public {
         // Create a temporary copy of the config file to avoid modifying the original.
         string memory originalConfig = "./test/fixtures/config.toml";
