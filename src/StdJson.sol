@@ -5,7 +5,9 @@ import {VmSafe} from "./Vm.sol";
 
 // Helpers for parsing and writing JSON files.
 // `key` parameters use the same selector syntax as the `vm.parseJson*` cheatcodes,
-// for example `.a` for a nested field or `$` for the root object.
+// for example `.a` for a nested field or `$` for the root object. A key that selects
+// a field must start with a dot: the bare field name is not a valid selector, so
+// `"a"` reverts while `".a"` selects the field.
 // To parse:
 // ```
 // using stdJson for string;
@@ -28,12 +30,14 @@ library stdJson {
 
     /// @notice Returns whether `key` exists in `json`.
     /// @dev `key` uses the same selector syntax as `vm.parseJson*`, such as `.a` or `$`.
+    /// A field key must start with a dot: `"a"` is not a valid selector and reverts.
     function keyExists(string memory json, string memory key) internal view returns (bool) {
         return vm.keyExistsJson(json, key);
     }
 
     /// @notice ABI-encodes the JSON value selected by `key`.
     /// @dev `key` uses the same selector syntax as `vm.parseJson*`, such as `.a` or `$`.
+    /// A field key must start with a dot: `"a"` is not a valid selector and reverts.
     /// @dev The value's type is inferred, not declared. A hex string of exactly 20 bytes is encoded
     /// as an `address` and one of exactly 32 bytes as a `bytes32`; every other length is encoded as
     /// dynamic `bytes`. Decoding those two lengths as `bytes` therefore reverts, so prefer
