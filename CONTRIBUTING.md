@@ -87,14 +87,11 @@ forge fmt --check
 forge test -vvv
 ```
 
-To make sure your changes are compatible with all compiler version targets, run the following commands:
+To make sure your changes are compatible with the minimum supported compiler version (`0.8.13`), run the following commands:
 
 ```sh
-forge build --skip test --use solc:0.6.2
-forge build --skip test --use solc:0.6.12
-forge build --skip test --use solc:0.7.0
-forge build --skip test --use solc:0.7.6
-forge build --skip test --use solc:0.8.0
+forge build --skip test --use solc:0.8.13
+forge build --skip test --use solc:0.8.13 --via-ir
 ```
 
 The CI will also ensure that the code is formatted correctly and that the tests are passing across all compiler version targets.
