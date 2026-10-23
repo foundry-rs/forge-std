@@ -53,6 +53,18 @@ contract StdSecp256k1Test is Test {
         assertFalse(StdSecp256k1.isIdentityProjective(projectiveX, projectiveY, z));
     }
 
+    function test_IsOnCurveRejectsNonCanonicalCoordinates() external pure {
+        uint256 x1 = 1;
+        uint256 y1 = 0x4218F20AE6C646B363DB68605822FB14264CA8D2587FDD6FBC750D587E76A7EE;
+        assertTrue(StdSecp256k1.isOnCurve(x1, y1));
+        assertFalse(StdSecp256k1.isOnCurve(x1 + StdSecp256k1.P, y1));
+
+        uint256 x2 = 0x1FE1E5EF3FCEB5C135AB7741333CE5A6E80D68167653F6B2B24BCBCFAAAFF507;
+        uint256 y2 = 1;
+        assertTrue(StdSecp256k1.isOnCurve(x2, y2));
+        assertFalse(StdSecp256k1.isOnCurve(x2, y2 + StdSecp256k1.P));
+    }
+
     function test_ScalarBounds() external pure {
         assertTrue(StdSecp256k1.isValidScalar(0));
         assertFalse(StdSecp256k1.isValidNonZeroScalar(0));
