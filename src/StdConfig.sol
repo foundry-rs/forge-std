@@ -40,6 +40,8 @@ contract StdConfig {
     /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `int`, `string`, `bytes`.
     uint8 private constant _NUM_TYPES = 7;
 
+    bytes16 private constant _HEX_DIGITS = "0123456789abcdef";
+
     // -- ERRORS ---------------------------------------------------------------
 
     error AlreadyInitialized(string key);
@@ -287,9 +289,37 @@ contract StdConfig {
         }
     }
 
-    /// @dev Wraps a string in double quotes for JSON compatibility.
+    /// @dev Encodes a string as a JSON string literal, escaping quotes, backslashes and control characters.
     function _quote(string memory s) private pure returns (string memory) {
-        return string.concat('"', s, '"');
+        bytes memory raw = bytes(s);
+        uint256 len = raw.length + 2;
+        for (uint256 i = 0; i < raw.length; i++) {
+            bytes1 c = raw[i];
+            if (c == '"' || c == "\\") len += 1;
+            else if (uint8(c) < 0x20) len += 5;
+        }
+
+        bytes memory out = new bytes(len);
+        uint256 n = 0;
+        out[n++] = '"';
+        for (uint256 i = 0; i < raw.length; i++) {
+            bytes1 c = raw[i];
+            if (c == '"' || c == "\\") {
+                out[n++] = "\\";
+                out[n++] = c;
+            } else if (uint8(c) < 0x20) {
+                out[n++] = "\\";
+                out[n++] = "u";
+                out[n++] = "0";
+                out[n++] = "0";
+                out[n++] = _HEX_DIGITS[uint8(c) >> 4];
+                out[n++] = _HEX_DIGITS[uint8(c) & 0x0f];
+            } else {
+                out[n++] = c;
+            }
+        }
+        out[n] = '"';
+        return string(out);
     }
 
     /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
