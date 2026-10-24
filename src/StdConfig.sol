@@ -99,8 +99,11 @@ contract StdConfig {
         // Cache the entire configuration to storage
         for (uint256 i = 0; i < chain_keys.length; i++) {
             string memory chain_key = chain_keys[i];
-            // Ignore top-level keys that are not tables
-            if (vm.parseTomlKeys(content, string.concat("$.", chain_key)).length == 0) {
+            // Ignore top-level keys that are not tables, or are empty tables.
+            // `parseTomlKeys` reverts for a value that is not a table.
+            try vm.parseTomlKeys(content, string.concat("$.", chain_key)) returns (string[] memory subKeys) {
+                if (subKeys.length == 0) continue;
+            } catch {
                 continue;
             }
             uint256 chainId = resolveChainId(chain_key);
