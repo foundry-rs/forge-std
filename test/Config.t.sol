@@ -307,6 +307,49 @@ contract ConfigTest is Test, Config {
         vm.removeFile(testConfig);
     }
 
+    function test_writeConfigLargeIntegers() public {
+        string memory testConfig = "./test/fixtures/large_int_config.t.toml";
+        vm.copyFile("./test/fixtures/config.toml", testConfig);
+        _loadConfig(testConfig, false);
+
+        // Enable writing to file bypassing the context check.
+        vm.store(address(config), bytes32(uint256(5)), bytes32(uint256(1)));
+
+        // TOML integers are 64-bit signed, so none of these fit in one.
+        uint256 big = uint256(uint64(type(int64).max)) + 1;
+        int256 small = int256(type(int64).min) - 1;
+        config.set(1, "big", big);
+        config.set(1, "max", type(uint256).max);
+        config.set(1, "small", small);
+
+        uint256[] memory bigs = new uint256[](2);
+        bigs[0] = 1;
+        bigs[1] = big;
+        config.set(1, "bigs", bigs);
+
+        int256[] memory smalls = new int256[](2);
+        smalls[0] = -1;
+        smalls[1] = small;
+        config.set(1, "smalls", smalls);
+
+        string memory content = vm.readFile(testConfig);
+        assertEq(vm.parseTomlUint(content, "$.mainnet.uint.big"), big);
+        assertEq(vm.parseTomlUint(content, "$.mainnet.uint.max"), type(uint256).max);
+        assertEq(vm.parseTomlInt(content, "$.mainnet.int.small"), small);
+        assertEq(vm.parseTomlUintArray(content, "$.mainnet.uint.bigs"), bigs);
+        assertEq(vm.parseTomlIntArray(content, "$.mainnet.int.smalls"), smalls);
+
+        // The file loads again with the same values.
+        StdConfig reloaded = new StdConfig(testConfig, false);
+        assertEq(reloaded.get(1, "big").toUint256(), big);
+        assertEq(reloaded.get(1, "max").toUint256(), type(uint256).max);
+        assertEq(reloaded.get(1, "small").toInt256(), small);
+        assertEq(reloaded.get(1, "bigs").toUint256Array(), bigs);
+        assertEq(reloaded.get(1, "smalls").toInt256Array(), smalls);
+
+        vm.removeFile(testConfig);
+    }
+
     function test_writeUpdatesBackToFile() public {
         // Create a temporary copy of the config file to avoid modifying the original.
         string memory originalConfig = "./test/fixtures/config.toml";
