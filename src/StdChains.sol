@@ -269,7 +269,7 @@ abstract contract StdChains {
         );
 
         _setChainWithDefaultRpcUrl("race", ChainData("Race", 6805, "https://racemainnet.io"));
-        _setChainWithDefaultRpcUrl("race_sepolia", ChainData("Race Sepolia", 6806, "https://racemainnet.io"));
+        _setChainWithDefaultRpcUrl("race_sepolia", ChainData("Race Sepolia", 6806, "https://racetestnet.io"));
 
         _setChainWithDefaultRpcUrl("radius", ChainData("Radius", 723487, "https://rpc.radiustech.xyz"));
         _setChainWithDefaultRpcUrl(
@@ -281,7 +281,7 @@ abstract contract StdChains {
 
         _setChainWithDefaultRpcUrl("binary", ChainData("Binary", 624, "https://rpc.zero.thebinaryholdings.com"));
         _setChainWithDefaultRpcUrl(
-            "binary_sepolia", ChainData("Binary Sepolia", 625, "https://rpc.zero.thebinaryholdings.com")
+            "binary_sepolia", ChainData("Binary Sepolia", 625, "https://rpc.testnet.thebinaryholdings.com")
         );
 
         _setChainWithDefaultRpcUrl("orderly", ChainData("Orderly", 291, "https://rpc.orderly.network"));
