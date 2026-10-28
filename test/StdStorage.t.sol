@@ -468,6 +468,21 @@ contract StdStorageTest is Test {
         vm.expectRevert("stdStorage find(StdStorage): Slot(s) not found.");
         target.findBalanceOf(address(this));
     }
+
+    // Regression test for https://github.com/foundry-rs/forge-std/issues/140
+    // `deal()` on a scaled-balance token (e.g. an Aave aToken) fails because
+    // `balanceOf` returns the stored balance scaled by an index, so no slot ever
+    // holds the returned value verbatim. Unlike a reflection token, the balance
+    // slot *is* detected as affecting the call, so report that specifically
+    // instead of claiming no slot was found.
+    function test_RevertFindOnScaledBalanceToken() public {
+        MockScaledBalanceToken token = new MockScaledBalanceToken();
+        ScaledBalanceTokenTarget target = new ScaledBalanceTokenTarget(token);
+        vm.expectRevert(
+            "stdStorage find(StdStorage): Slot(s) affect the return value but none hold it. Target may derive the value (e.g. rebasing token) or pack it (try enable_packed_slots())."
+        );
+        target.findBalanceOf(address(this));
+    }
 }
 
 contract StorageTestTarget {
@@ -516,6 +531,21 @@ contract ReflectionTokenTarget {
     MockReflectionToken internal token;
 
     constructor(MockReflectionToken token_) {
+        token = token_;
+    }
+
+    function findBalanceOf(address who) public {
+        stdstore.target(address(token)).sig("balanceOf(address)").with_key(who).find();
+    }
+}
+
+contract ScaledBalanceTokenTarget {
+    using stdStorage for StdStorage;
+
+    StdStorage internal stdstore;
+    MockScaledBalanceToken internal token;
+
+    constructor(MockScaledBalanceToken token_) {
         token = token_;
     }
 
@@ -668,5 +698,23 @@ contract MockReflectionToken {
         uint256 x = _a + _b + _c + _balances[account];
         x; // suppress unused warning
         return 42;
+    }
+}
+
+// Minimal mock of a scaled-balance token (e.g. an Aave aToken): `balanceOf`
+// returns the stored scaled balance multiplied by a liquidity index. Mutating
+// the balance slot does change the return value, but the slot never holds that
+// value, so stdStorage detects a relevant slot yet still cannot match it.
+contract MockScaledBalanceToken {
+    uint256 internal constant RAY = 1e27;
+    uint256 internal _index = 1.5e27;
+    mapping(address => uint256) internal _scaledBalances;
+
+    constructor() {
+        _scaledBalances[msg.sender] = 1000 ether;
+    }
+
+    function balanceOf(address account) public view returns (uint256) {
+        return (_scaledBalances[account] * _index) / RAY;
     }
 }
