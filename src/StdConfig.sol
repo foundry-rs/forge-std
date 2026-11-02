@@ -322,6 +322,20 @@ contract StdConfig {
         return string(out);
     }
 
+    /// @dev Encodes a uint256 as a JSON value for `vm.writeToml`. TOML integers are 64-bit signed and
+    ///      `vm.writeToml` turns larger JSON numbers into lossy floats, so those are written as decimal
+    ///      strings, which `vm.parseTomlUint` reads back exactly.
+    function _tomlUint(uint256 value) private pure returns (string memory) {
+        string memory s = vm.toString(value);
+        return value > uint64(type(int64).max) ? _quote(s) : s;
+    }
+
+    /// @dev Encodes an int256 as a JSON value for `vm.writeToml`, as a decimal string if it does not fit in an int64.
+    function _tomlInt(int256 value) private pure returns (string memory) {
+        string memory s = vm.toString(value);
+        return value > type(int64).max || value < type(int64).min ? _quote(s) : s;
+    }
+
     /// @dev Writes a JSON-formatted value to a specific key in the TOML file.
     /// @param chainId The chain id to write under.
     /// @param ty The type category ('bool', 'address', 'uint', 'bytes32', 'string', or 'bytes').
@@ -455,7 +469,7 @@ contract StdConfig {
         Type memory ty = Type(TypeKind.Uint256, false);
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, vm.toString(value));
+        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _tomlUint(value));
     }
 
     /// @notice Sets a uint256 value for a given key on the current chain.
@@ -469,7 +483,7 @@ contract StdConfig {
         Type memory ty = Type(TypeKind.Int256, false);
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
-        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, vm.toString(value));
+        if (_writeToFile) _writeToToml(chainId, ty.kind.toTomlKey(), key, _tomlInt(value));
     }
 
     /// @notice Sets an int256 value for a given key on the current chain.
@@ -587,7 +601,7 @@ contract StdConfig {
         if (_writeToFile) {
             string memory json = "[";
             for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
+                json = string.concat(json, _tomlUint(value[i]));
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
@@ -610,7 +624,7 @@ contract StdConfig {
         if (_writeToFile) {
             string memory json = "[";
             for (uint256 i = 0; i < value.length; i++) {
-                json = string.concat(json, vm.toString(value[i]));
+                json = string.concat(json, _tomlInt(value[i]));
                 if (i < value.length - 1) json = string.concat(json, ",");
             }
             json = string.concat(json, "]");
