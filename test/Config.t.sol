@@ -456,4 +456,29 @@ contract ConfigTest is Test, Config {
 
         vm.removeFile(configOnly);
     }
+
+    function test_loadConfigIgnoresTopLevelValues() public {
+        // Only tables are chain sections, so top-level values like these are skipped.
+        string memory withValues = "./test/fixtures/config_top_level_values.toml";
+        vm.writeFile(
+            withValues,
+            string.concat(
+                "version = 1\n",
+                "owners = [\"0x000000000000000000000000000000000000dEaD\"]\n",
+                "\n",
+                "[mainnet]\n",
+                "endpoint_url = \"https://ethereum.reth.rs/rpc\"\n",
+                "\n",
+                "[mainnet.uint]\n",
+                "number = 1234\n"
+            )
+        );
+
+        _loadConfig(withValues, false);
+
+        assertEq(config.getChainIds().length, 1);
+        assertEq(config.get(1, "number").toUint256(), 1234);
+
+        vm.removeFile(withValues);
+    }
 }
