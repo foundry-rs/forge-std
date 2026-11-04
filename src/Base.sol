@@ -30,6 +30,11 @@ abstract contract CommonBase {
     /// Taken from https://www.multicall3.com.
     address internal constant MULTICALL3_ADDRESS = 0xcA11bde05977b3631167028862bE2a173976CA11;
 
+    /// @dev Protocol system address: the caller of system calls (EIP-4788, EIP-2935) and,
+    /// from Amsterdam, the emitter of EIP-7708 ETH transfer logs.
+    /// Taken from https://eips.ethereum.org/EIPS/eip-4788.
+    address internal constant SYSTEM_ADDRESS = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
+
     /// @dev The order of the secp256k1 curve.
     uint256 internal constant SECP256K1_ORDER =
         115792089237316195423570985008687907852837564279074904382605163141518161494337;

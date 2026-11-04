@@ -30,6 +30,10 @@ contract CommonBaseTest is Test {
         assertEq(MULTICALL3_ADDRESS, address(StdConstants.MULTICALL3_ADDRESS));
     }
 
+    function testSystemAddressValue() public pure {
+        assertEq(SYSTEM_ADDRESS, address(StdConstants.SYSTEM_ADDRESS));
+    }
+
     function testSecp256k1OrderValue() public pure {
         assertEq(SECP256K1_ORDER, StdConstants.SECP256K1_ORDER);
     }
