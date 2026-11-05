@@ -267,6 +267,29 @@ contract MyScript is Script {
 
 See the contract itself for supported TOML format and all available methods.
 
+### Script
+
+`Script` is the default base contract for Forge scripts. It inherits `ScriptBase`, `StdChains`, `StdCheatsSafe` and `StdUtils`, so a script gets the safe cheatcodes (`vm`), chain helpers and utility helpers without extra imports. It also exposes the `IS_SCRIPT` marker that Forge uses to identify script contracts.
+
+#### Example usage
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity ^0.8.13;
+
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
+
+contract DeployScript is Script {
+    function run() external {
+        vm.startBroadcast();
+        // deploy contracts here
+        vm.stopBroadcast();
+        console.log("Done");
+    }
+}
+```
+
 ### `console.log`
 
 Usage follows the same format as [Hardhat](https://hardhat.org/hardhat-network/reference/#console-log).
