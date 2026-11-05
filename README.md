@@ -270,19 +270,7 @@ See the contract itself for supported TOML format and all available methods.
 ### `console.log`
 
 Usage follows the same format as [Hardhat](https://hardhat.org/hardhat-network/reference/#console-log).
-It's recommended to use `console2.sol` as shown below, as this will show the decoded logs in Forge traces.
-
-```solidity
-// import it indirectly via Test.sol
-import "forge-std/Test.sol";
-// or directly import it
-import "forge-std/console2.sol";
-...
-console2.log(someValue);
-```
-
-If you need compatibility with Hardhat, you must use the standard `console.sol` instead.
-Due to a bug in `console.sol`, logs that use `uint256` or `int256` types will not be properly decoded in Forge traces.
+Import `console.sol` (also available via `Test.sol`). `console2.sol` remains as a compatibility alias that re-exports `console` — Foundry treats both the same in traces and logs since forge-std [#573](https://github.com/foundry-rs/forge-std/pull/573).
 
 ```solidity
 // import it indirectly via Test.sol
