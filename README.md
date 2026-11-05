@@ -221,6 +221,29 @@ contract Bar {
 
 Provides comprehensive assertion functions for testing, including equality checks (assertEq, assertNotEq), comparisons (assertLt, assertGt, assertLe, assertGe), approximate equality (assertApproxEqAbs, assertApproxEqRel), and boolean assertions (assertTrue, assertFalse). All assertions support multiple data types and optional custom error messages.
 
+### stdMath
+
+Mathematical utility functions for unsigned and signed integers: `abs` returns the absolute value of an `int256`, `delta` returns the absolute difference between two values, and `percentDelta` returns the percentage difference between two values, scaled by 1e18 (so `1e18` represents 100%). `percentDelta` reverts if the divisor is zero.
+
+#### Example usage
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity ^0.8.13;
+
+import {Test} from "forge-std/Test.sol";
+import {stdMath} from "forge-std/StdMath.sol";
+
+contract MathTest is Test {
+    function test_Math() public pure {
+        assertEq(stdMath.abs(-5), 5);
+        assertEq(stdMath.delta(uint256(10), uint256(4)), 6);
+        // 1e18 represents 100%, so a 50% difference is 0.5e18
+        assertEq(stdMath.percentDelta(uint256(150), uint256(100)), 0.5e18);
+    }
+}
+```
+
 ### StdConfig
 
 This is a contract that parses a TOML configuration file and loads its variables into storage, automatically casting them on deployment. It assumes a TOML structure where top-level keys represent chain IDs or aliases. Under each chain key, variables are organized by type in separate sub-tables like `[<chain>.<type>]`, where type must be: `bool`, `address`, `bytes32`, `uint`, `int`, `string`, or `bytes`.
