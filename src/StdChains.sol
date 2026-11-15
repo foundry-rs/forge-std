@@ -244,9 +244,7 @@ abstract contract StdChains {
             "fantom_opera_testnet", ChainData("Fantom Opera Testnet", 4002, "https://rpc.ankr.com/fantom_testnet/")
         );
         _setChainWithDefaultRpcUrl("fraxtal", ChainData("Fraxtal", 252, "https://rpc.frax.com"));
-        _setChainWithDefaultRpcUrl(
-            "fraxtal_testnet", ChainData("Fraxtal Testnet", 2522, "https://rpc.testnet.frax.com")
-        );
+        _setChainWithDefaultRpcUrl("fraxtal_hoodi", ChainData("Fraxtal Hoodi", 2523, "https://rpc.testnet.frax.com"));
         _setChainWithDefaultRpcUrl(
             "berachain_bartio_testnet", ChainData("Berachain bArtio Testnet", 80084, "https://bartio.rpc.berachain.com")
         );
@@ -297,9 +295,6 @@ abstract contract StdChains {
         _setChainWithDefaultRpcUrl("tempo", ChainData("Tempo", 4217, "https://rpc.mainnet.tempo.xyz"));
         _setChainWithDefaultRpcUrl(
             "tempo_moderato", ChainData("Tempo Moderato", 42431, "https://rpc.moderato.tempo.xyz")
-        );
-        _setChainWithDefaultRpcUrl(
-            "tempo_andantino", ChainData("Tempo Andantino", 42429, "https://rpc.testnet.tempo.xyz")
         );
 
         _setChainWithDefaultRpcUrl("grav", ChainData("Gravity", 127001, "https://mainnet-rpc.gravity.xyz"));

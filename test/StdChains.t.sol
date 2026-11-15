@@ -78,7 +78,7 @@ contract StdChainsTest is Test {
     //     _testRpc("fantom_opera");
     //     _testRpc("fantom_opera_testnet");
     //     _testRpc("fraxtal");
-    //     _testRpc("fraxtal_testnet");
+    //     _testRpc("fraxtal_hoodi");
     //     _testRpc("berachain_bartio_testnet");
     //     _testRpc("flare");
     //     _testRpc("flare_coston2");
