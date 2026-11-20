@@ -331,7 +331,8 @@ abstract contract StdCheatsSafe {
         vm.assume(addr < address(0x1) || addr > address(0x100));
 
         // forgefmt: disable-start
-        if (chainId == 10 || chainId == 420 || chainId == 11155420) {
+        if (chainId == 10 || chainId == 420 || chainId == 11155420 || chainId == 8453 || chainId == 84532) {
+            // OP Stack chains (OP Mainnet, OP Sepolia, Base, Base Sepolia).
             // https://github.com/ethereum-optimism/optimism/blob/eaa371a0184b56b7ca6d9eb9cb0a2b78b2ccd864/op-bindings/predeploys/addresses.go#L6-L21
             vm.assume(addr < address(0x4200000000000000000000000000000000000000) || addr > address(0x4200000000000000000000000000000000000800));
         } else if (chainId == 42161 || chainId == 421613) {
