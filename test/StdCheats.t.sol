@@ -414,6 +414,18 @@ contract StdCheatsTest is Test {
         stdCheatsMock.exposedAssumeNotPrecompile(address(0x100));
     }
 
+    function test_AssumeNotPrecompileOpStackPredeploys() external {
+        StdCheatsMock stdCheatsMock = new StdCheatsMock();
+        string[4] memory chains = ["optimism", "optimism_sepolia", "base", "base_sepolia"];
+
+        for (uint256 i = 0; i < chains.length; i++) {
+            uint256 chainId = getChain(chains[i]).chainId;
+            // WETH predeploy, present on every OP Stack chain.
+            vm.expectRevert();
+            stdCheatsMock.exposedAssumeNotPrecompile(0x4200000000000000000000000000000000000006, chainId);
+        }
+    }
+
     function testFuzz_AssumeNotForgeAddress(address addr) external pure {
         assumeNotForgeAddress(addr);
         assertTrue(
@@ -519,6 +531,10 @@ contract StdCheatsMock is StdCheats {
 
     function exposedAssumeNotPrecompile(address addr) external pure {
         assumeNotPrecompile(addr);
+    }
+
+    function exposedAssumeNotPrecompile(address addr, uint256 chainId) external pure {
+        assumeNotPrecompile(addr, chainId);
     }
 }
 
