@@ -62,7 +62,7 @@ def main():
 
     pp = CheatcodesPrinter(
         spdx_identifier="MIT OR Apache-2.0",
-        solidity_requirement=">=0.8.13 <0.9.0",
+        solidity_requirement=">=0.8.13 <0.10.0",
     )
     pp.p_prelude()
     pp.prelude = False
@@ -516,7 +516,7 @@ class CheatcodesPrinter:
         if self.solidity_requirement != "":
             req = self.solidity_requirement
         else:
-            req = ">=0.8.13 <0.9.0"
+            req = ">=0.8.13 <0.10.0"
         self._p_str(f"pragma solidity {req};")
         self._p_nl()
 

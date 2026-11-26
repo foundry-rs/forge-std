@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+pragma solidity >=0.8.13 <0.10.0;
 
 /// @dev Library for interaction with secp256k1 elliptic curve,
 /// described by equation `y² ≡ x³ + ax + b (mod P)`
