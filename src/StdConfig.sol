@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.13 <0.10.0;
 
 import {VmSafe} from "./Vm.sol";
 import {Variable, Type, TypeKind, LibVariable} from "./LibVariable.sol";
